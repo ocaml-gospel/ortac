@@ -1,0 +1,4 @@
+(library
+ (name gospel_rtac)
+ (public_name gospel-rtac)
+ (libraries logs))
