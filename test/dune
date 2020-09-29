@@ -1,3 +1,3 @@
 (test
  (name main)
- (libraries alcotest gospel-rtac logs logs.fmt))
+ (libraries alcotest logs logs.fmt))

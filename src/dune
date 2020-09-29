@@ -1,4 +1,3 @@
-(library
+(executable
  (name gospel_rtac)
- (public_name gospel-rtac)
- (libraries logs))
+ (libraries cmdliner fmt gospel ppxlib ppxlib.ast))
