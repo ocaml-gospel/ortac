@@ -1,3 +1,4 @@
 (executable
- (name gospel_rtac)
+ (public_name gospel_rtac)
+ (package gospel-rtac)
  (libraries cmdliner fmt gospel ppxlib ppxlib.ast))

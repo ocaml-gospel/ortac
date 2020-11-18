@@ -1,60 +1,177 @@
 open Ppxlib
 
-module B = Ast_builder.Make (struct
-  let loc = Location.none
-end)
+module B = struct
+  include Ast_builder.Make (struct
+    let loc = Location.none
+  end)
+
+  let enot e = eapply (evar "not") [ e ]
+
+  let eand e1 e2 = eapply (evar "&&") [ e1; e2 ]
+
+  let eor e1 e2 = eapply (evar "||") [ e1; e2 ]
+end
 
 exception Unsupported of Gospel.Location.t option * string
 
-let rec term (t : Gospel.Tterm.term) : expression =
+let const : Gospel.Oasttypes.constant -> expression = function
+  | Pconst_integer (c, o) ->
+      Pconst_integer (c, o) |> B.pexp_constant |> fun e ->
+      B.eapply (B.evar "Z.of_int") [ e ]
+  | Pconst_char c -> B.echar c
+  | Pconst_string (s, d) -> Pconst_string (s, d) |> B.pexp_constant
+  | Pconst_float (c, o) -> Pconst_float (c, o) |> B.pexp_constant
+
+let string_of_exp : Gospel.Tterm.term_node -> string option = function
+  | Tvar x -> Some x.vs_name.id_str
+  | _ -> None
+
+let rec array_no_coercion (ls : Gospel.Tterm.lsymbol)
+    (tlist : Gospel.Tterm.term list) =
+  ( match ls.ls_name.id_str with
+  | "mixfix [_]" -> Some "Array.get"
+  | "length" -> Some "Array.length"
+  | _ -> None )
+  |> Option.map (fun f ->
+         match (List.hd tlist).t_node with
+         | Tapp (elts, [ arr ]) when elts.ls_name.id_str = "elts" ->
+             Some
+               (B.eapply (B.evar f) (term arr :: List.map term (List.tl tlist)))
+         | _ -> None)
+  |> Option.join
+
+and exp_of_const (t : Gospel.Tterm.term) : expression =
+  match t.t_node with
+  | Tconst c -> const c
+  | Tapp (f, c) when f.ls_name.id_str = "integer_of_int" ->
+      B.eapply (B.evar "Z.of_int") [ List.hd c |> term ]
+  | _ -> Fmt.invalid_arg "not a constant:@\n%a%!" Gospel.Upretty_printer.term t
+
+and bounds (t : Gospel.Tterm.term) : (string * expression * expression) option =
+  let pred e = B.eapply (B.evar "Z.pred") [ e ] in
+  let succ e = B.eapply (B.evar "Z.succ") [ e ] in
+  let comb ~right (f : Gospel.Tterm.lsymbol) e =
+    match f.ls_name.id_str with
+    | "infix >=" -> if right then (Some e, None) else (None, Some e)
+    | "infix <=" -> if right then (None, Some e) else (Some e, None)
+    | "infix <" -> if right then (None, Some (pred e)) else (Some (succ e), None)
+    | "infix >" -> if right then (Some (succ e), None) else (None, Some (pred e))
+    | _ -> (None, None)
+  in
+  let ( @+ ) a (b, c) = (a, b, c) in
+  let bound = function
+    | Gospel.Tterm.Tapp (f, [ x1; x2 ]) -> (
+        let sx1 = string_of_exp x1.t_node in
+        let sx2 = string_of_exp x2.t_node in
+        match (sx1, sx2) with
+        | Some _, Some _ | None, None -> (None, None, None)
+        | sx1, None ->
+            let e2 = exp_of_const x2 in
+            sx1 @+ comb ~right:true f e2
+        | None, sx2 ->
+            let e1 = exp_of_const x1 in
+            sx2 @+ comb ~right:false f e1 )
+    | _ -> (None, None, None)
+  in
+  match t.t_node with
+  | Tbinop (Tand, t1, t2) -> (
+      match (bound t1.t_node, bound t2.t_node) with
+      | (Some x, None, Some eupper), (Some x', Some elower, None)
+      | (Some x, Some elower, None), (Some x', None, Some eupper)
+        when x = x' ->
+          Some (x, elower, eupper)
+      | _, _ -> None )
+  | _ -> None
+
+and term (t : Gospel.Tterm.term) : expression =
   let unsupported m = raise (Unsupported (t.t_loc, m)) in
   match t.t_node with
-  | Tvar { vs_name; _ } -> B.evar vs_name.id_str
-  | Tconst c ->
-      ( match c with
-      | Pconst_integer (c, o) -> Pconst_integer (c, o)
-      | Pconst_char c -> Pconst_char c
-      | Pconst_string (s, d) -> Pconst_string (s, d)
-      | Pconst_float (c, o) -> Pconst_float (c, o) )
-      |> B.pexp_constant
-  | Tapp (ls, tlist) ->
-      if Gospel.Identifier.is_infix ls.ls_name.id_str then
-        let op =
-          String.split_on_char ' ' ls.ls_name.id_str |> List.tl |> List.hd
-        in
-        List.map term tlist |> B.eapply (B.evar op)
-      else if ls.ls_name.id_str = "integer_of_int" then List.hd tlist |> term
-      else unsupported (Fmt.str "function application `%s`" ls.ls_name.id_str)
+  | Tvar { vs_name; _ } ->
+      B.evar (Fmt.str "%a" Gospel.Identifier.Ident.pp vs_name)
+  | Tconst c -> const c
+  | Tapp (ls, tlist) -> (
+      match array_no_coercion ls tlist with
+      | Some e -> e
+      | None -> (
+          Drv.find_opt ls.ls_name.id_str |> function
+          | Some f -> B.eapply (B.evar f) (List.map term tlist)
+          | None ->
+              Fmt.kstr unsupported "function application `%s`" ls.ls_name.id_str
+          ) )
   | Tif (i, t, e) ->
       let i = term i in
       let t = term t in
       let e = term e in
       B.pexp_ifthenelse i t (Some e)
-  | Tlet (_, _, _) -> unsupported "let binding"
+  | Tlet (x, t1, t2) ->
+      B.pexp_let Nonrecursive
+        [ B.value_binding ~pat:(B.pvar x.vs_name.id_str) ~expr:(term t1) ]
+        (term t2)
   | Tcase (_, _) -> unsupported "case filtering"
-  | Tquant (_, _, _, _) -> unsupported "quantifier"
-  | Tbinop (_, _, _) -> unsupported "binary operator"
-  | Tnot t -> [ term t ] |> B.eapply (B.evar "not")
+  | Tquant (quant, _vars, _, t) -> (
+      match quant with
+      | Gospel.Tterm.Tforall -> (
+          match t.t_node with
+          | Tbinop (Timplies, t1, t2) -> (
+              bounds t1 |> function
+              | None -> unsupported "forall"
+              | Some (x, start, stop) ->
+                  let t2 = term t2 in
+                  let func = B.pexp_fun Nolabel None (B.pvar x) t2 in
+                  B.eapply (B.evar "Z.forall") [ start; stop; func ] )
+          | Gospel.Tterm.Ttrue -> B.ebool true
+          | Gospel.Tterm.Tfalse -> B.ebool false
+          | _ -> unsupported "forall" )
+      | Gospel.Tterm.Texists -> unsupported "exists"
+      | Gospel.Tterm.Tlambda -> unsupported "lambda quantification" )
+  | Tbinop (op, t1, t2) -> (
+      match op with
+      | Gospel.Tterm.Tand ->
+          B.pexp_let Nonrecursive
+            [ B.value_binding ~pat:(B.pvar "__t1") ~expr:(term t1) ]
+            (B.pexp_let Nonrecursive
+               [ B.value_binding ~pat:(B.pvar "__t2") ~expr:(term t2) ]
+               (B.eand (B.evar "__t1") (B.evar "__t2")))
+      | Gospel.Tterm.Tand_asym -> B.eand (term t1) (term t2)
+      | Gospel.Tterm.Tor ->
+          B.pexp_let Nonrecursive
+            [ B.value_binding ~pat:(B.pvar "__t1") ~expr:(term t1) ]
+            (B.pexp_let Nonrecursive
+               [ B.value_binding ~pat:(B.pvar "__t2") ~expr:(term t2) ]
+               (B.eor (B.evar "__t1") (B.evar "__t2")))
+      | Gospel.Tterm.Tor_asym -> B.eor (term t1) (term t2)
+      | Gospel.Tterm.Timplies ->
+          let t1 = term t1 in
+          let t2 = term t2 in
+          B.pexp_ifthenelse t1 t2 (Some (B.ebool true))
+      | Gospel.Tterm.Tiff ->
+          let t1 = term t1 in
+          let t2 = term t2 in
+          B.eapply (B.evar "=") [ t1; t2 ] )
+  | Tnot t -> B.enot (term t)
   | Told _ -> unsupported "old operator"
   | Ttrue -> B.ebool true
   | Tfalse -> B.ebool false
 
 let check_function ret i t =
   let comment ppf = Gospel.Upretty_printer.term ppf t in
-  let translated ppf = term t |> Pprintast.expression ppf in
+  let translated = term t in
+  let translated_ite ppf =
+    B.pexp_ifthenelse (B.enot translated)
+      (B.eapply (B.evar "__fail") [ B.eunit ])
+      None
+    |> Pprintast.expression ppf
+  in
   let name = Fmt.str "check_%d" i in
   ( name,
     Fmt.str
-      {|let %s %a =
-    (* %t *)
-    let __ret =
-      %t
-    in
-    if not __ret then __fail ()
+      {|let %s %a =@
+    (* %t *)@
+      %t@
   in|}
       name
       (Fmt.parens Gospel.Tast.print_lb_arg)
-      ret comment translated )
+      ret comment translated_ite )
 
 let post ret = List.mapi (check_function ret)
 
@@ -81,10 +198,10 @@ let value loc (val_desc : Gospel.Tast.val_description) : string option =
               ret_name)
           posts
       in
-      Fmt.str {|let %a %a =
-  %a
-  let %a = %a %a in
-  %a
+      Fmt.str {|let %a %a =@
+  %a@
+  let %a = %a %a in@
+  %a@
   %a|}
         Gospel.Identifier.Ident.pp val_desc.vd_name args spec.sp_args
         Fmt.(list ~sep:(any "@\n") string)
@@ -103,7 +220,7 @@ let signature (ast : Gospel.Tast.signature) : string list =
   List.filter_map
     (fun (sig_item : Gospel.Tast.signature_item) ->
       match sig_item.sig_desc with
-      | Sig_val (val_desc, _ghost) -> value (Some sig_item.sig_loc) val_desc
+      | Sig_val (decl, _ghost) -> value (Some sig_item.sig_loc) decl
       | _ -> None)
     ast
 
@@ -128,7 +245,15 @@ let main (path : string) : unit =
   try
     let declarations = signature tast in
     let open Fmt in
-    pr "include %s@\n@\nlet __fail () = assert false@\n@\n%a@\n" module_name
+    pr
+      "open Gospel_runtime@\n\
+       @\n\
+       include %s@\n\
+       @\n\
+       let __fail () = assert false@\n\
+       @\n\
+       %a@\n"
+      module_name
       (list ~sep:(any "@\n@\n") string)
       declarations
   with
@@ -162,7 +287,7 @@ let _pp_kind ppf kind =
   let msg = string_of_kind kind in
   Fmt.(styled colour string) ppf msg
 
-(* Command line *)
+(* Command line interface *)
 
 open Cmdliner
 
