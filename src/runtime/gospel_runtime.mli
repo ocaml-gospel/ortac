@@ -5,3 +5,11 @@ module Z : sig
   (** [forall i j p] is [true] iff the predicate `p` holds forall [k] within [i]
      and [j], included. *)
 end
+
+module Array : sig
+  val create : Z.t -> 'a -> 'a array
+
+  val get : 'a array -> Z.t -> 'a
+
+  val length : 'a array -> Z.t
+end
