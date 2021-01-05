@@ -6,26 +6,30 @@ Runtime assertion checking based on Gospel
 maintainer: ["Clément Pascutto <clement@pascutto.fr>"]
 authors: ["Clément Pascutto <clement@pascutto.fr>"]
 homepage: "https://github.com/pascutto/gospel-rtac"
+dev-repo: "git+https://github.com/pascutto/gospel-rtac.git"
 doc: "https://pascutto.github.io/gospel-rtac/"
 bug-reports: "https://github.com/pascutto/gospel-rtac/issues"
-depends: [
-  "dune" {>= "2.0"}
-  "alcotest" {with-test}
-  "fmt"
-  "logs"
-]
 build: [
   ["dune" "subst"] {pinned}
   [
     "dune"
     "build"
     "-p"
-    name
+  name
     "-j"
     jobs
     "@install"
     "@runtest" {with-test}
-    "@doc" {with-doc}
+  "@doc" {with-doc}
   ]
 ]
-dev-repo: "git+https://github.com/pascutto/gospel-rtac.git"
+
+depends: [
+  "ocaml"
+  "dune" {>= "2.0"}
+  "gospel-runtime" {with-test}
+  "fmt"
+]
+pin-depends: [
+  [ "gospel.dev" "git+https://github.com/pascutto/gospel#bd09db09ba18c1856aad995f21908a1cb6a0febd" ]
+]
