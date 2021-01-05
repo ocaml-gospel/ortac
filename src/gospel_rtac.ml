@@ -19,7 +19,7 @@ let const : Gospel.Oasttypes.constant -> expression = function
       Pconst_integer (c, o) |> B.pexp_constant |> fun e ->
       B.eapply (B.evar "Z.of_int") [ e ]
   | Pconst_char c -> B.echar c
-  | Pconst_string (s, d) -> Pconst_string (s, d) |> B.pexp_constant
+  | Pconst_string (s, d) -> Pconst_string (s, Location.none, d) |> B.pexp_constant
   | Pconst_float (c, o) -> Pconst_float (c, o) |> B.pexp_constant
 
 let string_of_exp : Gospel.Tterm.term_node -> string option = function
@@ -154,7 +154,6 @@ and term (t : Gospel.Tterm.term) : expression =
   | Tfalse -> B.ebool false
 
 let check_function ret i t =
-  let comment ppf = Gospel.Upretty_printer.term ppf t in
   let translated = term t in
   let translated_ite ppf =
     B.pexp_ifthenelse (B.enot translated)
@@ -166,12 +165,11 @@ let check_function ret i t =
   ( name,
     Fmt.str
       {|let %s %a =@
-    (* %t *)@
       %t@
   in|}
       name
       (Fmt.parens Gospel.Tast.print_lb_arg)
-      ret comment translated_ite )
+      ret translated_ite )
 
 let post ret = List.mapi (check_function ret)
 

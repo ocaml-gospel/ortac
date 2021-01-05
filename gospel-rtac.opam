@@ -27,8 +27,9 @@ build: [
 depends: [
   "ocaml"
   "dune" {>= "2.0"}
-  "gospel-runtime" {with-test}
   "fmt"
+  "ppxlib" {>= "0.20.0"}
+  "gospel-runtime" {with-test}
 ]
 pin-depends: [
   [ "gospel.dev" "git+https://github.com/pascutto/gospel#bd09db09ba18c1856aad995f21908a1cb6a0febd" ]
