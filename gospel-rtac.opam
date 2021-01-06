@@ -25,10 +25,12 @@ build: [
 ]
 
 depends: [
-  "ocaml"
+  "ocaml" {>= "4.08.0"}
   "dune" {>= "2.0"}
+  "cmdliner"
   "fmt"
   "ppxlib" {>= "0.20.0"}
+  "gospel"
   "gospel-runtime" {with-test}
 ]
 pin-depends: [

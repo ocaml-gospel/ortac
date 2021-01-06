@@ -13,4 +13,4 @@
 (test
  (name client)
  (flags :standard -w -27)
- (libraries gospel_runtime))
+ (libraries gospel-runtime))
