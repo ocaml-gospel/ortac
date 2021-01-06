@@ -19,7 +19,8 @@ let const : Gospel.Oasttypes.constant -> expression = function
       Pconst_integer (c, o) |> B.pexp_constant |> fun e ->
       B.eapply (B.evar "Z.of_int") [ e ]
   | Pconst_char c -> B.echar c
-  | Pconst_string (s, d) -> Pconst_string (s, Location.none, d) |> B.pexp_constant
+  | Pconst_string (s, d) ->
+      Pconst_string (s, Location.none, d) |> B.pexp_constant
   | Pconst_float (c, o) -> Pconst_float (c, o) |> B.pexp_constant
 
 let string_of_exp : Gospel.Tterm.term_node -> string option = function
@@ -28,10 +29,10 @@ let string_of_exp : Gospel.Tterm.term_node -> string option = function
 
 let rec array_no_coercion (ls : Gospel.Tterm.lsymbol)
     (tlist : Gospel.Tterm.term list) =
-  ( match ls.ls_name.id_str with
+  (match ls.ls_name.id_str with
   | "mixfix [_]" -> Some "Array.get"
   | "length" -> Some "Array.length"
-  | _ -> None )
+  | _ -> None)
   |> Option.map (fun f ->
          match (List.hd tlist).t_node with
          | Tapp (elts, [ arr ]) when elts.ls_name.id_str = "elts" ->
@@ -70,7 +71,7 @@ and bounds (t : Gospel.Tterm.term) : (string * expression * expression) option =
             sx1 @+ comb ~right:true f e2
         | None, sx2 ->
             let e1 = exp_of_const x1 in
-            sx2 @+ comb ~right:false f e1 )
+            sx2 @+ comb ~right:false f e1)
     | _ -> (None, None, None)
   in
   match t.t_node with
@@ -80,7 +81,7 @@ and bounds (t : Gospel.Tterm.term) : (string * expression * expression) option =
       | (Some x, Some elower, None), (Some x', None, Some eupper)
         when x = x' ->
           Some (x, elower, eupper)
-      | _, _ -> None )
+      | _, _ -> None)
   | _ -> None
 
 and term (t : Gospel.Tterm.term) : expression =
@@ -97,7 +98,7 @@ and term (t : Gospel.Tterm.term) : expression =
           | Some f -> B.eapply (B.evar f) (List.map term tlist)
           | None ->
               Fmt.kstr unsupported "function application `%s`" ls.ls_name.id_str
-          ) )
+          ))
   | Tif (i, t, e) ->
       let i = term i in
       let t = term t in
@@ -118,12 +119,12 @@ and term (t : Gospel.Tterm.term) : expression =
               | Some (x, start, stop) ->
                   let t2 = term t2 in
                   let func = B.pexp_fun Nolabel None (B.pvar x) t2 in
-                  B.eapply (B.evar "Z.forall") [ start; stop; func ] )
+                  B.eapply (B.evar "Z.forall") [ start; stop; func ])
           | Gospel.Tterm.Ttrue -> B.ebool true
           | Gospel.Tterm.Tfalse -> B.ebool false
-          | _ -> unsupported "forall" )
+          | _ -> unsupported "forall")
       | Gospel.Tterm.Texists -> unsupported "exists"
-      | Gospel.Tterm.Tlambda -> unsupported "lambda quantification" )
+      | Gospel.Tterm.Tlambda -> unsupported "lambda quantification")
   | Tbinop (op, t1, t2) -> (
       match op with
       | Gospel.Tterm.Tand ->
@@ -147,7 +148,7 @@ and term (t : Gospel.Tterm.term) : expression =
       | Gospel.Tterm.Tiff ->
           let t1 = term t1 in
           let t2 = term t2 in
-          B.eapply (B.evar "=") [ t1; t2 ] )
+          B.eapply (B.evar "=") [ t1; t2 ])
   | Tnot t -> B.enot (term t)
   | Told _ -> unsupported "old operator"
   | Ttrue -> B.ebool true
