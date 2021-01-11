@@ -185,7 +185,7 @@ let location_of_gospel_loc : Gospel.Warnings.loc option -> location = function
   | None -> Location.none
 
 let failed_post fun_name term =
-  B.eapply (B.evar "__failed_post")
+  B.eapply (B.evar "bad_post")
     [
       B.pexp_open
         (B.open_infos
@@ -196,23 +196,40 @@ let failed_post fun_name term =
       B.estring (Fmt.str "%a" Gospel.Tterm.print_term term);
     ]
 
-let check_function fun_name ret i t =
-  let translated = term t in
+let failed_nonexec fun_name term exn =
+  B.eapply (B.evar "runtime_exn")
+    [
+      B.pexp_open
+        (B.open_infos
+           ~expr:(B.pmod_ident (noloc (lident "Ppxlib.Location")))
+           ~override:Fresh)
+        (B.elocation (location_of_gospel_loc term.Gospel.Tterm.t_loc));
+      B.estring fun_name;
+      B.estring (Fmt.str "%a" Gospel.Tterm.print_term term);
+      exn;
+    ]
+
+let check_function fun_name ret t =
   let translated_ite ppf =
-    B.pexp_ifthenelse (B.enot translated) (failed_post fun_name t) None
+    B.pexp_ifthenelse (B.enot (term t)) (failed_post fun_name t) None
     |> Pprintast.expression ppf
   in
-  let name = Fmt.str "check_%d" i in
+  let name = gen_symbol ~prefix:"__check" () in
   ( name,
     Fmt.str
       {|let %s %a =@
+    try@
       %t@
+    with@
+    | Gospel_runtime.Error _ as e -> raise e@
+    | _ as e -> %a@
   in|}
       name
       (Fmt.parens Gospel.Tast.print_lb_arg)
-      ret translated_ite )
+      ret translated_ite Pprintast.expression
+      (failed_nonexec fun_name t (B.evar "e")) )
 
-let post fun_name ret = List.mapi (check_function fun_name ret)
+let post fun_name ret = List.map (check_function fun_name ret)
 
 let args = Fmt.(list ~sep:sp (parens Gospel.Tast.print_lb_arg))
 
@@ -284,16 +301,7 @@ let main (path : string) : unit =
   try
     let declarations = signature tast in
     let open Fmt in
-    pr
-      "open Gospel_runtime@\n\
-       @\n\
-       include %s@\n\
-       @\n\
-       let __failed_post loc fun_name term = raise (Error (BadPost {loc; \
-       fun_name; term}))@\n\
-       @\n\
-       %a@\n"
-      module_name
+    pr "open! Gospel_runtime@\n@\ninclude %s\n@\n%a@\n" module_name
       (list ~sep:(any "@\n@\n") string)
       declarations
   with

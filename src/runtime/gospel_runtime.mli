@@ -1,9 +1,19 @@
 type error =
   | BadPost of { loc : Ppxlib.location; fun_name : string; term : string }
+  | RuntimeExn of {
+      loc : Ppxlib.location;
+      fun_name : string;
+      term : string;
+      exn : exn;
+    }
 
 val report : Format.formatter -> error -> unit
 
 exception Error of error
+
+val runtime_exn : Ppxlib.location -> string -> string -> exn -> 'a
+
+val bad_post : Ppxlib.location -> string -> string -> 'a
 
 module Z : sig
   include module type of Z
