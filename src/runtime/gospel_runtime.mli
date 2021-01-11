@@ -21,9 +21,13 @@ val violated : Ppxlib.location -> string -> term -> 'a
 module Z : sig
   include module type of Z
 
+  val exists : t -> t -> (t -> bool) -> bool
+  (** [exists i j p] is [true] iff the predicate there exists [k] within [i]
+      and [j], included, for which [p] holds. *)
+
   val forall : t -> t -> (t -> bool) -> bool
   (** [forall i j p] is [true] iff the predicate `p` holds forall [k] within [i]
-     and [j], included. *)
+      and [j], included. *)
 end
 
 module Array : sig

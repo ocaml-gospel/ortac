@@ -1,4 +1,5 @@
 open Ppxlib
+open Fmt
 module B = Builder
 
 exception Unsupported of Gospel.Location.t option * string
@@ -26,7 +27,7 @@ and exp_of_const (t : Gospel.Tterm.term) : expression =
   | Tconst c -> B.econst c
   | Tapp (f, c) when f.ls_name.id_str = "integer_of_int" ->
       B.eapply (B.evar "Z.of_int") [ List.hd c |> term ]
-  | _ -> Fmt.invalid_arg "not a constant:@\n%a%!" Gospel.Upretty_printer.term t
+  | _ -> invalid_arg "not a constant:@\n%a%!" Gospel.Upretty_printer.term t
 
 and bounds (t : Gospel.Tterm.term) : (string * expression * expression) option =
   let pred e = B.eapply (B.evar "Z.pred") [ e ] in
@@ -67,8 +68,7 @@ and bounds (t : Gospel.Tterm.term) : (string * expression * expression) option =
 and term (t : Gospel.Tterm.term) : expression =
   let unsupported m = raise (Unsupported (t.t_loc, m)) in
   match t.t_node with
-  | Tvar { vs_name; _ } ->
-      B.evar (Fmt.str "%a" Gospel.Identifier.Ident.pp vs_name)
+  | Tvar { vs_name; _ } -> B.evar (str "%a" Gospel.Identifier.Ident.pp vs_name)
   | Tconst c -> B.econst c
   | Tapp (ls, tlist) -> (
       match array_no_coercion ls tlist with
@@ -77,8 +77,7 @@ and term (t : Gospel.Tterm.term) : expression =
           Drv.find_opt ls.ls_name.id_str |> function
           | Some f -> B.eapply (B.evar f) (List.map term tlist)
           | None ->
-              Fmt.kstr unsupported "function application `%s`" ls.ls_name.id_str
-          ))
+              kstr unsupported "function application `%s`" ls.ls_name.id_str))
   | Tif (i, t, e) ->
       let i = term i in
       let t = term t in
@@ -91,7 +90,8 @@ and term (t : Gospel.Tterm.term) : expression =
   | Tcase (_, _) -> unsupported "case filtering"
   | Tquant (quant, _vars, _, t) -> (
       match quant with
-      | Gospel.Tterm.Tforall -> (
+      | Gospel.Tterm.Tforall | Gospel.Tterm.Texists -> (
+          let op = if quant = Tforall then "forall" else "exists" in
           match t.t_node with
           | Tbinop (Timplies, t1, t2) -> (
               bounds t1 |> function
@@ -99,11 +99,10 @@ and term (t : Gospel.Tterm.term) : expression =
               | Some (x, start, stop) ->
                   let t2 = term t2 in
                   let func = B.pexp_fun Nolabel None (B.pvar x) t2 in
-                  B.eapply (B.evar "Z.forall") [ start; stop; func ])
+                  B.eapply (B.evar (str "Z.%s" op)) [ start; stop; func ])
           | Gospel.Tterm.Ttrue -> B.ebool true
           | Gospel.Tterm.Tfalse -> B.ebool false
-          | _ -> unsupported "forall")
-      | Gospel.Tterm.Texists -> unsupported "exists"
+          | _ -> unsupported op)
       | Gospel.Tterm.Tlambda -> unsupported "lambda quantification")
   | Tbinop (op, t1, t2) -> (
       match op with
@@ -138,7 +137,7 @@ and term (t : Gospel.Tterm.term) : expression =
   | Ttrue -> B.ebool true
   | Tfalse -> B.ebool false
 
-let pp_args = Fmt.(list ~sep:sp (parens Gospel.Tast.print_lb_arg))
+let pp_args = list ~sep:sp (parens Gospel.Tast.print_lb_arg)
 
 let check_pre fun_name args t =
   let translated_ite ppf =
@@ -147,7 +146,7 @@ let check_pre fun_name args t =
   in
   let name = gen_symbol ~prefix:"__check" () in
   ( name,
-    Fmt.str
+    str
       {|let %s %a =@
     try@
       %t@
@@ -165,7 +164,7 @@ let check_post fun_name ret t =
   in
   let name = gen_symbol ~prefix:"__check" () in
   ( name,
-    Fmt.str
+    str
       {|let %s %a =@
     try@
       %t@
@@ -174,7 +173,7 @@ let check_post fun_name ret t =
     | _ as e -> %a@
   in|}
       name
-      (Fmt.parens Gospel.Tast.print_lb_arg)
+      (parens Gospel.Tast.print_lb_arg)
       ret translated_ite Pprintast.expression
       (B.failed_post_nonexec fun_name t (B.evar "e")) )
 
@@ -201,15 +200,13 @@ let value loc (val_desc : Gospel.Tast.val_description) : string option =
       let post_checks =
         List.map
           (fun p ->
-            Fmt.str "%s %a;" (fst p)
-              (Fmt.parens Gospel.Tast.print_lb_arg)
-              ret_name)
+            str "%s %a;" (fst p) (parens Gospel.Tast.print_lb_arg) ret_name)
           posts
       in
       let pre_checks =
-        List.map (fun p -> Fmt.str "%s %a;" (fst p) pp_args spec.sp_args) pres
+        List.map (fun p -> str "%s %a;" (fst p) pp_args spec.sp_args) pres
       in
-      Fmt.str {|let %a %a =@
+      str {|let %a %a =@
   %a@
   %a@
   %a@
@@ -217,18 +214,14 @@ let value loc (val_desc : Gospel.Tast.val_description) : string option =
   %a@
   %a|}
         Gospel.Identifier.Ident.pp val_desc.vd_name pp_args spec.sp_args
-        Fmt.(list ~sep:(any "@\n") string)
+        (list ~sep:(any "@\n") string)
         (List.map snd pres)
-        Fmt.(list ~sep:(any "@\n") string)
-        (List.map snd posts)
-        Fmt.(list ~sep:sp string)
-        pre_checks
-        (Fmt.parens Gospel.Tast.print_lb_arg)
+        (list ~sep:(any "@\n") string)
+        (List.map snd posts) (list ~sep:sp string) pre_checks
+        (parens Gospel.Tast.print_lb_arg)
         ret_name Gospel.Identifier.Ident.pp val_desc.vd_name pp_args
-        spec.sp_args
-        Fmt.(list ~sep:sp string)
-        post_checks
-        (Fmt.parens Gospel.Tast.print_lb_arg)
+        spec.sp_args (list ~sep:sp string) post_checks
+        (parens Gospel.Tast.print_lb_arg)
         ret_name
     else raise (Unsupported (loc, "non-function value"))
   in
@@ -256,7 +249,7 @@ let type_check load_path name sigs =
   |> fun file -> file.fl_sigs
 
 let main (path : string) : unit =
-  Fmt.(set_style_renderer stderr `Ansi_tty);
+  set_style_renderer stderr `Ansi_tty;
   let module_name = module_name_of_path path in
   let ast = Gospel.Parser_frontend.parse_ocaml_gospel path in
   let tast = type_check [] path ast in
@@ -295,7 +288,7 @@ let string_of_kind = function
 let _pp_kind ppf kind =
   let colour = colour_of_kind kind in
   let msg = string_of_kind kind in
-  Fmt.(styled colour string) ppf msg
+  (styled colour string) ppf msg
 
 (* Command line interface *)
 

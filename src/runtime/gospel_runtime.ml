@@ -61,6 +61,9 @@ module Z = struct
 
   let rec forall start stop p =
     if equal start stop then p start else p start && forall (succ start) stop p
+
+  let rec exists start stop p =
+    if equal start stop then p start else p start || exists (succ start) stop p
 end
 
 module Array = struct
