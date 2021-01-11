@@ -1,5 +1,4 @@
 open Ppxlib
-
 module B = Builder
 
 exception Unsupported of Gospel.Location.t option * string
@@ -109,8 +108,8 @@ and term (t : Gospel.Tterm.term) : expression =
   | Tbinop (op, t1, t2) -> (
       match op with
       | Gospel.Tterm.Tand ->
-          let vt1 = gen_symbol ~prefix:"_t1" () in
-          let vt2 = gen_symbol ~prefix:"_t2" () in
+          let vt1 = gen_symbol ~prefix:"__t1" () in
+          let vt2 = gen_symbol ~prefix:"__t2" () in
           B.pexp_let Nonrecursive
             [ B.value_binding ~pat:(B.pvar vt1) ~expr:(term t1) ]
             (B.pexp_let Nonrecursive
@@ -118,8 +117,8 @@ and term (t : Gospel.Tterm.term) : expression =
                (B.eand (B.evar vt1) (B.evar vt2)))
       | Gospel.Tterm.Tand_asym -> B.eand (term t1) (term t2)
       | Gospel.Tterm.Tor ->
-          let vt1 = gen_symbol ~prefix:"_t1" () in
-          let vt2 = gen_symbol ~prefix:"_t2" () in
+          let vt1 = gen_symbol ~prefix:"__t1" () in
+          let vt2 = gen_symbol ~prefix:"__t2" () in
           B.pexp_let Nonrecursive
             [ B.value_binding ~pat:(B.pvar vt1) ~expr:(term t1) ]
             (B.pexp_let Nonrecursive
@@ -139,7 +138,27 @@ and term (t : Gospel.Tterm.term) : expression =
   | Ttrue -> B.ebool true
   | Tfalse -> B.ebool false
 
-let check_function fun_name ret t =
+let pp_args = Fmt.(list ~sep:sp (parens Gospel.Tast.print_lb_arg))
+
+let check_pre fun_name args t =
+  let translated_ite ppf =
+    B.pexp_ifthenelse (B.enot (term t)) (B.failed_pre fun_name t) None
+    |> Pprintast.expression ppf
+  in
+  let name = gen_symbol ~prefix:"__check" () in
+  ( name,
+    Fmt.str
+      {|let %s %a =@
+    try@
+      %t@
+    with@
+    | Gospel_runtime.Error _ as e -> raise e@
+    | _ as e -> %a@
+  in|}
+      name pp_args args translated_ite Pprintast.expression
+      (B.failed_pre_nonexec fun_name t (B.evar "e")) )
+
+let check_post fun_name ret t =
   let translated_ite ppf =
     B.pexp_ifthenelse (B.enot (term t)) (B.failed_post fun_name t) None
     |> Pprintast.expression ppf
@@ -159,9 +178,11 @@ let check_function fun_name ret t =
       ret translated_ite Pprintast.expression
       (B.failed_post_nonexec fun_name t (B.evar "e")) )
 
-let post fun_name ret = List.map (check_function fun_name ret)
+let post fun_name ret = List.map (check_post fun_name ret)
 
-let args = Fmt.(list ~sep:sp (parens Gospel.Tast.print_lb_arg))
+let pre fun_name args =
+  List.map (fun (t, b) ->
+      if not b then check_pre fun_name args t else assert false (*TODO*))
 
 let filter_ghost =
   List.filter (function Gospel.Tast.Lghost _ -> false | _ -> true)
@@ -176,7 +197,8 @@ let value loc (val_desc : Gospel.Tast.val_description) : string option =
         | _ -> raise (Unsupported (loc, "returned pattern"))
       in
       let posts = post val_desc.vd_name.id_str ret_name spec.sp_post in
-      let checks =
+      let pres = pre val_desc.vd_name.id_str spec.sp_args spec.sp_pre in
+      let post_checks =
         List.map
           (fun p ->
             Fmt.str "%s %a;" (fst p)
@@ -184,18 +206,28 @@ let value loc (val_desc : Gospel.Tast.val_description) : string option =
               ret_name)
           posts
       in
+      let pre_checks =
+        List.map (fun p -> Fmt.str "%s %a;" (fst p) pp_args spec.sp_args) pres
+      in
       Fmt.str {|let %a %a =@
+  %a@
+  %a@
   %a@
   let %a = %a %a in@
   %a@
   %a|}
-        Gospel.Identifier.Ident.pp val_desc.vd_name args spec.sp_args
+        Gospel.Identifier.Ident.pp val_desc.vd_name pp_args spec.sp_args
+        Fmt.(list ~sep:(any "@\n") string)
+        (List.map snd pres)
         Fmt.(list ~sep:(any "@\n") string)
         (List.map snd posts)
-        (Fmt.parens Gospel.Tast.print_lb_arg)
-        ret_name Gospel.Identifier.Ident.pp val_desc.vd_name args spec.sp_args
         Fmt.(list ~sep:sp string)
-        checks
+        pre_checks
+        (Fmt.parens Gospel.Tast.print_lb_arg)
+        ret_name Gospel.Identifier.Ident.pp val_desc.vd_name pp_args
+        spec.sp_args
+        Fmt.(list ~sep:sp string)
+        post_checks
         (Fmt.parens Gospel.Tast.print_lb_arg)
         ret_name
     else raise (Unsupported (loc, "non-function value"))

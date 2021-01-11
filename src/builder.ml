@@ -44,6 +44,20 @@ let location_of_gospel_loc : Gospel.Warnings.loc option -> location = function
       { loc_start = l.loc_start; loc_end = l.loc_end; loc_ghost = l.loc_ghost }
   | None -> Location.none
 
+let failed_pre fun_name term =
+  eapply (evar "violated")
+    [
+      pexp_open
+        (open_infos
+           ~expr:(pmod_ident (noloc (lident "Ppxlib.Location")))
+           ~override:Fresh)
+        (elocation (location_of_gospel_loc term.Gospel.Tterm.t_loc));
+      estring fun_name;
+      pexp_construct
+        (noloc (lident "Pre"))
+        (Some (estring (Fmt.str "%a" Gospel.Tterm.print_term term)));
+    ]
+
 let failed_post fun_name term =
   eapply (evar "violated")
     [
@@ -69,6 +83,21 @@ let failed_post_nonexec fun_name term exn =
       estring fun_name;
       pexp_construct
         (noloc (lident "Post"))
+        (Some (estring (Fmt.str "%a" Gospel.Tterm.print_term term)));
+      exn;
+    ]
+
+let failed_pre_nonexec fun_name term exn =
+  eapply (evar "runtime_exn")
+    [
+      pexp_open
+        (open_infos
+           ~expr:(pmod_ident (noloc (lident "Ppxlib.Location")))
+           ~override:Fresh)
+        (elocation (location_of_gospel_loc term.Gospel.Tterm.t_loc));
+      estring fun_name;
+      pexp_construct
+        (noloc (lident "Pre"))
         (Some (estring (Fmt.str "%a" Gospel.Tterm.print_term term)));
       exn;
     ]

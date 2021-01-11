@@ -37,15 +37,12 @@ let pp_loc = styled `Bold Ppxlib.Location.print
 
 let report ppf = function
   | Condition { loc; fun_name; term; error_kind } ->
-      pf ppf
-        "%a@\n %a: Gospel specification unmet in function %a:@\n %a %a is %a"
+      pf ppf "%a@\n %a: Gospel specification unmet in function %a:@\n %a is %a"
         pp_loc loc
         (styled `Red string)
         "Runtime error"
         (styled `Blue string)
         fun_name
-        (styled_list [ `Blue; `Underline ] string)
-        "post-condition"
         (styled `Bold pp_term)
         term
         (styled `Yellow pp_kind)
