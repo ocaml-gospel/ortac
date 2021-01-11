@@ -1,4 +1,4 @@
 (library
  (name gospel_runtime)
  (public_name gospel-runtime)
- (libraries zarith))
+ (libraries fmt ppxlib zarith))

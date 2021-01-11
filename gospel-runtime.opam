@@ -27,5 +27,7 @@ build: [
 depends: [
   "ocaml"
   "dune" {>= "2.0"}
+  "fmt"
+  "ppxlib" {>= "0.20.0"}
   "zarith"
 ]

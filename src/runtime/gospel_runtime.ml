@@ -1,3 +1,29 @@
+type error =
+  | BadPost of { loc : Ppxlib.location; fun_name : string; term : string }
+
+open Fmt
+
+let styled_list l pp = List.fold_left (fun acc x -> styled x acc) pp l
+
+let pp_loc = styled `Bold Ppxlib.Location.print
+
+let report ppf = function
+  | BadPost { loc; fun_name; term } ->
+      pf ppf
+        "%a@\n\
+        \ %a: Gospel specification unmet in function %a:@\n\
+        \ %a %a is violated" pp_loc loc
+        (styled `Red string)
+        "Runtime error"
+        (styled `Yellow string)
+        fun_name
+        (styled_list [ `Blue; `Underline ] string)
+        "post-condition"
+        (styled `Bold string)
+        term
+
+exception Error of error
+
 module Z = struct
   include Z
 

@@ -1,3 +1,10 @@
+type error =
+  | BadPost of { loc : Ppxlib.location; fun_name : string; term : string }
+
+val report : Format.formatter -> error -> unit
+
+exception Error of error
+
 module Z : sig
   include module type of Z
 

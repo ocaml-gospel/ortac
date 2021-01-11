@@ -1,5 +1,7 @@
 open Ppxlib
 
+let noloc txt = { txt; loc = Location.none }
+
 module B = struct
   include Ast_builder.Make (struct
     let loc = Location.none
@@ -10,6 +12,25 @@ module B = struct
   let eand e1 e2 = eapply (evar "&&") [ e1; e2 ]
 
   let eor e1 e2 = eapply (evar "||") [ e1; e2 ]
+
+  let eposition pos =
+    pexp_record
+      [
+        (noloc (lident "pos_fname"), estring pos.pos_fname);
+        (noloc (lident "pos_lnum"), eint pos.pos_lnum);
+        (noloc (lident "pos_bol"), eint pos.pos_bol);
+        (noloc (lident "pos_cnum"), eint pos.pos_cnum);
+      ]
+      None
+
+  let elocation loc =
+    pexp_record
+      [
+        (noloc (lident "loc_start"), eposition loc.loc_start);
+        (noloc (lident "loc_end"), eposition loc.loc_end);
+        (noloc (lident "loc_ghost"), ebool loc.loc_ghost);
+      ]
+      None
 end
 
 exception Unsupported of Gospel.Location.t option * string
@@ -128,18 +149,22 @@ and term (t : Gospel.Tterm.term) : expression =
   | Tbinop (op, t1, t2) -> (
       match op with
       | Gospel.Tterm.Tand ->
+          let vt1 = gen_symbol ~prefix:"_t1" () in
+          let vt2 = gen_symbol ~prefix:"_t2" () in
           B.pexp_let Nonrecursive
-            [ B.value_binding ~pat:(B.pvar "__t1") ~expr:(term t1) ]
+            [ B.value_binding ~pat:(B.pvar vt1) ~expr:(term t1) ]
             (B.pexp_let Nonrecursive
-               [ B.value_binding ~pat:(B.pvar "__t2") ~expr:(term t2) ]
-               (B.eand (B.evar "__t1") (B.evar "__t2")))
+               [ B.value_binding ~pat:(B.pvar vt2) ~expr:(term t2) ]
+               (B.eand (B.evar vt1) (B.evar vt2)))
       | Gospel.Tterm.Tand_asym -> B.eand (term t1) (term t2)
       | Gospel.Tterm.Tor ->
+          let vt1 = gen_symbol ~prefix:"_t1" () in
+          let vt2 = gen_symbol ~prefix:"_t2" () in
           B.pexp_let Nonrecursive
-            [ B.value_binding ~pat:(B.pvar "__t1") ~expr:(term t1) ]
+            [ B.value_binding ~pat:(B.pvar vt1) ~expr:(term t1) ]
             (B.pexp_let Nonrecursive
-               [ B.value_binding ~pat:(B.pvar "__t2") ~expr:(term t2) ]
-               (B.eor (B.evar "__t1") (B.evar "__t2")))
+               [ B.value_binding ~pat:(B.pvar vt2) ~expr:(term t2) ]
+               (B.eor (B.evar vt1) (B.evar vt2)))
       | Gospel.Tterm.Tor_asym -> B.eor (term t1) (term t2)
       | Gospel.Tterm.Timplies ->
           let t1 = term t1 in
@@ -154,12 +179,27 @@ and term (t : Gospel.Tterm.term) : expression =
   | Ttrue -> B.ebool true
   | Tfalse -> B.ebool false
 
-let check_function ret i t =
+let location_of_gospel_loc : Gospel.Warnings.loc option -> location = function
+  | Some l ->
+      { loc_start = l.loc_start; loc_end = l.loc_end; loc_ghost = l.loc_ghost }
+  | None -> Location.none
+
+let failed_post fun_name term =
+  B.eapply (B.evar "__failed_post")
+    [
+      B.pexp_open
+        (B.open_infos
+           ~expr:(B.pmod_ident (noloc (lident "Ppxlib.Location")))
+           ~override:Fresh)
+        (B.elocation (location_of_gospel_loc term.Gospel.Tterm.t_loc));
+      B.estring fun_name;
+      B.estring (Fmt.str "%a" Gospel.Tterm.print_term term);
+    ]
+
+let check_function fun_name ret i t =
   let translated = term t in
   let translated_ite ppf =
-    B.pexp_ifthenelse (B.enot translated)
-      (B.eapply (B.evar "__fail") [ B.eunit ])
-      None
+    B.pexp_ifthenelse (B.enot translated) (failed_post fun_name t) None
     |> Pprintast.expression ppf
   in
   let name = Fmt.str "check_%d" i in
@@ -172,7 +212,7 @@ let check_function ret i t =
       (Fmt.parens Gospel.Tast.print_lb_arg)
       ret translated_ite )
 
-let post ret = List.mapi (check_function ret)
+let post fun_name ret = List.mapi (check_function fun_name ret)
 
 let args = Fmt.(list ~sep:sp (parens Gospel.Tast.print_lb_arg))
 
@@ -188,7 +228,7 @@ let value loc (val_desc : Gospel.Tast.val_description) : string option =
         | [ arg ] -> arg
         | _ -> raise (Unsupported (loc, "returned pattern"))
       in
-      let posts = post ret_name spec.sp_post in
+      let posts = post val_desc.vd_name.id_str ret_name spec.sp_post in
       let checks =
         List.map
           (fun p ->
@@ -249,7 +289,8 @@ let main (path : string) : unit =
        @\n\
        include %s@\n\
        @\n\
-       let __fail () = assert false@\n\
+       let __failed_post loc fun_name term = raise (Error (BadPost {loc; \
+       fun_name; term}))@\n\
        @\n\
        %a@\n"
       module_name
