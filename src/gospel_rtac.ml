@@ -1,48 +1,8 @@
 open Ppxlib
 
-let noloc txt = { txt; loc = Location.none }
-
-module B = struct
-  include Ast_builder.Make (struct
-    let loc = Location.none
-  end)
-
-  let enot e = eapply (evar "not") [ e ]
-
-  let eand e1 e2 = eapply (evar "&&") [ e1; e2 ]
-
-  let eor e1 e2 = eapply (evar "||") [ e1; e2 ]
-
-  let eposition pos =
-    pexp_record
-      [
-        (noloc (lident "pos_fname"), estring pos.pos_fname);
-        (noloc (lident "pos_lnum"), eint pos.pos_lnum);
-        (noloc (lident "pos_bol"), eint pos.pos_bol);
-        (noloc (lident "pos_cnum"), eint pos.pos_cnum);
-      ]
-      None
-
-  let elocation loc =
-    pexp_record
-      [
-        (noloc (lident "loc_start"), eposition loc.loc_start);
-        (noloc (lident "loc_end"), eposition loc.loc_end);
-        (noloc (lident "loc_ghost"), ebool loc.loc_ghost);
-      ]
-      None
-end
+module B = Builder
 
 exception Unsupported of Gospel.Location.t option * string
-
-let const : Gospel.Oasttypes.constant -> expression = function
-  | Pconst_integer (c, o) ->
-      Pconst_integer (c, o) |> B.pexp_constant |> fun e ->
-      B.eapply (B.evar "Z.of_int") [ e ]
-  | Pconst_char c -> B.echar c
-  | Pconst_string (s, d) ->
-      Pconst_string (s, Location.none, d) |> B.pexp_constant
-  | Pconst_float (c, o) -> Pconst_float (c, o) |> B.pexp_constant
 
 let string_of_exp : Gospel.Tterm.term_node -> string option = function
   | Tvar x -> Some x.vs_name.id_str
@@ -64,7 +24,7 @@ let rec array_no_coercion (ls : Gospel.Tterm.lsymbol)
 
 and exp_of_const (t : Gospel.Tterm.term) : expression =
   match t.t_node with
-  | Tconst c -> const c
+  | Tconst c -> B.econst c
   | Tapp (f, c) when f.ls_name.id_str = "integer_of_int" ->
       B.eapply (B.evar "Z.of_int") [ List.hd c |> term ]
   | _ -> Fmt.invalid_arg "not a constant:@\n%a%!" Gospel.Upretty_printer.term t
@@ -110,7 +70,7 @@ and term (t : Gospel.Tterm.term) : expression =
   match t.t_node with
   | Tvar { vs_name; _ } ->
       B.evar (Fmt.str "%a" Gospel.Identifier.Ident.pp vs_name)
-  | Tconst c -> const c
+  | Tconst c -> B.econst c
   | Tapp (ls, tlist) -> (
       match array_no_coercion ls tlist with
       | Some e -> e
@@ -179,39 +139,9 @@ and term (t : Gospel.Tterm.term) : expression =
   | Ttrue -> B.ebool true
   | Tfalse -> B.ebool false
 
-let location_of_gospel_loc : Gospel.Warnings.loc option -> location = function
-  | Some l ->
-      { loc_start = l.loc_start; loc_end = l.loc_end; loc_ghost = l.loc_ghost }
-  | None -> Location.none
-
-let failed_post fun_name term =
-  B.eapply (B.evar "violated")
-    [
-      B.pexp_open
-        (B.open_infos
-           ~expr:(B.pmod_ident (noloc (lident "Ppxlib.Location")))
-           ~override:Fresh)
-        (B.elocation (location_of_gospel_loc term.Gospel.Tterm.t_loc));
-      B.estring fun_name;
-      B.pexp_construct (noloc (lident "Post")) (Some (B.estring (Fmt.str "%a" Gospel.Tterm.print_term term)));
-    ]
-
-let failed_post_nonexec fun_name term exn =
-  B.eapply (B.evar "runtime_exn")
-    [
-      B.pexp_open
-        (B.open_infos
-           ~expr:(B.pmod_ident (noloc (lident "Ppxlib.Location")))
-           ~override:Fresh)
-        (B.elocation (location_of_gospel_loc term.Gospel.Tterm.t_loc));
-      B.estring fun_name;
-      B.pexp_construct (noloc (lident "Post")) (Some (B.estring (Fmt.str "%a" Gospel.Tterm.print_term term)));
-      exn;
-    ]
-
 let check_function fun_name ret t =
   let translated_ite ppf =
-    B.pexp_ifthenelse (B.enot (term t)) (failed_post fun_name t) None
+    B.pexp_ifthenelse (B.enot (term t)) (B.failed_post fun_name t) None
     |> Pprintast.expression ppf
   in
   let name = gen_symbol ~prefix:"__check" () in
@@ -227,7 +157,7 @@ let check_function fun_name ret t =
       name
       (Fmt.parens Gospel.Tast.print_lb_arg)
       ret translated_ite Pprintast.expression
-      (failed_post_nonexec fun_name t (B.evar "e")) )
+      (B.failed_post_nonexec fun_name t (B.evar "e")) )
 
 let post fun_name ret = List.map (check_function fun_name ret)
 
