@@ -1,19 +1,22 @@
+type term = Pre of string | Post of string
+
+type error_kind = Violated | RuntimeExn of exn
+
 type error =
-  | BadPost of { loc : Ppxlib.location; fun_name : string; term : string }
-  | RuntimeExn of {
+  | Condition of {
       loc : Ppxlib.location;
       fun_name : string;
-      term : string;
-      exn : exn;
+      term : term;
+      error_kind : error_kind;
     }
 
 val report : Format.formatter -> error -> unit
 
 exception Error of error
 
-val runtime_exn : Ppxlib.location -> string -> string -> exn -> 'a
+val runtime_exn : Ppxlib.location -> string -> term -> exn -> 'a
 
-val bad_post : Ppxlib.location -> string -> string -> 'a
+val violated : Ppxlib.location -> string -> term -> 'a
 
 module Z : sig
   include module type of Z

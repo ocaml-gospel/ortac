@@ -185,7 +185,7 @@ let location_of_gospel_loc : Gospel.Warnings.loc option -> location = function
   | None -> Location.none
 
 let failed_post fun_name term =
-  B.eapply (B.evar "bad_post")
+  B.eapply (B.evar "violated")
     [
       B.pexp_open
         (B.open_infos
@@ -193,10 +193,10 @@ let failed_post fun_name term =
            ~override:Fresh)
         (B.elocation (location_of_gospel_loc term.Gospel.Tterm.t_loc));
       B.estring fun_name;
-      B.estring (Fmt.str "%a" Gospel.Tterm.print_term term);
+      B.pexp_construct (noloc (lident "Post")) (Some (B.estring (Fmt.str "%a" Gospel.Tterm.print_term term)));
     ]
 
-let failed_nonexec fun_name term exn =
+let failed_post_nonexec fun_name term exn =
   B.eapply (B.evar "runtime_exn")
     [
       B.pexp_open
@@ -205,7 +205,7 @@ let failed_nonexec fun_name term exn =
            ~override:Fresh)
         (B.elocation (location_of_gospel_loc term.Gospel.Tterm.t_loc));
       B.estring fun_name;
-      B.estring (Fmt.str "%a" Gospel.Tterm.print_term term);
+      B.pexp_construct (noloc (lident "Post")) (Some (B.estring (Fmt.str "%a" Gospel.Tterm.print_term term)));
       exn;
     ]
 
@@ -227,7 +227,7 @@ let check_function fun_name ret t =
       name
       (Fmt.parens Gospel.Tast.print_lb_arg)
       ret translated_ite Pprintast.expression
-      (failed_nonexec fun_name t (B.evar "e")) )
+      (failed_post_nonexec fun_name t (B.evar "e")) )
 
 let post fun_name ret = List.map (check_function fun_name ret)
 
