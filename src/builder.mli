@@ -17,6 +17,6 @@ val failed_pre : string -> Gospel.Tterm.term -> expression
 val failed_post : string -> Gospel.Tterm.term -> expression
 
 val failed_post_nonexec :
-  string -> Gospel.Tterm.term -> expression -> expression
+  expression -> string -> Gospel.Tterm.term -> expression
 
-val failed_pre_nonexec : string -> Gospel.Tterm.term -> expression -> expression
+val failed_pre_nonexec : expression -> string -> Gospel.Tterm.term -> expression

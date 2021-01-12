@@ -155,7 +155,7 @@ let check_pre fun_name args t =
     | _ as e -> %a@
   in|}
       name pp_args args translated_ite Pprintast.expression
-      (B.failed_pre_nonexec fun_name t (B.evar "e")) )
+      (B.failed_pre_nonexec (B.evar "e") fun_name t) )
 
 let check_post fun_name ret t =
   let translated_ite ppf =
@@ -175,7 +175,7 @@ let check_post fun_name ret t =
       name
       (parens Gospel.Tast.print_lb_arg)
       ret translated_ite Pprintast.expression
-      (B.failed_post_nonexec fun_name t (B.evar "e")) )
+      (B.failed_post_nonexec (B.evar "e") fun_name t) )
 
 let post fun_name ret = List.map (check_post fun_name ret)
 
