@@ -2,7 +2,7 @@ open Ppxlib
 open Fmt
 module B = Builder
 
-exception Unsupported of Gospel.Location.t option * string
+exception Unsupported of Location.t option * string
 
 let string_of_exp : Gospel.Tterm.term_node -> Gospel.Tterm.Ident.t option =
   function
@@ -33,14 +33,12 @@ and exp_of_const (t : Gospel.Tterm.term) : expression =
 
 and bounds (t : Gospel.Tterm.term) :
     (Gospel.Tterm.Ident.t * expression * expression) option =
-  let pred e = B.eapply (B.evar "Z.pred") [ e ] in
-  let succ e = B.eapply (B.evar "Z.succ") [ e ] in
   let comb ~right (f : Gospel.Tterm.lsymbol) e =
     match f.ls_name.id_str with
     | "infix >=" -> if right then (Some e, None) else (None, Some e)
     | "infix <=" -> if right then (None, Some e) else (Some e, None)
-    | "infix <" -> if right then (None, Some (pred e)) else (Some (succ e), None)
-    | "infix >" -> if right then (Some (succ e), None) else (None, Some (pred e))
+    | "infix <" -> if right then (None, Some (B.epred e)) else (Some (B.esucc e), None)
+    | "infix >" -> if right then (Some (B.esucc e), None) else (None, Some (B.epred e))
     | _ -> (None, None)
   in
   let ( @+ ) a (b, c) = (a, b, c) in
@@ -266,9 +264,9 @@ let main (path : string) : unit =
   with
   | Unsupported (loc, msg) ->
       let open Fmt in
-      let loc = Option.value ~default:Gospel.Location.none loc in
+      let loc = Option.value ~default:Location.none loc in
       let pp_loc =
-        (fun ppf () -> Gospel.Location.print ppf loc) |> styled `Bold
+        (fun ppf () -> Location.print ppf loc) |> styled `Bold
       in
       let pp_details ppf () =
         pf ppf "%a: unsupported %s" (styled `Red string) "Error" msg

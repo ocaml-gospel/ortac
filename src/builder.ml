@@ -12,13 +12,15 @@ let eand e1 e2 = eapply (evar "&&") [ e1; e2 ]
 
 let eor e1 e2 = eapply (evar "||") [ e1; e2 ]
 
-let econst : Gospel.Oasttypes.constant -> expression = function
+let epred e = eapply (evar "Z.pred") [ e ]
+
+let esucc e = eapply (evar "Z.succ") [ e ]
+
+let econst = function
   | Pconst_integer (c, o) ->
       Pconst_integer (c, o) |> pexp_constant |> fun e ->
       eapply (evar "Z.of_int") [ e ]
-  | Pconst_char c -> echar c
-  | Pconst_string (s, d) -> Pconst_string (s, Location.none, d) |> pexp_constant
-  | Pconst_float (c, o) -> Pconst_float (c, o) |> pexp_constant
+  | _ as e -> pexp_constant e
 
 let eposition pos =
   pexp_record
@@ -39,11 +41,6 @@ let elocation loc =
     ]
     None
 
-let location_of_gospel_loc : Gospel.Warnings.loc option -> location = function
-  | Some l ->
-      { loc_start = l.loc_start; loc_end = l.loc_end; loc_ghost = l.loc_ghost }
-  | None -> Location.none
-
 let failed error_kind term_kind fun_name term =
   let func, exn =
     match error_kind with
@@ -55,7 +52,7 @@ let failed error_kind term_kind fun_name term =
       (open_infos
          ~expr:(pmod_ident (noloc (lident "Ppxlib.Location")))
          ~override:Fresh)
-      (elocation (location_of_gospel_loc term.Gospel.Tterm.t_loc))
+      (elocation (Option.value ~default:Location.none term.Gospel.Tterm.t_loc))
   in
   let term =
     pexp_construct

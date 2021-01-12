@@ -4,13 +4,17 @@ include Ast_builder.S
 
 val noloc : 'a -> 'a loc
 
-val econst : Gospel.Oasttypes.constant -> expression
+val econst : constant -> expression
 
 val eand : expression -> expression -> expression
 
 val eor : expression -> expression -> expression
 
 val enot : expression -> expression
+
+val epred : expression -> expression
+
+val esucc : expression -> expression
 
 val failed_pre : string -> Gospel.Tterm.term -> expression
 
