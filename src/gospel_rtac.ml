@@ -4,8 +4,9 @@ module B = Builder
 
 exception Unsupported of Gospel.Location.t option * string
 
-let string_of_exp : Gospel.Tterm.term_node -> string option = function
-  | Tvar x -> Some x.vs_name.id_str
+let string_of_exp : Gospel.Tterm.term_node -> Gospel.Tterm.Ident.t option =
+  function
+  | Tvar x -> Some x.vs_name
   | _ -> None
 
 let rec array_no_coercion (ls : Gospel.Tterm.lsymbol)
@@ -27,9 +28,11 @@ and exp_of_const (t : Gospel.Tterm.term) : expression =
   | Tconst c -> B.econst c
   | Tapp (f, c) when f.ls_name.id_str = "integer_of_int" ->
       B.eapply (B.evar "Z.of_int") [ List.hd c |> term ]
+  (* FIXME *)
   | _ -> invalid_arg "not a constant:@\n%a%!" Gospel.Upretty_printer.term t
 
-and bounds (t : Gospel.Tterm.term) : (string * expression * expression) option =
+and bounds (t : Gospel.Tterm.term) :
+    (Gospel.Tterm.Ident.t * expression * expression) option =
   let pred e = B.eapply (B.evar "Z.pred") [ e ] in
   let succ e = B.eapply (B.evar "Z.succ") [ e ] in
   let comb ~right (f : Gospel.Tterm.lsymbol) e =
@@ -98,6 +101,7 @@ and term (t : Gospel.Tterm.term) : expression =
               | None -> unsupported "forall"
               | Some (x, start, stop) ->
                   let t2 = term t2 in
+                  let x = str "%a" Gospel.Identifier.Ident.pp x in
                   let func = B.pexp_fun Nolabel None (B.pvar x) t2 in
                   B.eapply (B.evar (str "Z.%s" op)) [ start; stop; func ])
           | Gospel.Tterm.Ttrue -> B.ebool true
