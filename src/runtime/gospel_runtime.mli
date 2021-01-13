@@ -9,6 +9,11 @@ type error =
       term : term;
       error_kind : error_kind;
     }
+  | Unexpected_exception of {
+      loc : Ppxlib.location;
+      fun_name : string;
+      exn : exn;
+    }
 
 val report : Format.formatter -> error -> unit
 
@@ -17,6 +22,8 @@ exception Error of error
 val runtime_exn : Ppxlib.location -> string -> term -> exn -> 'a
 
 val violated : Ppxlib.location -> string -> term -> 'a
+
+val unexpected_exn : Ppxlib.location -> string -> exn -> 'a
 
 module Z : sig
   include module type of Z

@@ -183,6 +183,18 @@ let pre fun_name args =
 let filter_ghost =
   List.filter (function Gospel.Tast.Lghost _ -> false | _ -> true)
 
+let arg =
+  let to_string x = str "%a" Gospel.Tast.Ident.pp x.Gospel.Tterm.vs_name in
+  function
+  | Gospel.Tast.Lnone x -> (Nolabel, B.evar (to_string x))
+  | Gospel.Tast.Lquestion x ->
+      let s = to_string x in
+      (Optional s, B.evar s)
+  | Gospel.Tast.Lnamed x ->
+      let s = to_string x in
+      (Labelled s, B.evar s)
+  | Gospel.Tast.Lghost _ -> assert false
+
 let value loc (val_desc : Gospel.Tast.val_description) : string option =
   let process (spec : Gospel.Tast.val_spec) =
     let ninputs = List.length spec.sp_args in
@@ -203,11 +215,18 @@ let value loc (val_desc : Gospel.Tast.val_description) : string option =
       let pre_checks =
         List.map (fun p -> str "%s %a;" (fst p) pp_args spec.sp_args) pres
       in
+      let call =
+        filter_ghost spec.sp_args |> List.map arg
+        |> B.pexp_apply (B.evar val_desc.vd_name.id_str)
+      in
+      let check_exn =
+        B.check_exceptions val_desc.vd_loc val_desc.vd_name.id_str call []
+      in
       str {|let %a %a =@
   %a@
   %a@
   %a@
-  let %a = %a %a in@
+  let %a = %a in@
   %a@
   %a|}
         Gospel.Identifier.Ident.pp val_desc.vd_name pp_args spec.sp_args
@@ -216,8 +235,8 @@ let value loc (val_desc : Gospel.Tast.val_description) : string option =
         (list ~sep:(any "@\n") string)
         (List.map snd posts) (list ~sep:sp string) pre_checks
         (parens Gospel.Tast.print_lb_arg)
-        ret_name Gospel.Identifier.Ident.pp val_desc.vd_name pp_args
-        spec.sp_args (list ~sep:sp string) post_checks
+        ret_name Pprintast.expression check_exn (list ~sep:sp string)
+        post_checks
         (parens Gospel.Tast.print_lb_arg)
         ret_name
     else raise (Unsupported (loc, "non-function value"))

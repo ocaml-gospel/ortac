@@ -34,5 +34,5 @@ depends: [
   "gospel-runtime" {with-test}
 ]
 pin-depends: [
-  [ "gospel.dev" "git+https://github.com/pascutto/gospel#bd09db09ba18c1856aad995f21908a1cb6a0febd" ]
+  [ "gospel.dev" "git+https://github.com/pascutto/gospel#3e8cf0ec8954294c6ee3e66e7c0b7f80038211c1" ]
 ]

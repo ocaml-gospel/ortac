@@ -11,6 +11,11 @@ type error =
       term : term;
       error_kind : error_kind;
     }
+  | Unexpected_exception of {
+      loc : Ppxlib.location;
+      fun_name : string;
+      exn : exn;
+    }
 
 let styled_list l pp = List.fold_left (fun acc x -> styled x acc) pp l
 
@@ -44,17 +49,28 @@ let report ppf = function
         (styled `Blue string)
         fun_name
         (styled `Bold pp_term)
-        term
-        (styled `Yellow pp_kind)
-        error_kind
+        term pp_kind error_kind
+  | Unexpected_exception { loc; fun_name; exn } ->
+      pf ppf "%a@\n %a: Undeclared exeception raised by %a:@\n%a" pp_loc loc
+        (styled `Red string)
+        "Runtime error"
+        (styled `Blue string)
+        fun_name
+        (styled `Bold string)
+        (Printexc.to_string exn)
 
 exception Error of error
 
+let error e = raise (Error e)
+
 let runtime_exn loc fun_name term exn =
-  raise (Error (Condition { loc; fun_name; term; error_kind = RuntimeExn exn }))
+  error (Condition { loc; fun_name; term; error_kind = RuntimeExn exn })
 
 let violated loc fun_name term =
-  raise (Error (Condition { loc; fun_name; term; error_kind = Violated }))
+  error (Condition { loc; fun_name; term; error_kind = Violated })
+
+let unexpected_exn loc fun_name exn =
+  error (Unexpected_exception { loc; fun_name; exn })
 
 module Z = struct
   include Z
