@@ -56,7 +56,12 @@ let failed error_kind term_kind fun_name term =
   in
   let term =
     pexp_construct
-      (noloc (lident (match term_kind with `Pre -> "Pre" | `Post -> "Post")))
+      (noloc
+         (lident
+            (match term_kind with
+            | `Pre -> "Pre"
+            | `Post -> "Post"
+            | `XPost -> "XPost")))
       (Some (estring (Fmt.str "%a" Gospel.Tterm.print_term term)))
   in
   eapply (evar func)
@@ -71,6 +76,10 @@ let failed_post = failed `Violated `Post
 let failed_pre_nonexec exn = failed (`RuntimeExn exn) `Pre
 
 let failed_post_nonexec exn = failed (`RuntimeExn exn) `Post
+
+let failed_xpost = failed `Violated `XPost
+
+let failed_xpost_nonexec exn = failed (`RuntimeExn exn) `XPost
 
 let check_exceptions loc fun_name call raises =
   let allowed_generic =

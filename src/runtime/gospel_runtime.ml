@@ -1,6 +1,6 @@
 open Fmt
 
-type term = Pre of string | Post of string
+type term = Pre of string | Post of string | XPost of string
 
 type error_kind = Violated | RuntimeExn of exn
 
@@ -30,7 +30,10 @@ let pp_kind ppf = function
 
 let pp_term =
   using
-    (function Pre t -> ("pre-condition", t) | Post t -> ("post-condition", t))
+    (function
+      | Pre t -> ("pre-condition", t)
+      | Post t -> ("post-condition", t)
+      | XPost t -> ("exceptional post-condition", t))
     (fun ppf (p, t) ->
       pf ppf "%a @[%a@]"
         (styled_list [ `Yellow; `Underline ] string)

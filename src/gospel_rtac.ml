@@ -180,6 +180,47 @@ let pre fun_name args =
   List.map (fun (t, b) ->
       if not b then check_pre fun_name args t else assert false (*TODO*))
 
+let rec xpost_pattern exn = function
+  | Gospel.Tterm.Pwild ->
+      B.ppat_construct (B.noloc (lident exn)) (Some B.ppat_any)
+  | Gospel.Tterm.Pvar x ->
+      B.ppat_construct
+        (B.noloc (lident exn))
+        (Some (B.ppat_var (B.noloc (str "%a" Gospel.Tterm.Ident.pp x.vs_name))))
+  | Gospel.Tterm.Papp (ls, []) when Gospel.Tterm.(ls_equal ls (fs_tuple 0)) ->
+      B.pvar exn
+  | Gospel.Tterm.Papp (_ls, _l) -> assert false
+  | Gospel.Tterm.Por (p1, p2) ->
+      B.ppat_or (xpost_pattern exn p1.p_node) (xpost_pattern exn p2.p_node)
+  | Gospel.Tterm.Pas (p, s) ->
+      B.ppat_alias
+        (xpost_pattern exn p.p_node)
+        (B.noloc (str "%a" Gospel.Tterm.Ident.pp s.vs_name))
+
+let xpost loc fun_name xpost =
+  Gospel.Ttypes.Mxs.bindings xpost
+  |> List.map (fun (exn, pl) ->
+         if List.length pl > 1 then
+           raise
+             (Unsupported
+                (loc, "multiple exception patterns with the same constructor"))
+         else
+           let exn = exn.Gospel.Ttypes.xs_ident.id_str in
+           let alias = gen_symbol ~prefix:"__e" () in
+           List.map
+             (fun (p, t) ->
+               B.case ~guard:None
+                 ~lhs:
+                   (B.ppat_alias
+                      (xpost_pattern exn p.Gospel.Tterm.p_node)
+                      (B.noloc alias))
+                 ~rhs:
+                   (B.pexp_ifthenelse (term t)
+                      (B.eapply (B.evar "raise") [ B.evar alias ])
+                      (Some (B.failed_xpost fun_name t))))
+             pl)
+  |> List.flatten
+
 let filter_ghost =
   List.filter (function Gospel.Tast.Lghost _ -> false | _ -> true)
 
@@ -220,7 +261,9 @@ let value loc (val_desc : Gospel.Tast.val_description) : string option =
         |> B.pexp_apply (B.evar val_desc.vd_name.id_str)
       in
       let check_exn =
-        B.check_exceptions val_desc.vd_loc val_desc.vd_name.id_str call []
+        let cases = xpost loc val_desc.vd_name.id_str spec.sp_xpost in
+        (*XXX: [raises] should be made out of the xpost conditions. *)
+        B.check_exceptions val_desc.vd_loc val_desc.vd_name.id_str call cases
       in
       str {|let %a %a =@
   %a@
