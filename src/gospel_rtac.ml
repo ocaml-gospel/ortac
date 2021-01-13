@@ -23,22 +23,16 @@ let rec array_no_coercion (ls : Gospel.Tterm.lsymbol)
          | _ -> None)
   |> Option.join
 
-and exp_of_const (t : Gospel.Tterm.term) : expression =
-  match t.t_node with
-  | Tconst c -> B.econst c
-  | Tapp (f, c) when f.ls_name.id_str = "integer_of_int" ->
-      B.eapply (B.evar "Z.of_int") [ List.hd c |> term ]
-  (* FIXME *)
-  | _ -> invalid_arg "not a constant:@\n%a%!" Gospel.Upretty_printer.term t
-
 and bounds (t : Gospel.Tterm.term) :
     (Gospel.Tterm.Ident.t * expression * expression) option =
   let comb ~right (f : Gospel.Tterm.lsymbol) e =
     match f.ls_name.id_str with
     | "infix >=" -> if right then (Some e, None) else (None, Some e)
     | "infix <=" -> if right then (None, Some e) else (Some e, None)
-    | "infix <" -> if right then (None, Some (B.epred e)) else (Some (B.esucc e), None)
-    | "infix >" -> if right then (Some (B.esucc e), None) else (None, Some (B.epred e))
+    | "infix <" ->
+        if right then (None, Some (B.epred e)) else (Some (B.esucc e), None)
+    | "infix >" ->
+        if right then (Some (B.esucc e), None) else (None, Some (B.epred e))
     | _ -> (None, None)
   in
   let ( @+ ) a (b, c) = (a, b, c) in
@@ -49,10 +43,10 @@ and bounds (t : Gospel.Tterm.term) :
         match (sx1, sx2) with
         | Some _, Some _ | None, None -> (None, None, None)
         | sx1, None ->
-            let e2 = exp_of_const x2 in
+            let e2 = term x2 in
             sx1 @+ comb ~right:true f e2
         | None, sx2 ->
-            let e1 = exp_of_const x1 in
+            let e1 = term x1 in
             sx2 @+ comb ~right:false f e1)
     | _ -> (None, None, None)
   in
@@ -63,7 +57,8 @@ and bounds (t : Gospel.Tterm.term) :
       | (Some x, Some elower, None), (Some x', None, Some eupper)
         when x = x' ->
           Some (x, elower, eupper)
-      | _, _ -> None)
+      | _, _ -> None
+      | exception Unsupported _ -> None)
   | _ -> None
 
 and term (t : Gospel.Tterm.term) : expression =
@@ -265,9 +260,7 @@ let main (path : string) : unit =
   | Unsupported (loc, msg) ->
       let open Fmt in
       let loc = Option.value ~default:Location.none loc in
-      let pp_loc =
-        (fun ppf () -> Location.print ppf loc) |> styled `Bold
-      in
+      let pp_loc = (fun ppf () -> Location.print ppf loc) |> styled `Bold in
       let pp_details ppf () =
         pf ppf "%a: unsupported %s" (styled `Red string) "Error" msg
       in
