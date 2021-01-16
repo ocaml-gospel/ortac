@@ -134,51 +134,45 @@ and term (t : Gospel.Tterm.term) : expression =
   | Ttrue -> B.ebool true
   | Tfalse -> B.ebool false
 
-let pp_args = list ~sep:sp (parens Gospel.Tast.print_lb_arg)
-
-let check_pre fun_name args t =
-  let translated_ite ppf =
-    B.pexp_ifthenelse (B.enot (term t)) (B.failed_pre fun_name t) None
-    |> Pprintast.expression ppf
+let check_term_in name fail_violated fail_nonexec args t =
+  let trywith =
+    let exn_alias = gen_symbol ~prefix:"__e" () in
+    B.pexp_try (term t)
+      [
+        B.case ~guard:None
+          ~lhs:(B.ppat_alias B.ppat_any (B.noloc exn_alias))
+          ~rhs:(fail_nonexec (B.evar exn_alias));
+      ]
+    (* try t with _ as e -> <B.failed_post_nonexec e fun_name t> *)
   in
-  let name = gen_symbol ~prefix:"__check" () in
-  ( name,
-    str
-      {|let %s %a =@
-    try@
-      %t@
-    with@
-    | Gospel_runtime.Error _ as e -> raise e@
-    | _ as e -> %a@
-  in|}
-      name pp_args args translated_ite Pprintast.expression
-      (B.failed_pre_nonexec (B.evar "e") fun_name t) )
-
-let check_post fun_name ret t =
-  let translated_ite ppf =
-    B.pexp_ifthenelse (B.enot (term t)) (B.failed_post fun_name t) None
-    |> Pprintast.expression ppf
+  let expr =
+    B.pexp_ifthenelse (B.enot trywith) (fail_violated ()) None
+    (* if not <trywith> then <B.failed_post fun_name t> *)
   in
-  let name = gen_symbol ~prefix:"__check" () in
-  ( name,
-    str
-      {|let %s %a =@
-    try@
-      %t@
-    with@
-    | Gospel_runtime.Error _ as e -> raise e@
-    | _ as e -> %a@
-  in|}
-      name
-      (parens Gospel.Tast.print_lb_arg)
-      ret translated_ite Pprintast.expression
-      (B.failed_post_nonexec (B.evar "e") fun_name t) )
+  let func = B.efun args expr in
+  let binding = B.value_binding ~pat:B.(pvar name) ~expr:func in
+  B.pexp_let Nonrecursive [ binding ]
 
-let post fun_name ret = List.map (check_post fun_name ret)
+let post names fun_name rets posts expr =
+  List.fold_right2
+    (fun name t exp ->
+      let fail_violated () = B.failed_post fun_name t in
+      let fail_nonexec e = B.failed_post_nonexec e fun_name t in
+      let f =
+        check_term_in name fail_violated fail_nonexec [ (Nolabel, rets) ] t
+      in
+      f exp)
+    names posts expr
 
-let pre fun_name args =
-  List.map (fun (t, b) ->
-      if not b then check_pre fun_name args t else assert false (*TODO*))
+let pre names loc fun_name args pres expr =
+  List.fold_right2
+    (fun name (t, check) exp ->
+      if check then raise (Unsupported (Some loc, "`check` condition"));
+      let fail_violated () = B.failed_post fun_name t in
+      let fail_nonexec e = B.failed_post_nonexec e fun_name t in
+      let f = check_term_in name fail_violated fail_nonexec args t in
+      f exp)
+    names pres expr
 
 let rec xpost_pattern exn = function
   | Gospel.Tterm.Pwild ->
@@ -203,7 +197,8 @@ let xpost loc fun_name xpost =
          if List.length pl > 1 then
            raise
              (Unsupported
-                (loc, "multiple exception patterns with the same constructor"))
+                ( Some loc,
+                  "multiple exception patterns with the same constructor" ))
          else
            let exn = exn.Gospel.Ttypes.xs_ident.id_str in
            let alias = gen_symbol ~prefix:"__e" () in
@@ -221,70 +216,86 @@ let xpost loc fun_name xpost =
              pl)
   |> List.flatten
 
-let filter_ghost =
-  List.filter (function Gospel.Tast.Lghost _ -> false | _ -> true)
-
-let arg =
+let of_gospel_args args =
   let to_string x = str "%a" Gospel.Tast.Ident.pp x.Gospel.Tterm.vs_name in
-  function
-  | Gospel.Tast.Lnone x -> (Nolabel, B.evar (to_string x))
-  | Gospel.Tast.Lquestion x ->
-      let s = to_string x in
-      (Optional s, B.evar s)
-  | Gospel.Tast.Lnamed x ->
-      let s = to_string x in
-      (Labelled s, B.evar s)
-  | Gospel.Tast.Lghost _ -> assert false
+  List.fold_right
+    (fun arg (eargs, pargs) ->
+      match arg with
+      | Gospel.Tast.Lnone x ->
+          let s = to_string x in
+          ((Nolabel, B.evar s) :: eargs, (Nolabel, B.pvar s) :: pargs)
+      | Gospel.Tast.Lquestion x ->
+          let s = to_string x in
+          ((Optional s, B.evar s) :: eargs, (Nolabel, B.pvar s) :: pargs)
+      | Gospel.Tast.Lnamed x ->
+          let s = to_string x in
+          ((Labelled s, B.evar s) :: eargs, (Labelled s, B.pvar s) :: pargs)
+      | Gospel.Tast.Lghost _ -> (eargs, pargs))
+    args ([], [])
+
+let returned_pattern rets =
+  let to_string x = str "%a" Gospel.Tast.Ident.pp x.Gospel.Tterm.vs_name in
+  List.filter_map
+    (function
+      | Gospel.Tast.Lnone x -> Some (B.pvar (to_string x))
+      | Gospel.Tast.Lghost _ -> None
+      | Gospel.Tast.Lquestion _ | Gospel.Tast.Lnamed _ -> assert false)
+    rets
+  |> B.ppat_tuple
 
 let value loc (val_desc : Gospel.Tast.val_description) : string option =
-  let process (spec : Gospel.Tast.val_spec) =
-    let ninputs = List.length spec.sp_args in
-    if ninputs >= 1 then
-      let ret_name =
-        filter_ghost spec.sp_ret |> function
-        | [ arg ] -> arg
-        | _ -> raise (Unsupported (loc, "returned pattern"))
-      in
-      let posts = post val_desc.vd_name.id_str ret_name spec.sp_post in
-      let pres = pre val_desc.vd_name.id_str spec.sp_args spec.sp_pre in
-      let post_checks =
-        List.map
-          (fun p ->
-            str "%s %a;" (fst p) (parens Gospel.Tast.print_lb_arg) ret_name)
-          posts
-      in
-      let pre_checks =
-        List.map (fun p -> str "%s %a;" (fst p) pp_args spec.sp_args) pres
-      in
-      let call =
-        filter_ghost spec.sp_args |> List.map arg
-        |> B.pexp_apply (B.evar val_desc.vd_name.id_str)
-      in
-      let check_exn =
-        let cases = xpost loc val_desc.vd_name.id_str spec.sp_xpost in
-        (*XXX: [raises] should be made out of the xpost conditions. *)
-        B.check_exceptions val_desc.vd_loc val_desc.vd_name.id_str call cases
-      in
-      str {|let %a %a =@
-  %a@
-  %a@
-  %a@
-  let %a = %a in@
-  %a@
-  %a|}
-        Gospel.Identifier.Ident.pp val_desc.vd_name pp_args spec.sp_args
-        (list ~sep:(any "@\n") string)
-        (List.map snd pres)
-        (list ~sep:(any "@\n") string)
-        (List.map snd posts) (list ~sep:sp string) pre_checks
-        (parens Gospel.Tast.print_lb_arg)
-        ret_name Pprintast.expression check_exn (list ~sep:sp string)
-        post_checks
-        (parens Gospel.Tast.print_lb_arg)
-        ret_name
-    else raise (Unsupported (loc, "non-function value"))
+  let process (spec : Gospel.Tast.val_spec) : structure_item =
+    if List.length spec.sp_args = 0 then
+      raise (Unsupported (loc, "non-function value"));
+    (* Declaration location *)
+    let loc = val_desc.vd_loc in
+    (* Arguments *)
+    let eargs, pargs = of_gospel_args spec.sp_args in
+    (* Returned values *)
+    let prets = returned_pattern spec.sp_ret in
+    let ret_name = gen_symbol ~prefix:"__ret" () in
+    let pre_names =
+      List.init (List.length spec.sp_pre) (fun _ ->
+          gen_symbol ~prefix:"__check_pre" ())
+    in
+    let post_names =
+      List.init (List.length spec.sp_post) (fun _ ->
+          gen_symbol ~prefix:"__check_post" ())
+    in
+    let let_posts =
+      post post_names val_desc.vd_name.id_str prets spec.sp_post
+    in
+    let let_pres =
+      pre pre_names loc val_desc.vd_name.id_str pargs spec.sp_pre
+    in
+    let post_checks =
+      List.map (fun s -> B.eapply (B.evar s) [ B.evar ret_name ]) post_names
+      |> B.esequence
+    in
+    let pre_checks =
+      List.map (fun s -> B.pexp_apply (B.evar s) eargs) pre_names |> B.esequence
+    in
+    let call = B.pexp_apply (B.evar val_desc.vd_name.id_str) eargs in
+    let check_raises =
+      let cases = xpost loc val_desc.vd_name.id_str spec.sp_xpost in
+      B.check_exceptions val_desc.vd_loc val_desc.vd_name.id_str call cases
+    in
+    let let_call =
+      B.pexp_let Nonrecursive
+        [ B.value_binding ~pat:(B.pvar ret_name) ~expr:check_raises ]
+    in
+    let return = B.evar ret_name in
+    let body =
+      B.efun pargs @@ let_posts @@ let_pres
+      @@ B.pexp_sequence pre_checks
+           (let_call @@ B.pexp_sequence post_checks return)
+    in
+    B.pstr_value Nonrecursive
+      [ B.value_binding ~pat:(B.pvar val_desc.vd_name.id_str) ~expr:body ]
   in
-  Option.map process val_desc.vd_spec
+  Option.map
+    (fun s -> process s |> str "%a" Pprintast.structure_item)
+    val_desc.vd_spec
 
 let signature (ast : Gospel.Tast.signature) : string list =
   List.filter_map

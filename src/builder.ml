@@ -100,3 +100,10 @@ let check_exceptions loc fun_name call raises =
            [ elocation loc; estring fun_name; evar "e" ])
   in
   pexp_try call (raises @ [ allowed_generic; generic ])
+
+let efun args expr =
+  List.fold_right
+    (fun a ->
+      let label, p = a in
+      pexp_fun label None p)
+    args expr

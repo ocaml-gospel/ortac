@@ -4,6 +4,8 @@ include Ast_builder.S
 
 val noloc : 'a -> 'a loc
 
+val elocation : location -> expression
+
 val econst : constant -> expression
 
 val eand : expression -> expression -> expression
@@ -41,3 +43,5 @@ val check_exceptions : location -> string -> expression -> cases -> expression
     ]}
 
     Each case provided is added at the beginning of the error matching. *)
+
+val efun : (arg_label * pattern) list -> expression -> expression
