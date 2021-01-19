@@ -134,17 +134,17 @@ and term (t : Tterm.term) : expression =
   | Ttrue -> B.ebool true
   | Tfalse -> B.ebool false
 
+let guarded_term fail t =
+  let exn_alias = gen_symbol ~prefix:"__e" () in
+  B.pexp_try (term t)
+    [
+      B.case ~guard:None
+        ~lhs:(B.ppat_alias B.ppat_any (B.noloc exn_alias))
+        ~rhs:(fail (B.evar exn_alias));
+    ]
+
 let check_term_in name fail_violated fail_nonexec args t =
-  let trywith =
-    let exn_alias = gen_symbol ~prefix:"__e" () in
-    B.pexp_try (term t)
-      [
-        B.case ~guard:None
-          ~lhs:(B.ppat_alias B.ppat_any (B.noloc exn_alias))
-          ~rhs:(fail_nonexec (B.evar exn_alias));
-      ]
-    (* try t with _ as e -> <B.failed_post_nonexec e fun_name t> *)
-  in
+  let trywith = guarded_term fail_nonexec t in
   let expr =
     B.pexp_ifthenelse (B.enot trywith) (fail_violated ()) None
     (* if not <trywith> then <B.failed_post fun_name t> *)
@@ -201,13 +201,15 @@ let xpost loc fun_name xpost =
            let alias = gen_symbol ~prefix:"__e" () in
            List.map
              (fun (p, t) ->
+               let fail_nonexec e = B.failed_post_nonexec e fun_name t in
                B.case ~guard:None
                  ~lhs:
                    (B.ppat_alias
                       (xpost_pattern exn p.Tterm.p_node)
                       (B.noloc alias))
                  ~rhs:
-                   (B.pexp_ifthenelse (term t)
+                   (B.pexp_ifthenelse
+                      (guarded_term fail_nonexec t)
                       (B.eapply (B.evar "raise") [ B.evar alias ])
                       (Some (B.failed_xpost fun_name t))))
              pl)
