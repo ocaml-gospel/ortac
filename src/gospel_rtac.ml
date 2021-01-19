@@ -1,16 +1,17 @@
 open Ppxlib
+open Gospel
 open Fmt
 module B = Builder
 
 exception Unsupported of Location.t option * string
 
-let string_of_exp : Gospel.Tterm.term_node -> Gospel.Tterm.Ident.t option =
-  function
+let lident s = B.noloc (lident s)
+
+let string_of_exp : Tterm.term_node -> Tterm.Ident.t option = function
   | Tvar x -> Some x.vs_name
   | _ -> None
 
-let rec array_no_coercion (ls : Gospel.Tterm.lsymbol)
-    (tlist : Gospel.Tterm.term list) =
+let rec array_no_coercion (ls : Tterm.lsymbol) (tlist : Tterm.term list) =
   (match ls.ls_name.id_str with
   | "mixfix [_]" -> Some "Array.get"
   | "length" -> Some "Array.length"
@@ -23,9 +24,8 @@ let rec array_no_coercion (ls : Gospel.Tterm.lsymbol)
          | _ -> None)
   |> Option.join
 
-and bounds (t : Gospel.Tterm.term) :
-    (Gospel.Tterm.Ident.t * expression * expression) option =
-  let comb ~right (f : Gospel.Tterm.lsymbol) e =
+and bounds (t : Tterm.term) : (Tterm.Ident.t * expression * expression) option =
+  let comb ~right (f : Tterm.lsymbol) e =
     match f.ls_name.id_str with
     | "infix >=" -> if right then (Some e, None) else (None, Some e)
     | "infix <=" -> if right then (None, Some e) else (Some e, None)
@@ -37,7 +37,7 @@ and bounds (t : Gospel.Tterm.term) :
   in
   let ( @+ ) a (b, c) = (a, b, c) in
   let bound = function
-    | Gospel.Tterm.Tapp (f, [ x1; x2 ]) -> (
+    | Tterm.Tapp (f, [ x1; x2 ]) -> (
         let sx1 = string_of_exp x1.t_node in
         let sx2 = string_of_exp x2.t_node in
         match (sx1, sx2) with
@@ -61,10 +61,10 @@ and bounds (t : Gospel.Tterm.term) :
       | exception Unsupported _ -> None)
   | _ -> None
 
-and term (t : Gospel.Tterm.term) : expression =
+and term (t : Tterm.term) : expression =
   let unsupported m = raise (Unsupported (t.t_loc, m)) in
   match t.t_node with
-  | Tvar { vs_name; _ } -> B.evar (str "%a" Gospel.Identifier.Ident.pp vs_name)
+  | Tvar { vs_name; _ } -> B.evar (str "%a" Identifier.Ident.pp vs_name)
   | Tconst c -> B.econst c
   | Tapp (ls, tlist) -> (
       match array_no_coercion ls tlist with
@@ -86,7 +86,7 @@ and term (t : Gospel.Tterm.term) : expression =
   | Tcase (_, _) -> unsupported "case filtering"
   | Tquant (quant, _vars, _, t) -> (
       match quant with
-      | Gospel.Tterm.Tforall | Gospel.Tterm.Texists -> (
+      | Tterm.Tforall | Tterm.Texists -> (
           let op = if quant = Tforall then "forall" else "exists" in
           match t.t_node with
           | Tbinop (Timplies, t1, t2) -> (
@@ -94,16 +94,16 @@ and term (t : Gospel.Tterm.term) : expression =
               | None -> unsupported "forall"
               | Some (x, start, stop) ->
                   let t2 = term t2 in
-                  let x = str "%a" Gospel.Identifier.Ident.pp x in
+                  let x = str "%a" Identifier.Ident.pp x in
                   let func = B.pexp_fun Nolabel None (B.pvar x) t2 in
                   B.eapply (B.evar (str "Z.%s" op)) [ start; stop; func ])
-          | Gospel.Tterm.Ttrue -> B.ebool true
-          | Gospel.Tterm.Tfalse -> B.ebool false
+          | Tterm.Ttrue -> B.ebool true
+          | Tterm.Tfalse -> B.ebool false
           | _ -> unsupported op)
-      | Gospel.Tterm.Tlambda -> unsupported "lambda quantification")
+      | Tterm.Tlambda -> unsupported "lambda quantification")
   | Tbinop (op, t1, t2) -> (
       match op with
-      | Gospel.Tterm.Tand ->
+      | Tterm.Tand ->
           let vt1 = gen_symbol ~prefix:"__t1" () in
           let vt2 = gen_symbol ~prefix:"__t2" () in
           B.pexp_let Nonrecursive
@@ -111,8 +111,8 @@ and term (t : Gospel.Tterm.term) : expression =
             (B.pexp_let Nonrecursive
                [ B.value_binding ~pat:(B.pvar vt2) ~expr:(term t2) ]
                (B.eand (B.evar vt1) (B.evar vt2)))
-      | Gospel.Tterm.Tand_asym -> B.eand (term t1) (term t2)
-      | Gospel.Tterm.Tor ->
+      | Tterm.Tand_asym -> B.eand (term t1) (term t2)
+      | Tterm.Tor ->
           let vt1 = gen_symbol ~prefix:"__t1" () in
           let vt2 = gen_symbol ~prefix:"__t2" () in
           B.pexp_let Nonrecursive
@@ -120,12 +120,12 @@ and term (t : Gospel.Tterm.term) : expression =
             (B.pexp_let Nonrecursive
                [ B.value_binding ~pat:(B.pvar vt2) ~expr:(term t2) ]
                (B.eor (B.evar vt1) (B.evar vt2)))
-      | Gospel.Tterm.Tor_asym -> B.eor (term t1) (term t2)
-      | Gospel.Tterm.Timplies ->
+      | Tterm.Tor_asym -> B.eor (term t1) (term t2)
+      | Tterm.Timplies ->
           let t1 = term t1 in
           let t2 = term t2 in
           B.pexp_ifthenelse t1 t2 (Some (B.ebool true))
-      | Gospel.Tterm.Tiff ->
+      | Tterm.Tiff ->
           let t1 = term t1 in
           let t2 = term t2 in
           B.eapply (B.evar "=") [ t1; t2 ])
@@ -175,24 +175,21 @@ let pre names loc fun_name args pres expr =
     names pres expr
 
 let rec xpost_pattern exn = function
-  | Gospel.Tterm.Pwild ->
-      B.ppat_construct (B.noloc (lident exn)) (Some B.ppat_any)
-  | Gospel.Tterm.Pvar x ->
-      B.ppat_construct
-        (B.noloc (lident exn))
-        (Some (B.ppat_var (B.noloc (str "%a" Gospel.Tterm.Ident.pp x.vs_name))))
-  | Gospel.Tterm.Papp (ls, []) when Gospel.Tterm.(ls_equal ls (fs_tuple 0)) ->
-      B.pvar exn
-  | Gospel.Tterm.Papp (_ls, _l) -> assert false
-  | Gospel.Tterm.Por (p1, p2) ->
+  | Tterm.Pwild -> B.ppat_construct (lident exn) (Some B.ppat_any)
+  | Tterm.Pvar x ->
+      B.ppat_construct (lident exn)
+        (Some (B.ppat_var (B.noloc (str "%a" Tterm.Ident.pp x.vs_name))))
+  | Tterm.Papp (ls, []) when Tterm.(ls_equal ls (fs_tuple 0)) -> B.pvar exn
+  | Tterm.Papp (_ls, _l) -> assert false
+  | Tterm.Por (p1, p2) ->
       B.ppat_or (xpost_pattern exn p1.p_node) (xpost_pattern exn p2.p_node)
-  | Gospel.Tterm.Pas (p, s) ->
+  | Tterm.Pas (p, s) ->
       B.ppat_alias
         (xpost_pattern exn p.p_node)
-        (B.noloc (str "%a" Gospel.Tterm.Ident.pp s.vs_name))
+        (B.noloc (str "%a" Tterm.Ident.pp s.vs_name))
 
 let xpost loc fun_name xpost =
-  Gospel.Ttypes.Mxs.bindings xpost
+  Ttypes.Mxs.bindings xpost
   |> List.map (fun (exn, pl) ->
          if List.length pl > 1 then
            raise
@@ -200,14 +197,14 @@ let xpost loc fun_name xpost =
                 ( Some loc,
                   "multiple exception patterns with the same constructor" ))
          else
-           let exn = exn.Gospel.Ttypes.xs_ident.id_str in
+           let exn = exn.Ttypes.xs_ident.id_str in
            let alias = gen_symbol ~prefix:"__e" () in
            List.map
              (fun (p, t) ->
                B.case ~guard:None
                  ~lhs:
                    (B.ppat_alias
-                      (xpost_pattern exn p.Gospel.Tterm.p_node)
+                      (xpost_pattern exn p.Tterm.p_node)
                       (B.noloc alias))
                  ~rhs:
                    (B.pexp_ifthenelse (term t)
@@ -217,41 +214,41 @@ let xpost loc fun_name xpost =
   |> List.flatten
 
 let of_gospel_args args =
-  let to_string x = str "%a" Gospel.Tast.Ident.pp x.Gospel.Tterm.vs_name in
+  let to_string x = str "%a" Tast.Ident.pp x.Tterm.vs_name in
   List.fold_right
     (fun arg (eargs, pargs) ->
       match arg with
-      | Gospel.Tast.Lnone x ->
+      | Tast.Lnone x ->
           let s = to_string x in
           ((Nolabel, B.evar s) :: eargs, (Nolabel, B.pvar s) :: pargs)
-      | Gospel.Tast.Lquestion x ->
+      | Tast.Lquestion x ->
           let s = to_string x in
           ((Optional s, B.evar s) :: eargs, (Nolabel, B.pvar s) :: pargs)
-      | Gospel.Tast.Lnamed x ->
+      | Tast.Lnamed x ->
           let s = to_string x in
           ((Labelled s, B.evar s) :: eargs, (Labelled s, B.pvar s) :: pargs)
-      | Gospel.Tast.Lghost _ -> (eargs, pargs))
+      | Tast.Lghost _ -> (eargs, pargs))
     args ([], [])
 
 let returned_pattern rets =
-  let to_string x = str "%a" Gospel.Tast.Ident.pp x.Gospel.Tterm.vs_name in
+  let to_string x = str "%a" Tast.Ident.pp x.Tterm.vs_name in
   List.filter_map
     (function
-      | Gospel.Tast.Lnone x -> Some (B.pvar (to_string x))
-      | Gospel.Tast.Lghost _ -> None
-      | Gospel.Tast.Lquestion _ | Gospel.Tast.Lnamed _ -> assert false)
+      | Tast.Lnone x -> Some (B.pvar (to_string x))
+      | Tast.Lghost _ -> None
+      | Tast.Lquestion _ | Tast.Lnamed _ -> assert false)
     rets
   |> B.ppat_tuple
 
-let value loc (val_desc : Gospel.Tast.val_description) : string option =
-  let process (spec : Gospel.Tast.val_spec) : structure_item =
-    if List.length spec.sp_args = 0 then
-      raise (Unsupported (loc, "non-function value"));
+let value (val_desc : Tast.val_description) =
+  let process (spec : Tast.val_spec) =
     (* Declaration location *)
     let loc = val_desc.vd_loc in
+    if List.length spec.sp_args = 0 then
+      raise (Unsupported (Some loc, "non-function value"));
     (* Arguments *)
     let eargs, pargs = of_gospel_args spec.sp_args in
-    (* Returned values *)
+    (* Returned pattern *)
     let prets = returned_pattern spec.sp_ret in
     let ret_name = gen_symbol ~prefix:"__ret" () in
     let pre_names =
@@ -293,42 +290,42 @@ let value loc (val_desc : Gospel.Tast.val_description) : string option =
     B.pstr_value Nonrecursive
       [ B.value_binding ~pat:(B.pvar val_desc.vd_name.id_str) ~expr:body ]
   in
-  Option.map
-    (fun s -> process s |> str "%a" Pprintast.structure_item)
-    val_desc.vd_spec
+  Option.map process val_desc.vd_spec
 
-let signature (ast : Gospel.Tast.signature) : string list =
-  List.filter_map
-    (fun (sig_item : Gospel.Tast.signature_item) ->
+let signature =
+  List.filter_map (fun (sig_item : Tast.signature_item) ->
       match sig_item.sig_desc with
-      | Sig_val (decl, _ghost) -> value (Some sig_item.sig_loc) decl
+      | Sig_val (decl, _ghost) -> value decl
       | _ -> None)
-    ast
 
 let module_name_of_path p =
   Filename.basename p |> Filename.chop_extension |> String.capitalize_ascii
 
 let type_check load_path name sigs =
-  let md = Gospel.Tmodule.init_muc name in
+  let md = Tmodule.init_muc name in
   let penv =
-    module_name_of_path name |> Gospel.Utils.Sstr.singleton
-    |> Gospel.Typing.penv load_path
+    module_name_of_path name |> Utils.Sstr.singleton |> Typing.penv load_path
   in
-  List.fold_left (Gospel.Typing.type_sig_item penv) md sigs
-  |> Gospel.Tmodule.wrap_up_muc
+  List.fold_left (Typing.type_sig_item penv) md sigs |> Tmodule.wrap_up_muc
   |> fun file -> file.fl_sigs
 
-let main (path : string) : unit =
+let main path =
   set_style_renderer stderr `Ansi_tty;
   let module_name = module_name_of_path path in
-  let ast = Gospel.Parser_frontend.parse_ocaml_gospel path in
+  let ast = Parser_frontend.parse_ocaml_gospel path in
   let tast = type_check [] path ast in
   try
+    let open_runtime =
+      B.open_infos
+        ~expr:(B.pmod_ident (lident "Gospel_runtime"))
+        ~override:Fresh
+      |> B.pstr_open
+    in
+    let include_lib =
+      B.pmod_ident (lident module_name) |> B.include_infos |> B.pstr_include
+    in
     let declarations = signature tast in
-    let open Fmt in
-    pr "open! Gospel_runtime@\n@\ninclude %s\n@\n%a@\n" module_name
-      (list ~sep:(any "@\n@\n") string)
-      declarations
+    open_runtime :: include_lib :: declarations |> Pprintast.structure stdout
   with
   | Unsupported (loc, msg) ->
       let open Fmt in
