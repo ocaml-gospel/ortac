@@ -45,14 +45,11 @@ let elocation loc =
        ]
        None)
 
-let failed error_kind term_kind fun_name term =
+let failed error_kind term_kind fun_name loc term =
   let func, exn =
     match error_kind with
     | `Violated -> ("violated", None)
     | `RuntimeExn e -> ("runtime_exn", Some e)
-  in
-  let loc =
-    elocation (Option.value ~default:Location.none term.Gospel.Tterm.t_loc)
   in
   let term =
     pexp_construct
@@ -81,7 +78,7 @@ let failed_xpost = failed `Violated `XPost
 
 let failed_xpost_nonexec exn = failed (`RuntimeExn exn) `XPost
 
-let check_exceptions loc fun_name call raises =
+let check_exceptions fun_name eloc call raises =
   let allowed_generic =
     case ~guard:None
       ~lhs:
@@ -95,9 +92,7 @@ let check_exceptions loc fun_name call raises =
   let generic =
     case ~guard:None
       ~lhs:(ppat_alias ppat_any (noloc "e"))
-      ~rhs:
-        (eapply (evar "unexpected_exn")
-           [ elocation loc; estring fun_name; evar "e" ])
+      ~rhs:(eapply (evar "unexpected_exn") [ eloc; estring fun_name; evar "e" ])
   in
   pexp_try call (raises @ [ allowed_generic; generic ])
 

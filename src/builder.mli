@@ -18,21 +18,22 @@ val epred : expression -> expression
 
 val esucc : expression -> expression
 
-val failed_pre : string -> Gospel.Tterm.term -> expression
+val failed_pre : string -> expression -> Gospel.Tterm.term -> expression
 
-val failed_post : string -> Gospel.Tterm.term -> expression
+val failed_post : string -> expression -> Gospel.Tterm.term -> expression
 
 val failed_post_nonexec :
-  expression -> string -> Gospel.Tterm.term -> expression
+  expression -> string -> expression -> Gospel.Tterm.term -> expression
 
-val failed_pre_nonexec : expression -> string -> Gospel.Tterm.term -> expression
+val failed_pre_nonexec :
+  expression -> string -> expression -> Gospel.Tterm.term -> expression
 
-val failed_xpost : string -> Gospel.Tterm.term -> expression
+val failed_xpost : string -> expression -> Gospel.Tterm.term -> expression
 
 val failed_xpost_nonexec :
-  expression -> string -> Gospel.Tterm.term -> expression
+  expression -> string -> expression -> Gospel.Tterm.term -> expression
 
-val check_exceptions : location -> string -> expression -> cases -> expression
+val check_exceptions : string -> expression -> expression -> cases -> expression
 (** Builds an AST fragment wrapping an expression in a [try...with].
     [check_exceptions loc fun_name call \[\]] is:
 

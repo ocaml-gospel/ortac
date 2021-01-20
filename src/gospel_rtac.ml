@@ -134,7 +134,7 @@ and term (t : Tterm.term) : expression =
   | Ttrue -> B.ebool true
   | Tfalse -> B.ebool false
 
-let guarded_term fail t =
+let term fail t =
   let exn_alias = gen_symbol ~prefix:"__e" () in
   B.pexp_try (term t)
     [
@@ -144,7 +144,7 @@ let guarded_term fail t =
     ]
 
 let check_term_in name fail_violated fail_nonexec args t =
-  let trywith = guarded_term fail_nonexec t in
+  let trywith = term fail_nonexec t in
   let expr =
     B.pexp_ifthenelse (B.enot trywith) (fail_violated ()) None
     (* if not <trywith> then <B.failed_post fun_name t> *)
@@ -153,23 +153,23 @@ let check_term_in name fail_violated fail_nonexec args t =
   let binding = B.value_binding ~pat:B.(pvar name) ~expr:func in
   B.pexp_let Nonrecursive [ binding ]
 
-let post names fun_name rets posts expr =
+let post names fun_name loc rets posts expr =
   List.fold_right2
     (fun name t exp ->
-      let fail_violated () = B.failed_post fun_name t in
-      let fail_nonexec e = B.failed_post_nonexec e fun_name t in
+      let fail_violated () = B.failed_post fun_name loc t in
+      let fail_nonexec e = B.failed_post_nonexec e fun_name loc t in
       let f =
         check_term_in name fail_violated fail_nonexec [ (Nolabel, rets) ] t
       in
       f exp)
     names posts expr
 
-let pre names loc fun_name args pres expr =
+let pre names loc fun_name eloc args pres expr =
   List.fold_right2
     (fun name (t, check) exp ->
       if check then raise (Unsupported (Some loc, "`check` condition"));
-      let fail_violated () = B.failed_post fun_name t in
-      let fail_nonexec e = B.failed_post_nonexec e fun_name t in
+      let fail_violated () = B.failed_pre fun_name eloc t in
+      let fail_nonexec e = B.failed_pre_nonexec e fun_name eloc t in
       let f = check_term_in name fail_violated fail_nonexec args t in
       f exp)
     names pres expr
@@ -188,7 +188,7 @@ let rec xpost_pattern exn = function
         (xpost_pattern exn p.p_node)
         (B.noloc (str "%a" Tterm.Ident.pp s.vs_name))
 
-let xpost loc fun_name xpost =
+let xpost loc fun_name eloc xpost =
   Ttypes.Mxs.bindings xpost
   |> List.map (fun (exn, pl) ->
          if List.length pl > 1 then
@@ -201,17 +201,16 @@ let xpost loc fun_name xpost =
            let alias = gen_symbol ~prefix:"__e" () in
            List.map
              (fun (p, t) ->
-               let fail_nonexec e = B.failed_post_nonexec e fun_name t in
+               let fail_nonexec e = B.failed_xpost_nonexec e fun_name eloc t in
                B.case ~guard:None
                  ~lhs:
                    (B.ppat_alias
                       (xpost_pattern exn p.Tterm.p_node)
                       (B.noloc alias))
                  ~rhs:
-                   (B.pexp_ifthenelse
-                      (guarded_term fail_nonexec t)
+                   (B.pexp_ifthenelse (term fail_nonexec t)
                       (B.eapply (B.evar "raise") [ B.evar alias ])
-                      (Some (B.failed_xpost fun_name t))))
+                      (Some (B.failed_xpost fun_name eloc t))))
              pl)
   |> List.flatten
 
@@ -253,6 +252,12 @@ let value (val_desc : Tast.val_description) =
     (* Returned pattern *)
     let prets = returned_pattern spec.sp_ret in
     let ret_name = gen_symbol ~prefix:"__ret" () in
+    let loc_name = gen_symbol ~prefix:"__loc" () in
+    let let_loc =
+      B.pexp_let Nonrecursive
+        [ B.value_binding ~pat:(B.pvar loc_name) ~expr:(B.elocation loc) ]
+    in
+    let eloc = B.evar loc_name in
     let pre_names =
       List.init (List.length spec.sp_pre) (fun _ ->
           gen_symbol ~prefix:"__check_pre" ())
@@ -262,10 +267,10 @@ let value (val_desc : Tast.val_description) =
           gen_symbol ~prefix:"__check_post" ())
     in
     let let_posts =
-      post post_names val_desc.vd_name.id_str prets spec.sp_post
+      post post_names val_desc.vd_name.id_str eloc prets spec.sp_post
     in
     let let_pres =
-      pre pre_names loc val_desc.vd_name.id_str pargs spec.sp_pre
+      pre pre_names loc val_desc.vd_name.id_str eloc pargs spec.sp_pre
     in
     let post_checks =
       List.map (fun s -> B.eapply (B.evar s) [ B.evar ret_name ]) post_names
@@ -276,8 +281,8 @@ let value (val_desc : Tast.val_description) =
     in
     let call = B.pexp_apply (B.evar val_desc.vd_name.id_str) eargs in
     let check_raises =
-      let cases = xpost loc val_desc.vd_name.id_str spec.sp_xpost in
-      B.check_exceptions val_desc.vd_loc val_desc.vd_name.id_str call cases
+      let cases = xpost loc val_desc.vd_name.id_str eloc spec.sp_xpost in
+      B.check_exceptions val_desc.vd_name.id_str eloc call cases
     in
     let let_call =
       B.pexp_let Nonrecursive
@@ -285,7 +290,7 @@ let value (val_desc : Tast.val_description) =
     in
     let return = B.evar ret_name in
     let body =
-      B.efun pargs @@ let_posts @@ let_pres
+      B.efun pargs @@ let_loc @@ let_posts @@ let_pres
       @@ B.pexp_sequence pre_checks
            (let_call @@ B.pexp_sequence post_checks return)
     in
