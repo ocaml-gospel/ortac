@@ -1,11 +1,11 @@
 open Ppxlib
 open Gospel
 open Fmt
-module B = Builder
+open Builder
 
 exception Unsupported of Location.t option * string
 
-let lident s = B.noloc (lident s)
+let lident s = noloc (lident s)
 
 let string_of_exp : Tterm.term_node -> Tterm.Ident.t option = function
   | Tvar x -> Some x.vs_name
@@ -19,8 +19,7 @@ let rec array_no_coercion (ls : Tterm.lsymbol) (tlist : Tterm.term list) =
   |> Option.map (fun f ->
          match (List.hd tlist).t_node with
          | Tapp (elts, [ arr ]) when elts.ls_name.id_str = "elts" ->
-             Some
-               (B.eapply (B.evar f) (term arr :: List.map term (List.tl tlist)))
+             Some (eapply (evar f) (term arr :: List.map term (List.tl tlist)))
          | _ -> None)
   |> Option.join
 
@@ -30,9 +29,9 @@ and bounds (t : Tterm.term) : (Tterm.Ident.t * expression * expression) option =
     | "infix >=" -> if right then (Some e, None) else (None, Some e)
     | "infix <=" -> if right then (None, Some e) else (Some e, None)
     | "infix <" ->
-        if right then (None, Some (B.epred e)) else (Some (B.esucc e), None)
+        if right then (None, Some (epred e)) else (Some (esucc e), None)
     | "infix >" ->
-        if right then (Some (B.esucc e), None) else (None, Some (B.epred e))
+        if right then (Some (esucc e), None) else (None, Some (epred e))
     | _ -> (None, None)
   in
   let ( @+ ) a (b, c) = (a, b, c) in
@@ -64,25 +63,21 @@ and bounds (t : Tterm.term) : (Tterm.Ident.t * expression * expression) option =
 and term (t : Tterm.term) : expression =
   let unsupported m = raise (Unsupported (t.t_loc, m)) in
   match t.t_node with
-  | Tvar { vs_name; _ } -> B.evar (str "%a" Identifier.Ident.pp vs_name)
-  | Tconst c -> B.econst c
+  | Tvar { vs_name; _ } -> evar (str "%a" Identifier.Ident.pp vs_name)
+  | Tconst c -> econst c
   | Tapp (ls, tlist) -> (
       match array_no_coercion ls tlist with
       | Some e -> e
       | None -> (
           Drv.find_opt ls.ls_name.id_str |> function
-          | Some f -> B.eapply (B.evar f) (List.map term tlist)
+          | Some f -> eapply (evar f) (List.map term tlist)
           | None ->
               kstr unsupported "function application `%s`" ls.ls_name.id_str))
-  | Tif (i, t, e) ->
-      let i = term i in
-      let t = term t in
-      let e = term e in
-      B.pexp_ifthenelse i t (Some e)
+  | Tif (i, t, e) -> [%expr if [%e term i] then [%e term t] else [%e term e]]
   | Tlet (x, t1, t2) ->
-      B.pexp_let Nonrecursive
-        [ B.value_binding ~pat:(B.pvar x.vs_name.id_str) ~expr:(term t1) ]
-        (term t2)
+      [%expr
+        let [%p pvar x.vs_name.id_str] = [%e term t1] in
+        [%e term t2]]
   | Tcase (_, _) -> unsupported "case filtering"
   | Tquant (quant, _vars, _, t) -> (
       match quant with
@@ -95,10 +90,10 @@ and term (t : Tterm.term) : expression =
               | Some (x, start, stop) ->
                   let t2 = term t2 in
                   let x = str "%a" Identifier.Ident.pp x in
-                  let func = B.pexp_fun Nolabel None (B.pvar x) t2 in
-                  B.eapply (B.evar (str "Z.%s" op)) [ start; stop; func ])
-          | Tterm.Ttrue -> B.ebool true
-          | Tterm.Tfalse -> B.ebool false
+                  let func = pexp_fun Nolabel None (pvar x) t2 in
+                  eapply (evar (str "Z.%s" op)) [ start; stop; func ])
+          | Tterm.Ttrue -> [%expr true]
+          | Tterm.Tfalse -> [%expr false]
           | _ -> unsupported op)
       | Tterm.Tlambda -> unsupported "lambda quantification")
   | Tbinop (op, t1, t2) -> (
@@ -106,58 +101,42 @@ and term (t : Tterm.term) : expression =
       | Tterm.Tand ->
           let vt1 = gen_symbol ~prefix:"__t1" () in
           let vt2 = gen_symbol ~prefix:"__t2" () in
-          B.pexp_let Nonrecursive
-            [ B.value_binding ~pat:(B.pvar vt1) ~expr:(term t1) ]
-            (B.pexp_let Nonrecursive
-               [ B.value_binding ~pat:(B.pvar vt2) ~expr:(term t2) ]
-               (B.eand (B.evar vt1) (B.evar vt2)))
-      | Tterm.Tand_asym -> B.eand (term t1) (term t2)
+          [%expr
+            let [%p pvar vt1] = [%e term t1] in
+            let [%p pvar vt2] = [%e term t2] in
+            [%e evar vt1] && [%e evar vt2]]
+      | Tterm.Tand_asym -> [%expr [%e term t1] && [%e term t2]]
       | Tterm.Tor ->
           let vt1 = gen_symbol ~prefix:"__t1" () in
           let vt2 = gen_symbol ~prefix:"__t2" () in
-          B.pexp_let Nonrecursive
-            [ B.value_binding ~pat:(B.pvar vt1) ~expr:(term t1) ]
-            (B.pexp_let Nonrecursive
-               [ B.value_binding ~pat:(B.pvar vt2) ~expr:(term t2) ]
-               (B.eor (B.evar vt1) (B.evar vt2)))
-      | Tterm.Tor_asym -> B.eor (term t1) (term t2)
-      | Tterm.Timplies ->
-          let t1 = term t1 in
-          let t2 = term t2 in
-          B.pexp_ifthenelse t1 t2 (Some (B.ebool true))
-      | Tterm.Tiff ->
-          let t1 = term t1 in
-          let t2 = term t2 in
-          B.eapply (B.evar "=") [ t1; t2 ])
-  | Tnot t -> B.enot (term t)
+          [%expr
+            let [%p pvar vt1] = [%e term t1] in
+            let [%p pvar vt2] = [%e term t2] in
+            [%e evar vt1] || [%e evar vt2]]
+      | Tterm.Tor_asym -> [%expr [%e term t1] || [%e term t2]]
+      | Tterm.Timplies -> [%expr (not [%e term t1]) || [%e term t2]]
+      | Tterm.Tiff -> [%expr [%e term t1] = [%e term t2]])
+  | Tnot t -> [%expr not [%e term t]]
   | Told _ -> unsupported "old operator"
-  | Ttrue -> B.ebool true
-  | Tfalse -> B.ebool false
+  | Ttrue -> [%expr true]
+  | Tfalse -> [%expr false]
 
-let term fail t =
-  let exn_alias = gen_symbol ~prefix:"__e" () in
-  B.pexp_try (term t)
-    [
-      B.case ~guard:None
-        ~lhs:(B.ppat_alias B.ppat_any (B.noloc exn_alias))
-        ~rhs:(fail (B.evar exn_alias));
-    ]
+let term fail t = [%expr try [%e term t] with _ as e -> [%e fail (evar "e")]]
 
-let check_term_in name fail_violated fail_nonexec args t =
-  let trywith = term fail_nonexec t in
+let check_term_in name fail_violated fail_nonexec args t next =
   let expr =
-    B.pexp_ifthenelse (B.enot trywith) (fail_violated ()) None
-    (* if not <trywith> then <B.failed_post fun_name t> *)
+    [%expr if not [%e term fail_nonexec t] then [%e fail_violated ()]]
   in
-  let func = B.efun args expr in
-  let binding = B.value_binding ~pat:B.(pvar name) ~expr:func in
-  B.pexp_let Nonrecursive [ binding ]
+  let func = efun args expr in
+  [%expr
+    let [%p pvar name] = [%e func] in
+    [%e next]]
 
 let post names fun_name loc rets posts expr =
   List.fold_right2
     (fun name t exp ->
-      let fail_violated () = B.failed_post fun_name loc t in
-      let fail_nonexec e = B.failed_post_nonexec e fun_name loc t in
+      let fail_violated () = failed_post fun_name loc t in
+      let fail_nonexec e = failed_post_nonexec e fun_name loc t in
       let f =
         check_term_in name fail_violated fail_nonexec [ (Nolabel, rets) ] t
       in
@@ -168,25 +147,25 @@ let pre names loc fun_name eloc args pres expr =
   List.fold_right2
     (fun name (t, check) exp ->
       if check then raise (Unsupported (Some loc, "`check` condition"));
-      let fail_violated () = B.failed_pre fun_name eloc t in
-      let fail_nonexec e = B.failed_pre_nonexec e fun_name eloc t in
+      let fail_violated () = failed_pre fun_name eloc t in
+      let fail_nonexec e = failed_pre_nonexec e fun_name eloc t in
       let f = check_term_in name fail_violated fail_nonexec args t in
       f exp)
     names pres expr
 
 let rec xpost_pattern exn = function
-  | Tterm.Pwild -> B.ppat_construct (lident exn) (Some B.ppat_any)
+  | Tterm.Pwild -> ppat_construct (lident exn) (Some ppat_any)
   | Tterm.Pvar x ->
-      B.ppat_construct (lident exn)
-        (Some (B.ppat_var (B.noloc (str "%a" Tterm.Ident.pp x.vs_name))))
-  | Tterm.Papp (ls, []) when Tterm.(ls_equal ls (fs_tuple 0)) -> B.pvar exn
+      ppat_construct (lident exn)
+        (Some (ppat_var (noloc (str "%a" Tterm.Ident.pp x.vs_name))))
+  | Tterm.Papp (ls, []) when Tterm.(ls_equal ls (fs_tuple 0)) -> pvar exn
   | Tterm.Papp (_ls, _l) -> assert false
   | Tterm.Por (p1, p2) ->
-      B.ppat_or (xpost_pattern exn p1.p_node) (xpost_pattern exn p2.p_node)
+      ppat_or (xpost_pattern exn p1.p_node) (xpost_pattern exn p2.p_node)
   | Tterm.Pas (p, s) ->
-      B.ppat_alias
+      ppat_alias
         (xpost_pattern exn p.p_node)
-        (B.noloc (str "%a" Tterm.Ident.pp s.vs_name))
+        (noloc (str "%a" Tterm.Ident.pp s.vs_name))
 
 let xpost_guard _loc fun_name eloc xpost call =
   let module M = Map.Make (struct
@@ -196,24 +175,16 @@ let xpost_guard _loc fun_name eloc xpost call =
   end) in
   let default_cases =
     [
-      B.case ~guard:None
-        ~lhs:
-          (B.ppat_alias
-             (B.ppat_or
-                (B.ppat_var (B.noloc "Out_of_memory"))
-                (B.ppat_var (B.noloc "Stack_overflow")))
-             (B.noloc "e"))
-        ~rhs:(B.eapply (B.evar "raise") [ B.evar "e" ]);
-      B.case ~guard:None
-        ~lhs:(B.ppat_alias B.ppat_any (B.noloc "e"))
-        ~rhs:
-          (B.eapply (B.evar "unexpected_exn")
-             [ eloc; B.estring fun_name; B.evar "e" ]);
+      case ~guard:None
+        ~lhs:[%pat? (Out_of_memory | Stack_overflow) as e]
+        ~rhs:[%expr raise e];
+      case ~guard:None
+        ~lhs:[%pat? _ as e]
+        ~rhs:[%expr unexpected_exn [%e eloc] [%e estring fun_name] e];
     ]
   in
   let assert_false_case =
-    B.case ~guard:None ~lhs:B.ppat_any
-      ~rhs:(B.eapply (B.evar "assert") [ B.ebool false ])
+    case ~guard:None ~lhs:[%pat? _] ~rhs:[%expr assert false]
   in
   List.fold_left
     (fun map (exn, ptlist) ->
@@ -221,14 +192,13 @@ let xpost_guard _loc fun_name eloc xpost call =
       let cases =
         List.rev_map
           (fun (p, t) ->
-            let fail_nonexec e = B.failed_xpost_nonexec e fun_name eloc t in
-            B.case ~guard:None
+            let fail_nonexec e = failed_xpost_nonexec e fun_name eloc t in
+            case ~guard:None
               ~lhs:(xpost_pattern name p.Tterm.p_node)
               ~rhs:
-                (B.pexp_ifthenelse
-                   (B.enot (term fail_nonexec t))
-                   (B.failed_xpost fun_name eloc t)
-                   None))
+                [%expr
+                  if not [%e term fail_nonexec t] then
+                    [%e failed_post fun_name eloc t]])
           ptlist
         @ [ assert_false_case ]
       in
@@ -243,19 +213,19 @@ let xpost_guard _loc fun_name eloc xpost call =
       let has_args = exn.Ttypes.xs_type <> Ttypes.Exn_tuple [] in
       let alias = gen_symbol ~prefix:"__e" () in
       let rhs =
-        B.pexp_sequence
-          (List.map (B.pexp_match (B.evar alias)) cases |> B.esequence)
-          (B.eapply (B.evar "raise") [ B.evar alias ])
+        [%expr
+          [%e List.map (pexp_match (evar alias)) cases |> esequence];
+          raise [%e evar alias]]
       in
       let lhs =
-        B.ppat_alias
-          (B.ppat_construct (lident name)
-             (if has_args then Some B.ppat_any else None))
-          (B.noloc alias)
+        ppat_alias
+          (ppat_construct (lident name)
+             (if has_args then Some ppat_any else None))
+          (noloc alias)
       in
-      B.case ~guard:None ~lhs ~rhs :: acc)
+      case ~guard:None ~lhs ~rhs :: acc)
     cases default_cases
-  |> B.pexp_try call
+  |> pexp_try call
 
 let of_gospel_args args =
   let to_string x = str "%a" Tast.Ident.pp x.Tterm.vs_name in
@@ -264,13 +234,13 @@ let of_gospel_args args =
       match arg with
       | Tast.Lnone x ->
           let s = to_string x in
-          ((Nolabel, B.evar s) :: eargs, (Nolabel, B.pvar s) :: pargs)
+          ((Nolabel, evar s) :: eargs, (Nolabel, pvar s) :: pargs)
       | Tast.Lquestion x ->
           let s = to_string x in
-          ((Optional s, B.evar s) :: eargs, (Nolabel, B.pvar s) :: pargs)
+          ((Optional s, evar s) :: eargs, (Nolabel, pvar s) :: pargs)
       | Tast.Lnamed x ->
           let s = to_string x in
-          ((Labelled s, B.evar s) :: eargs, (Labelled s, B.pvar s) :: pargs)
+          ((Labelled s, evar s) :: eargs, (Labelled s, pvar s) :: pargs)
       | Tast.Lghost _ -> (eargs, pargs))
     args ([], [])
 
@@ -278,11 +248,11 @@ let returned_pattern rets =
   let to_string x = str "%a" Tast.Ident.pp x.Tterm.vs_name in
   List.filter_map
     (function
-      | Tast.Lnone x -> Some (B.pvar (to_string x))
+      | Tast.Lnone x -> Some (pvar (to_string x))
       | Tast.Lghost _ -> None
       | Tast.Lquestion _ | Tast.Lnamed _ -> assert false)
     rets
-  |> B.ppat_tuple
+  |> ppat_tuple
 
 let value (val_desc : Tast.val_description) =
   let process (spec : Tast.val_spec) =
@@ -296,11 +266,12 @@ let value (val_desc : Tast.val_description) =
     let prets = returned_pattern spec.sp_ret in
     let ret_name = gen_symbol ~prefix:"__ret" () in
     let loc_name = gen_symbol ~prefix:"__loc" () in
-    let let_loc =
-      B.pexp_let Nonrecursive
-        [ B.value_binding ~pat:(B.pvar loc_name) ~expr:(B.elocation loc) ]
+    let let_loc next =
+      [%expr
+        let [%p pvar loc_name] = [%e elocation loc] in
+        [%e next]]
     in
-    let eloc = B.evar loc_name in
+    let eloc = evar loc_name in
     let pre_names =
       List.init (List.length spec.sp_pre) (fun _ ->
           gen_symbol ~prefix:"__check_pre" ())
@@ -316,28 +287,27 @@ let value (val_desc : Tast.val_description) =
       pre pre_names loc val_desc.vd_name.id_str eloc pargs spec.sp_pre
     in
     let post_checks =
-      List.map (fun s -> B.eapply (B.evar s) [ B.evar ret_name ]) post_names
-      |> B.esequence
+      List.map (fun s -> eapply (evar s) [ evar ret_name ]) post_names
+      |> esequence
     in
     let pre_checks =
-      List.map (fun s -> B.pexp_apply (B.evar s) eargs) pre_names |> B.esequence
+      List.map (fun s -> pexp_apply (evar s) eargs) pre_names |> esequence
     in
-    let call = B.pexp_apply (B.evar val_desc.vd_name.id_str) eargs in
+    let call = pexp_apply (evar val_desc.vd_name.id_str) eargs in
     let check_raises =
       xpost_guard loc val_desc.vd_name.id_str eloc spec.sp_xpost call
     in
-    let let_call =
-      B.pexp_let Nonrecursive
-        [ B.value_binding ~pat:(B.pvar ret_name) ~expr:check_raises ]
+    let let_call next =
+      [%expr
+        let [%p pvar ret_name] = [%e check_raises] in
+        [%e next]]
     in
-    let return = B.evar ret_name in
+    let return = evar ret_name in
     let body =
-      B.efun pargs @@ let_loc @@ let_posts @@ let_pres
-      @@ B.pexp_sequence pre_checks
-           (let_call @@ B.pexp_sequence post_checks return)
+      efun pargs @@ let_loc @@ let_posts @@ let_pres
+      @@ pexp_sequence pre_checks (let_call @@ pexp_sequence post_checks return)
     in
-    B.pstr_value Nonrecursive
-      [ B.value_binding ~pat:(B.pvar val_desc.vd_name.id_str) ~expr:body ]
+    [%stri let [%p pvar val_desc.vd_name.id_str] = [%e body]]
   in
   Option.map process val_desc.vd_spec
 
@@ -364,14 +334,9 @@ let main path =
   let ast = Parser_frontend.parse_ocaml_gospel path in
   let tast = type_check [] path ast in
   try
-    let open_runtime =
-      B.open_infos
-        ~expr:(B.pmod_ident (lident "Gospel_runtime"))
-        ~override:Fresh
-      |> B.pstr_open
-    in
+    let open_runtime = [%stri open Gospel_runtime] in
     let include_lib =
-      B.pmod_ident (lident module_name) |> B.include_infos |> B.pstr_include
+      pmod_ident (lident module_name) |> include_infos |> pstr_include
     in
     let declarations = signature tast in
     open_runtime :: include_lib :: declarations |> Pprintast.structure stdout
