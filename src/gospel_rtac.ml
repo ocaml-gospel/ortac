@@ -188,31 +188,74 @@ let rec xpost_pattern exn = function
         (xpost_pattern exn p.p_node)
         (B.noloc (str "%a" Tterm.Ident.pp s.vs_name))
 
-let xpost loc fun_name eloc xpost =
-  Ttypes.Mxs.bindings xpost
-  |> List.map (fun (exn, pl) ->
-         if List.length pl > 1 then
-           raise
-             (Unsupported
-                ( Some loc,
-                  "multiple exception patterns with the same constructor" ))
-         else
-           let exn = exn.Ttypes.xs_ident.id_str in
-           let alias = gen_symbol ~prefix:"__e" () in
-           List.map
-             (fun (p, t) ->
-               let fail_nonexec e = B.failed_xpost_nonexec e fun_name eloc t in
-               B.case ~guard:None
-                 ~lhs:
-                   (B.ppat_alias
-                      (xpost_pattern exn p.Tterm.p_node)
-                      (B.noloc alias))
-                 ~rhs:
-                   (B.pexp_ifthenelse (term fail_nonexec t)
-                      (B.eapply (B.evar "raise") [ B.evar alias ])
-                      (Some (B.failed_xpost fun_name eloc t))))
-             pl)
-  |> List.flatten
+let xpost_guard _loc fun_name eloc xpost call =
+  let module M = Map.Make (struct
+    type t = Ttypes.xsymbol
+
+    let compare = compare
+  end) in
+  let default_cases =
+    [
+      B.case ~guard:None
+        ~lhs:
+          (B.ppat_alias
+             (B.ppat_or
+                (B.ppat_var (B.noloc "Out_of_memory"))
+                (B.ppat_var (B.noloc "Stack_overflow")))
+             (B.noloc "e"))
+        ~rhs:(B.eapply (B.evar "raise") [ B.evar "e" ]);
+      B.case ~guard:None
+        ~lhs:(B.ppat_alias B.ppat_any (B.noloc "e"))
+        ~rhs:
+          (B.eapply (B.evar "unexpected_exn")
+             [ eloc; B.estring fun_name; B.evar "e" ]);
+    ]
+  in
+  let assert_false_case =
+    B.case ~guard:None ~lhs:B.ppat_any
+      ~rhs:(B.eapply (B.evar "assert") [ B.ebool false ])
+  in
+  List.fold_left
+    (fun map (exn, ptlist) ->
+      let name = exn.Ttypes.xs_ident.id_str in
+      let cases =
+        List.rev_map
+          (fun (p, t) ->
+            let fail_nonexec e = B.failed_xpost_nonexec e fun_name eloc t in
+            B.case ~guard:None
+              ~lhs:(xpost_pattern name p.Tterm.p_node)
+              ~rhs:
+                (B.pexp_ifthenelse
+                   (B.enot (term fail_nonexec t))
+                   (B.failed_xpost fun_name eloc t)
+                   None))
+          ptlist
+        @ [ assert_false_case ]
+      in
+      M.update exn
+        (function None -> Some [ cases ] | Some e -> Some (cases :: e))
+        map)
+    M.empty xpost
+  |> fun cases ->
+  M.fold
+    (fun exn cases acc ->
+      let name = exn.Ttypes.xs_ident.id_str in
+      let has_args = exn.Ttypes.xs_type <> Ttypes.Exn_tuple [] in
+      let alias = gen_symbol ~prefix:"__e" () in
+      let rhs =
+        B.pexp_sequence
+          (List.map (B.pexp_match (B.evar alias)) cases |> B.esequence)
+          (B.eapply (B.evar "raise") [ B.evar alias ])
+      in
+      let lhs =
+        B.ppat_alias
+          (B.ppat_construct (lident name)
+             (if has_args then Some B.ppat_any else None))
+          (B.noloc alias)
+      in
+      B.case ~guard:None ~lhs ~rhs :: acc)
+    cases default_cases
+  |> B.pexp_try call
 
 let of_gospel_args args =
   let to_string x = str "%a" Tast.Ident.pp x.Tterm.vs_name in
@@ -281,9 +324,12 @@ let value (val_desc : Tast.val_description) =
     in
     let call = B.pexp_apply (B.evar val_desc.vd_name.id_str) eargs in
     let check_raises =
-      let cases = xpost loc val_desc.vd_name.id_str eloc spec.sp_xpost in
-      B.check_exceptions val_desc.vd_name.id_str eloc call cases
+      xpost_guard loc val_desc.vd_name.id_str eloc spec.sp_xpost call
     in
+    (* let check_raises =
+     *   let cases = xpost loc val_desc.vd_name.id_str eloc spec.sp_xpost in
+     *   B.check_exceptions val_desc.vd_name.id_str eloc call cases
+     * in *)
     let let_call =
       B.pexp_let Nonrecursive
         [ B.value_binding ~pat:(B.pvar ret_name) ~expr:check_raises ]

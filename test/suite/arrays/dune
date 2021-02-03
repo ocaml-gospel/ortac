@@ -12,5 +12,5 @@
 
 (test
  (name client)
- (flags :standard -w -27)
+ (flags :standard -w -27-11)
  (libraries fmt ppxlib gospel-runtime))

@@ -16,4 +16,5 @@ val raise_notfound : int -> int
 val raise_invalidarg : string -> int
   [@@gospel
     {| o = raise_invalidarg i
-       raises Invalid_argument s -> i = s |}]
+       raises Invalid_argument s -> i = s | Invalid_argument _ -> false
+       raises Invalid_argument _ -> true |}]

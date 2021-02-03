@@ -24,7 +24,7 @@ val bad_get : 'a array -> int -> 'a
 
 val set : 'a array -> int -> 'a -> unit
   [@@gospel
-    {| o = set arr i v
+    {| set arr i v
     requires 0 <= i < length arr
     ensures  arr[i] = v
     (*
@@ -34,6 +34,6 @@ val set : 'a array -> int -> 'a -> unit
 
 val fill : 'a array -> int -> int -> 'a -> unit
   [@@gospel
-    {| o = fill arr ofs len v
+    {| fill arr ofs len v
        requires 0 <= ofs <= ofs + len <= length arr
        ensures  forall j. ofs <= j < ofs + len -> arr[j] = v |}]
