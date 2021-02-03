@@ -326,10 +326,6 @@ let value (val_desc : Tast.val_description) =
     let check_raises =
       xpost_guard loc val_desc.vd_name.id_str eloc spec.sp_xpost call
     in
-    (* let check_raises =
-     *   let cases = xpost loc val_desc.vd_name.id_str eloc spec.sp_xpost in
-     *   B.check_exceptions val_desc.vd_name.id_str eloc call cases
-     * in *)
     let let_call =
       B.pexp_let Nonrecursive
         [ B.value_binding ~pat:(B.pvar ret_name) ~expr:check_raises ]
@@ -382,13 +378,9 @@ let main path =
   with
   | Unsupported (loc, msg) ->
       let open Fmt in
-      let loc = Option.value ~default:Location.none loc in
-      let pp_loc = (fun ppf () -> Location.print ppf loc) |> styled `Bold in
-      let pp_details ppf () =
-        pf ppf "%a: unsupported %s" (styled `Red string) "Error" msg
-      in
-      epr "%a%a@\n" pp_loc () pp_details ();
-      exit 1
+      Location.raise_errorf ?loc "%a: unsupported %s"
+        (styled `Red string)
+        "Error" msg
   | e -> raise e
 
 (* Error reporting *)
