@@ -65,6 +65,8 @@ and term (t : Tterm.term) : expression =
   match t.t_node with
   | Tvar { vs_name; _ } -> evar (str "%a" Identifier.Ident.pp vs_name)
   | Tconst c -> econst c
+  | Tapp (fs, []) when Tterm.(ls_equal fs fs_bool_true) -> [%expr true]
+  | Tapp (fs, []) when Tterm.(ls_equal fs fs_bool_false) -> [%expr false]
   | Tapp (ls, tlist) -> (
       match array_no_coercion ls tlist with
       | Some e -> e
@@ -75,8 +77,9 @@ and term (t : Tterm.term) : expression =
               kstr unsupported "function application `%s`" ls.ls_name.id_str))
   | Tif (i, t, e) -> [%expr if [%e term i] then [%e term t] else [%e term e]]
   | Tlet (x, t1, t2) ->
+      let x = str "%a" Identifier.Ident.pp x.vs_name in
       [%expr
-        let [%p pvar x.vs_name.id_str] = [%e term t1] in
+        let [%p pvar x] = [%e term t1] in
         [%e term t2]]
   | Tcase (_, _) -> unsupported "case filtering"
   | Tquant (quant, _vars, _, t) -> (
