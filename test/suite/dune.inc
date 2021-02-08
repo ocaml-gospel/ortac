@@ -1,9 +1,14 @@
 (rule
+ (target lib.mli.pp)
+ (action (with-outputs-to %{target}
+          (run gospel_pps %{dep:lib.mli}))))
+
+(rule
  (target lib_rtac.ml)
  (action
   (with-stdout-to
     %{target}
-   (run gospel_rtac %{dep:lib.mli}))))
+   (run gospel_rtac %{dep:lib.mli.pp}))))
 
 (rule
  (target lib_rtac.mli)

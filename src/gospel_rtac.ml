@@ -321,7 +321,8 @@ let signature =
       | _ -> None)
 
 let module_name_of_path p =
-  Filename.basename p |> Filename.chop_extension |> String.capitalize_ascii
+  let filename = Filename.basename p in
+  String.index filename '.' |> String.sub filename 0 |> String.capitalize_ascii
 
 let type_check load_path name sigs =
   let md = Tmodule.init_muc name in
@@ -344,29 +345,10 @@ let main path =
     let declarations = signature tast in
     open_runtime :: include_lib :: declarations |> Pprintast.structure stdout
   with
-  | Unsupported (loc, msg) ->
+  | Unsupported (_loc, msg) ->
       let open Fmt in
-      Location.raise_errorf ?loc "%a: unsupported %s"
-        (styled `Red string)
-        "Error" msg
+      epr "%a: unsupported %s" (styled `Red string) "Error" msg
   | e -> raise e
-
-(* Error reporting *)
-
-let colour_of_kind = function
-  | `Ok -> `Green
-  | `Error -> `Red
-  | `Warning -> `Yellow
-
-let string_of_kind = function
-  | `Ok -> "Success"
-  | `Error -> "Error"
-  | `Warning -> "Warning"
-
-let _pp_kind ppf kind =
-  let colour = colour_of_kind kind in
-  let msg = string_of_kind kind in
-  (styled colour string) ppf msg
 
 (* Command line interface *)
 
@@ -376,7 +358,7 @@ let ocaml_file =
   let parse s =
     match Sys.file_exists s with
     | true ->
-        if Sys.is_directory s || Filename.extension s <> ".mli" then
+        if Sys.is_directory s (* || Filename.extension s <> ".mli" *) then
           `Error (Printf.sprintf "Error: `%s' is not an OCaml interface file" s)
         else `Ok s
     | false -> `Error (Printf.sprintf "Error: `%s' not found" s)
