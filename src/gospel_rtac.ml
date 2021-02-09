@@ -126,35 +126,25 @@ and term (t : Tterm.term) : expression =
 
 let term fail t = [%expr try [%e term t] with _ as e -> [%e fail (evar "e")]]
 
-let check_term_in name fail_violated fail_nonexec args t next =
-  let expr =
-    [%expr if not [%e term fail_nonexec t] then [%e fail_violated ()]]
-  in
-  let func = efun args expr in
-  [%expr
-    let [%p pvar name] = [%e func] in
-    [%e next]]
+let post (fun_name : string) (eloc : expression) (posts : Tterm.term list) :
+    expression =
+  List.map
+    (fun t ->
+      let fail_violated () = failed_post fun_name eloc t in
+      let fail_nonexec e = failed_post_nonexec e fun_name eloc t in
+      [%expr if not [%e term fail_nonexec t] then [%e fail_violated ()]])
+    posts
+  |> esequence
 
-let post names fun_name loc rets posts expr =
-  List.fold_right2
-    (fun name t exp ->
-      let fail_violated () = failed_post fun_name loc t in
-      let fail_nonexec e = failed_post_nonexec e fun_name loc t in
-      let f =
-        check_term_in name fail_violated fail_nonexec [ (Nolabel, rets) ] t
-      in
-      f exp)
-    names posts expr
-
-let pre names loc fun_name eloc args pres expr =
-  List.fold_right2
-    (fun name (t, check) exp ->
+let pre loc fun_name eloc pres =
+  List.map
+    (fun (t, check) ->
       if check then raise (Unsupported (Some loc, "`check` condition"));
       let fail_violated () = failed_pre fun_name eloc t in
       let fail_nonexec e = failed_pre_nonexec e fun_name eloc t in
-      let f = check_term_in name fail_violated fail_nonexec args t in
-      f exp)
-    names pres expr
+      [%expr if not [%e term fail_nonexec t] then [%e fail_violated ()]])
+    pres
+  |> esequence
 
 let rec xpost_pattern exn = function
   | Tterm.Pwild -> ppat_construct (lident exn) (Some ppat_any)
@@ -246,13 +236,18 @@ let of_gospel_args args =
 
 let returned_pattern rets =
   let to_string x = str "%a" Tast.Ident.pp x.Tterm.vs_name in
-  List.filter_map
-    (function
-      | Tast.Lnone x -> Some (pvar (to_string x))
-      | Tast.Lghost _ -> None
-      | Tast.Lquestion _ | Tast.Lnamed _ -> assert false)
-    rets
-  |> ppat_tuple
+  let pvars, evars =
+    List.filter_map
+      (function
+        | Tast.Lnone x ->
+            let s = to_string x in
+            Some (pvar s, evar s)
+        | Tast.Lghost _ -> None
+        | Tast.Lquestion _ | Tast.Lnamed _ -> assert false)
+      rets
+    |> List.split
+  in
+  (ppat_tuple pvars, pexp_tuple evars)
 
 let value (val_desc : Tast.val_description) =
   let process (spec : Tast.val_spec) =
@@ -263,8 +258,7 @@ let value (val_desc : Tast.val_description) =
     (* Arguments *)
     let eargs, pargs = of_gospel_args spec.sp_args in
     (* Returned pattern *)
-    let prets = returned_pattern spec.sp_ret in
-    let ret_name = gen_symbol ~prefix:"__ret" () in
+    let ret_pat, ret_expr = returned_pattern spec.sp_ret in
     let loc_name = gen_symbol ~prefix:"__loc" () in
     let let_loc next =
       [%expr
@@ -272,40 +266,21 @@ let value (val_desc : Tast.val_description) =
         [%e next]]
     in
     let eloc = evar loc_name in
-    let pre_names =
-      List.init (List.length spec.sp_pre) (fun _ ->
-          gen_symbol ~prefix:"__check_pre" ())
-    in
-    let post_names =
-      List.init (List.length spec.sp_post) (fun _ ->
-          gen_symbol ~prefix:"__check_post" ())
-    in
-    let let_posts =
-      post post_names val_desc.vd_name.id_str eloc prets spec.sp_post
-    in
-    let let_pres =
-      pre pre_names loc val_desc.vd_name.id_str eloc pargs spec.sp_pre
-    in
-    let post_checks =
-      List.map (fun s -> eapply (evar s) [ evar ret_name ]) post_names
-      |> esequence
-    in
-    let pre_checks =
-      List.map (fun s -> pexp_apply (evar s) eargs) pre_names |> esequence
-    in
+    let post_checks = post val_desc.vd_name.id_str eloc spec.sp_post in
+    let pre_checks = pre loc val_desc.vd_name.id_str eloc spec.sp_pre in
     let call = pexp_apply (evar val_desc.vd_name.id_str) eargs in
     let check_raises =
       xpost_guard loc val_desc.vd_name.id_str eloc spec.sp_xpost call
     in
     let let_call next =
       [%expr
-        let [%p pvar ret_name] = [%e check_raises] in
+        let [%p ret_pat] = [%e check_raises] in
         [%e next]]
     in
-    let return = evar ret_name in
     let body =
-      efun pargs @@ let_loc @@ let_posts @@ let_pres
-      @@ pexp_sequence pre_checks (let_call @@ pexp_sequence post_checks return)
+      efun pargs @@ let_loc
+      @@ pexp_sequence pre_checks
+           (let_call @@ pexp_sequence post_checks ret_expr)
     in
     [%stri let [%p pvar val_desc.vd_name.id_str] = [%e body]]
   in
