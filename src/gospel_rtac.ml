@@ -124,27 +124,29 @@ and term (t : Tterm.term) : expression =
   | Ttrue -> [%expr true]
   | Tfalse -> [%expr false]
 
-let term fail t = [%expr try [%e term t] with _ as e -> [%e fail (evar "e")]]
+let term fail t = [%expr try [%e term t] with e -> [%e fail (evar "e")]]
 
-let post (fun_name : string) (eloc : expression) (posts : Tterm.term list) :
-    expression =
+let conditions fail_violated fail_nonexec terms =
   List.map
     (fun t ->
-      let fail_violated () = failed_post fun_name eloc t in
-      let fail_nonexec e = failed_post_nonexec e fun_name eloc t in
-      [%expr if not [%e term fail_nonexec t] then [%e fail_violated ()]])
-    posts
+      [%expr if not [%e term (fail_nonexec t) t] then [%e fail_violated t]])
+    terms
   |> esequence
 
+let post fun_name eloc =
+  let fail_violated t = failed_post fun_name eloc t in
+  let fail_nonexec t e = failed_post_nonexec e fun_name eloc t in
+  conditions fail_violated fail_nonexec
+
 let pre loc fun_name eloc pres =
+  let fail_violated t = failed_pre fun_name eloc t in
+  let fail_nonexec t e = failed_pre_nonexec e fun_name eloc t in
   List.map
     (fun (t, check) ->
       if check then raise (Unsupported (Some loc, "`check` condition"));
-      let fail_violated () = failed_pre fun_name eloc t in
-      let fail_nonexec e = failed_pre_nonexec e fun_name eloc t in
-      [%expr if not [%e term fail_nonexec t] then [%e fail_violated ()]])
+      t)
     pres
-  |> esequence
+  |> conditions fail_violated fail_nonexec
 
 let rec xpost_pattern exn = function
   | Tterm.Pwild -> ppat_construct (lident exn) (Some ppat_any)
@@ -169,7 +171,7 @@ let xpost_guard _loc fun_name eloc xpost call =
   let default_cases =
     [
       case ~guard:None
-        ~lhs:[%pat? _ as e]
+        ~lhs:[%pat? e]
         ~rhs:[%expr unexpected_exn [%e eloc] [%e estring fun_name] e];
     ]
   in
