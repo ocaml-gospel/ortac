@@ -72,8 +72,9 @@ let runtime_exn loc fun_name term exn =
 let violated loc fun_name term =
   error (Condition { loc; fun_name; term; error_kind = Violated })
 
-let unexpected_exn loc fun_name exn =
-  error (Unexpected_exception { loc; fun_name; exn })
+let unexpected_exn loc fun_name = function
+  | (Out_of_memory | Stack_overflow) as e -> raise e
+  | exn -> error (Unexpected_exception { loc; fun_name; exn })
 
 module Z = struct
   include Z

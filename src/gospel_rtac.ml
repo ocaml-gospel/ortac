@@ -179,9 +179,6 @@ let xpost_guard _loc fun_name eloc xpost call =
   let default_cases =
     [
       case ~guard:None
-        ~lhs:[%pat? (Out_of_memory | Stack_overflow) as e]
-        ~rhs:[%expr raise e];
-      case ~guard:None
         ~lhs:[%pat? _ as e]
         ~rhs:[%expr unexpected_exn [%e eloc] [%e estring fun_name] e];
     ]
