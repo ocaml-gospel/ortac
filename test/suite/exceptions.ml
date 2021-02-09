@@ -29,6 +29,8 @@ let suite =
     [
       ("bad_raise_notfound", `Quick, bad_raise_notfound);
       ("undeclared_raise_notfound", `Quick, undeclared_raise_notfound);
+      ("raise_notfound", `Quick, raise_notfound);
+      ("allowed exceptions", `Quick, raise_std);
       ("raise_invalidarg", `Quick, raise_invalidarg);
       ("bad_raise_notfound", `Quick, bad_raise_notfound);
     ] )

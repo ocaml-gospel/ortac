@@ -17,4 +17,8 @@ let logic () =
 
 let suite =
   ( "Terms",
-    [ ("boolean operators", `Quick, bool_ops); ("scopes", `Quick, scopes) ] )
+    [
+      ("boolean operators", `Quick, bool_ops);
+      ("scopes", `Quick, scopes);
+      ("logic", `Quick, logic);
+    ] )

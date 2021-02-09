@@ -37,6 +37,7 @@ let suite =
     [
       ("get out of range", `Quick, bad_get_oor);
       ("get wrong value", `Quick, bad_get_wrong_value);
+      ("create wrong value", `Quick, bad_create);
       ("correct implementations", `Quick, normal);
       ("create with wrong arguments", `Quick, create);
     ] )
