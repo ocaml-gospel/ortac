@@ -31,8 +31,9 @@ depends: [
   "fmt"
   "ppxlib" {>= "0.20.0"}
   "gospel"
+  "alcotest" {with-test}
   "gospel-runtime" {with-test}
 ]
 pin-depends: [
-  [ "gospel.dev" "git+https://github.com/pascutto/gospel#baf32b200fedf4c4450c538cef8ccbec607f51ee" ]
+  [ "gospel.dev" "git+https://github.com/ocaml-gospel/gospel#608eb80fbbc66425b853da591117482e23e744c9" ]
 ]

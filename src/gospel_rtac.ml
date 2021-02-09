@@ -229,6 +229,7 @@ let of_gospel_args args =
   List.fold_right
     (fun arg (eargs, pargs) ->
       match arg with
+      | Tast.Lunit -> ((Nolabel, eunit) :: eargs, (Nolabel, punit) :: pargs)
       | Tast.Lnone x ->
           let s = to_string x in
           ((Nolabel, evar s) :: eargs, (Nolabel, pvar s) :: pargs)
@@ -246,6 +247,7 @@ let returned_pattern rets =
   let pvars, evars =
     List.filter_map
       (function
+        | Tast.Lunit -> Some (punit, eunit)
         | Tast.Lnone x ->
             let s = to_string x in
             Some (pvar s, evar s)

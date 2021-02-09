@@ -19,3 +19,17 @@ val scope1 : int -> int
 (*@ y = scope1 x
     requires let x = true in x
     ensures  let y = true in y *)
+
+(* Terms and formulas *)
+
+val if_forall : int -> int
+(*@ y = if_forall x
+    requires if forall i. 0 <= i < 10 -> x <> i then x = 10 else x = 3 *)
+
+val equiv : unit -> unit
+(*@ equiv ()
+    ensures (1 = 2) <-> (2 = 3) *)
+
+val exists_ : unit -> unit
+(*@ exists_ ()
+    ensures exists x. 0 <= x < 10 /\ x = 3 *)
