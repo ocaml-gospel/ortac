@@ -14,8 +14,3 @@
  (target lib_rtac.mli)
  (action
   (copy %{dep:lib.mli} %{target})))
-
-(test
- (name client)
- (flags :standard -w -27-11)
- (libraries fmt ppxlib gospel-runtime))

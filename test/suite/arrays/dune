@@ -1,1 +1,6 @@
-(include ../dune.inc)
+(library
+ (name arrays)
+ (flags :standard -w -27-11)
+ (libraries ppxlib gospel-runtime))
+
+(include ../dune.common)
