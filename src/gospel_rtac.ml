@@ -85,19 +85,24 @@ and term (t : Tterm.term) : expression =
   | Tquant (quant, _vars, _, t) -> (
       match quant with
       | Tterm.Tforall | Tterm.Texists -> (
-          let op = if quant = Tforall then "forall" else "exists" in
+          let z_op = if quant = Tforall then "forall" else "exists" in
+          let gospel_op = function
+            | Tterm.Timplies -> quant = Tforall
+            | Tterm.Tand | Tand_asym -> quant = Texists
+            | _ -> false
+          in
           match t.t_node with
-          | Tbinop (Timplies, t1, t2) -> (
+          | Tbinop (op, t1, t2) when gospel_op op -> (
               bounds t1 |> function
-              | None -> unsupported "forall"
+              | None -> unsupported "forall/exists"
               | Some (x, start, stop) ->
                   let t2 = term t2 in
                   let x = str "%a" Identifier.Ident.pp x in
                   let func = pexp_fun Nolabel None (pvar x) t2 in
-                  eapply (evar (str "Z.%s" op)) [ start; stop; func ])
+                  eapply (evar (str "Z.%s" z_op)) [ start; stop; func ])
           | Tterm.Ttrue -> [%expr true]
           | Tterm.Tfalse -> [%expr false]
-          | _ -> unsupported op)
+          | _ -> unsupported z_op)
       | Tterm.Tlambda -> unsupported "lambda quantification")
   | Tbinop (op, t1, t2) -> (
       match op with
