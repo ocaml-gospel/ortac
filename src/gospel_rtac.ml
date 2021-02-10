@@ -88,7 +88,7 @@ and term (t : Tterm.term) : expression =
           Drv.find_opt func |> function
           | Some f -> eapply (evar f) (List.map term tlist)
           | None ->
-              if String.capitalize_ascii func = func then
+              if ls.ls_constr then
                 (if tlist = [] then None
                 else Some (List.map term tlist |> pexp_tuple))
                 |> pexp_construct (lident func)
