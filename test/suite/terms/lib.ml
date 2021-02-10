@@ -11,3 +11,9 @@ let if_forall x = x
 let equiv () = ()
 
 let exists_ () = ()
+
+type t = A | B of string
+
+let a = ignore
+
+let b = ignore

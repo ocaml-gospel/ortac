@@ -33,3 +33,20 @@ val equiv : unit -> unit
 val exists_ : unit -> unit
 (*@ exists_ ()
     ensures exists x. 0 <= x < 10 /\ x = 3 *)
+
+(* Pattern matching *)
+
+type t = A | B of string
+
+val a : t -> unit
+(*@ a x
+    requires match x with
+            | A -> true
+            | B s -> false
+    requires x = A *)
+
+val b : t -> unit
+(*@ b x
+    requires match x with
+            | A -> false
+            | B _ -> true *)

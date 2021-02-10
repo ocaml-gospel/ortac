@@ -11,6 +11,19 @@ let string_of_exp : Tterm.term_node -> Tterm.Ident.t option = function
   | Tvar x -> Some x.vs_name
   | _ -> None
 
+let rec pattern p =
+  match p.Tterm.p_node with
+  | Tterm.Pwild -> ppat_any
+  | Tterm.Pvar v -> pvar (str "%a" Identifier.Ident.pp v.vs_name)
+  | Tterm.Papp (l, pl) ->
+      let args =
+        if pl = [] then None else Some (ppat_tuple (List.map pattern pl))
+      in
+      ppat_construct (lident l.ls_name.id_str) args
+  | Tterm.Por (p1, p2) -> ppat_or (pattern p1) (pattern p2)
+  | Tterm.Pas (p, v) ->
+      ppat_alias (pattern p) (noloc (str "%a" Identifier.Ident.pp v.vs_name))
+
 let rec array_no_coercion (ls : Tterm.lsymbol) (tlist : Tterm.term list) =
   (match ls.ls_name.id_str with
   | "mixfix [_]" -> Some "Array.get"
@@ -71,17 +84,26 @@ and term (t : Tterm.term) : expression =
       match array_no_coercion ls tlist with
       | Some e -> e
       | None -> (
-          Drv.find_opt ls.ls_name.id_str |> function
+          let func = ls.ls_name.id_str in
+          Drv.find_opt func |> function
           | Some f -> eapply (evar f) (List.map term tlist)
           | None ->
-              kstr unsupported "function application `%s`" ls.ls_name.id_str))
+              if String.capitalize_ascii func = func then
+                (if tlist = [] then None
+                else Some (List.map term tlist |> pexp_tuple))
+                |> pexp_construct (lident func)
+              else kstr unsupported "function application `%s`" func))
   | Tif (i, t, e) -> [%expr if [%e term i] then [%e term t] else [%e term e]]
   | Tlet (x, t1, t2) ->
       let x = str "%a" Identifier.Ident.pp x.vs_name in
       [%expr
         let [%p pvar x] = [%e term t1] in
         [%e term t2]]
-  | Tcase (_, _) -> unsupported "case filtering"
+  | Tcase (t, ptl) ->
+      List.map
+        (fun (p, t) -> case ~guard:None ~lhs:(pattern p) ~rhs:(term t))
+        ptl
+      |> pexp_match (term t)
   | Tquant (quant, _vars, _, t) -> (
       match quant with
       | Tterm.Tforall | Tterm.Texists -> (
