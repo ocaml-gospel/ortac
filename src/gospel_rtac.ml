@@ -15,6 +15,8 @@ let rec pattern p =
   match p.Tterm.p_node with
   | Tterm.Pwild -> ppat_any
   | Tterm.Pvar v -> pvar (str "%a" Identifier.Ident.pp v.vs_name)
+  | Tterm.Papp (l, pl) when Tterm.is_fs_tuple l ->
+      ppat_tuple (List.map pattern pl)
   | Tterm.Papp (l, pl) ->
       let args =
         if pl = [] then None else Some (ppat_tuple (List.map pattern pl))
@@ -80,6 +82,8 @@ and term (t : Tterm.term) : expression =
   | Tconst c -> econst c
   | Tapp (fs, []) when Tterm.(ls_equal fs fs_bool_true) -> [%expr true]
   | Tapp (fs, []) when Tterm.(ls_equal fs fs_bool_false) -> [%expr false]
+  | Tapp (fs, tlist) when Tterm.is_fs_tuple fs ->
+      List.map term tlist |> pexp_tuple
   | Tapp (ls, tlist) -> (
       match array_no_coercion ls tlist with
       | Some e -> e
