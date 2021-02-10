@@ -21,6 +21,19 @@ let patterns () =
   check_raises_gospel "invalid match" (fun () -> a (B "hello"));
   check_raises_gospel "invalid match with arguments" (fun () -> b A)
 
+let peano () =
+  check_success "succ" (fun () -> succ O |> ignore);
+  check_success "add" (fun () -> add O (S O) |> ignore);
+  check_raises_gospel "bad_add" (fun () -> bad_add O (S O) |> ignore)
+
+let trees () =
+  let t = check_success "make_tree" (fun () -> make_tree E 42 E) in
+  check_raises_gospel "test_tree" (fun () -> test_tree t |> ignore);
+  check_success "make_alt_tree" (fun () -> make_alt_tree Ealt 42 Ealt |> ignore);
+  check_success "fill 1" (fun () -> fill E [||] 0 |> ignore);
+  check_raises_gospel "fill 2" (fun () -> fill E [||] 1 |> ignore);
+  check_success "fill 3" (fun () -> fill (N (E, 42, E)) [| 0; 1 |] 1 |> ignore)
+
 let suite =
   ( "Terms",
     [
@@ -28,4 +41,6 @@ let suite =
       ("scopes", `Quick, scopes);
       ("logic", `Quick, logic);
       ("patterns", `Quick, patterns);
+      ("peano", `Quick, peano);
+      ("trees", `Quick, trees);
     ] )
