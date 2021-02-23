@@ -169,15 +169,10 @@ let post fun_name eloc =
   let fail_nonexec t e = failed_post_nonexec e fun_name eloc t in
   conditions fail_violated fail_nonexec
 
-let pre loc fun_name eloc pres =
+let pre fun_name eloc pres =
   let fail_violated t = failed_pre fun_name eloc t in
   let fail_nonexec t e = failed_pre_nonexec e fun_name eloc t in
-  List.map
-    (fun (t, check) ->
-      if check then raise (Unsupported (Some loc, "`check` condition"));
-      t)
-    pres
-  |> conditions fail_violated fail_nonexec
+  conditions fail_violated fail_nonexec pres
 
 let rec xpost_pattern exn = function
   | Tterm.Pwild -> ppat_construct (lident exn) (Some ppat_any)
@@ -302,7 +297,7 @@ let value (val_desc : Tast.val_description) =
     in
     let eloc = evar loc_name in
     let post_checks = post val_desc.vd_name.id_str eloc spec.sp_post in
-    let pre_checks = pre loc val_desc.vd_name.id_str eloc spec.sp_pre in
+    let pre_checks = pre val_desc.vd_name.id_str eloc spec.sp_pre in
     let call = pexp_apply (evar val_desc.vd_name.id_str) eargs in
     let check_raises =
       xpost_guard loc val_desc.vd_name.id_str eloc spec.sp_xpost call
