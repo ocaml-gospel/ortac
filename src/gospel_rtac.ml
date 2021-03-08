@@ -38,7 +38,8 @@ let rec array_no_coercion (ls : Tterm.lsymbol) (tlist : Tterm.term list) =
          | _ -> None)
   |> Option.join
 
-and bounds (t : Tterm.term) : (Tterm.Ident.t * expression * expression) option =
+and bounds (var : Tterm.vsymbol) (t : Tterm.term) :
+    (Tterm.Ident.t * expression * expression) option =
   let comb ~right (f : Tterm.lsymbol) e =
     match f.ls_name.id_str with
     | "infix >=" -> if right then (Some e, None) else (None, Some e)
@@ -55,13 +56,13 @@ and bounds (t : Tterm.term) : (Tterm.Ident.t * expression * expression) option =
         let sx1 = string_of_exp x1.t_node in
         let sx2 = string_of_exp x2.t_node in
         match (sx1, sx2) with
-        | Some _, Some _ | None, None -> (None, None, None)
-        | sx1, None ->
+        | Some sx1, _ when sx1 = var.vs_name ->
             let e2 = term x2 in
-            sx1 @+ comb ~right:true f e2
-        | None, sx2 ->
+            Some sx1 @+ comb ~right:true f e2
+        | _, Some sx2 when sx2 = var.vs_name ->
             let e1 = term x1 in
-            sx2 @+ comb ~right:false f e1)
+            Some sx2 @+ comb ~right:false f e1
+        | _, _ -> (None, None, None))
     | _ -> (None, None, None)
   in
   match t.t_node with
@@ -69,7 +70,7 @@ and bounds (t : Tterm.term) : (Tterm.Ident.t * expression * expression) option =
       match (bound t1.t_node, bound t2.t_node) with
       | (Some x, None, Some eupper), (Some x', Some elower, None)
       | (Some x, Some elower, None), (Some x', None, Some eupper)
-        when x = x' ->
+        when x = x' && x = var.vs_name ->
           Some (x, elower, eupper)
       | _, _ -> None
       | exception Unsupported _ -> None)
@@ -108,7 +109,7 @@ and term (t : Tterm.term) : expression =
         (fun (p, t) -> case ~guard:None ~lhs:(pattern p) ~rhs:(term t))
         ptl
       |> pexp_match (term t)
-  | Tquant (quant, _vars, _, t) -> (
+  | Tquant (quant, [ var ], _, t) -> (
       match quant with
       | Tterm.Tforall | Tterm.Texists -> (
           let z_op = if quant = Tforall then "forall" else "exists" in
@@ -119,7 +120,7 @@ and term (t : Tterm.term) : expression =
           in
           match t.t_node with
           | Tbinop (op, t1, t2) when gospel_op op -> (
-              bounds t1 |> function
+              bounds var t1 |> function
               | None -> unsupported "forall/exists"
               | Some (x, start, stop) ->
                   let t2 = term t2 in
@@ -130,6 +131,7 @@ and term (t : Tterm.term) : expression =
           | Tterm.Tfalse -> [%expr false]
           | _ -> unsupported z_op)
       | Tterm.Tlambda -> unsupported "lambda quantification")
+  | Tquant (_, _, _, _) -> unsupported "forall/exists with multiple variables"
   | Tbinop (op, t1, t2) -> (
       match op with
       | Tterm.Tand ->
