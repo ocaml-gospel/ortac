@@ -18,3 +18,5 @@ let copy_sort a =
   b
 
 let bad_sort _ = [| 314; 42; 73; 57; 421 |]
+
+let constant_sort a = create (Array.length a) 42

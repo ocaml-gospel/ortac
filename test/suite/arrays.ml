@@ -40,6 +40,11 @@ let bad_sort_fails () =
       let arr = create 10 0 in
       bad_sort arr |> ignore)
 
+let constant_sort_fails () =
+  check_raises_gospel
+    "constant_sort returns arrays with rigth length but wrong values" (fun () ->
+      constant_sort [| 314; 42; 73; 57; 421 |] |> ignore)
+
 let create () =
   check_raises_gospel "create with negative length" (fun () ->
       create (-10) 0 |> ignore)
@@ -55,4 +60,5 @@ let suite =
       ("sort is correct", `Quick, sort_success);
       ("copy sort is correct", `Quick, copy_sort_success);
       ("bad sort is wrong", `Quick, bad_sort_fails);
+      ("constant sort is wrong", `Quick, constant_sort_fails);
     ] )

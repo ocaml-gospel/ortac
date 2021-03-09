@@ -43,7 +43,11 @@ val copy_sort : int array -> int array
     ensures length r = length a
     ensures forall i. 0 <= i < length r
             -> forall j. i < j < length r
-            -> r[i] <= r[j] *)
+            -> r[i] <= r[j] 
+    ensures forall i. 0 <= i < length r
+            -> exists j. 0 <= j < length a /\ r[i] = a[j]
+    ensures forall i. 0 <= i < length a
+            -> exists j. 0 <= j < length r /\ a[i] = r[j] *)
 
 val bad_sort : int array -> int array
 (*@ r = bad_sort a
@@ -51,3 +55,14 @@ val bad_sort : int array -> int array
             -> forall j. i < j < length r
             -> r[i] <= r[j] *)
 
+val constant_sort : int array -> int array
+(*@ r = constant_sort a
+    ensures length r = length a
+    ensures forall i. 0 <= i < length r
+            -> forall j. i < j < length r
+            -> r[i] <= r[j] 
+    ensures forall i. 0 <= i < length r
+            -> exists j. 0 <= j < length a /\ r[i] = a[j]
+    ensures forall i. 0 <= i < length a
+            -> exists j. 0 <= j < length r /\ a[i] = r[j] *)
+    
