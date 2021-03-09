@@ -31,3 +31,23 @@ val fill : 'a array -> int -> int -> 'a -> unit
 (*@ fill arr ofs len v
     requires 0 <= ofs <= ofs + len <= length arr
     ensures  forall j. ofs <= j < ofs + len -> arr[j] = v *)
+
+val sort : int array -> unit
+(*@ sort a
+    ensures forall i. 0 <= i < length a
+            -> forall j. i < j < length a
+            -> a[i] <= a[j] *)
+
+val copy_sort : int array -> int array
+(*@ r = copy_sort a
+    ensures length r = length a
+    ensures forall i. 0 <= i < length r
+            -> forall j. i < j < length r
+            -> r[i] <= r[j] *)
+
+val bad_sort : int array -> int array
+(*@ r = bad_sort a
+    ensures forall i. 0 <= i < length r
+            -> forall j. i < j < length r
+            -> r[i] <= r[j] *)
+
