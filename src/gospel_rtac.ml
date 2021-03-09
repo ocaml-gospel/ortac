@@ -7,10 +7,6 @@ exception Unsupported of Location.t option * string
 
 let lident s = noloc (lident s)
 
-let string_of_exp : Tterm.term_node -> Tterm.Ident.t option = function
-  | Tvar x -> Some x.vs_name
-  | _ -> None
-
 let rec pattern p =
   match p.Tterm.p_node with
   | Tterm.Pwild -> ppat_any
@@ -39,7 +35,9 @@ let rec array_no_coercion (ls : Tterm.lsymbol) (tlist : Tterm.term list) =
   |> Option.join
 
 and bounds (var : Tterm.vsymbol) (t : Tterm.term) :
-    (Tterm.Ident.t * expression * expression) option =
+    (expression * expression) option =
+  (** [comb] extracts a bound from an the operator [f] and expression [e].
+      [right] indicates if [e] is on the right side of the operator. *)
   let comb ~right (f : Tterm.lsymbol) e =
     match f.ls_name.id_str with
     | "infix >=" -> if right then (Some e, None) else (None, Some e)
@@ -50,28 +48,26 @@ and bounds (var : Tterm.vsymbol) (t : Tterm.term) :
         if right then (Some (esucc e), None) else (None, Some (epred e))
     | _ -> (None, None)
   in
-  let ( @+ ) a (b, c) = (a, b, c) in
   let bound = function
     | Tterm.Tapp (f, [ x1; x2 ]) -> (
-        let sx1 = string_of_exp x1.t_node in
-        let sx2 = string_of_exp x2.t_node in
-        match (sx1, sx2) with
-        | Some sx1, _ when sx1 = var.vs_name ->
+        match (x1, x2) with
+        | { Tterm.t_node = Tvar { vs_name; _ }; _ }, _
+          when vs_name = var.vs_name ->
             let e2 = term x2 in
-            Some sx1 @+ comb ~right:true f e2
-        | _, Some sx2 when sx2 = var.vs_name ->
+            comb ~right:true f e2
+        | _, { Tterm.t_node = Tvar { vs_name; _ }; _ }
+          when vs_name = var.vs_name ->
             let e1 = term x1 in
-            Some sx2 @+ comb ~right:false f e1
-        | _, _ -> (None, None, None))
-    | _ -> (None, None, None)
+            comb ~right:false f e1
+        | _, _ -> (None, None))
+    | _ -> (None, None)
   in
   match t.t_node with
   | Tbinop (Tand, t1, t2) -> (
       match (bound t1.t_node, bound t2.t_node) with
-      | (Some x, None, Some eupper), (Some x', Some elower, None)
-      | (Some x, Some elower, None), (Some x', None, Some eupper)
-        when x = x' && x = var.vs_name ->
-          Some (x, elower, eupper)
+      | (None, Some eupper), (Some elower, None)
+      | (Some elower, None), (None, Some eupper) ->
+          Some (elower, eupper)
       | _, _ -> None
       | exception Unsupported _ -> None)
   | _ -> None
@@ -122,9 +118,9 @@ and term (t : Tterm.term) : expression =
           | Tbinop (op, t1, t2) when gospel_op op -> (
               bounds var t1 |> function
               | None -> unsupported "forall/exists"
-              | Some (x, start, stop) ->
+              | Some (start, stop) ->
                   let t2 = term t2 in
-                  let x = str "%a" Identifier.Ident.pp x in
+                  let x = str "%a" Identifier.Ident.pp var.vs_name in
                   let func = pexp_fun Nolabel None (pvar x) t2 in
                   eapply (evar (str "Z.%s" z_op)) [ start; stop; func ])
           | Tterm.Ttrue -> [%expr true]
