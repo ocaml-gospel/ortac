@@ -28,6 +28,23 @@ let normal () =
       let _ = get arr 3 in
       fill arr 3 7 1729)
 
+let sort_success () =
+  check_success "sort array of int" (fun () -> sort [| 314; 42; 73; 57; 421 |])
+
+let copy_sort_success () =
+  check_success "copy_sort array of int" (fun () ->
+      copy_sort [| 314; 42; 73; 57; 421 |] |> ignore)
+
+let bad_sort_fails () =
+  check_raises_gospel "bad_sort returns always the same array" (fun () ->
+      let arr = create 10 0 in
+      bad_sort arr |> ignore)
+
+let constant_sort_fails () =
+  check_raises_gospel
+    "constant_sort returns arrays with rigth length but wrong values" (fun () ->
+      constant_sort [| 314; 42; 73; 57; 421 |] |> ignore)
+
 let create () =
   check_raises_gospel "create with negative length" (fun () ->
       create (-10) 0 |> ignore)
@@ -40,4 +57,8 @@ let suite =
       ("create wrong value", `Quick, bad_create);
       ("correct implementations", `Quick, normal);
       ("create with wrong arguments", `Quick, create);
+      ("sort is correct", `Quick, sort_success);
+      ("copy sort is correct", `Quick, copy_sort_success);
+      ("bad sort is wrong", `Quick, bad_sort_fails);
+      ("constant sort is wrong", `Quick, constant_sort_fails);
     ] )
