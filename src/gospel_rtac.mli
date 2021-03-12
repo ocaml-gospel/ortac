@@ -1,1 +1,1 @@
-(* Left empty on purpose. *)
+val main : string -> Gospel.Tast.signature -> Ppxlib.structure

@@ -1,6 +1,6 @@
-(executable
- (public_name gospel_rtac)
- (package gospel-rtac)
+(library
+ (name gospel_rtac)
+ (public_name gospel-rtac)
  (preprocess
   (pps ppxlib.metaquot))
- (libraries cmdliner fmt gospel ppxlib ppxlib.ast))
+ (libraries fmt gospel ppxlib))

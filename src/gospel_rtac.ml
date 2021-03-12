@@ -320,56 +320,16 @@ let signature =
       | Sig_val (decl, _ghost) -> value decl
       | _ -> None)
 
-let module_name_of_path p =
-  let filename = Filename.basename p in
-  String.index filename '.' |> String.sub filename 0 |> String.capitalize_ascii
-
-let type_check load_path name sigs =
-  let md = Tmodule.init_muc name in
-  let penv =
-    module_name_of_path name |> Utils.Sstr.singleton |> Typing.penv load_path
-  in
-  List.fold_left (Typing.type_sig_item penv) md sigs |> Tmodule.wrap_up_muc
-  |> fun file -> file.fl_sigs
-
-let main path =
-  set_style_renderer stderr `Ansi_tty;
-  let module_name = module_name_of_path path in
-  let ast = Parser_frontend.parse_ocaml_gospel path in
-  let tast = type_check [] path ast in
+let main module_name s =
   try
     let open_runtime = [%stri open Gospel_runtime] in
     let include_lib =
       pmod_ident (lident module_name) |> include_infos |> pstr_include
     in
-    let declarations = signature tast in
-    open_runtime :: include_lib :: declarations |> Pprintast.structure stdout
+    let declarations = signature s in
+    open_runtime :: include_lib :: declarations
   with
   | Unsupported (_loc, msg) ->
       let open Fmt in
-      epr "%a: unsupported %s" (styled `Red string) "Error" msg
+      failwith "%a: unsupported %s" (styled `Red string) "Error" msg
   | e -> raise e
-
-(* Command line interface *)
-
-open Cmdliner
-
-let ocaml_file =
-  let parse s =
-    match Sys.file_exists s with
-    | true ->
-        if Sys.is_directory s (* || Filename.extension s <> ".mli" *) then
-          `Error (Printf.sprintf "Error: `%s' is not an OCaml interface file" s)
-        else `Ok s
-    | false -> `Error (Printf.sprintf "Error: `%s' not found" s)
-  in
-  Arg.(
-    required
-    & pos 0 (some (parse, Format.pp_print_string)) None
-    & info [] ~docv:"FILE")
-
-let cmd =
-  let doc = "Run GOSPEL-RTAC." in
-  (Term.(const main $ ocaml_file), Term.info "gospel-rtac" ~doc)
-
-let () = Term.(exit @@ eval cmd)
