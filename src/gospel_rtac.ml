@@ -252,7 +252,7 @@ let of_gospel_args args =
       | Tast.Lnone x ->
           let s = to_string x in
           ((Nolabel, evar s) :: eargs, (Nolabel, pvar s) :: pargs)
-      | Tast.Lquestion x ->
+      | Tast.Loptional x ->
           let s = to_string x in
           ((Optional s, evar s) :: eargs, (Nolabel, pvar s) :: pargs)
       | Tast.Lnamed x ->
@@ -271,7 +271,7 @@ let returned_pattern rets =
             let s = to_string x in
             Some (pvar s, evar s)
         | Tast.Lghost _ -> None
-        | Tast.Lquestion _ | Tast.Lnamed _ -> assert false)
+        | Tast.Loptional _ | Tast.Lnamed _ -> assert false)
       rets
     |> List.split
   in
