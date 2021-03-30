@@ -12,19 +12,40 @@ val epred : expression -> expression
 
 val esucc : expression -> expression
 
-val failed_pre : string -> expression -> Gospel.Tterm.term -> expression
+val failed_pre :
+  string -> string -> expression -> Gospel.Tterm.term -> expression
 
-val failed_post : string -> expression -> Gospel.Tterm.term -> expression
+val failed_post :
+  string -> string -> expression -> Gospel.Tterm.term -> expression
+
+(* val build_failed_post :
+ *   string -> string -> expression -> Gospel.Tterm.term -> expression *)
 
 val failed_post_nonexec :
-  expression -> string -> expression -> Gospel.Tterm.term -> expression
+  string ->
+  expression ->
+  string ->
+  expression ->
+  Gospel.Tterm.term ->
+  expression
 
 val failed_pre_nonexec :
-  expression -> string -> expression -> Gospel.Tterm.term -> expression
+  string ->
+  expression ->
+  string ->
+  expression ->
+  Gospel.Tterm.term ->
+  expression
 
-val failed_xpost : string -> expression -> Gospel.Tterm.term -> expression
+val failed_xpost :
+  string -> string -> expression -> Gospel.Tterm.term -> expression
 
 val failed_xpost_nonexec :
-  expression -> string -> expression -> Gospel.Tterm.term -> expression
+  string ->
+  expression ->
+  string ->
+  expression ->
+  Gospel.Tterm.term ->
+  expression
 
 val efun : (arg_label * pattern) list -> expression -> expression

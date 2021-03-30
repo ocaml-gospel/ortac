@@ -162,14 +162,14 @@ let conditions fail_violated fail_nonexec terms =
     terms
   |> esequence
 
-let post fun_name eloc =
-  let fail_violated t = failed_post fun_name eloc t in
-  let fail_nonexec t e = failed_post_nonexec e fun_name eloc t in
+let post acc_name fun_name eloc =
+  let fail_violated t = failed_post acc_name fun_name eloc t in
+  let fail_nonexec t e = failed_post_nonexec acc_name e fun_name eloc t in
   conditions fail_violated fail_nonexec
 
-let pre fun_name eloc pres =
-  let fail_violated t = failed_pre fun_name eloc t in
-  let fail_nonexec t e = failed_pre_nonexec e fun_name eloc t in
+let pre acc_name fun_name eloc pres =
+  let fail_violated t = failed_pre acc_name fun_name eloc t in
+  let fail_nonexec t e = failed_pre_nonexec acc_name e fun_name eloc t in
   conditions fail_violated fail_nonexec pres
 
 let rec xpost_pattern exn = function
@@ -186,7 +186,7 @@ let rec xpost_pattern exn = function
         (xpost_pattern exn p.p_node)
         (noloc (str "%a" Tterm.Ident.pp s.vs_name))
 
-let xpost_guard _loc fun_name eloc xpost call =
+let xpost_guard acc_name _loc fun_name eloc xpost call =
   let module M = Map.Make (struct
     type t = Ttypes.xsymbol
 
@@ -196,7 +196,12 @@ let xpost_guard _loc fun_name eloc xpost call =
     [
       case ~guard:None
         ~lhs:[%pat? e]
-        ~rhs:[%expr unexpected_exn [%e eloc] [%e estring fun_name] e];
+        ~rhs:[%expr
+              let err = mk_unexpected_exception [%e eloc] [%e estring fun_name] e  in
+                  store err [%e evar acc_name];
+                  report_all [%e evar acc_name];
+                  raise (Error ![%e evar acc_name]);
+        ];
     ]
   in
   let assert_false_case =
@@ -208,13 +213,13 @@ let xpost_guard _loc fun_name eloc xpost call =
       let cases =
         List.rev_map
           (fun (p, t) ->
-            let fail_nonexec e = failed_xpost_nonexec e fun_name eloc t in
+            let fail_nonexec e = failed_xpost_nonexec acc_name e fun_name eloc t in
             case ~guard:None
               ~lhs:(xpost_pattern name p.Tterm.p_node)
               ~rhs:
                 [%expr
                   if not [%e term fail_nonexec t] then
-                    [%e failed_post fun_name eloc t]])
+                    [%e failed_post acc_name fun_name eloc t]])
           ptlist
         @ [ assert_false_case ]
       in
@@ -231,7 +236,9 @@ let xpost_guard _loc fun_name eloc xpost call =
       let rhs =
         [%expr
           [%e List.map (pexp_match (evar alias)) cases |> esequence];
-          raise [%e evar alias]]
+         check_and_report [%e evar acc_name];
+         raise [%e evar alias];
+        ]
       in
       let lhs =
         ppat_alias
@@ -294,21 +301,32 @@ let value (val_desc : Tast.val_description) =
         [%e next]]
     in
     let eloc = evar loc_name in
-    let post_checks = post val_desc.vd_name.id_str eloc spec.sp_post in
-    let pre_checks = pre val_desc.vd_name.id_str eloc spec.sp_pre in
+    let acc_name = gen_symbol ~prefix:"__acc" () in    
+    let post_checks = post acc_name val_desc.vd_name.id_str eloc spec.sp_post in
+    let pre_checks = pre acc_name val_desc.vd_name.id_str eloc spec.sp_pre in
     let call = pexp_apply (evar val_desc.vd_name.id_str) eargs in
     let check_raises =
-      xpost_guard loc val_desc.vd_name.id_str eloc spec.sp_xpost call
+      xpost_guard acc_name loc val_desc.vd_name.id_str eloc spec.sp_xpost call
     in
     let let_call next =
       [%expr
         let [%p ret_pat] = [%e check_raises] in
         [%e next]]
     in
+    let let_acc next =
+      [%expr
+       let [%p pvar acc_name] = ref [] in
+           [%e next]]
+    in
+    let rep_expr next =
+      [%expr
+          check_and_report [%e evar acc_name]; [%e next]
+      ]
+    in
     let body =
-      efun pargs @@ let_loc
-      @@ pexp_sequence pre_checks
-           (let_call @@ pexp_sequence post_checks ret_expr)
+      efun pargs @@ let_acc @@ let_loc
+      @@ pexp_sequence pre_checks @@ rep_expr @@
+           (let_call @@ pexp_sequence post_checks (rep_expr @@ ret_expr))
     in
     [%stri let [%p pvar val_desc.vd_name.id_str] = [%e body]]
   in

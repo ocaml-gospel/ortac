@@ -17,6 +17,16 @@ type error =
       exn : exn;
     }
 
+let mk_condition loc fun_name term error_kind =
+  Condition { loc; fun_name; term; error_kind }
+
+let mk_unexpected_exception loc fun_name = function
+  | (Out_of_memory | Stack_overflow) as e -> raise e  
+  | exn -> Unexpected_exception { loc; fun_name; exn }
+
+let store err log =
+  log := err :: !log
+  
 let styled_list l pp = List.fold_left (fun acc x -> styled x acc) pp l
 
 let pp_kind ppf = function
@@ -62,19 +72,28 @@ let report ppf = function
         (styled `Bold string)
         (Printexc.to_string exn)
 
-exception Error of error
+exception Error of error list
 
 let error e = raise (Error e)
 
+let check_and_report log =
+  match !log with
+  | [] -> ()
+  | xs ->
+      List.iter (report Fmt.stderr) xs;
+      error xs
+
+let report_all log = List.iter (report Fmt.stderr) !log
+
 let runtime_exn loc fun_name term exn =
-  error (Condition { loc; fun_name; term; error_kind = RuntimeExn exn })
+  error [ Condition { loc; fun_name; term; error_kind = RuntimeExn exn } ]
 
 let violated loc fun_name term =
-  error (Condition { loc; fun_name; term; error_kind = Violated })
+  error [ Condition { loc; fun_name; term; error_kind = Violated } ]
 
 let unexpected_exn loc fun_name = function
   | (Out_of_memory | Stack_overflow) as e -> raise e
-  | exn -> error (Unexpected_exception { loc; fun_name; exn })
+  | exn -> error [ Unexpected_exception { loc; fun_name; exn } ]
 
 module Z = struct
   include Z
