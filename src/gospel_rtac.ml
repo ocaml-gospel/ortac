@@ -36,8 +36,8 @@ let rec array_no_coercion (ls : Tterm.lsymbol) (tlist : Tterm.term list) =
 
 and bounds (var : Tterm.vsymbol) (t : Tterm.term) :
     (expression * expression) option =
-  (** [comb] extracts a bound from an the operator [f] and expression [e].
-      [right] indicates if [e] is on the right side of the operator. *)
+  (* [comb] extracts a bound from an the operator [f] and expression [e].
+     [right] indicates if [e] is on the right side of the operator. *)
   let comb ~right (f : Tterm.lsymbol) e =
     match f.ls_name.id_str with
     | "infix >=" -> if right then (Some e, None) else (None, Some e)
