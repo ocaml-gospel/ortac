@@ -49,13 +49,18 @@ let failed error_kind term_kind acc_name fun_name (eloc : expression) term :
   match error_kind with
   | `Violated ->
       [%expr
-       let err = mk_condition [%e eloc] [%e estring fun_name] [%e term] Violated in
-           store err [%e evar acc_name];]
+        let err =
+          mk_condition [%e eloc] [%e estring fun_name] [%e term] Violated
+        in
+        Errors.register err [%e evar acc_name]]
   | `RuntimeExn e ->
       [%expr
-       let err = mk_unexpected_exception [%e eloc] [%e estring fun_name] [%e e] in
-           store err [%e evar acc_name];
-           true]
+        let err =
+          mk_condition [%e eloc] [%e estring fun_name] [%e term]
+            (RuntimeExn [%e e])
+        in
+        Errors.register err [%e evar acc_name];
+        true]
 
 let failed_pre = failed `Violated `Pre
 

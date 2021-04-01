@@ -19,21 +19,21 @@ val mk_condition : Ppxlib.location -> string -> term -> error_kind -> error
 
 val mk_unexpected_exception : Ppxlib.location -> string -> exn -> error
 
-val store : error -> error list ref -> unit
-
-val report : Format.formatter -> error -> unit
-
-val check_and_report : error list ref -> unit
-
-val report_all : error list ref -> unit
-
 exception Error of error list
 
-val runtime_exn : Ppxlib.location -> string -> term -> exn -> 'a
+module Errors : sig
+  type t
 
-val violated : Ppxlib.location -> string -> term -> 'a
+  val empty : unit -> t
+  (** [empty] create a new empty error container *)
 
-val unexpected_exn : Ppxlib.location -> string -> exn -> 'a
+  val register : error -> t -> unit
+  (** [register a l] add the element [a] to [l] *)
+
+  val check_and_report : t -> unit
+  (** [check_and_report l] reports the errors logged in [l] and raises them if
+      any *)
+end
 
 module Z : sig
   include module type of Z

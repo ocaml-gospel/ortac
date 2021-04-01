@@ -18,9 +18,6 @@ val failed_pre :
 val failed_post :
   string -> string -> expression -> Gospel.Tterm.term -> expression
 
-(* val build_failed_post :
- *   string -> string -> expression -> Gospel.Tterm.term -> expression *)
-
 val failed_post_nonexec :
   string ->
   expression ->

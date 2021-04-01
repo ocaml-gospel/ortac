@@ -196,12 +196,15 @@ let xpost_guard acc_name _loc fun_name eloc xpost call =
     [
       case ~guard:None
         ~lhs:[%pat? e]
-        ~rhs:[%expr
-              let err = mk_unexpected_exception [%e eloc] [%e estring fun_name] e  in
-                  store err [%e evar acc_name];
-                  report_all [%e evar acc_name];
-                  raise (Error ![%e evar acc_name]);
-        ];
+        ~rhs:
+          [%expr
+            let err =
+              mk_unexpected_exception [%e eloc] [%e estring fun_name] e
+            in
+            Errors.register err [%e evar acc_name];
+            Errors.check_and_report [%e evar acc_name];
+            (* Here for typechecking reason *)
+            failwith "This portion of code shouldn't be accessible"];
     ]
   in
   let assert_false_case =
@@ -213,7 +216,9 @@ let xpost_guard acc_name _loc fun_name eloc xpost call =
       let cases =
         List.rev_map
           (fun (p, t) ->
-            let fail_nonexec e = failed_xpost_nonexec acc_name e fun_name eloc t in
+            let fail_nonexec e =
+              failed_xpost_nonexec acc_name e fun_name eloc t
+            in
             case ~guard:None
               ~lhs:(xpost_pattern name p.Tterm.p_node)
               ~rhs:
@@ -236,9 +241,8 @@ let xpost_guard acc_name _loc fun_name eloc xpost call =
       let rhs =
         [%expr
           [%e List.map (pexp_match (evar alias)) cases |> esequence];
-         check_and_report [%e evar acc_name];
-         raise [%e evar alias];
-        ]
+          Errors.check_and_report [%e evar acc_name];
+          raise [%e evar alias]]
       in
       let lhs =
         ppat_alias
@@ -301,7 +305,7 @@ let value (val_desc : Tast.val_description) =
         [%e next]]
     in
     let eloc = evar loc_name in
-    let acc_name = gen_symbol ~prefix:"__acc" () in    
+    let acc_name = gen_symbol ~prefix:"__acc" () in
     let post_checks = post acc_name val_desc.vd_name.id_str eloc spec.sp_post in
     let pre_checks = pre acc_name val_desc.vd_name.id_str eloc spec.sp_pre in
     let call = pexp_apply (evar val_desc.vd_name.id_str) eargs in
@@ -315,18 +319,15 @@ let value (val_desc : Tast.val_description) =
     in
     let let_acc next =
       [%expr
-       let [%p pvar acc_name] = ref [] in
-           [%e next]]
+        let [%p pvar acc_name] = Errors.empty () in
+        [%e next]]
     in
-    let rep_expr next =
-      [%expr
-          check_and_report [%e evar acc_name]; [%e next]
-      ]
-    in
+    let rep_expr = [%expr Errors.check_and_report [%e evar acc_name]] in
     let body =
-      efun pargs @@ let_acc @@ let_loc
-      @@ pexp_sequence pre_checks @@ rep_expr @@
-           (let_call @@ pexp_sequence post_checks (rep_expr @@ ret_expr))
+      efun pargs @@ let_acc @@ let_loc @@ pexp_sequence pre_checks
+      @@ pexp_sequence rep_expr
+           (let_call @@ pexp_sequence post_checks
+           @@ pexp_sequence rep_expr ret_expr)
     in
     [%stri let [%p pvar val_desc.vd_name.id_str] = [%e body]]
   in
