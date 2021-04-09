@@ -1,6 +1,25 @@
 open Ppxlib
 open Gospel
 open Builder
+open Fmt
+
+let of_gospel_args args =
+  let to_string x = str "%a" Tast.Ident.pp x.Tterm.vs_name in
+  List.fold_right
+    (fun arg (eargs, pargs) ->
+      match arg with
+      | Tast.Lunit -> ((Nolabel, eunit) :: eargs, (Nolabel, punit) :: pargs)
+      | Tast.Lnone x ->
+          let s = to_string x in
+          ((Nolabel, evar s) :: eargs, (Nolabel, pvar s) :: pargs)
+      | Tast.Loptional x ->
+          let s = to_string x in
+          ((Optional s, evar s) :: eargs, (Nolabel, pvar s) :: pargs)
+      | Tast.Lnamed x ->
+          let s = to_string x in
+          ((Labelled s, evar s) :: eargs, (Labelled s, pvar s) :: pargs)
+      | Tast.Lghost _ -> (eargs, pargs))
+    args ([], [])
 
 let value (val_desc : Tast.val_description) =
   let process (spec : Tast.val_spec) =
@@ -8,40 +27,25 @@ let value (val_desc : Tast.val_description) =
     let loc = val_desc.vd_loc in
     if List.length spec.sp_args = 0 then
       raise (Unsupported (Some loc, "non-function value"));
+    let setup_expr, loc_name, acc_name = mk_setup loc in
     (* Arguments *)
     let eargs, pargs = of_gospel_args spec.sp_args in
     (* Returned pattern *)
     let ret_pat, ret_expr = returned_pattern spec.sp_ret in
-    let loc_name = gen_symbol ~prefix:"__loc" () in
-    let let_loc next =
-      [%expr
-        let [%p pvar loc_name] = [%e elocation loc] in
-        [%e next]]
-    in
     let eloc = evar loc_name in
-    let acc_name = gen_symbol ~prefix:"__acc" () in
-    let post_checks = post acc_name val_desc.vd_name.id_str eloc spec.sp_post in
-    let pre_checks = pre acc_name val_desc.vd_name.id_str eloc spec.sp_pre in
-    let call = pexp_apply (evar val_desc.vd_name.id_str) eargs in
-    let check_raises =
-      xpost_guard acc_name loc val_desc.vd_name.id_str eloc spec.sp_xpost call
+    let pre_checks =
+      mk_pre_checks acc_name val_desc.vd_name.id_str eloc spec.sp_pre
     in
-    let let_call next =
-      [%expr
-        let [%p ret_pat] = [%e check_raises] in
-        [%e next]]
+    let let_call =
+      mk_call acc_name ret_pat loc val_desc.vd_name.id_str eloc spec.sp_xpost
+        eargs
     in
-    let let_acc next =
-      [%expr
-        let [%p pvar acc_name] = Errors.empty () in
-        [%e next]]
+    let post_checks =
+      mk_post_checks acc_name val_desc.vd_name.id_str eloc spec.sp_post
     in
-    let rep_expr = [%expr Errors.check_and_report [%e evar acc_name]] in
     let body =
-      efun pargs @@ let_acc @@ let_loc @@ pexp_sequence pre_checks
-      @@ pexp_sequence rep_expr
-           (let_call @@ pexp_sequence post_checks
-           @@ pexp_sequence rep_expr ret_expr)
+      efun pargs @@ setup_expr @@ pre_checks @@ let_call @@ post_checks
+      @@ ret_expr
     in
     [%stri let [%p pvar val_desc.vd_name.id_str] = [%e body]]
   in

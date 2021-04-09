@@ -72,8 +72,6 @@ let failed_pre_nonexec acc_name exn = failed (`RuntimeExn exn) `Pre acc_name
 
 let failed_post_nonexec acc_name exn = failed (`RuntimeExn exn) `Post acc_name
 
-let failed_xpost = failed `Violated `XPost
-
 let failed_xpost_nonexec acc_name exn = failed (`RuntimeExn exn) `XPost acc_name
 
 let efun args expr =
@@ -334,24 +332,6 @@ let xpost_guard acc_name _loc fun_name eloc xpost call =
     cases default_cases
   |> pexp_try call
 
-let of_gospel_args args =
-  let to_string x = str "%a" Tast.Ident.pp x.Tterm.vs_name in
-  List.fold_right
-    (fun arg (eargs, pargs) ->
-      match arg with
-      | Tast.Lunit -> ((Nolabel, eunit) :: eargs, (Nolabel, punit) :: pargs)
-      | Tast.Lnone x ->
-          let s = to_string x in
-          ((Nolabel, evar s) :: eargs, (Nolabel, pvar s) :: pargs)
-      | Tast.Loptional x ->
-          let s = to_string x in
-          ((Optional s, evar s) :: eargs, (Nolabel, pvar s) :: pargs)
-      | Tast.Lnamed x ->
-          let s = to_string x in
-          ((Labelled s, evar s) :: eargs, (Labelled s, pvar s) :: pargs)
-      | Tast.Lghost _ -> (eargs, pargs))
-    args ([], [])
-
 let returned_pattern rets =
   let to_string x = str "%a" Tast.Ident.pp x.Tterm.vs_name in
   let pvars, evars =
@@ -369,3 +349,37 @@ let returned_pattern rets =
   (ppat_tuple pvars, pexp_tuple evars)
 
 let mk_open = [%stri open Gospel_runtime]
+
+let mk_setup loc =
+  let loc_name = gen_symbol ~prefix:"__loc" () in
+  let let_loc next =
+    [%expr
+      let [%p pvar loc_name] = [%e elocation loc] in
+      [%e next]]
+  in
+  let acc_name = gen_symbol ~prefix:"__acc" () in
+  let let_acc next =
+    [%expr
+      let [%p pvar acc_name] = Errors.empty () in
+      [%e next]]
+  in
+  ((fun next -> let_loc @@ let_acc @@ next), loc_name, acc_name)
+
+let report_expr acc_name = [%expr Errors.check_and_report [%e evar acc_name]]
+
+let mk_pre_checks acc_name fun_name eloc pres =
+  let pre_epxr = pre acc_name fun_name eloc pres in
+  fun next ->
+    pexp_sequence pre_epxr @@ pexp_sequence (report_expr acc_name) @@ next
+
+let mk_call acc_name ret_pat loc fun_name eloc xpost eargs =
+  let call = pexp_apply (evar fun_name) eargs in
+  let check_raises = xpost_guard acc_name loc fun_name eloc xpost call in
+  fun next ->
+    [%expr
+      let [%p ret_pat] = [%e check_raises] in
+      [%e next]]
+
+let mk_post_checks acc_name fun_name eloc terms next =
+  let post_expr = post acc_name fun_name eloc terms in
+  pexp_sequence post_expr (pexp_sequence (report_expr acc_name) next)
