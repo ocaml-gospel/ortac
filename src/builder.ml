@@ -6,6 +6,30 @@ include Ast_builder.Make (struct
   let loc = Location.none
 end)
 
+module F = struct
+  let open_modules = [%stri open Gospel_runtime]
+
+  let report_pre acc_name =
+    [%expr Errors.check_and_do Errors.report_and_raise [%e evar acc_name]]
+
+  let report_post acc_name =
+    [%expr Errors.check_and_do Errors.report_and_raise [%e evar acc_name]]
+
+  let report_declared_exn acc_name alias =
+    [%expr
+      Errors.check_and_do Errors.report_and_raise [%e evar acc_name];
+      raise [%e evar alias]]
+
+  let report_undeclared_exn eloc fun_name acc_name =
+    [%expr
+      let err = mk_unexpected_exception [%e eloc] [%e estring fun_name] e in
+      Errors.register err [%e evar acc_name];
+      Errors.report [%e evar acc_name];
+      Errors.raise_errors [%e evar acc_name];
+      (* Here for typechecking reason *)
+      failwith "This portion of code shouldn't be accessible"]
+end
+
 let noloc txt = { txt; loc = Location.none }
 
 let epred e = eapply (evar "Z.pred") [ e ]
@@ -271,22 +295,11 @@ let xpost_guard acc_name _loc fun_name eloc xpost call =
     let compare = compare
   end) in
   let default_cases =
+    (* undeclared exn *)
     [
       case ~guard:None
         ~lhs:[%pat? e]
-        ~rhs:
-          [%expr
-            let err =
-              mk_unexpected_exception [%e eloc] [%e estring fun_name] e
-            in
-            Errors.register err [%e evar acc_name];
-            Errors.check_and_do
-              (fun l ->
-                Errors.report l;
-                Errors.raise_errors l)
-              [%e evar acc_name];
-            (* Here for typechecking reason *)
-            failwith "This portion of code shouldn't be accessible"];
+        ~rhs:[%expr [%e F.report_undeclared_exn eloc fun_name acc_name]];
     ]
   in
   let assert_false_case =
@@ -321,14 +334,10 @@ let xpost_guard acc_name _loc fun_name eloc xpost call =
       let has_args = exn.Ttypes.xs_type <> Ttypes.Exn_tuple [] in
       let alias = gen_symbol ~prefix:"__e" () in
       let rhs =
+        (* after pattern matching on declared exn *)
         [%expr
           [%e List.map (pexp_match (evar alias)) cases |> esequence];
-          Errors.check_and_do
-            (fun l ->
-              Errors.report l;
-              Errors.raise_errors l)
-            [%e evar acc_name];
-          raise [%e evar alias]]
+          [%e F.report_declared_exn acc_name alias]]
       in
       let lhs =
         ppat_alias
@@ -356,7 +365,7 @@ let returned_pattern rets =
   in
   (ppat_tuple pvars, pexp_tuple evars)
 
-let mk_open = [%stri open Gospel_runtime]
+let mk_open = F.open_modules
 
 let mk_setup loc =
   let loc_name = gen_symbol ~prefix:"__loc" () in
@@ -373,26 +382,10 @@ let mk_setup loc =
   in
   ((fun next -> let_loc @@ let_acc @@ next), loc_name, acc_name)
 
-let report_pre acc_name =
-  [%expr
-    Errors.check_and_do
-      (fun l ->
-        Errors.report l;
-        Errors.raise_errors l)
-      [%e evar acc_name]]
-
-let report_post acc_name =
-  [%expr
-    Errors.check_and_do
-      (fun l ->
-        Errors.report l;
-        Errors.raise_errors l)
-      [%e evar acc_name]]
-
 let mk_pre_checks acc_name fun_name eloc pres =
   let pre_epxr = pre acc_name fun_name eloc pres in
   fun next ->
-    pexp_sequence pre_epxr @@ pexp_sequence (report_pre acc_name) @@ next
+    pexp_sequence pre_epxr @@ pexp_sequence (F.report_pre acc_name) @@ next
 
 let mk_call acc_name ret_pat loc fun_name eloc xpost eargs =
   let call = pexp_apply (evar fun_name) eargs in
@@ -404,4 +397,4 @@ let mk_call acc_name ret_pat loc fun_name eloc xpost eargs =
 
 let mk_post_checks acc_name fun_name eloc terms next =
   let post_expr = post acc_name fun_name eloc terms in
-  pexp_sequence post_expr (pexp_sequence (report_post acc_name) next)
+  pexp_sequence post_expr (pexp_sequence (F.report_post acc_name) next)

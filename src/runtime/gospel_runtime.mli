@@ -36,6 +36,9 @@ module Errors : sig
   val report : t -> unit
   (** [report l] prints the content of [l] *)
 
+  val report_and_raise : t -> unit
+  (** [report_and_raise l] report the content of [l] and raise it as an [Error] *)
+
   val check_and_do : (t -> unit) -> t -> unit
   (** [check_and_do f l] apply [f] to [l] if [l] is not empty *)
 end
