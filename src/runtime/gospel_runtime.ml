@@ -84,11 +84,7 @@ module Errors = struct
 
   let report l = Fmt.(epr "%a@." (list ~sep:(any "@\n") report) !l)
 
-  let report_and_raise l =
-    report l;
-    raise_errors l
-
-  let check_and_report l = match !l with [] -> () | _ -> report_and_raise l
+  let check_and_do f l = match !l with [] -> () | _ -> f l
 end
 
 module Z = struct

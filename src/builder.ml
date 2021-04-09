@@ -280,7 +280,11 @@ let xpost_guard acc_name _loc fun_name eloc xpost call =
               mk_unexpected_exception [%e eloc] [%e estring fun_name] e
             in
             Errors.register err [%e evar acc_name];
-            Errors.check_and_report [%e evar acc_name];
+            Errors.check_and_do
+              (fun l ->
+                Errors.report l;
+                Errors.raise_errors l)
+              [%e evar acc_name];
             (* Here for typechecking reason *)
             failwith "This portion of code shouldn't be accessible"];
     ]
@@ -319,7 +323,11 @@ let xpost_guard acc_name _loc fun_name eloc xpost call =
       let rhs =
         [%expr
           [%e List.map (pexp_match (evar alias)) cases |> esequence];
-          Errors.check_and_report [%e evar acc_name];
+          Errors.check_and_do
+            (fun l ->
+              Errors.report l;
+              Errors.raise_errors l)
+            [%e evar acc_name];
           raise [%e evar alias]]
       in
       let lhs =
@@ -365,12 +373,26 @@ let mk_setup loc =
   in
   ((fun next -> let_loc @@ let_acc @@ next), loc_name, acc_name)
 
-let report_expr acc_name = [%expr Errors.check_and_report [%e evar acc_name]]
+let report_pre acc_name =
+  [%expr
+    Errors.check_and_do
+      (fun l ->
+        Errors.report l;
+        Errors.raise_errors l)
+      [%e evar acc_name]]
+
+let report_post acc_name =
+  [%expr
+    Errors.check_and_do
+      (fun l ->
+        Errors.report l;
+        Errors.raise_errors l)
+      [%e evar acc_name]]
 
 let mk_pre_checks acc_name fun_name eloc pres =
   let pre_epxr = pre acc_name fun_name eloc pres in
   fun next ->
-    pexp_sequence pre_epxr @@ pexp_sequence (report_expr acc_name) @@ next
+    pexp_sequence pre_epxr @@ pexp_sequence (report_pre acc_name) @@ next
 
 let mk_call acc_name ret_pat loc fun_name eloc xpost eargs =
   let call = pexp_apply (evar fun_name) eargs in
@@ -382,4 +404,4 @@ let mk_call acc_name ret_pat loc fun_name eloc xpost eargs =
 
 let mk_post_checks acc_name fun_name eloc terms next =
   let post_expr = post acc_name fun_name eloc terms in
-  pexp_sequence post_expr (pexp_sequence (report_expr acc_name) next)
+  pexp_sequence post_expr (pexp_sequence (report_post acc_name) next)
