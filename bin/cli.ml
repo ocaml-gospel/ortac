@@ -13,11 +13,11 @@ let type_check load_path name sigs =
   List.fold_left (Typing.type_sig_item penv) md sigs |> Tmodule.wrap_up_muc
   |> fun file -> file.fl_sigs
 
-let main path =
+let main opt path =
   let module_name = module_name_of_path path in
   Parser_frontend.parse_ocaml_gospel path
   |> type_check [] path
-  |> Gospel_rtac.main module_name
+  |> Gospel_rtac.main opt module_name
   |> Pprintast.structure Fmt.stdout
 
 open Cmdliner
@@ -36,8 +36,19 @@ let ocaml_file =
     & pos 0 (some (parse, Format.pp_print_string)) None
     & info [] ~docv:"FILE")
 
+let opt =
+  let parse s =
+    match s with
+    | "original" | "monolith" | "crowbar" -> `Ok s
+    | _ -> `Error (Printf.sprintf "Error: `%s' not a valid option" s)
+  in
+  Arg.(
+    required
+    & pos 1 (some (parse, Format.pp_print_string)) None
+    & info [] ~docv:"OPTION")
+
 let cmd =
   let doc = "Run GOSPEL-RTAC." in
-  (Term.(const main $ ocaml_file), Term.info "gospel-rtac" ~doc)
+  (Term.(const main $ opt $ ocaml_file), Term.info "gospel-rtac" ~doc)
 
 let () = Term.(exit @@ eval cmd)

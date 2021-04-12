@@ -1,43 +1,57 @@
 open Ppxlib
 open Gospel
 
-include Ast_builder.S
+module type G = sig
+  val open_modules : structure_item list
 
-val noloc : 'a -> 'a loc
+  val report_pre : label -> expression
 
-val elocation : location -> expression
+  val report_post : label -> expression
 
-val econst : constant -> expression
+  val report_declared_exn : label -> label -> expression
 
-val epred : expression -> expression
+  val report_undeclared_exn : expression -> label -> label -> expression
+end
 
-val esucc : expression -> expression
+module Make_Builder (F : G) : sig
+  include Ast_builder.S
 
-val efun : (arg_label * pattern) list -> expression -> expression
+  val noloc : 'a -> 'a loc
 
-exception Unsupported of Location.t option * string
+  val elocation : location -> expression
 
-val lident : label -> longident loc
+  val econst : constant -> expression
 
-val returned_pattern : Tast.lb_arg list -> pattern * expression
+  val epred : expression -> expression
 
-val mk_open : structure_item
+  val esucc : expression -> expression
 
-val mk_setup : location -> (expression -> expression) * label * label
+  val efun : (arg_label * pattern) list -> expression -> expression
 
-val mk_pre_checks :
-  label -> label -> expression -> Tterm.term list -> expression -> expression
+  exception Unsupported of Location.t option * string
 
-val mk_call :
-  label ->
-  pattern ->
-  location ->
-  label ->
-  expression ->
-  (Ttypes.xsymbol * (Tterm.pattern * Tterm.term) list) list ->
-  (arg_label * expression) list ->
-  expression ->
-  expression
+  val lident : label -> longident loc
 
-val mk_post_checks :
-  label -> label -> expression -> Tterm.term list -> expression -> expression
+  val returned_pattern : Tast.lb_arg list -> pattern * expression
+
+  val mk_open : structure_item list
+
+  val mk_setup : location -> (expression -> expression) * label * label
+
+  val mk_pre_checks :
+    label -> label -> expression -> Tterm.term list -> expression -> expression
+
+  val mk_call :
+    label ->
+    pattern ->
+    location ->
+    label ->
+    expression ->
+    (Ttypes.xsymbol * (Tterm.pattern * Tterm.term) list) list ->
+    (arg_label * expression) list ->
+    expression ->
+    expression
+
+  val mk_post_checks :
+    label -> label -> expression -> Tterm.term list -> expression -> expression
+end
