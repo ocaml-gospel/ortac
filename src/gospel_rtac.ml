@@ -90,7 +90,7 @@ module Make_Gospel_rtac (B : B) = struct
 end
 
 let choose = function
-  | "original" -> (module Gen_original : Builder.G)
+  | "default" -> (module Gen_original : Builder.G)
   | "monolith" -> (module Gen_monolith : Builder.G)
   | _ -> raise (failwith "not yet implemented")
 
