@@ -17,6 +17,13 @@ type error =
       exn : exn;
     }
 
+let mk_condition loc fun_name term error_kind =
+  Condition { loc; fun_name; term; error_kind }
+
+let mk_unexpected_exception loc fun_name = function
+  | (Out_of_memory | Stack_overflow) as e -> raise e
+  | exn -> Unexpected_exception { loc; fun_name; exn }
+
 let styled_list l pp = List.fold_left (fun acc x -> styled x acc) pp l
 
 let pp_kind ppf = function
@@ -62,19 +69,27 @@ let report ppf = function
         (styled `Bold string)
         (Printexc.to_string exn)
 
-exception Error of error
+exception Error of error list
 
 let error e = raise (Error e)
 
-let runtime_exn loc fun_name term exn =
-  error (Condition { loc; fun_name; term; error_kind = RuntimeExn exn })
+module Errors = struct
+  type t = error list ref
 
-let violated loc fun_name term =
-  error (Condition { loc; fun_name; term; error_kind = Violated })
+  let empty () = ref []
 
-let unexpected_exn loc fun_name = function
-  | (Out_of_memory | Stack_overflow) as e -> raise e
-  | exn -> error (Unexpected_exception { loc; fun_name; exn })
+  let register e l = l := e :: !l
+
+  let raise_errors l = error !l
+
+  let report l = Fmt.(epr "%a@." (list ~sep:(any "@\n") report) !l)
+
+  let report_and_raise l =
+    report l;
+    raise_errors l
+
+  let check_and_report l = match !l with [] -> () | _ -> report_and_raise l
+end
 
 module Z = struct
   include Z

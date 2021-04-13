@@ -34,12 +34,8 @@ let elocation loc =
       loc_ghost = [%e ebool loc.loc_ghost];
     }]
 
-let failed error_kind term_kind fun_name loc term =
-  let func, exn =
-    match error_kind with
-    | `Violated -> ("violated", None)
-    | `RuntimeExn e -> ("runtime_exn", Some e)
-  in
+let failed error_kind term_kind acc_name fun_name (eloc : expression) term :
+    expression =
   let term =
     pexp_construct
       (noloc
@@ -50,22 +46,33 @@ let failed error_kind term_kind fun_name loc term =
             | `XPost -> "XPost")))
       (Some (estring (Fmt.str "%a" Gospel.Tterm.print_term term)))
   in
-  eapply (evar func)
-    (match exn with
-    | None -> [ loc; estring fun_name; term ]
-    | Some e -> [ loc; estring fun_name; term; e ])
+  match error_kind with
+  | `Violated ->
+      [%expr
+        let err =
+          mk_condition [%e eloc] [%e estring fun_name] [%e term] Violated
+        in
+        Errors.register err [%e evar acc_name]]
+  | `RuntimeExn e ->
+      [%expr
+        let err =
+          mk_condition [%e eloc] [%e estring fun_name] [%e term]
+            (RuntimeExn [%e e])
+        in
+        Errors.register err [%e evar acc_name];
+        true]
 
 let failed_pre = failed `Violated `Pre
 
 let failed_post = failed `Violated `Post
 
-let failed_pre_nonexec exn = failed (`RuntimeExn exn) `Pre
+let failed_pre_nonexec acc_name exn = failed (`RuntimeExn exn) `Pre acc_name
 
-let failed_post_nonexec exn = failed (`RuntimeExn exn) `Post
+let failed_post_nonexec acc_name exn = failed (`RuntimeExn exn) `Post acc_name
 
 let failed_xpost = failed `Violated `XPost
 
-let failed_xpost_nonexec exn = failed (`RuntimeExn exn) `XPost
+let failed_xpost_nonexec acc_name exn = failed (`RuntimeExn exn) `XPost acc_name
 
 let efun args expr =
   List.fold_right

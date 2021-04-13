@@ -15,15 +15,25 @@ type error =
       exn : exn;
     }
 
-val report : Format.formatter -> error -> unit
+val mk_condition : Ppxlib.location -> string -> term -> error_kind -> error
 
-exception Error of error
+val mk_unexpected_exception : Ppxlib.location -> string -> exn -> error
 
-val runtime_exn : Ppxlib.location -> string -> term -> exn -> 'a
+exception Error of error list
 
-val violated : Ppxlib.location -> string -> term -> 'a
+module Errors : sig
+  type t
 
-val unexpected_exn : Ppxlib.location -> string -> exn -> 'a
+  val empty : unit -> t
+  (** [empty] create a new empty error container *)
+
+  val register : error -> t -> unit
+  (** [register a l] add the element [a] to [l] *)
+
+  val check_and_report : t -> unit
+  (** [check_and_report l] reports the errors logged in [l] and raises them if
+      any *)
+end
 
 module Z : sig
   include module type of Z
