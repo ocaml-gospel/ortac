@@ -71,24 +71,3 @@ module Make (G : G) = struct
         | Sig_val (decl, _ghost) -> value decl
         | _ -> None)
 end
-
-let choose = function
-  | "default" -> (module Gen_original : Builder.G)
-  | "monolith" -> (module Gen_monolith : Builder.G)
-  | _ -> raise (failwith "not yet implemented")
-
-let main generator module_name s =
-  let module G = (val choose generator) in
-  let module B = Builder.Make (G) in
-  let open Make (G) in
-  try
-    let include_lib =
-      B.pmod_ident (B.lident module_name) |> B.include_infos |> B.pstr_include
-    in
-    let declarations = signature s in
-    B.mk_open @ include_lib :: declarations
-  with
-  | B.Unsupported (_loc, msg) ->
-      let open Fmt in
-      failwith "%a: unsupported %s" (styled `Red string) "Error" msg
-  | e -> raise e
