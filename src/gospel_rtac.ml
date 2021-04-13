@@ -2,37 +2,20 @@ open Ppxlib
 open Gospel
 open Fmt
 
-module type B = sig
-  include Ast_builder.S
+module type G = sig
+  val open_modules : structure_item list
 
-  val efun : (arg_label * pattern) list -> expression -> expression
+  val report_pre : label -> expression
 
-  val returned_pattern : Tast.lb_arg list -> pattern * expression
+  val report_post : label -> expression
 
-  exception Unsupported of Location.t option * string
+  val report_declared_exn : label -> label -> expression
 
-  val mk_setup : location -> (expression -> expression) * label * label
-
-  val mk_pre_checks :
-    label -> label -> expression -> Tterm.term list -> expression -> expression
-
-  val mk_call :
-    label ->
-    pattern ->
-    location ->
-    label ->
-    expression ->
-    (Ttypes.xsymbol * (Tterm.pattern * Tterm.term) list) list ->
-    (arg_label * expression) list ->
-    expression ->
-    expression
-
-  val mk_post_checks :
-    label -> label -> expression -> Tterm.term list -> expression -> expression
+  val report_undeclared_exn : expression -> label -> label -> expression
 end
 
-module Make_Gospel_rtac (B : B) = struct
-  open B
+module Make (G : G) = struct
+  open Builder.Make (G)
 
   let of_gospel_args args =
     let to_string x = str "%a" Tast.Ident.pp x.Tterm.vs_name in
@@ -94,19 +77,18 @@ let choose = function
   | "monolith" -> (module Gen_monolith : Builder.G)
   | _ -> raise (failwith "not yet implemented")
 
-let main opt module_name s =
-  let module M = (val choose opt) in
-  let module B = Builder.Make_Builder (M) in
-  let open B in
-  let open Make_Gospel_rtac (B) in
+let main generator module_name s =
+  let module G = (val choose generator) in
+  let module B = Builder.Make (G) in
+  let open Make (G) in
   try
     let include_lib =
-      pmod_ident (lident module_name) |> include_infos |> pstr_include
+      B.pmod_ident (B.lident module_name) |> B.include_infos |> B.pstr_include
     in
     let declarations = signature s in
-    mk_open @ include_lib :: declarations
+    B.mk_open @ include_lib :: declarations
   with
-  | Unsupported (_loc, msg) ->
+  | B.Unsupported (_loc, msg) ->
       let open Fmt in
       failwith "%a: unsupported %s" (styled `Red string) "Error" msg
   | e -> raise e

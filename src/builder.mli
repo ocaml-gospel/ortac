@@ -13,7 +13,7 @@ module type G = sig
   val report_undeclared_exn : expression -> label -> label -> expression
 end
 
-module Make_Builder (F : G) : sig
+module Make (F : G) : sig
   include Ast_builder.S
 
   val noloc : 'a -> 'a loc

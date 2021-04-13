@@ -14,7 +14,7 @@ module type G = sig
   val report_undeclared_exn : expression -> label -> label -> expression
 end
 
-module Make_Builder (F : G) = struct
+module Make (F : G) = struct
   include Ast_builder.Make (struct
     let loc = Location.none
   end)
