@@ -2,4 +2,4 @@
  (name gospel_rtac)
  (preprocess
   (pps ppxlib.metaquot))
- (libraries gospel_rtac_core fmt gospel ppxlib))
+ (libraries gospel_rtac_core fmt gospel ppxlib ppxlib.ast))

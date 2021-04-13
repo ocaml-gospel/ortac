@@ -47,7 +47,7 @@ end
 module B = Gospel_rtac_core.Builder.Make (M)
 module G = Gospel_rtac_core.Gospel_rtac.Make (M)
 
-let generate module_name s =
+let tests module_name s =
   try
     let include_lib =
       B.pmod_ident (B.lident module_name) |> B.include_infos |> B.pstr_include
@@ -59,3 +59,10 @@ let generate module_name s =
       let open Fmt in
       failwith "%a: unsupported %s" (styled `Red string) "Error" msg
   | e -> raise e
+
+let generate path =
+  let module_name = Gospel_rtac_core.Utils.module_name_of_path path in
+  Gospel.Parser_frontend.parse_ocaml_gospel path
+  |> Gospel_rtac_core.Utils.type_check [] path
+  |> tests module_name
+  |> Ppxlib_ast.Pprintast.structure Fmt.stdout
