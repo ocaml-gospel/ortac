@@ -1,7 +1,12 @@
+type generator = Default | Monolith
+
+let backend_printer f = function
+  | Default -> Format.pp_print_string f "Default"
+  | Monolith -> Format.pp_print_string f "Monolith"
+
 let main = function
-  | "default" -> Gospel_rtac.Generator.generate
-  | "monolith" -> Gospel_rtac_monolith.Generator.generate
-  | _ -> raise (failwith "not yet implemented")
+  | Default -> Gospel_rtac.Backend.generate
+  | Monolith -> Gospel_rtac_monolith.Backend.generate
 
 open Cmdliner
 
@@ -19,14 +24,19 @@ let ocaml_file =
     & pos 0 (some (parse, Format.pp_print_string)) None
     & info [] ~docv:"FILE")
 
-let generator =
-  let doc = "" in
+let backend =
+  let parse = function
+    | "default" -> Ok Default
+    | "monolith" -> Ok Monolith
+    | s -> Error (`Msg (Printf.sprintf "Error: `%s' is not a valid argument" s))
+  in
   Arg.(
-    value & opt string "default"
-    & info [ "g"; "generator" ] ~docv:"GENERATOR" ~doc)
+    value
+    & opt (conv ~docv:"BACKEND" (parse, backend_printer)) Default
+    & info [ "g"; "backend" ] ~docv:"BACKEND")
 
 let cmd =
   let doc = "Run GOSPEL-RTAC." in
-  (Term.(const main $ generator $ ocaml_file), Term.info "gospel-rtac" ~doc)
+  (Term.(const main $ backend $ ocaml_file), Term.info "gospel-rtac" ~doc)
 
 let () = Term.(exit @@ eval cmd)

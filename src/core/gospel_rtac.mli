@@ -1,4 +1,4 @@
-module type G = Generator_intf.S
+module type G = Config_intf.S
 
 module Make (G : G) : sig
   val of_gospel_args :

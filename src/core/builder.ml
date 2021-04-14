@@ -2,7 +2,7 @@ open Ppxlib
 open Gospel
 open Fmt
 
-module type G = Generator_intf.S
+module type G = Config_intf.S
 
 module Make (F : G) = struct
   include Ast_builder.Make (struct

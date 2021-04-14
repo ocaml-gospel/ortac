@@ -1,4 +1,4 @@
-module type G = Gospel_rtac_core.Generator_intf.S
+module type G = Gospel_rtac_core.Config_intf.S
 
 module M : G = struct
   open Ppxlib

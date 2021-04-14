@@ -1,7 +1,7 @@
 open Ppxlib
 open Gospel
 
-module type G = Generator_intf.S
+module type G = Config_intf.S
 
 module Make (F : G) : sig
   include Ast_builder.S
