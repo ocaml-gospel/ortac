@@ -1,17 +1,7 @@
 open Ppxlib
 open Gospel
 
-module type G = sig
-  val open_modules : structure_item list
-
-  val report_pre : label -> expression
-
-  val report_post : label -> expression
-
-  val report_declared_exn : label -> label -> expression
-
-  val report_undeclared_exn : expression -> label -> label -> expression
-end
+module type G = Generator_intf.S
 
 module Make (F : G) : sig
   include Ast_builder.S
@@ -34,7 +24,7 @@ module Make (F : G) : sig
 
   val returned_pattern : Tast.lb_arg list -> pattern * expression
 
-  val mk_open : structure_item list
+  val mk_open : structure_item
 
   val mk_setup : location -> (expression -> expression) * label * label
 

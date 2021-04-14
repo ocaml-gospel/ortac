@@ -2,17 +2,7 @@ open Ppxlib
 open Gospel
 open Fmt
 
-module type G = sig
-  val open_modules : structure_item list
-
-  val report_pre : label -> expression
-
-  val report_post : label -> expression
-
-  val report_declared_exn : label -> label -> expression
-
-  val report_undeclared_exn : expression -> label -> label -> expression
-end
+module type G = Generator_intf.S
 
 module Make (G : G) = struct
   open Builder.Make (G)

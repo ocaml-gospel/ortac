@@ -1,15 +1,4 @@
-module type G = sig
-  val open_modules : Ppxlib.structure_item list
-
-  val report_pre : string -> Ppxlib.expression
-
-  val report_post : string -> Ppxlib.expression
-
-  val report_declared_exn : string -> string -> Ppxlib.expression
-
-  val report_undeclared_exn :
-    Ppxlib.expression -> string -> string -> Ppxlib.expression
-end
+module type G = Gospel_rtac_core.Generator_intf.S
 
 module M : G = struct
   open Ppxlib
@@ -18,7 +7,7 @@ module M : G = struct
     let loc = Location.none
   end)
 
-  let open_modules = [ [%stri open Gospel_runtime]; [%stri open Monolith] ]
+  let open_modules = [%stri open Gospel_runtime]
 
   let report_pre acc_name =
     [%expr
@@ -53,7 +42,7 @@ let tests module_name s =
       B.pmod_ident (B.lident module_name) |> B.include_infos |> B.pstr_include
     in
     let declarations = G.signature s in
-    B.mk_open @ include_lib :: declarations
+    B.mk_open :: include_lib :: declarations
   with
   | B.Unsupported (_loc, msg) ->
       let open Fmt in
