@@ -276,7 +276,6 @@ module Make (F : G) = struct
       let compare = compare
     end) in
     let default_cases =
-      (* undeclared exn *)
       [
         case ~guard:None
           ~lhs:[%pat? e]
@@ -315,7 +314,6 @@ module Make (F : G) = struct
         let has_args = exn.Ttypes.xs_type <> Ttypes.Exn_tuple [] in
         let alias = gen_symbol ~prefix:"__e" () in
         let rhs =
-          (* after pattern matching on declared exn *)
           [%expr
             [%e List.map (pexp_match (evar alias)) cases |> esequence];
             [%e F.report_declared_exn acc_name alias]]

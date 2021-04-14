@@ -1,8 +1,13 @@
-type generator = Default | Monolith
+type backend = Default | Monolith
 
 let backend_printer f = function
   | Default -> Format.pp_print_string f "Default"
   | Monolith -> Format.pp_print_string f "Monolith"
+
+let backend_parser = function
+  | "default" -> Ok Default
+  | "monolith" -> Ok Monolith
+  | s -> Error (`Msg (Printf.sprintf "Error: `%s' is not a valid argument" s))
 
 let main = function
   | Default -> Gospel_rtac.Backend.generate
@@ -25,15 +30,10 @@ let ocaml_file =
     & info [] ~docv:"FILE")
 
 let backend =
-  let parse = function
-    | "default" -> Ok Default
-    | "monolith" -> Ok Monolith
-    | s -> Error (`Msg (Printf.sprintf "Error: `%s' is not a valid argument" s))
-  in
   Arg.(
     value
-    & opt (conv ~docv:"BACKEND" (parse, backend_printer)) Default
-    & info [ "g"; "backend" ] ~docv:"BACKEND")
+    & opt (conv ~docv:"BACKEND" (backend_parser, backend_printer)) Default
+    & info [ "b"; "backend" ] ~docv:"BACKEND")
 
 let cmd =
   let doc = "Run GOSPEL-RTAC." in
