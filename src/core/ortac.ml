@@ -1,27 +1,28 @@
 open Ppxlib
-open Gospel
-open Fmt
 
 module Make (B : Backend.S) = struct
   open Builder
   module T = Translation
 
   let of_gospel_args args =
-    let to_string x = str "%a" Tast.Ident.pp x.Tterm.vs_name in
+    let to_string x =
+      Fmt.str "%a" Gospel.Tast.Ident.pp x.Gospel.Tterm.vs_name
+    in
     List.fold_right
       (fun arg (eargs, pargs) ->
         match arg with
-        | Tast.Lunit -> ((Nolabel, eunit) :: eargs, (Nolabel, punit) :: pargs)
-        | Tast.Lnone x ->
+        | Gospel.Tast.Lunit ->
+            ((Nolabel, B.eunit) :: eargs, (Nolabel, B.punit) :: pargs)
+        | Gospel.Tast.Lnone x ->
             let s = to_string x in
-            ((Nolabel, evar s) :: eargs, (Nolabel, pvar s) :: pargs)
-        | Tast.Loptional x ->
+            ((Nolabel, B.evar s) :: eargs, (Nolabel, B.pvar s) :: pargs)
+        | Gospel.Tast.Loptional x ->
             let s = to_string x in
-            ((Optional s, evar s) :: eargs, (Nolabel, pvar s) :: pargs)
-        | Tast.Lnamed x ->
+            ((Optional s, B.evar s) :: eargs, (Nolabel, B.pvar s) :: pargs)
+        | Gospel.Tast.Lnamed x ->
             let s = to_string x in
-            ((Labelled s, evar s) :: eargs, (Labelled s, pvar s) :: pargs)
-        | Tast.Lghost _ -> (eargs, pargs))
+            ((Labelled s, B.evar s) :: eargs, (Labelled s, B.pvar s) :: pargs)
+        | Gospel.Tast.Lghost _ -> (eargs, pargs))
       args ([], [])
 
   let value (val_desc : Tast.val_description) =
@@ -54,10 +55,10 @@ module Make (B : Backend.S) = struct
         T.mk_post_checks ~register_name ~term_printer spec.sp_post
       in
       let body =
-        efun pargs @@ setup_expr @@ pre_checks @@ let_call @@ post_checks
+        B.efun pargs @@ setup_expr @@ pre_checks @@ let_call @@ post_checks
         @@ ret_expr
       in
-      [%stri let [%p pvar val_desc.vd_name.id_str] = [%e body]]
+      [%stri let [%p B.pvar val_desc.vd_name.id_str] = [%e body]]
     in
     Option.map process val_desc.vd_spec
 
