@@ -28,8 +28,19 @@ let mk_candidate module_name =
 
 let is_arrow = function Ptyp_arrow _ -> true | _ -> false
 
-let constructible_int =
-  [%expr int_within (Gen.semi_open_interval Int.min_int Int.max_int)]
+let find_gen s =
+  match s.ptyp_desc with
+  | Ptyp_constr ({ txt = Lident "unit"; _ }, _) -> [%expr Gen.unit]
+  | Ptyp_constr ({ txt = Lident "int"; _ }, _) -> [%expr Gen.int Int.max_int]
+  | Ptyp_constr ({ txt = Lident "bool"; _ }, _) -> [%expr Gen.bool]
+  | _ -> failwith "not implemented yet"
+
+let find_printer s =
+  match s.ptyp_desc with
+  | Ptyp_constr ({ txt = Lident "unit"; _ }, _) -> [%expr Print.unit]
+  | Ptyp_constr ({ txt = Lident "int"; _ }, _) -> [%expr Print.int]
+  | Ptyp_constr ({ txt = Lident "bool"; _ }, _) -> [%expr Print.bool]
+  | _ -> failwith "not implemented yet"
 
 let rec translate_ret s =
   match s.ptyp_desc with
@@ -39,16 +50,20 @@ let rec translate_ret s =
   | Ptyp_constr ({ txt = Lident "bool"; _ }, _) -> [%expr bool]
   | Ptyp_constr ({ txt = Lident "list"; _ }, [ param ]) ->
       [%expr list [%e translate_ret param]]
+  | Ptyp_constr ({ txt = Lident "array"; _ }, [ param ]) ->
+      [%expr M.deconstructible_array [%e find_printer param]]
   | _ -> failwith "not implemented yet"
 
 let rec translate s =
   match s.ptyp_desc with
   | Ptyp_var s -> B.evar s
   | Ptyp_constr ({ txt = Lident "unit"; _ }, _) -> [%expr unit]
-  | Ptyp_constr ({ txt = Lident "int"; _ }, _) -> constructible_int
+  | Ptyp_constr ({ txt = Lident "int"; _ }, _) -> [%expr M.constructible_int]
   | Ptyp_constr ({ txt = Lident "bool"; _ }, _) -> [%expr bool]
   | Ptyp_constr ({ txt = Lident "list"; _ }, [ param ]) ->
       [%expr list [%e translate param]]
+  | Ptyp_constr ({ txt = Lident "array"; _ }, [ param ]) ->
+      [%expr M.constructible_array [%e find_gen param] [%e find_printer param]]
   | Ptyp_arrow (_, x, y) when is_arrow y.ptyp_desc ->
       [%expr [%e translate x] ^> [%e translate y]]
   | Ptyp_arrow (_, x, y) -> [%expr [%e translate x] ^!> [%e translate_ret y]]
@@ -87,7 +102,8 @@ let standalone module_name s =
   let mod_ref = mk_reference (G.signature module_name s) in
   let mod_can = mk_candidate module_name in
   let specs = mk_specs s in
-  [%stri open Monolith] :: mod_ref :: mod_can :: specs
+  [%stri open Monolith]
+  :: [%stri open Gospel_runtime] :: mod_ref :: mod_can :: specs
 
 let generate path =
   let module_name = Ortac_core.Utils.module_name_of_path path in

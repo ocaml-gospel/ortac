@@ -12,16 +12,16 @@ module Make (B : Backend.S) = struct
       (fun arg (eargs, pargs) ->
         match arg with
         | Gospel.Tast.Lunit ->
-            ((Nolabel, B.eunit) :: eargs, (Nolabel, B.punit) :: pargs)
+            ((Nolabel, eunit) :: eargs, (Nolabel, punit) :: pargs)
         | Gospel.Tast.Lnone x ->
             let s = to_string x in
-            ((Nolabel, B.evar s) :: eargs, (Nolabel, B.pvar s) :: pargs)
+            ((Nolabel, evar s) :: eargs, (Nolabel, pvar s) :: pargs)
         | Gospel.Tast.Loptional x ->
             let s = to_string x in
-            ((Optional s, B.evar s) :: eargs, (Nolabel, B.pvar s) :: pargs)
+            ((Optional s, evar s) :: eargs, (Nolabel, pvar s) :: pargs)
         | Gospel.Tast.Lnamed x ->
             let s = to_string x in
-            ((Labelled s, B.evar s) :: eargs, (Labelled s, B.pvar s) :: pargs)
+            ((Labelled s, evar s) :: eargs, (Labelled s, pvar s) :: pargs)
         | Gospel.Tast.Lghost _ -> (eargs, pargs))
       args ([], [])
 
@@ -55,17 +55,17 @@ module Make (B : Backend.S) = struct
         T.mk_post_checks ~register_name ~term_printer spec.sp_post
       in
       let body =
-        B.efun pargs @@ setup_expr @@ pre_checks @@ let_call @@ post_checks
+        efun pargs @@ setup_expr @@ pre_checks @@ let_call @@ post_checks
         @@ ret_expr
       in
-      [%stri let [%p B.pvar val_desc.vd_name.id_str] = [%e body]]
+      [%stri let [%p pvar val_desc.vd_name.id_str] = [%e body]]
     in
     Option.map process val_desc.vd_spec
 
   let signature module_name s =
     let declarations =
       List.filter_map
-        (fun (sig_item : Tast.signature_item) ->
+        (fun (sig_item : Gospel.Tast.signature_item) ->
           match sig_item.sig_desc with
           | Sig_val (decl, _ghost) -> value decl
           | _ -> None)

@@ -13,12 +13,12 @@ build: [
     "dune"
     "build"
     "-p"
-  name
+    name
     "-j"
     jobs
     "@install"
     "@runtest" {with-test}
-  "@doc" {with-doc}
+    "@doc" {with-doc}
   ]
 ]
 

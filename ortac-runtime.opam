@@ -15,19 +15,12 @@ build: [
     "dune"
     "build"
     "-p"
-  name
+    name
     "-j"
     jobs
     "@install"
     "@runtest" {with-test}
-  "@doc" {with-doc}
+    "@doc" {with-doc}
   ]
 ]
-
-depends: [
-  "ocaml"
-  "dune" {>= "2.0"}
-  "fmt"
-  "ppxlib" {>= "0.20.0"}
-  "zarith"
-]
+dev-repo: "git+https://github.com/pascutto/gospel-rtac.git"
