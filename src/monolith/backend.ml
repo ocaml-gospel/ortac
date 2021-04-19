@@ -34,18 +34,24 @@ let constructible_int =
 let rec translate_ret s =
   match s.ptyp_desc with
   | Ptyp_var s -> B.evar s
+  | Ptyp_constr ({ txt = Lident "unit"; _ }, _) -> [%expr unit]
   | Ptyp_constr ({ txt = Lident "int"; _ }, _) -> [%expr int]
+  | Ptyp_constr ({ txt = Lident "bool"; _ }, _) -> [%expr bool]
   | Ptyp_constr ({ txt = Lident "list"; _ }, [ param ]) ->
       [%expr list [%e translate_ret param]]
   | _ -> failwith "not implemented yet"
 
-let rec traduction s =
+let rec translate s =
   match s.ptyp_desc with
   | Ptyp_var s -> B.evar s
+  | Ptyp_constr ({ txt = Lident "unit"; _ }, _) -> [%expr unit]
   | Ptyp_constr ({ txt = Lident "int"; _ }, _) -> constructible_int
+  | Ptyp_constr ({ txt = Lident "bool"; _ }, _) -> [%expr bool]
+  | Ptyp_constr ({ txt = Lident "list"; _ }, [ param ]) ->
+      [%expr list [%e translate param]]
   | Ptyp_arrow (_, x, y) when is_arrow y.ptyp_desc ->
-      [%expr [%e traduction x] ^> [%e traduction y]]
-  | Ptyp_arrow (_, x, y) -> [%expr [%e traduction x] ^!> [%e translate_ret y]]
+      [%expr [%e translate x] ^> [%e translate y]]
+  | Ptyp_arrow (_, x, y) -> [%expr [%e translate x] ^!> [%e translate_ret y]]
   | _ -> failwith "not implemented yet"
 
 let mk_declaration (sig_item : Gospel.Tast.signature_item) =
@@ -58,7 +64,7 @@ let mk_declaration (sig_item : Gospel.Tast.signature_item) =
       let candidate = Printf.sprintf "C.%s" fun_name in
       Some
         [%expr
-          let spec = [%e traduction fun_type] in
+          let spec = [%e translate fun_type] in
           declare [%e msg] spec [%e B.evar reference] [%e B.evar candidate]]
   | _ -> None
 
