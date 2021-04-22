@@ -1,24 +1,17 @@
-open Ppxlib
-open Gospel
+type backend = Default | Monolith
 
-let module_name_of_path p =
-  let filename = Filename.basename p in
-  String.index filename '.' |> String.sub filename 0 |> String.capitalize_ascii
+let backend_printer f = function
+  | Default -> Format.pp_print_string f "Default"
+  | Monolith -> Format.pp_print_string f "Monolith"
 
-let type_check load_path name sigs =
-  let md = Tmodule.init_muc name in
-  let penv =
-    module_name_of_path name |> Utils.Sstr.singleton |> Typing.penv load_path
-  in
-  List.fold_left (Typing.type_sig_item penv) md sigs |> Tmodule.wrap_up_muc
-  |> fun file -> file.fl_sigs
+let backend_parser = function
+  | "default" -> Ok Default
+  | "monolith" -> Ok Monolith
+  | s -> Error (`Msg (Printf.sprintf "Error: `%s' is not a valid argument" s))
 
-let main path =
-  let module_name = module_name_of_path path in
-  Parser_frontend.parse_ocaml_gospel path
-  |> type_check [] path
-  |> Gospel_rtac.main module_name
-  |> Pprintast.structure Fmt.stdout
+let main = function
+  | Default -> Gospel_rtac.Backend.generate
+  | Monolith -> Gospel_rtac_monolith.Backend.generate
 
 open Cmdliner
 
@@ -36,8 +29,14 @@ let ocaml_file =
     & pos 0 (some (parse, Format.pp_print_string)) None
     & info [] ~docv:"FILE")
 
+let backend =
+  Arg.(
+    value
+    & opt (conv ~docv:"BACKEND" (backend_parser, backend_printer)) Default
+    & info [ "b"; "backend" ] ~docv:"BACKEND")
+
 let cmd =
   let doc = "Run GOSPEL-RTAC." in
-  (Term.(const main $ ocaml_file), Term.info "gospel-rtac" ~doc)
+  (Term.(const main $ backend $ ocaml_file), Term.info "gospel-rtac" ~doc)
 
 let () = Term.(exit @@ eval cmd)

@@ -1,0 +1,5 @@
+(library
+ (name gospel_rtac_monolith)
+ (preprocess
+  (pps ppxlib.metaquot))
+ (libraries gospel_rtac_core fmt gospel ppxlib ppxlib.ast))
