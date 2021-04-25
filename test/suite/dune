@@ -1,4 +1,4 @@
 (test
  (name test)
- (package gospel-rtac)
- (libraries alcotest gospel-runtime fmt arrays arith exceptions terms))
+ (package ortac)
+ (libraries alcotest ortac-runtime fmt arrays arith exceptions terms))

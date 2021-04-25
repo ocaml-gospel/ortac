@@ -1,4 +1,4 @@
-module type G = Gospel_rtac_core.Config_intf.S
+module type G = Ortac_core.Config_intf.S
 
 module M : G = struct
   open Ppxlib
@@ -7,7 +7,7 @@ module M : G = struct
     let loc = Location.none
   end)
 
-  let open_modules = [%stri open Gospel_runtime]
+  let open_modules = [%stri open Ortac_runtime]
 
   let report_pre acc_name =
     [%expr Errors.check_and_do Errors.report_and_raise [%e evar acc_name]]
@@ -30,8 +30,8 @@ module M : G = struct
       failwith "This portion of code shouldn't be accessible"]
 end
 
-module B = Gospel_rtac_core.Builder.Make (M)
-module G = Gospel_rtac_core.Gospel_rtac.Make (M)
+module B = Ortac_core.Builder.Make (M)
+module G = Ortac_core.Ortac.Make (M)
 
 let tests module_name s =
   try
@@ -47,8 +47,8 @@ let tests module_name s =
   | e -> raise e
 
 let generate path =
-  let module_name = Gospel_rtac_core.Utils.module_name_of_path path in
+  let module_name = Ortac_core.Utils.module_name_of_path path in
   Gospel.Parser_frontend.parse_ocaml_gospel path
-  |> Gospel_rtac_core.Utils.type_check [] path
+  |> Ortac_core.Utils.type_check [] path
   |> tests module_name
   |> Ppxlib_ast.Pprintast.structure Fmt.stdout

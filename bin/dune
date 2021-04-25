@@ -1,6 +1,6 @@
 (executable
  (name cli)
- (public_name gospel-rtac)
- (package gospel-rtac)
- (libraries cmdliner fmt gospel gospel_rtac gospel_rtac_core
-   gospel_rtac_monolith ppxlib ppxlib.ast))
+ (public_name ortac)
+ (package ortac)
+ (libraries cmdliner fmt gospel ortac ortac_core ortac_monolith ppxlib
+   ppxlib.ast))
