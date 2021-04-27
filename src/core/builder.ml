@@ -2,9 +2,7 @@ open Ppxlib
 open Gospel
 open Fmt
 
-module type G = Config_intf.S
-
-module Make (F : G) = struct
+module Make (F : Backend.S) = struct
   include Ast_builder.Make (struct
     let loc = Location.none
   end)

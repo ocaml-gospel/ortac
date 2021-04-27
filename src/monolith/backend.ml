@@ -1,6 +1,4 @@
-module type G = Ortac_core.Config_intf.S
-
-module M : G = struct
+module M : Ortac_core.Backend.S = struct
   open Ppxlib
 
   include Ast_builder.Make (struct

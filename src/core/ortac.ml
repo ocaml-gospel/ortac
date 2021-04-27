@@ -2,9 +2,7 @@ open Ppxlib
 open Gospel
 open Fmt
 
-module type G = Config_intf.S
-
-module Make (G : G) = struct
+module Make (G : Backend.S) = struct
   open Builder.Make (G)
 
   let of_gospel_args args =

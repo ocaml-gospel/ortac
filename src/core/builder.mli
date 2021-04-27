@@ -1,9 +1,7 @@
 open Ppxlib
 open Gospel
 
-module type G = Config_intf.S
-
-module Make (F : G) : sig
+module Make (F : Backend.S) : sig
   include Ast_builder.S
 
   val noloc : 'a -> 'a loc
