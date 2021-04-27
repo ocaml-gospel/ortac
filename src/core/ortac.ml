@@ -2,8 +2,9 @@ open Ppxlib
 open Gospel
 open Fmt
 
-module Make (G : Backend.S) = struct
-  open Builder.Make (G)
+module Make (B : Backend.S) = struct
+  open Builder
+  module T = Translation.Make (B)
 
   let of_gospel_args args =
     let to_string x = str "%a" Tast.Ident.pp x.Tterm.vs_name in
@@ -28,23 +29,18 @@ module Make (G : Backend.S) = struct
       (* Declaration location *)
       let loc = val_desc.vd_loc in
       if List.length spec.sp_args = 0 then
-        raise (Unsupported (Some loc, "non-function value"));
-      let setup_expr, loc_name, acc_name = mk_setup loc in
+        raise (T.Unsupported (Some loc, "non-function value"));
+      let setup_expr, acc_name = T.mk_setup loc val_desc.vd_name.id_str in
       (* Arguments *)
       let eargs, pargs = of_gospel_args spec.sp_args in
       (* Returned pattern *)
-      let ret_pat, ret_expr = returned_pattern spec.sp_ret in
-      let eloc = evar loc_name in
-      let pre_checks =
-        mk_pre_checks acc_name val_desc.vd_name.id_str eloc spec.sp_pre
-      in
+      let ret_pat, ret_expr = T.returned_pattern spec.sp_ret in
+      let pre_checks = T.mk_pre_checks acc_name spec.sp_pre in
       let let_call =
-        mk_call acc_name ret_pat loc val_desc.vd_name.id_str eloc spec.sp_xpost
+        T.mk_call acc_name ret_pat loc val_desc.vd_name.id_str spec.sp_xpost
           eargs
       in
-      let post_checks =
-        mk_post_checks acc_name val_desc.vd_name.id_str eloc spec.sp_post
-      in
+      let post_checks = T.mk_post_checks acc_name spec.sp_post in
       let body =
         efun pargs @@ setup_expr @@ pre_checks @@ let_call @@ post_checks
         @@ ret_expr
@@ -53,9 +49,17 @@ module Make (G : Backend.S) = struct
     in
     Option.map process val_desc.vd_spec
 
-  let signature =
-    List.filter_map (fun (sig_item : Tast.signature_item) ->
-        match sig_item.sig_desc with
-        | Sig_val (decl, _ghost) -> value decl
-        | _ -> None)
+  let signature module_name s =
+    let declarations =
+      List.filter_map
+        (fun (sig_item : Tast.signature_item) ->
+          match sig_item.sig_desc with
+          | Sig_val (decl, _ghost) -> value decl
+          | _ -> None)
+        s
+    in
+    let include_lib =
+      pmod_ident (lident module_name) |> include_infos |> pstr_include
+    in
+    B.open_modules :: include_lib :: declarations
 end

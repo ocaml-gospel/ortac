@@ -28,25 +28,11 @@ module M : Ortac_core.Backend.S = struct
       failwith "This portion of code shouldn't be accessible"]
 end
 
-module B = Ortac_core.Builder.Make (M)
 module G = Ortac_core.Ortac.Make (M)
-
-let tests module_name s =
-  try
-    let include_lib =
-      B.pmod_ident (B.lident module_name) |> B.include_infos |> B.pstr_include
-    in
-    let declarations = G.signature s in
-    B.mk_open :: include_lib :: declarations
-  with
-  | B.Unsupported (_loc, msg) ->
-      let open Fmt in
-      failwith "%a: unsupported %s" (styled `Red string) "Error" msg
-  | e -> raise e
 
 let generate path =
   let module_name = Ortac_core.Utils.module_name_of_path path in
   Gospel.Parser_frontend.parse_ocaml_gospel path
   |> Ortac_core.Utils.type_check [] path
-  |> tests module_name
+  |> G.signature module_name
   |> Ppxlib_ast.Pprintast.structure Fmt.stdout
