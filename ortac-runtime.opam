@@ -1,14 +1,14 @@
 opam-version: "2.0"
-synopsis: "Runtime library for gospel-rtac"
+synopsis: "Runtime library for ortac"
 description: """
-Runtime library for gospel-rtac
+Runtime library for ortac
 """
 maintainer: ["Clément Pascutto <clement@pascutto.fr>"]
 authors: ["Clément Pascutto <clement@pascutto.fr>"]
-homepage: "https://github.com/pascutto/gospel-rtac"
-dev-repo: "git+https://github.com/pascutto/gospel-rtac.git"
-doc: "https://pascutto.github.io/gospel-rtac/"
-bug-reports: "https://github.com/pascutto/gospel-rtac/issues"
+homepage: "https://github.com/ocaml-gospel/ortac"
+dev-repo: "git+https://github.com/ocaml-gospel/ortac.git"
+doc: "https://pascutto.github.io/ortac/"
+bug-reports: "https://github.com/ocaml-gospel/ortac/issues"
 build: [
   ["dune" "subst"] {pinned}
   [

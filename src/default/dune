@@ -1,5 +1,5 @@
 (library
- (name gospel_rtac)
+ (name ortac)
  (preprocess
   (pps ppxlib.metaquot))
- (libraries gospel_rtac_core fmt gospel ppxlib ppxlib.ast))
+ (libraries ortac_core fmt gospel ppxlib ppxlib.ast))

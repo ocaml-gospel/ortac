@@ -2,15 +2,15 @@ open Exceptions__Lib_rtac
 open Common
 
 let bad_raise_notfound () =
-  check_raises_gospel "bad_raise_notfound" (fun () ->
+  check_raises_ortac "bad_raise_notfound" (fun () ->
       bad_raise_notfound 0 |> ignore)
 
 let undeclared_raise_notfound () =
-  check_raises_gospel "bad_raise_notfound" (fun () ->
+  check_raises_ortac "bad_raise_notfound" (fun () ->
       undeclared_raise_notfound 0 |> ignore)
 
 let raise_invalidarg () =
-  check_raises_gospel "raise_invalidarg with bad string" (fun () ->
+  check_raises_ortac "raise_invalidarg with bad string" (fun () ->
       raise_invalidarg "not the right string" |> ignore);
   check_raises "raise_invalidarg with correct string"
     (Invalid_argument "invalid") (fun () ->

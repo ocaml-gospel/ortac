@@ -10,8 +10,8 @@ let backend_parser = function
   | s -> Error (`Msg (Printf.sprintf "Error: `%s' is not a valid argument" s))
 
 let main = function
-  | Default -> Gospel_rtac.Backend.generate
-  | Monolith -> Gospel_rtac_monolith.Backend.generate
+  | Default -> Ortac.Backend.generate
+  | Monolith -> Ortac_monolith.Backend.generate
 
 open Cmdliner
 
@@ -36,7 +36,7 @@ let backend =
     & info [ "b"; "backend" ] ~docv:"BACKEND")
 
 let cmd =
-  let doc = "Run GOSPEL-RTAC." in
-  (Term.(const main $ backend $ ocaml_file), Term.info "gospel-rtac" ~doc)
+  let doc = "Run ORTAC." in
+  (Term.(const main $ backend $ ocaml_file), Term.info "ortac" ~doc)
 
 let () = Term.(exit @@ eval cmd)

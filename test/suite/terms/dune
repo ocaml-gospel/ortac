@@ -1,6 +1,6 @@
 (library
  (name terms)
  (flags :standard -w -27-11)
- (libraries ppxlib gospel-runtime))
+ (libraries ppxlib ortac-runtime))
 
 (include ../dune.common)

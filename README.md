@@ -1,13 +1,11 @@
-# gospel-rtac
+# `ortac` - OCaml Runtime Assertion Checking.
 
-Runtime assertion checking based on Gospel
+**Disclamer:** This project is still experimental. No support will be provided
+at this point, and its behaviour is still unstable.
 
 ## Installation
 
 ```
-opam pin add --yes https://github.com/pascutto/gospel-rtac.git
-opam install gospel-rtac
+opam pin add -y https://github.com/ocaml-gospel/ortac.git
+opam install ortac
 ```
-
-If you want to contribute to the project, please read
-[CONTRIBUTING.md](CONTRIBUTING.md).

@@ -1,3 +1,3 @@
 (lang dune 2.0)
-(name gospel-rtac)
+(name ortac)
 (implicit_transitive_deps false)

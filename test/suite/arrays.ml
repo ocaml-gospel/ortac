@@ -5,7 +5,7 @@ let bad_get_oor () =
   let arr =
     check_success "create with right arguments" (fun () -> create 10 0)
   in
-  check_raises_gospel "bad_get is out of range" (fun () ->
+  check_raises_ortac "bad_get is out of range" (fun () ->
       bad_get arr 9 |> ignore)
 
 let bad_get_wrong_value () =
@@ -13,11 +13,11 @@ let bad_get_wrong_value () =
     check_success "create with right arguments" (fun () -> create 10 0)
   in
   check_success "set with right arguments" (fun () -> set arr 8 1);
-  check_raises_gospel "bad_get doesn't return the right value" (fun () ->
+  check_raises_ortac "bad_get doesn't return the right value" (fun () ->
       bad_get arr 8 |> ignore)
 
 let bad_create () =
-  check_raises_gospel "bad_create fills with wrong values" (fun () ->
+  check_raises_ortac "bad_create fills with wrong values" (fun () ->
       bad_create 10 1729 |> ignore)
 
 let normal () =
@@ -36,17 +36,17 @@ let copy_sort_success () =
       copy_sort [| 314; 42; 73; 57; 421 |] |> ignore)
 
 let bad_sort_fails () =
-  check_raises_gospel "bad_sort returns always the same array" (fun () ->
+  check_raises_ortac "bad_sort returns always the same array" (fun () ->
       let arr = create 10 0 in
       bad_sort arr |> ignore)
 
 let constant_sort_fails () =
-  check_raises_gospel
+  check_raises_ortac
     "constant_sort returns arrays with rigth length but wrong values" (fun () ->
       constant_sort [| 314; 42; 73; 57; 421 |] |> ignore)
 
 let create () =
-  check_raises_gospel "create with negative length" (fun () ->
+  check_raises_ortac "create with negative length" (fun () ->
       create (-10) 0 |> ignore)
 
 let suite =
