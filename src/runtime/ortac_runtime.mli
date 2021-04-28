@@ -1,46 +1,33 @@
-type term = Pre of string | Post of string | XPost of string
+type location = { start : Lexing.position; stop : Lexing.position }
 
-type error_kind = Violated | RuntimeExn of exn
+type term_kind = Pre | Post | XPost
 
 type error =
-  | Condition of {
-      loc : Ppxlib.location;
-      fun_name : string;
-      term : term;
-      error_kind : error_kind;
-    }
-  | Unexpected_exception of {
-      loc : Ppxlib.location;
-      fun_name : string;
-      exn : exn;
-    }
+  | Violated_condition of { term : string; term_kind : term_kind }
+  | Specification_failure of { term : string; term_kind : term_kind; exn : exn }
+  | Unexpected_exception of { allowed_exn : string list; exn : exn }
+  | Uncaught_checks of { term : string }
+  | Unexpected_checks of { terms : string list }
 
-val mk_condition : Ppxlib.location -> string -> term -> error_kind -> error
+type error_report = {
+  loc : location;
+  fun_name : string;
+  mutable errors : error list;
+}
 
-val mk_unexpected_exception : Ppxlib.location -> string -> exn -> error
-
-exception Error of error list
+exception Error of error_report
 
 module Errors : sig
   type t
 
-  val empty : unit -> t
+  val create : location -> string -> t
   (** [empty] create a new empty error container *)
 
-  val register : error -> t -> unit
-  (** [register a l] add the element [a] to [l] *)
-
-  val raise_errors : t -> unit
-  (** [raise_errors l] raises [Error] with the content of [l] *)
+  val register : t -> error -> unit
+  (** [register t a] add the element [a] to [t] *)
 
   val report : t -> unit
   (** [report l] prints the content of [l] *)
-
-  val report_and_raise : t -> unit
-  (** [report_and_raise l] report the content of [l] and raise it as an [Error] *)
-
-  val check_and_do : (t -> unit) -> t -> unit
-  (** [check_and_do f l] apply [f] to [l] if [l] is not empty *)
 end
 
 module Z : sig

@@ -1,7 +1,5 @@
-module type G = Config_intf.S
-
-module Make (G : G) : sig
-  val signature : Gospel.Tast.signature_item list -> Ppxlib.structure_item list
+module Make (G : Backend.S) : sig
+  val signature : string -> Gospel.Tast.signature -> Ppxlib.structure
   (** [signature s] generate the representation of the test file corresponding
       to [s] *)
 end
