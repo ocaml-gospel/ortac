@@ -26,17 +26,8 @@ module Errors : sig
   val register : t -> error -> unit
   (** [register t a] add the element [a] to [t] *)
 
-  val raise : t -> 'a
-  (** [raise_errors l] raises [Error] with the content of [l] *)
-
   val report : t -> unit
   (** [report l] prints the content of [l] *)
-
-  val report_and_raise : t -> 'a
-  (** [report_and_raise l] report the content of [l] and raise it as an [Error] *)
-
-  val check_and_do : (t -> unit) -> t -> unit
-  (** [check_and_do f l] apply [f] to [l] if [l] is not empty *)
 end
 
 module Z : sig

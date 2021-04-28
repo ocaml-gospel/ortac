@@ -89,8 +89,6 @@ let pp_error_report ppf { loc; fun_name; errors } =
 
 exception Error of error_report
 
-let error e = raise (Error e)
-
 module Errors = struct
   type t = error_report
 
@@ -98,15 +96,12 @@ module Errors = struct
 
   let register t e = t.errors <- e :: t.errors
 
-  let raise = error
-
-  let report = pp_error_report stderr
-
-  let report_and_raise t =
-    report t;
-    raise t
-
-  let check_and_do f t = match t.errors with [] -> () | _ -> f t
+  let report t =
+    match t.errors with
+    | [] -> ()
+    | _ ->
+        pp_error_report stderr t;
+        raise (Error t)
 end
 
 module Z = struct

@@ -30,17 +30,18 @@ module Make (B : Backend.S) = struct
       let loc = val_desc.vd_loc in
       if List.length spec.sp_args = 0 then
         raise (T.Unsupported (Some loc, "non-function value"));
-      let setup_expr, acc_name = T.mk_setup loc val_desc.vd_name.id_str in
+      let setup_expr, register_name = T.mk_setup loc val_desc.vd_name.id_str in
+      let register_name = evar register_name in
       (* Arguments *)
       let eargs, pargs = of_gospel_args spec.sp_args in
       (* Returned pattern *)
       let ret_pat, ret_expr = T.returned_pattern spec.sp_ret in
-      let pre_checks = T.mk_pre_checks acc_name spec.sp_pre in
+      let pre_checks = T.mk_pre_checks ~register_name spec.sp_pre in
       let let_call =
-        T.mk_call acc_name ret_pat loc val_desc.vd_name.id_str spec.sp_xpost
-          eargs
+        T.mk_call ~register_name ret_pat loc val_desc.vd_name.id_str
+          spec.sp_xpost eargs
       in
-      let post_checks = T.mk_post_checks acc_name spec.sp_post in
+      let post_checks = T.mk_post_checks ~register_name spec.sp_post in
       let body =
         efun pargs @@ setup_expr @@ pre_checks @@ let_call @@ post_checks
         @@ ret_expr
@@ -61,5 +62,5 @@ module Make (B : Backend.S) = struct
     let include_lib =
       pmod_ident (lident module_name) |> include_infos |> pstr_include
     in
-    B.open_modules :: include_lib :: declarations
+    B.prelude @ include_lib :: declarations
 end

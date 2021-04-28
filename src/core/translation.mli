@@ -8,10 +8,11 @@ module Make (B : Backend.S) : sig
 
   val mk_setup : location -> string -> (expression -> expression) * string
 
-  val mk_pre_checks : label -> Tterm.term list -> expression -> expression
+  val mk_pre_checks :
+    register_name:expression -> Tterm.term list -> expression -> expression
 
   val mk_call :
-    label ->
+    register_name:expression ->
     pattern ->
     location ->
     label ->
@@ -20,5 +21,6 @@ module Make (B : Backend.S) : sig
     expression ->
     expression
 
-  val mk_post_checks : label -> Tterm.term list -> expression -> expression
+  val mk_post_checks :
+    register_name:expression -> Tterm.term list -> expression -> expression
 end

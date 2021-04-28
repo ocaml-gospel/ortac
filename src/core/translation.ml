@@ -211,7 +211,9 @@ module Make (B : Backend.S) = struct
           ~rhs:
             [%expr
               [%e
-                F.unexpected_exn ~allowed_exn:[] ~exn:(evar "e") ~register_name]];
+                F.unexpected_exn ~allowed_exn:[] ~exn:(evar "e") ~register_name];
+              [%e F.report ~register_name];
+              raise e];
       ]
     in
     let assert_false_case =
@@ -248,7 +250,7 @@ module Make (B : Backend.S) = struct
         let rhs =
           [%expr
             [%e List.map (pexp_match (evar alias)) cases |> esequence];
-            Errors.check_and_do Errors.report_and_raise [%e evar register_name];
+            [%e F.report ~register_name];
             raise [%e evar alias]]
         in
         let lhs =
@@ -294,14 +296,13 @@ module Make (B : Backend.S) = struct
     in
     ((fun next -> let_loc @@ let_acc @@ next), register_name)
 
-  let mk_pre_checks register_name pres =
-    let pre_epxr = pre register_name pres in
-    fun next ->
-      pexp_sequence pre_epxr
-      @@ pexp_sequence (B.report_pre register_name)
-      @@ next
+  let mk_pre_checks ~register_name pres next =
+    [%expr
+      [%e pre register_name pres];
+      [%e F.report ~register_name];
+      [%e next]]
 
-  let mk_call register_name ret_pat loc fun_name xpost eargs =
+  let mk_call ~register_name ret_pat loc fun_name xpost eargs =
     let call = pexp_apply (evar fun_name) eargs in
     let check_raises = xpost_guard register_name xpost call in
     fun next ->
@@ -309,7 +310,9 @@ module Make (B : Backend.S) = struct
         let [%p ret_pat] = [%e check_raises] in
         [%e next]]
 
-  let mk_post_checks register_name terms next =
-    let post_expr = post register_name terms in
-    pexp_sequence post_expr (pexp_sequence (B.report_post register_name) next)
+  let mk_post_checks ~register_name posts next =
+    [%expr
+      [%e post register_name posts];
+      [%e F.report ~register_name];
+      [%e next]]
 end

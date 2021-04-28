@@ -9,7 +9,7 @@ let term_kind kind =
   |> fun c -> pexp_construct c None
 
 let register register_name e =
-  [%expr [%e e] |> Errors.register [%e evar register_name]]
+  [%expr [%e e] |> Errors.register [%e register_name]]
 
 let violated kind ~term ~register_name =
   [%expr
@@ -32,8 +32,6 @@ let unexpected_exn ~allowed_exn ~exn ~register_name =
   [%expr
     Unexpected_exception { allowed_exn = [%e allowed_exn]; exn = [%e exn] }]
   |> register register_name
-  |> fun e ->
-  pexp_sequence e [%expr Errors.report_and_raise [%e evar register_name]]
 
 let uncaught_checks ~term ~register_name =
   [%expr Uncaught_checks { term = [%e eterm term] }] |> register register_name
@@ -41,3 +39,5 @@ let uncaught_checks ~term ~register_name =
 let unexpected_checks ~terms ~register_name =
   let terms = List.map eterm terms |> elist in
   [%expr Unexpected_checks { terms = [%e terms] }] |> register register_name
+
+let report ~register_name = [%expr Errors.report [%e register_name]]
