@@ -1,0 +1,4 @@
+(library
+  (name monolith_runtime)
+  (public_name monolith-runtime)
+  (libraries monolith))

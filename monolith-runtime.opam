@@ -1,0 +1,25 @@
+opam-version: "2.0"
+synopsis: "Runtime library for ortac used with monolith"
+description: """
+Runtime library for ortac used with monolith
+"""
+maintainer: ["Nicolas Osborne <nicolas.osborne.etu@univ-lille.fr>"]
+author: ["Nicolas Osborne <nicolas.osborne.etu@univ-lille.fr>"]
+homepage: "https://github.com/ocaml-gospel/ortac"
+dev-repo: "git+https://github.com/ocaml-gospel/ortac.git"
+doc: "https://pascutto.github.io/ortac/"
+bug-reports: "https://github.com/ocaml-gospel/ortac/issues"
+build: [
+  ["dune" "subst"] {pinned}
+  [
+    "dune"
+    "build"
+    "-p"
+  name
+    "-j"
+    jobs
+    "@install"
+    "@runtest" {with-test}
+  "@doc" {with-doc}
+  ]
+]

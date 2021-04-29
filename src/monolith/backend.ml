@@ -103,7 +103,7 @@ let standalone module_name s =
   let mod_can = mk_candidate module_name in
   let specs = mk_specs s in
   [%stri open Monolith]
-  :: [%stri open Gospel_runtime] :: mod_ref :: mod_can :: specs
+  :: [%stri module M = Monolith_runtime] :: mod_ref :: mod_can :: specs
 
 let generate path =
   let module_name = Ortac_core.Utils.module_name_of_path path in

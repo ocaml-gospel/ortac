@@ -138,5 +138,3 @@ module Array = struct
 
   let length arr = Array.length arr |> Z.of_int
 end
-
-module M = Monolith_runtime
