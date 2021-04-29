@@ -34,6 +34,11 @@ module Generators = struct
     | "char" -> [%expr Gen.char]
     | "int" -> [%expr Gen.int 1024]
     | "string" -> [%expr Gen.string (Gen.int 1024) Gen.char]
+    | "list" -> (
+        match params with
+        | [] -> failwith "list should have a parameter"
+        | [ param ] -> [%expr Gen.list (Gen.int Int.max_int) [%e ty2gen param]]
+        | _ -> failwith "don't know what to do with more than one parameter")
     | "array" -> (
         match params with
         | [] -> failwith "array should have a parameter"
