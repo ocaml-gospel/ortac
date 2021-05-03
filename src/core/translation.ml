@@ -79,6 +79,7 @@ module Make (B : Backend.S) = struct
     match t.t_node with
     | Tvar { vs_name; _ } -> evar (str "%a" Identifier.Ident.pp vs_name)
     | Tconst c -> econst c
+    | Tfield (t, f) -> pexp_field (term t) (lident f.ls_name.id_str)
     | Tapp (fs, []) when Tterm.(ls_equal fs fs_bool_true) -> [%expr true]
     | Tapp (fs, []) when Tterm.(ls_equal fs fs_bool_false) -> [%expr false]
     | Tapp (fs, tlist) when Tterm.is_fs_tuple fs ->

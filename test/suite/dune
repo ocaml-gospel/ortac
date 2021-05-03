@@ -1,4 +1,4 @@
 (test
  (name test)
  (package ortac)
- (libraries alcotest ortac-runtime fmt arrays arith exceptions terms))
+ (libraries alcotest ortac-runtime fmt arrays arith exceptions terms ltypes))
