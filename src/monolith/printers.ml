@@ -13,17 +13,9 @@ let str2printer ty =
   | "string" -> [%expr PPrintOCaml.string]
   | s -> failwith (Printf.sprintf "%s printer is not yet implementer" s)
 
-let get_ty (ld : Gospel.Tterm.lsymbol Gospel.Tast.label_declaration) =
-  match ld.ld_field.ls_value with
-  | Some ty -> (
-      match ty.ty_node with
-      | Tyvar tvs -> tvs.tv_name.id_str
-      | Tyapp (tys, _params) -> tys.ts_ident.id_str)
-  | None -> failwith "can't find type"
-
 let mk_field (ld : Gospel.Tterm.lsymbol Gospel.Tast.label_declaration) =
   let field = ld.ld_field.ls_name.id_str in
-  let printer = str2printer (get_ty ld) in
+  let printer = str2printer (Utils.get_ld_ident ld) in
   [%expr [%e B.estring field], [%e printer] [%e B.evar field]]
 
 let record_printer (rec_decl : Gospel.Tast.rec_declaration) =
