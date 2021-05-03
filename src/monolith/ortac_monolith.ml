@@ -51,7 +51,7 @@ module Generators = struct
     | Tyvar tvs -> string2gen tvs.tv_name.id_str []
     | Tyapp (tys, params) -> string2gen tys.ts_ident.id_str params
 
-  let generator_nr _ = failwith "not yet implemented"
+  let generator_nr _ = failwith "non-recursive generator not yet implemented"
 
   let record_gen ty_name (rec_decl : Gospel.Tast.rec_declaration) =
     let id = B.pvar ty_name in
@@ -74,7 +74,7 @@ module Generators = struct
     let ty_name = type_decl.td_ts.ts_ident.id_str in
     match type_decl.td_kind with
     | Gospel.Tast.Pty_record rec_decl -> record_gen ty_name rec_decl
-    | _ -> failwith "not yet implemented"
+    | _ -> failwith "variant not yet implemented"
 
   let generator rec_flag type_decl =
     match rec_flag with
@@ -111,7 +111,7 @@ let find_gen s =
   | Ptyp_constr ({ txt = Lident "bool"; _ }, _) -> [%expr Gen.bool]
   | Ptyp_constr ({ txt = Lident "string"; _ }, _) ->
       [%expr Gen.string (Gen.int 1024) Gen.char]
-  | _ -> failwith "not implemented yet"
+  | _ -> failwith "gen not implemented yet"
 
 let find_printer s =
   match s.ptyp_desc with
@@ -119,7 +119,7 @@ let find_printer s =
   | Ptyp_constr ({ txt = Lident "int"; _ }, _) -> [%expr Print.int]
   | Ptyp_constr ({ txt = Lident "bool"; _ }, _) -> [%expr Print.bool]
   | Ptyp_constr ({ txt = Lident "string"; _ }, _) -> [%expr Print.string]
-  | _ -> failwith "not implemented yet"
+  | _ -> failwith "printer not implemented yet"
 
 let rec translate_ret s =
   match s.ptyp_desc with
@@ -131,7 +131,7 @@ let rec translate_ret s =
       [%expr list [%e translate_ret param]]
   | Ptyp_constr ({ txt = Lident "array"; _ }, [ param ]) ->
       [%expr M.deconstructible_array [%e find_printer param]]
-  | _ -> failwith "not implemented yet"
+  | _ -> failwith "monolith deconstructible spec not implemented yet"
 
 let rec translate s =
   match s.ptyp_desc with
@@ -140,7 +140,7 @@ let rec translate s =
   | Ptyp_arrow (_, x, y) when is_arrow y.ptyp_desc ->
       [%expr [%e translate x] ^> [%e translate y]]
   | Ptyp_arrow (_, x, y) -> [%expr [%e translate x] ^!> [%e translate_ret y]]
-  | _ -> failwith "not implemented yet"
+  | _ -> failwith "monolith constructible spec not implemented yet"
 
 and translate_constr ty params =
   match ty with

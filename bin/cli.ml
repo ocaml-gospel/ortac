@@ -10,8 +10,8 @@ let backend_parser = function
   | s -> Error (`Msg (Printf.sprintf "Error: `%s' is not a valid argument" s))
 
 let main = function
-  | Default -> Ortac.Backend.generate
-  | Monolith -> Ortac_monolith.Backend.generate
+  | Default -> Ortac_default.generate
+  | Monolith -> Ortac_monolith.generate
 
 open Cmdliner
 
