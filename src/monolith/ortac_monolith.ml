@@ -56,6 +56,7 @@ let rec translate_ret s =
       [%expr list [%e translate_ret param]]
   | Ptyp_constr ({ txt = Lident "array"; _ }, [ param ]) ->
       [%expr M.deconstructible_array [%e find_printer param]]
+  | Ptyp_constr ({ txt = Lident s; _ }, _) -> B.evar (Printf.sprintf "S.%s" s)
   | _ -> failwith "monolith deconstructible spec not implemented yet"
 
 let rec translate s =
@@ -65,7 +66,9 @@ let rec translate s =
   | Ptyp_arrow (_, x, y) when is_arrow y.ptyp_desc ->
       [%expr [%e translate x] ^> [%e translate y]]
   | Ptyp_arrow (_, x, y) -> [%expr [%e translate x] ^!> [%e translate_ret y]]
-  | _ -> failwith "monolith constructible spec not implemented yet"
+  | _ ->
+      failwith
+        "monolith constructible spec not implemented yet (from translate)"
 
 and translate_constr ty params =
   match ty with
@@ -86,7 +89,7 @@ and translate_constr ty params =
           [%expr
             M.constructible_array [%e find_gen param] [%e find_printer param]]
       | _ -> failwith "don't know what to do with Array with multiple params")
-  | t -> failwith (Printf.sprintf "%s is not yet implemented" t)
+  | t -> B.evar (Printf.sprintf "S.%s" t)
 
 let mk_declaration (sig_item : Gospel.Tast.signature_item) =
   match sig_item.sig_desc with
@@ -118,15 +121,16 @@ let mk_specs s =
   [ mk_declarations s; main ]
 
 let standalone module_name s =
-  let mod_ref = mk_reference module_name s in
-  let mod_can = mk_candidate module_name in
-  let mod_gen = Generators.mk_generators s in
-  let mod_pri = Printers.printers s in
+  let module_r = mk_reference module_name s in
+  let module_c = mk_candidate module_name in
+  let module_g = Generators.mk_generators s in
+  let module_p = Printers.printers s in
+  let module_s = Spec.specs s in
   let specs = mk_specs s in
   [%stri open Monolith]
   ::
   [%stri module M = Monolith_runtime]
-  :: mod_ref :: mod_can :: mod_gen :: mod_pri :: specs
+  :: module_r :: module_c :: module_g :: module_p :: module_s :: specs
 
 let generate path =
   let module_name = Ortac_core.Utils.module_name_of_path path in
