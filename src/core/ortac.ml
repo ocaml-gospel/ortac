@@ -4,7 +4,7 @@ open Fmt
 
 module Make (B : Backend.S) = struct
   open Builder
-  module T = Translation.Make (B)
+  module T = Translation
 
   let of_gospel_args args =
     let to_string x = str "%a" Tast.Ident.pp x.Tterm.vs_name in
