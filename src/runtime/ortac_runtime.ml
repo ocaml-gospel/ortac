@@ -21,7 +21,7 @@ let pp_term_kind =
       | Pre -> "pre-condition"
       | Post -> "post-condition"
       | XPost -> "exceptional post-condition")
-    (fun ppf -> pf ppf "%a" (styled `Yellow string))
+    (styled `Yellow string)
 
 let pp_term = styled `Bold (quoted string)
 
@@ -55,24 +55,30 @@ let pp_error ppf = function
         pp_term_kind term_kind pp_term term pp_exn exn
   | Unexpected_exception { allowed_exn; exn } ->
       pf ppf
-        "it raised an unexpected exception:@\n\
+        "it raised an %a:@\n\
         \  @[%a@]@\n\
          only the following exceptions were declared:@\n\
-        \  @[%a@]" pp_exn exn pp_allowed_exn allowed_exn
+        \  @[%a@]"
+        (styled `Red string)
+        "unexpected exception" pp_exn exn pp_allowed_exn allowed_exn
   | Uncaught_checks { term } ->
       pf ppf
-        "a `checks' precondition violation in@\n\
+        "a %a in@\n\
         \  @[%a@]@\n\
          was not detected.@\n\
-         Function should have raised %a." pp_term term pp_quoted_exn
+         Function should have raised %a."
+        (styled `Red string)
+        "`checks' precondition violation" pp_term term pp_quoted_exn
         "Invalid_argument"
   | Unexpected_checks { terms } ->
       pf ppf
-        "it raised exception@\n\
+        "it %a@\n\
         \   @[%a@]\n\
          but none of the declared `checks' preconditions@\n\
         \  @[%a@]\n\
-         were violated." pp_quoted_exn "Invalid_argument" pp_terms terms
+         were violated."
+        (styled `Red string)
+        "raised exception" pp_quoted_exn "Invalid_argument" pp_terms terms
 
 type error_report = {
   loc : location;
@@ -82,8 +88,9 @@ type error_report = {
 
 let pp_error_report ppf { loc; fun_name; errors } =
   let pp_bullet pp ppf = pf ppf "- @[%a@]" pp in
-  pf ppf "%a@\nRuntime error in function %a@\n  @[%a@]" pp_loc loc pp_fun_name
-    fun_name
+  pf ppf "%a@\n%a in function %a@\n  @[%a@]" pp_loc loc
+    (styled_list [ `Bold; `Red ] string)
+    "Runtime error" pp_fun_name fun_name
     (list ~sep:(any "@\n") (pp_bullet pp_error))
     errors
 
