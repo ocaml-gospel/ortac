@@ -3,7 +3,34 @@ open Ppxlib
 module M : Ortac_core.Backend.S = struct
   let prelude =
     let loc = Location.none in
-    [ [%stri open Ortac_runtime] ]
+    [
+      [%stri open Ortac_runtime];
+      [%stri
+        module Errors = struct
+          type t = error_report
+
+          let create loc fun_name = { loc; fun_name; errors = [] }
+
+          let register t e = t.errors <- e :: t.errors
+
+          let is_pre = function
+            | Violated_condition e -> e.term_kind = Pre
+            | Specification_failure e -> e.term_kind = Pre
+            | _ -> false
+
+          let rec backoff = function
+            | [] -> false
+            | e :: es -> is_pre e || backoff es
+
+          let report t =
+            match t.errors with
+            | [] -> ()
+            | e when backoff e -> raise Monolith.PleaseBackOff
+            | _ ->
+                pp_error_report Fmt.stderr t;
+                raise (Error t)
+        end];
+    ]
 end
 
 module G = Ortac_core.Ortac.Make (M)

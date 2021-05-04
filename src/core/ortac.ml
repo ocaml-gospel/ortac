@@ -1,4 +1,5 @@
 open Ppxlib
+open Gospel
 
 module Make (B : Backend.S) = struct
   open Builder
