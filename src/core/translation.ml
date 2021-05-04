@@ -160,22 +160,23 @@ let term fail t =
       [%e fail (evar "e")];
       true]
 
-let conditions fail_violated fail_nonexec terms =
+let conditions ~term_printer fail_violated fail_nonexec terms =
   List.map
     (fun t ->
-      [%expr if not [%e term (fail_nonexec t) t] then [%e fail_violated t]])
+      let s = term_printer t in
+      [%expr if not [%e term (fail_nonexec s) t] then [%e fail_violated s]])
     terms
   |> esequence
 
-let post register_name =
+let post ~register_name ~term_printer =
   let fail_violated term = F.violated `Post ~term ~register_name in
   let fail_nonexec term exn = F.spec_failure `Post ~term ~exn ~register_name in
-  conditions fail_violated fail_nonexec
+  conditions ~term_printer fail_violated fail_nonexec
 
-let pre register_name =
+let pre ~register_name ~term_printer =
   let fail_violated term = F.violated `Pre ~term ~register_name in
   let fail_nonexec term exn = F.spec_failure `Pre ~term ~exn ~register_name in
-  conditions fail_violated fail_nonexec
+  conditions ~term_printer fail_violated fail_nonexec
 
 let rec xpost_pattern exn = function
   | Tterm.Pwild -> ppat_construct (lident exn) (Some ppat_any)
@@ -191,7 +192,7 @@ let rec xpost_pattern exn = function
         (xpost_pattern exn p.p_node)
         (noloc (str "%a" Tterm.Ident.pp s.vs_name))
 
-let xpost_guard register_name xpost call =
+let xpost_guard ~register_name ~term_printer xpost call =
   let module M = Map.Make (struct
     type t = Ttypes.xsymbol
 
@@ -220,15 +221,16 @@ let xpost_guard register_name xpost call =
       let cases =
         List.rev_map
           (fun (p, t) ->
+            let s = term_printer t in
             let fail_nonexec exn =
-              F.spec_failure `XPost ~term:t ~exn ~register_name
+              F.spec_failure `XPost ~term:s ~exn ~register_name
             in
             case ~guard:None
               ~lhs:(xpost_pattern name p.Tterm.p_node)
               ~rhs:
                 [%expr
                   if not [%e term fail_nonexec t] then
-                    [%e F.violated `XPost ~term:t ~register_name]])
+                    [%e F.violated `XPost ~term:s ~register_name]])
           ptlist
         @ [ assert_false_case ]
       in
@@ -291,22 +293,22 @@ let mk_setup loc fun_name =
   in
   ((fun next -> let_loc @@ let_acc @@ next), register_name)
 
-let mk_pre_checks ~register_name pres next =
+let mk_pre_checks ~register_name ~term_printer pres next =
   [%expr
-    [%e pre register_name pres];
+    [%e pre ~register_name ~term_printer pres];
     [%e F.report ~register_name];
     [%e next]]
 
-let mk_call ~register_name ret_pat loc fun_name xpost eargs =
+let mk_call ~register_name ~term_printer ret_pat loc fun_name xpost eargs =
   let call = pexp_apply (evar fun_name) eargs in
-  let check_raises = xpost_guard register_name xpost call in
+  let check_raises = xpost_guard ~register_name ~term_printer xpost call in
   fun next ->
     [%expr
       let [%p ret_pat] = [%e check_raises] in
       [%e next]]
 
-let mk_post_checks ~register_name posts next =
+let mk_post_checks ~register_name ~term_printer posts next =
   [%expr
-    [%e post register_name posts];
+    [%e post ~register_name ~term_printer posts];
     [%e F.report ~register_name];
     [%e next]]

@@ -8,10 +8,15 @@ val returned_pattern : Tast.lb_arg list -> pattern * expression
 val mk_setup : location -> string -> (expression -> expression) * string
 
 val mk_pre_checks :
-  register_name:expression -> Tterm.term list -> expression -> expression
+  register_name:expression ->
+  term_printer:(Tterm.term -> string) ->
+  Tterm.term list ->
+  expression ->
+  expression
 
 val mk_call :
   register_name:expression ->
+  term_printer:(Tterm.term -> string) ->
   pattern ->
   location ->
   label ->
@@ -21,4 +26,8 @@ val mk_call :
   expression
 
 val mk_post_checks :
-  register_name:expression -> Tterm.term list -> expression -> expression
+  register_name:expression ->
+  term_printer:(Tterm.term -> string) ->
+  Tterm.term list ->
+  expression ->
+  expression
