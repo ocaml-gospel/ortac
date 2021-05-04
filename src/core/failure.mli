@@ -1,15 +1,14 @@
 open Ppxlib
-open Gospel
 
 val violated :
   [ `Post | `Pre | `XPost ] ->
-  term:Tterm.term ->
+  term:string ->
   register_name:expression ->
   expression
 
 val spec_failure :
   [ `Post | `Pre | `XPost ] ->
-  term:Tterm.term ->
+  term:string ->
   exn:expression ->
   register_name:expression ->
   expression
@@ -20,9 +19,9 @@ val unexpected_exn :
   register_name:expression ->
   expression
 
-val uncaught_checks : term:Tterm.term -> register_name:expression -> expression
+val uncaught_checks : term:string -> register_name:expression -> expression
 
 val unexpected_checks :
-  terms:Tterm.term list -> register_name:expression -> expression
+  terms:string list -> register_name:expression -> expression
 
 val report : register_name:expression -> expression

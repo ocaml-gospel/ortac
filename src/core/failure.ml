@@ -1,7 +1,7 @@
 open Ppxlib
 open Builder
 
-let eterm t = Fmt.str "%a" Gospel.Tterm.print_term t |> estring
+let eterm t = estring t
 
 let term_kind kind =
   (match kind with `Pre -> "Pre" | `Post -> "Post" | `XPost -> "XPost")
