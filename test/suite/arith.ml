@@ -20,4 +20,8 @@ let power () =
 
 let suite =
   ( "Arithmetics",
-    [ ("forall", `Quick, forall); ("double forall", `Quick, double_forall); ("power", `Quick, power) ] )
+    [
+      ("forall", `Quick, forall);
+      ("double forall", `Quick, double_forall);
+      ("power", `Quick, power);
+    ] )

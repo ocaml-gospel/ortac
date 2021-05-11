@@ -18,16 +18,13 @@ module M : Ortac_core.Backend.S = struct
             | Specification_failure e -> e.term_kind = Pre
             | _ -> false
 
-          let rec backoff = function
-            | [] -> false
-            | e :: es -> is_pre e || backoff es
-
           let report t =
             match t.errors with
             | [] -> ()
-            | e when backoff e -> raise Monolith.PleaseBackOff
+            | errs when List.exists is_pre errs -> raise Monolith.PleaseBackOff
             | _ ->
-                pp_error_report Fmt.stderr t;
+                Fmt.flush Fmt.stderr (pp_error_report Fmt.stderr t);
+                (* pp_error_report Fmt.stderr t; *)
                 raise (Error t)
         end];
     ]
@@ -142,7 +139,7 @@ let mk_specs s =
   let main =
     [%stri
       let () =
-        let fuel = 10 in
+        let fuel = 100 in
         main fuel]
   in
   [ mk_declarations s; main ]
