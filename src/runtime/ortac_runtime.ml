@@ -23,7 +23,7 @@ let pp_term_kind =
       | XPost -> "exceptional post-condition")
     (styled `Yellow string)
 
-let pp_term = styled `Bold (quoted string)
+let pp_term = quoted (styled `Bold string)
 
 let pp_terms = list ~sep:(any "@\n") pp_term
 
@@ -36,9 +36,9 @@ let pp_loc =
   in
   styled_list [ `Underline; `Bold ] unstyled
 
-let pp_fun_name = styled `Blue (quoted string)
+let pp_fun_name = quoted (styled `Blue string)
 
-let pp_quoted_exn = styled `Bold (quoted string)
+let pp_quoted_exn = quoted (styled `Bold string)
 
 let pp_exn = using Printexc.to_string pp_quoted_exn
 
@@ -50,9 +50,10 @@ let pp_error ppf = function
         (styled `Red string)
         "violated"
   | Specification_failure { term; term_kind; exn } ->
-      pf ppf
-        "the evaluation of the %a@\n  @[%a@]@\nraised an exception:@\n  @[%a@]"
-        pp_term_kind term_kind pp_term term pp_exn exn
+      pf ppf "the evaluation of the %a@\n  @[%a@]@\n%a:@\n  @[%a@]" pp_term_kind
+        term_kind pp_term term
+        (styled `Red string)
+        "raised an exception" pp_exn exn
   | Unexpected_exception { allowed_exn; exn } ->
       pf ppf
         "it raised an %a:@\n\
