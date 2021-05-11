@@ -33,6 +33,8 @@ end
 module Z : sig
   include module type of Z
 
+  val pow : t -> t -> t
+
   val exists : t -> t -> (t -> bool) -> bool
   (** [exists i j p] is [true] iff the predicate there exists [k] within [i] and
       [j], included, for which [p] holds. *)
