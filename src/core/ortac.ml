@@ -12,18 +12,17 @@ module Make (B : Backend.S) = struct
     List.fold_right
       (fun arg (eargs, pargs) ->
         match arg with
-        | Gospel.Tast.Lunit ->
-            ((Nolabel, eunit) :: eargs, (Nolabel, punit) :: pargs)
-        | Gospel.Tast.Lnone x ->
+        | Tast.Lunit -> ((Nolabel, eunit) :: eargs, (Nolabel, punit) :: pargs)
+        | Tast.Lnone x ->
             let s = to_string x in
             ((Nolabel, evar s) :: eargs, (Nolabel, pvar s) :: pargs)
-        | Gospel.Tast.Loptional x ->
+        | Tast.Loptional x ->
             let s = to_string x in
             ((Optional s, evar s) :: eargs, (Nolabel, pvar s) :: pargs)
-        | Gospel.Tast.Lnamed x ->
+        | Tast.Lnamed x ->
             let s = to_string x in
             ((Labelled s, evar s) :: eargs, (Labelled s, pvar s) :: pargs)
-        | Gospel.Tast.Lghost _ -> (eargs, pargs))
+        | Tast.Lghost _ -> (eargs, pargs))
       args ([], [])
 
   let value (val_desc : Tast.val_description) =
@@ -66,7 +65,7 @@ module Make (B : Backend.S) = struct
   let signature module_name s =
     let declarations =
       List.filter_map
-        (fun (sig_item : Gospel.Tast.signature_item) ->
+        (fun (sig_item : Tast.signature_item) ->
           match sig_item.sig_desc with
           | Sig_val (decl, _ghost) -> value decl
           | _ -> None)

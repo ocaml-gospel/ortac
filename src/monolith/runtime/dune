@@ -1,4 +1,4 @@
 (library
- (name monolith_runtime)
- (public_name monolith-runtime)
+ (name ortac_runtime_monolith)
+ (public_name ortac-runtime-monolith)
  (libraries monolith))

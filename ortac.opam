@@ -6,6 +6,18 @@ authors: "Clément Pascutto <clement@pascutto.fr>"
 homepage: "https://github.com/ocaml-gospel/ortac"
 doc: "https://ocaml-gospel.github.io/ortac/"
 bug-reports: "https://github.com/ocaml-gospel/ortac/issues"
+depends: [
+  "ocaml" {>= "4.08.0"}
+  "dune" {>= "2.0"}
+  "cmdliner"
+  "fmt"
+  "ppxlib" {>= "0.20.0"}
+  "gospel"
+  "alcotest" {with-test}
+  "ortac-runtime" {with-test}
+  "ortac-runtime-monolith"
+  "monolith" {>= "20201026"}
+]
 build: [
   ["dune" "subst"] {pinned}
   [
@@ -20,20 +32,7 @@ build: [
     "@doc" {with-doc}
   ]
 ]
-
-depends: [
-  "ocaml" {>= "4.08.0"}
-  "dune" {>= "2.0"}
-  "cmdliner"
-  "fmt"
-  "ppxlib" {>= "0.20.0"}
-  "gospel"
-  "alcotest" {with-test}
-  "ortac-runtime" {with-test}
-  "monolith-runtime"
-  "monolith" {>= "20201026"}
-]
-
 pin-depends: [
-  [ "gospel.dev" "git+https://github.com/ocaml-gospel/gospel#4170f412dba0911422b10644a46590432f119417" ]
+  "gospel.dev"
+  "git+https://github.com/ocaml-gospel/gospel#4170f412dba0911422b10644a46590432f119417"
 ]

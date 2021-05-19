@@ -99,7 +99,7 @@ and translate_constr ty params =
   | "unit" -> [%expr unit]
   | "bool" -> [%expr bool]
   | "char" -> [%expr char]
-  | "int" -> [%expr M.constructible_int]
+  | "int" -> [%expr M.int]
   | "string" -> [%expr M.string]
   | "list" -> (
       match params with
@@ -153,7 +153,7 @@ let standalone module_name s =
   let specs = mk_specs s in
   [%stri open Monolith]
   ::
-  [%stri module M = Monolith_runtime]
+  [%stri module M = Ortac_runtime_monolith]
   :: module_r :: module_c :: module_g :: module_p :: module_s :: specs
 
 let generate path =
