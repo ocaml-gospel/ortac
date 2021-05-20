@@ -1,11 +1,17 @@
 open Ppxlib
+open Gospel
 module A = Ast_builder.Default
 module B = Ortac_core.Builder
 
 let loc = Location.none
 
-let str2printer ty =
-  match ty with
+let rec ty2printer (ty : Ttypes.ty) =
+  match ty.ty_node with
+  | Tyvar tvs -> tvs2printer tvs
+  | Tyapp (tys, _tyl) -> tys2printer tys
+
+and tvs2printer (tvs : Ttypes.tvsymbol) =
+  match tvs.tv_name.id_str with
   | "unit" -> [%expr PPrintOCaml.unit]
   | "bool" -> [%expr PPrintOCaml.bool]
   | "char" -> [%expr PPrintOCaml.char]
@@ -13,15 +19,29 @@ let str2printer ty =
   | "string" -> [%expr PPrintOCaml.string]
   | s -> failwith (Printf.sprintf "%s printer is not yet implementer" s)
 
-let mk_field (ld : Gospel.Tterm.lsymbol Gospel.Tast.label_declaration) =
+and tys2printer (tys : Ttypes.tysymbol) =
+  match tys.ts_ident.id_str with
+  | "unit" -> [%expr PPrintOCaml.unit]
+  | "bool" -> [%expr PPrintOCaml.bool]
+  | "char" -> [%expr PPrintOCaml.char]
+  | "int" -> [%expr PPrintOCaml.int]
+  | "string" -> [%expr PPrintOCaml.string]
+  | s -> failwith (Printf.sprintf "%s printer is not yet implementer" s)
+
+let lsymbol2printer (ls : Tterm.lsymbol) =
+  match ls.ls_value with
+  | Some ty -> ty2printer ty
+  | None -> failwith "con't find type to build printer"
+
+let mk_field (ld : Tterm.lsymbol Tast.label_declaration) =
   let field = ld.ld_field.ls_name.id_str in
-  let printer = str2printer (Utils.get_ld_ident ld) in
+  let printer = lsymbol2printer ld.ld_field in
   [%expr [%e B.estring field], [%e printer] [%e B.evar field]]
 
-let record_printer (rec_decl : Gospel.Tast.rec_declaration) =
+let record_printer (rec_decl : Tast.rec_declaration) =
   let fields =
     List.map
-      (fun (ld : Gospel.Tterm.lsymbol Gospel.Tast.label_declaration) ->
+      (fun (ld : Tterm.lsymbol Tast.label_declaration) ->
         ld.ld_field.ls_name.id_str)
       rec_decl.rd_ldl
   in
@@ -31,7 +51,7 @@ let record_printer (rec_decl : Gospel.Tast.rec_declaration) =
   let l = B.elist fields_printer in
   [%expr fun [%p pat] -> PPrintOCaml.record "" [%e l]]
 
-let printer_expr (ty_kind : Gospel.Tast.type_kind) =
+let printer_expr (ty_kind : Tast.type_kind) =
   match ty_kind with
   | Pty_abstract -> failwith "printer for abstract type not yet implemented"
   | Pty_variant _construtors ->
@@ -39,15 +59,14 @@ let printer_expr (ty_kind : Gospel.Tast.type_kind) =
   | Pty_record rec_decl -> record_printer rec_decl
   | Pty_open -> failwith "printer for open not yet implemented"
 
-let printer_definition (type_decl : Gospel.Tast.type_declaration) =
+let printer_definition (type_decl : Tast.type_declaration) =
   let id = B.pvar type_decl.td_ts.ts_ident.id_str in
   let printer = printer_expr type_decl.td_kind in
   [%stri let [%p id] = [%e printer]]
 
-let printer_option (sig_item : Gospel.Tast.signature_item) =
+let printer_option (sig_item : Tast.signature_item) =
   match sig_item.sig_desc with
-  | Gospel.Tast.Sig_type (_, [ type_decl ], _) ->
-      Some (printer_definition type_decl)
+  | Tast.Sig_type (_, [ type_decl ], _) -> Some (printer_definition type_decl)
   | _ -> None
 
 let printers s =

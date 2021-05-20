@@ -86,34 +86,24 @@ let rec translate_ret s =
 let rec translate s =
   match s.ptyp_desc with
   | Ptyp_var s -> B.evar s
-  | Ptyp_constr ({ txt = Lident ty; _ }, params) -> translate_constr ty params
+  | Ptyp_constr ({ txt = Lident "unit"; _ }, _params) -> [%expr unit]
+  | Ptyp_constr ({ txt = Lident "bool"; _ }, _params) -> [%expr bool]
+  | Ptyp_constr ({ txt = Lident "char"; _ }, _params) -> [%expr char]
+  | Ptyp_constr ({ txt = Lident "int"; _ }, _params) -> [%expr M.int]
+  | Ptyp_constr ({ txt = Lident "string"; _ }, _params) -> [%expr string]
+  | Ptyp_constr ({ txt = Lident "list"; _ }, [ param ]) ->
+      [%expr list [%e translate param]]
+  | Ptyp_constr ({ txt = Lident "array"; _ }, [ param ]) ->
+      [%expr M.array [%e find_gen param] [%e find_printer param]]
   | Ptyp_arrow (_, x, y) when is_arrow y.ptyp_desc ->
       [%expr [%e translate x] ^> [%e translate y]]
   | Ptyp_arrow (_, x, y) -> [%expr [%e translate x] ^!> [%e translate_ret y]]
+  | Ptyp_constr ({ txt = Lident ty; _ }, _params) ->
+      failwith
+        (Printf.sprintf "spec generator for %s is not yet implemented" ty)
   | _ ->
       failwith
         "monolith constructible spec not implemented yet (from translate)"
-
-and translate_constr ty params =
-  match ty with
-  | "unit" -> [%expr unit]
-  | "bool" -> [%expr bool]
-  | "char" -> [%expr char]
-  | "int" -> [%expr M.int]
-  | "string" -> [%expr M.string]
-  | "list" -> (
-      match params with
-      | [] -> failwith "List should have a param"
-      | [ param ] -> [%expr List [%e translate param]]
-      | _ -> failwith "don't know what to do with List with multiple params")
-  | "array" -> (
-      match params with
-      | [] -> failwith "Array should have a param"
-      | [ param ] ->
-          [%expr
-            M.constructible_array [%e find_gen param] [%e find_printer param]]
-      | _ -> failwith "don't know what to do with Array with multiple params")
-  | t -> B.evar (Printf.sprintf "S.%s" t)
 
 let mk_declaration (sig_item : Gospel.Tast.signature_item) =
   match sig_item.sig_desc with
