@@ -12,7 +12,6 @@ depends: [
   "fmt"
   "ppxlib" {>= "0.20.0"}
   "zarith"
-  "monolith" {>= "20201026"}
 ]
 build: [
   ["dune" "subst"] {pinned}
