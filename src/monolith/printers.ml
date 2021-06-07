@@ -53,20 +53,20 @@ let record_printer (rec_decl : Tast.rec_declaration) =
 
 let printer_expr (ty_kind : Tast.type_kind) =
   match ty_kind with
-  | Pty_abstract -> failwith "printer for abstract type not yet implemented"
-  | Pty_variant _construtors ->
-      failwith "printer for variant not yet implemented"
-  | Pty_record rec_decl -> record_printer rec_decl
-  | Pty_open -> failwith "printer for open not yet implemented"
+  | Pty_abstract -> None
+  | Pty_variant _construtors -> None
+  | Pty_record rec_decl -> Some (record_printer rec_decl)
+  | Pty_open -> None
 
 let printer_definition (type_decl : Tast.type_declaration) =
   let id = B.pvar type_decl.td_ts.ts_ident.id_str in
-  let printer = printer_expr type_decl.td_kind in
-  [%stri let [%p id] = [%e printer]]
+  match printer_expr type_decl.td_kind with
+  | None -> None
+  | Some printer -> Some [%stri let [%p id] = [%e printer]]
 
 let printer_option (sig_item : Tast.signature_item) =
   match sig_item.sig_desc with
-  | Tast.Sig_type (_, [ type_decl ], _) -> Some (printer_definition type_decl)
+  | Tast.Sig_type (_, [ type_decl ], _) -> printer_definition type_decl
   | _ -> None
 
 let printers s =
