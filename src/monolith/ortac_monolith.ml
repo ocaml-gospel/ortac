@@ -80,7 +80,7 @@ let rec translate_ret s =
       [%expr list [%e translate_ret param]]
   | Ptyp_constr ({ txt = Lident "array"; _ }, [ param ]) ->
       [%expr M.deconstructible_array [%e find_printer param]]
-  | Ptyp_constr ({ txt = Lident s; _ }, _) -> B.evar (Printf.sprintf "S.%s" s)
+  | Ptyp_constr ({ txt = Lident ty; _ }, _) -> B.evar (Printf.sprintf "S.%s" ty)
   | _ -> failwith "monolith deconstructible spec not implemented yet"
 
 let rec translate s =
@@ -98,9 +98,7 @@ let rec translate s =
   | Ptyp_arrow (_, x, y) when is_arrow y.ptyp_desc ->
       [%expr [%e translate x] ^> [%e translate y]]
   | Ptyp_arrow (_, x, y) -> [%expr [%e translate x] ^!> [%e translate_ret y]]
-  | Ptyp_constr ({ txt = Lident ty; _ }, _params) ->
-      failwith
-        (Printf.sprintf "spec generator for %s is not yet implemented" ty)
+  | Ptyp_constr ({ txt = Lident ty; _ }, _) -> B.evar (Printf.sprintf "S.%s" ty)
   | _ ->
       failwith
         "monolith constructible spec not implemented yet (from translate)"
