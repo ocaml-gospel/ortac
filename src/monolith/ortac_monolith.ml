@@ -53,23 +53,6 @@ let mk_candidate module_name =
 
 let is_arrow = function Ptyp_arrow _ -> true | _ -> false
 
-let find_gen s =
-  match s.ptyp_desc with
-  | Ptyp_constr ({ txt = Lident "unit"; _ }, _) -> [%expr Gen.unit]
-  | Ptyp_constr ({ txt = Lident "int"; _ }, _) -> [%expr Gen.int Int.max_int]
-  | Ptyp_constr ({ txt = Lident "bool"; _ }, _) -> [%expr Gen.bool]
-  | Ptyp_constr ({ txt = Lident "string"; _ }, _) ->
-      [%expr Gen.string (Gen.int 1024) Gen.char]
-  | _ -> failwith "gen not implemented yet"
-
-let find_printer s =
-  match s.ptyp_desc with
-  | Ptyp_constr ({ txt = Lident "unit"; _ }, _) -> [%expr Print.unit]
-  | Ptyp_constr ({ txt = Lident "int"; _ }, _) -> [%expr Print.int]
-  | Ptyp_constr ({ txt = Lident "bool"; _ }, _) -> [%expr Print.bool]
-  | Ptyp_constr ({ txt = Lident "string"; _ }, _) -> [%expr Print.string]
-  | _ -> failwith "printer not implemented yet"
-
 let rec translate_ret s =
   match s.ptyp_desc with
   | Ptyp_var s -> B.evar s
@@ -79,7 +62,7 @@ let rec translate_ret s =
   | Ptyp_constr ({ txt = Lident "list"; _ }, [ param ]) ->
       [%expr list [%e translate_ret param]]
   | Ptyp_constr ({ txt = Lident "array"; _ }, [ param ]) ->
-      [%expr M.deconstructible_array [%e find_printer param]]
+      [%expr M.array [%e translate_ret param]]
   | Ptyp_constr ({ txt = Lident ty; _ }, _) -> B.evar (Printf.sprintf "S.%s" ty)
   | _ -> failwith "monolith deconstructible spec not implemented yet"
 
@@ -94,7 +77,7 @@ let rec translate s =
   | Ptyp_constr ({ txt = Lident "list"; _ }, [ param ]) ->
       [%expr list [%e translate param]]
   | Ptyp_constr ({ txt = Lident "array"; _ }, [ param ]) ->
-      [%expr M.array [%e find_gen param] [%e find_printer param]]
+      [%expr M.array [%e translate param]]
   | Ptyp_arrow (_, x, y) when is_arrow y.ptyp_desc ->
       [%expr [%e translate x] ^> [%e translate y]]
   | Ptyp_arrow (_, x, y) -> [%expr [%e translate x] ^!> [%e translate_ret y]]
