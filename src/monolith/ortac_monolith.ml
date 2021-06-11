@@ -55,7 +55,7 @@ let is_arrow = function Ptyp_arrow _ -> true | _ -> false
 
 let rec translate_ret s =
   match s.ptyp_desc with
-  | Ptyp_var s -> B.evar s
+  | Ptyp_var _s -> [%expr sequential ()]
   | Ptyp_constr ({ txt = Lident "unit"; _ }, _) -> [%expr unit]
   | Ptyp_constr ({ txt = Lident "int"; _ }, _) -> [%expr int]
   | Ptyp_constr ({ txt = Lident "bool"; _ }, _) -> [%expr bool]
@@ -68,7 +68,7 @@ let rec translate_ret s =
 
 let rec translate s =
   match s.ptyp_desc with
-  | Ptyp_var s -> B.evar s
+  | Ptyp_var _s -> [%expr sequential ()]
   | Ptyp_constr ({ txt = Lident "unit"; _ }, _params) -> [%expr unit]
   | Ptyp_constr ({ txt = Lident "bool"; _ }, _params) -> [%expr bool]
   | Ptyp_constr ({ txt = Lident "char"; _ }, _params) -> [%expr char]
