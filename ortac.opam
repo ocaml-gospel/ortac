@@ -31,6 +31,8 @@ depends: [
   "gospel"
   "alcotest" {with-test}
   "ortac-runtime" {with-test}
+  "ortac-runtime-monolith"
+  "monolith" {>= "20201026"}
 ]
 pin-depends: [
   [ "gospel.dev" "git+https://github.com/ocaml-gospel/gospel#4170f412dba0911422b10644a46590432f119417" ]

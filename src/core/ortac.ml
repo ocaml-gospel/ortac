@@ -1,13 +1,14 @@
 open Ppxlib
 open Gospel
-open Fmt
 
 module Make (B : Backend.S) = struct
   open Builder
   module T = Translation
 
   let of_gospel_args args =
-    let to_string x = str "%a" Tast.Ident.pp x.Tterm.vs_name in
+    let to_string x =
+      Fmt.str "%a" Gospel.Tast.Ident.pp x.Gospel.Tterm.vs_name
+    in
     List.fold_right
       (fun arg (eargs, pargs) ->
         match arg with

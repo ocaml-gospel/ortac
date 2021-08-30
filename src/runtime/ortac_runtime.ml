@@ -67,16 +67,16 @@ let pp_error ppf = function
         "a %a in@\n\
         \  @[%a@]@\n\
          was not detected.@\n\
-         The function should have raised %a."
+         Function should have raised %a."
         (styled `Red string)
         "`checks' precondition violation" pp_term term pp_quoted_exn
         "Invalid_argument"
   | Unexpected_checks { terms } ->
       pf ppf
         "it %a@\n\
-        \  @[%a@]@\n\
+        \   @[%a@]\n\
          but none of the declared `checks' preconditions@\n\
-        \  @[%a@]@\n\
+        \  @[%a@]\n\
          were violated."
         (styled `Red string)
         "raised exception" pp_quoted_exn "Invalid_argument" pp_terms terms

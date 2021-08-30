@@ -1,10 +1,10 @@
 opam-version: "2.0"
-synopsis: "Runtime library for ortac"
+synopsis: "Runtime library for ortac used with monolith"
 description: """
-Runtime library for ortac
+Runtime library for ortac used with monolith
 """
-maintainer: ["Clément Pascutto <clement@pascutto.fr>"]
-authors: ["Clément Pascutto <clement@pascutto.fr>"]
+maintainer: ["Nicolas Osborne <nicolas.osborne.etu@univ-lille.fr>"]
+author: ["Nicolas Osborne <nicolas.osborne.etu@univ-lille.fr>"]
 homepage: "https://github.com/ocaml-gospel/ortac"
 dev-repo: "git+https://github.com/ocaml-gospel/ortac.git"
 doc: "https://pascutto.github.io/ortac/"
@@ -23,12 +23,8 @@ build: [
   "@doc" {with-doc}
   ]
 ]
-
 depends: [
-  "ocaml"
+  "ocaml" {>= "4.08.0"}
   "dune" {>= "2.0"}
-  "fmt"
-  "ppxlib" {>= "0.20.0"}
-  "zarith"
   "monolith" {>= "20201026"}
-]
+  ]
