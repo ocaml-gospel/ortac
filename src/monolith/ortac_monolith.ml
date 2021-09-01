@@ -142,8 +142,7 @@ let standalone module_name s =
   let module_s = Spec.specs s in
   let specs = mk_specs s in
   [%stri open Monolith]
-  ::
-  [%stri module M = Ortac_runtime_monolith]
+  :: [%stri module M = Ortac_runtime_monolith]
   :: module_r :: module_c :: module_g :: module_p :: module_s :: specs
 
 let generate path =

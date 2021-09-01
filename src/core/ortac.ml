@@ -74,5 +74,5 @@ module Make (B : Backend.S) = struct
     let include_lib =
       pmod_ident (lident module_name) |> include_infos |> pstr_include
     in
-    B.prelude @ include_lib :: declarations
+    B.prelude @ (include_lib :: declarations)
 end
