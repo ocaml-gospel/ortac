@@ -6,6 +6,6 @@ val type_check :
   string list ->
   string ->
   Gospel.Uast.s_signature_item list ->
-  Gospel.Tast.signature
+  Gospel.Tmodule.namespace list * Gospel.Tast.signature
 (** [type_check load_path name sigs] call the Gospel typechecker on the file
     [name] *)

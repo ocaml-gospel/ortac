@@ -8,6 +8,6 @@ let type_check load_path name sigs =
     module_name_of_path name |> Gospel.Utils.Sstr.singleton
     |> Gospel.Typing.penv load_path
   in
-  List.fold_left (Gospel.Typing.type_sig_item penv) md sigs
-  |> Gospel.Tmodule.wrap_up_muc
-  |> fun file -> file.fl_sigs
+  let gfile = List.fold_left (Gospel.Typing.type_sig_item penv) md sigs in
+  let sigs = Gospel.Tmodule.wrap_up_muc gfile |> fun file -> file.fl_sigs in
+  (gfile.muc_import, sigs)
