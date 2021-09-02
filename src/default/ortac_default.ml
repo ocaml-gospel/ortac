@@ -12,5 +12,5 @@ let generate path =
   let module_name = Ortac_core.Utils.module_name_of_path path in
   Gospel.Parser_frontend.parse_ocaml_gospel path
   |> Ortac_core.Utils.type_check [] path
-  |> G.signature module_name
-  |> Ppxlib_ast.Pprintast.structure Fmt.stdout
+  |> fun (env, sigs) ->
+  G.signature module_name env sigs |> Ppxlib_ast.Pprintast.structure Fmt.stdout

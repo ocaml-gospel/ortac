@@ -36,8 +36,8 @@ module B = Ortac_core.Builder
 
 let loc = Location.none
 
-let mk_reference module_name s =
-  let rtac = G.signature module_name s in
+let mk_reference module_name env s =
+  let rtac = G.signature module_name env s in
   let module_r = A.pmod_structure ~loc rtac in
   let module_bind =
     A.module_binding ~loc ~name:(B.noloc (Some "R")) ~expr:module_r
@@ -134,8 +134,8 @@ let mk_specs s =
   in
   [ mk_declarations s; main ]
 
-let standalone module_name s =
-  let module_r = mk_reference module_name s in
+let standalone module_name env s =
+  let module_r = mk_reference module_name env s in
   let module_c = mk_candidate module_name in
   let module_g = Generators.generators s in
   let module_p = Printers.printers s in
@@ -149,5 +149,5 @@ let generate path =
   let module_name = Ortac_core.Utils.module_name_of_path path in
   Gospel.Parser_frontend.parse_ocaml_gospel path
   |> Ortac_core.Utils.type_check [] path
-  |> standalone module_name
-  |> Ppxlib_ast.Pprintast.structure Fmt.stdout
+  |> fun (env, sigs) ->
+  standalone module_name env sigs |> Ppxlib_ast.Pprintast.structure Fmt.stdout

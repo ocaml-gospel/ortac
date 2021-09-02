@@ -23,7 +23,7 @@ build: [
 ]
 
 depends: [
-  "ocaml" {>= "4.08.0"}
+  "ocaml" {>= "4.10.0"}
   "dune" {>= "2.0"}
   "cmdliner"
   "fmt"

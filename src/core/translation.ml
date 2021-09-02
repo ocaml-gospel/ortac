@@ -21,19 +21,25 @@ let rec pattern p =
   | Tterm.Pas (p, v) ->
       ppat_alias (pattern p) (noloc (str "%a" Identifier.Ident.pp v.vs_name))
 
-let rec array_no_coercion (ls : Tterm.lsymbol) (tlist : Tterm.term list) =
-  (match ls.ls_name.id_str with
-  | "mixfix [_]" -> Some "Array.get"
-  | "length" -> Some "Array.length"
-  | _ -> None)
-  |> Option.map (fun f ->
-         match (List.hd tlist).t_node with
-         | Tapp (elts, [ arr ]) when elts.ls_name.id_str = "elts" ->
-             Some (eapply (evar f) (term arr :: List.map term (List.tl tlist)))
-         | _ -> None)
-  |> Option.join
+let rec array_no_coercion ~driver =
+  let array_get_ls = Drv.get_ls driver [ "Gospelstdlib"; "mixfix [_]" ] in
+  let array_length_ls = Drv.get_ls driver [ "Gospelstdlib"; "length" ] in
+  let elts_ls = Drv.get_ls driver [ "Gospelstdlib"; "elts" ] in
+  fun (ls : Tterm.lsymbol) -> function
+    | { Tterm.t_node = Tapp (elts, [ arr ]); _ } :: tl
+      when Tterm.ls_equal elts elts_ls ->
+        let f =
+          if Tterm.ls_equal ls array_get_ls then Some "Array.get"
+          else if Tterm.ls_equal ls array_length_ls then Some "Array.length"
+          else None
+        in
+        Option.map
+          (fun f ->
+            eapply (evar f) (term ~driver arr :: List.map (term ~driver) tl))
+          f
+    | _ -> None
 
-and bounds (var : Tterm.vsymbol) (t : Tterm.term) :
+and bounds ~driver (var : Tterm.vsymbol) (t : Tterm.term) :
     (expression * expression) option =
   (* [comb] extracts a bound from an the operator [f] and expression [e].
      [right] indicates if [e] is on the right side of the operator. *)
@@ -52,11 +58,11 @@ and bounds (var : Tterm.vsymbol) (t : Tterm.term) :
         match (x1, x2) with
         | { Tterm.t_node = Tvar { vs_name; _ }; _ }, _
           when vs_name = var.vs_name ->
-            let e2 = term x2 in
+            let e2 = term ~driver x2 in
             comb ~right:true f e2
         | _, { Tterm.t_node = Tvar { vs_name; _ }; _ }
           when vs_name = var.vs_name ->
-            let e1 = term x1 in
+            let e1 = term ~driver x1 in
             comb ~right:false f e1
         | _, _ -> (None, None))
     | _ -> (None, None)
@@ -71,7 +77,8 @@ and bounds (var : Tterm.vsymbol) (t : Tterm.term) :
       | exception Unsupported _ -> None)
   | _ -> None
 
-and term (t : Tterm.term) : expression =
+and term ~driver (t : Tterm.term) : expression =
+  let term = term ~driver in
   let unsupported m = raise (Unsupported (t.t_loc, m)) in
   match t.t_node with
   | Tvar { vs_name; _ } -> evar (str "%a" Identifier.Ident.pp vs_name)
@@ -82,13 +89,13 @@ and term (t : Tterm.term) : expression =
   | Tapp (fs, tlist) when Tterm.is_fs_tuple fs ->
       List.map term tlist |> pexp_tuple
   | Tapp (ls, tlist) -> (
-      match array_no_coercion ls tlist with
+      match array_no_coercion ~driver ls tlist with
       | Some e -> e
       | None -> (
-          let func = ls.ls_name.id_str in
-          Drv.find_opt func |> function
+          Drv.translate driver ls |> function
           | Some f -> eapply (evar f) (List.map term tlist)
           | None ->
+              let func = ls.ls_name.id_str in
               if ls.ls_constr then
                 (if tlist = [] then None
                 else Some (List.map term tlist |> pexp_tuple))
@@ -116,7 +123,7 @@ and term (t : Tterm.term) : expression =
           in
           match t.t_node with
           | Tbinop (op, t1, t2) when gospel_op op -> (
-              bounds var t1 |> function
+              bounds ~driver var t1 |> function
               | None -> unsupported "forall/exists"
               | Some (start, stop) ->
                   let t2 = term t2 in
@@ -153,32 +160,33 @@ and term (t : Tterm.term) : expression =
   | Ttrue -> [%expr true]
   | Tfalse -> [%expr false]
 
-let term fail t =
+let term ~driver fail t =
   [%expr
-    try [%e term t]
+    try [%e term ~driver t]
     with e ->
       [%e fail (evar "e")];
       true]
 
-let conditions ~term_printer fail_violated fail_nonexec terms =
+let conditions ~driver ~term_printer fail_violated fail_nonexec terms =
   List.map
     (fun t ->
       let s = term_printer t in
-      [%expr if not [%e term (fail_nonexec s) t] then [%e fail_violated s]])
+      [%expr
+        if not [%e term ~driver (fail_nonexec s) t] then [%e fail_violated s]])
     terms
   |> esequence
 
-let post ~register_name ~term_printer =
+let post ~driver ~register_name ~term_printer =
   let fail_violated term = F.violated `Post ~term ~register_name in
   let fail_nonexec term exn = F.spec_failure `Post ~term ~exn ~register_name in
-  conditions ~term_printer fail_violated fail_nonexec
+  conditions ~driver ~term_printer fail_violated fail_nonexec
 
-let pre ~register_name ~term_printer =
+let pre ~driver ~register_name ~term_printer =
   let fail_violated term = F.violated `Pre ~term ~register_name in
   let fail_nonexec term exn = F.spec_failure `Pre ~term ~exn ~register_name in
-  conditions ~term_printer fail_violated fail_nonexec
+  conditions ~driver ~term_printer fail_violated fail_nonexec
 
-let rec xpost_pattern exn = function
+let rec xpost_pattern ~driver exn = function
   | Tterm.Pwild -> ppat_construct (lident exn) (Some ppat_any)
   | Tterm.Pvar x ->
       ppat_construct (lident exn)
@@ -186,13 +194,15 @@ let rec xpost_pattern exn = function
   | Tterm.Papp (ls, []) when Tterm.(ls_equal ls (fs_tuple 0)) -> pvar exn
   | Tterm.Papp (_ls, _l) -> assert false
   | Tterm.Por (p1, p2) ->
-      ppat_or (xpost_pattern exn p1.p_node) (xpost_pattern exn p2.p_node)
+      ppat_or
+        (xpost_pattern ~driver exn p1.p_node)
+        (xpost_pattern ~driver exn p2.p_node)
   | Tterm.Pas (p, s) ->
       ppat_alias
-        (xpost_pattern exn p.p_node)
+        (xpost_pattern ~driver exn p.p_node)
         (noloc (str "%a" Tterm.Ident.pp s.vs_name))
 
-let xpost_guard ~register_name ~term_printer xpost call =
+let xpost_guard ~driver ~register_name ~term_printer xpost call =
   let module M = Map.Make (struct
     type t = Ttypes.xsymbol
 
@@ -226,10 +236,10 @@ let xpost_guard ~register_name ~term_printer xpost call =
               F.spec_failure `XPost ~term:s ~exn ~register_name
             in
             case ~guard:None
-              ~lhs:(xpost_pattern name p.Tterm.p_node)
+              ~lhs:(xpost_pattern ~driver name p.Tterm.p_node)
               ~rhs:
                 [%expr
-                  if not [%e term fail_nonexec t] then
+                  if not [%e term fail_nonexec ~driver t] then
                     [%e F.violated `XPost ~term:s ~register_name]])
           ptlist
         @ [ assert_false_case ]
@@ -293,22 +303,25 @@ let mk_setup loc fun_name =
   in
   ((fun next -> let_loc @@ let_acc @@ next), register_name)
 
-let mk_pre_checks ~register_name ~term_printer pres next =
+let mk_pre_checks ~driver ~register_name ~term_printer pres next =
   [%expr
-    [%e pre ~register_name ~term_printer pres];
+    [%e pre ~driver ~register_name ~term_printer pres];
     [%e F.report ~register_name];
     [%e next]]
 
-let mk_call ~register_name ~term_printer ret_pat loc fun_name xpost eargs =
+let mk_call ~driver ~register_name ~term_printer ret_pat loc fun_name xpost
+    eargs =
   let call = pexp_apply (evar fun_name) eargs in
-  let check_raises = xpost_guard ~register_name ~term_printer xpost call in
+  let check_raises =
+    xpost_guard ~driver ~register_name ~term_printer xpost call
+  in
   fun next ->
     [%expr
       let [%p ret_pat] = [%e check_raises] in
       [%e next]]
 
-let mk_post_checks ~register_name ~term_printer posts next =
+let mk_post_checks ~driver ~register_name ~term_printer posts next =
   [%expr
-    [%e post ~register_name ~term_printer posts];
+    [%e post ~driver ~register_name ~term_printer posts];
     [%e F.report ~register_name];
     [%e next]]
