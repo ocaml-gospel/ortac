@@ -53,20 +53,20 @@ let record_generator (rec_decl : Tast.rec_declaration) =
 
 let generator_expr (ty_kind : Tast.type_kind) =
   match ty_kind with
-  | Pty_abstract -> failwith "generator for abstract type not yet implemented"
-  | Pty_variant _constructors ->
-      failwith "generator for variant not yet implemented"
-  | Pty_record rec_decl -> record_generator rec_decl
-  | Pty_open -> failwith "generator for open not yet implemented"
+  | Pty_abstract -> None
+  | Pty_variant _constructors -> None
+  | Pty_record rec_decl -> Some (record_generator rec_decl)
+  | Pty_open -> None
 
 let generator_definition (type_decl : Tast.type_declaration) =
   let id = B.pvar type_decl.td_ts.ts_ident.id_str in
-  let generator = generator_expr type_decl.td_kind in
-  [%stri let [%p id] = [%e generator]]
+  match generator_expr type_decl.td_kind with
+  | None -> None
+  | Some generator -> Some [%stri let [%p id] = [%e generator]]
 
 let generator_option (sig_item : Tast.signature_item) =
   match sig_item.sig_desc with
-  | Tast.Sig_type (_, [ type_decl ], _) -> Some (generator_definition type_decl)
+  | Tast.Sig_type (_, [ type_decl ], _) -> generator_definition type_decl
   | _ -> None
 
 let generators s =

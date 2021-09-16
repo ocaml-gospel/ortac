@@ -1,10 +1,16 @@
 open Ppxlib
+open Gospel
 module A = Ast_builder.Default
 module B = Ortac_core.Builder
 
 let loc = Location.none
 
-let spec_definition (type_decl : Gospel.Tast.type_declaration) =
+let spec_abstract (type_decl : Tast.type_declaration) =
+  let id = type_decl.td_ts.ts_ident.id_str in
+  [%stri
+    let [%p B.pvar id] = declare_abstract_type ~var:[%e A.estring ~loc id] ()]
+
+let spec_constructor (type_decl : Tast.type_declaration) =
   let id = type_decl.td_ts.ts_ident.id_str in
   let gen = B.evar (Printf.sprintf "G.%s" id) in
   let printer = B.evar (Printf.sprintf "P.%s" id) in
@@ -14,10 +20,15 @@ let spec_definition (type_decl : Gospel.Tast.type_declaration) =
       let pos = deconstructible [%e printer] in
       ifpol neg pos]
 
-let spec_option (sig_item : Gospel.Tast.signature_item) =
+let spec_dispatch (type_decl : Tast.type_declaration) =
+  match type_decl.td_kind with
+  | Pty_abstract -> Some (spec_abstract type_decl)
+  | Pty_variant _ | Pty_record _ -> Some (spec_constructor type_decl)
+  | Pty_open -> None
+
+let spec_option (sig_item : Tast.signature_item) =
   match sig_item.sig_desc with
-  | Gospel.Tast.Sig_type (_, [ type_decl ], _) ->
-      Some (spec_definition type_decl)
+  | Tast.Sig_type (_, [ type_decl ], _) -> spec_dispatch type_decl
   | _ -> None
 
 let specs s =
