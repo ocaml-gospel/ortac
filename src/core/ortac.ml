@@ -30,9 +30,12 @@ module Make (B : Backend.S) = struct
       let term_printer (t : Tterm.term) =
         match t.t_loc with
         | None -> Fmt.str "%a" Tterm.print_term t
-        | Some loc ->
-            String.sub spec.sp_text loc.loc_start.pos_cnum
-              (loc.loc_end.pos_cnum - loc.loc_start.pos_cnum)
+        | Some loc -> (
+            try
+              String.sub spec.sp_text
+                (loc.loc_start.pos_cnum - spec.sp_loc.loc_start.pos_cnum)
+                (loc.loc_end.pos_cnum - loc.loc_start.pos_cnum)
+            with Invalid_argument _ -> Fmt.str "%a" Tterm.print_term t)
       in
       (* Declaration location *)
       let loc = val_desc.vd_loc in
