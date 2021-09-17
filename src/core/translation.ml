@@ -21,25 +21,7 @@ let rec pattern p =
   | Tterm.Pas (p, v) ->
       ppat_alias (pattern p) (noloc (str "%a" Identifier.Ident.pp v.vs_name))
 
-let rec array_no_coercion ~driver =
-  let array_get_ls = Drv.get_ls driver [ "Gospelstdlib"; "mixfix [_]" ] in
-  let array_length_ls = Drv.get_ls driver [ "Gospelstdlib"; "length" ] in
-  let elts_ls = Drv.get_ls driver [ "Gospelstdlib"; "elts" ] in
-  fun (ls : Tterm.lsymbol) -> function
-    | { Tterm.t_node = Tapp (elts, [ arr ]); _ } :: tl
-      when Tterm.ls_equal elts elts_ls ->
-        let f =
-          if Tterm.ls_equal ls array_get_ls then Some "Array.get"
-          else if Tterm.ls_equal ls array_length_ls then Some "Array.length"
-          else None
-        in
-        Option.map
-          (fun f ->
-            eapply (evar f) (term ~driver arr :: List.map (term ~driver) tl))
-          f
-    | _ -> None
-
-and bounds ~driver (var : Tterm.vsymbol) (t : Tterm.term) :
+let rec bounds ~driver (var : Tterm.vsymbol) (t : Tterm.term) :
     (expression * expression) option =
   (* [comb] extracts a bound from an the operator [f] and expression [e].
      [right] indicates if [e] is on the right side of the operator. *)
@@ -89,18 +71,15 @@ and term ~driver (t : Tterm.term) : expression =
   | Tapp (fs, tlist) when Tterm.is_fs_tuple fs ->
       List.map term tlist |> pexp_tuple
   | Tapp (ls, tlist) -> (
-      match array_no_coercion ~driver ls tlist with
-      | Some e -> e
-      | None -> (
-          Drv.translate driver ls |> function
-          | Some f -> eapply (evar f) (List.map term tlist)
-          | None ->
-              let func = ls.ls_name.id_str in
-              if ls.ls_constr then
-                (if tlist = [] then None
-                else Some (List.map term tlist |> pexp_tuple))
-                |> pexp_construct (lident func)
-              else kstr unsupported "function application `%s`" func))
+      Drv.translate driver ls |> function
+      | Some f -> eapply (evar f) (List.map term tlist)
+      | None ->
+          let func = ls.ls_name.id_str in
+          if ls.ls_constr then
+            (if tlist = [] then None
+            else Some (List.map term tlist |> pexp_tuple))
+            |> pexp_construct (lident func)
+          else kstr unsupported "function application `%s`" func)
   | Tif (i, t, e) -> [%expr if [%e term i] then [%e term t] else [%e term e]]
   | Tlet (x, t1, t2) ->
       let x = str "%a" Identifier.Ident.pp x.vs_name in
