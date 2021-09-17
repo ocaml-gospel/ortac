@@ -5,6 +5,16 @@ module Make (B : Backend.S) = struct
   open Builder
   module T = Translation
 
+  let term_printer (spec : Tast.val_spec) (t : Tterm.term) =
+    match t.t_loc with
+    | None -> Fmt.str "%a" Tterm.print_term t
+    | Some loc -> (
+        try
+          String.sub spec.sp_text
+            (loc.loc_start.pos_cnum - spec.sp_loc.loc_start.pos_cnum)
+            (loc.loc_end.pos_cnum - loc.loc_start.pos_cnum)
+        with Invalid_argument _ -> Fmt.str "%a" Tterm.print_term t)
+
   let of_gospel_args args =
     let to_string x =
       Fmt.str "%a" Gospel.Tast.Ident.pp x.Gospel.Tterm.vs_name
@@ -27,20 +37,9 @@ module Make (B : Backend.S) = struct
 
   let value ~driver (val_desc : Tast.val_description) =
     let process (spec : Tast.val_spec) =
-      let term_printer (t : Tterm.term) =
-        match t.t_loc with
-        | None -> Fmt.str "%a" Tterm.print_term t
-        | Some loc -> (
-            try
-              String.sub spec.sp_text
-                (loc.loc_start.pos_cnum - spec.sp_loc.loc_start.pos_cnum)
-                (loc.loc_end.pos_cnum - loc.loc_start.pos_cnum)
-            with Invalid_argument _ -> Fmt.str "%a" Tterm.print_term t)
-      in
+      let term_printer = term_printer spec in
       (* Declaration location *)
       let loc = val_desc.vd_loc in
-      if List.length spec.sp_args = 0 then
-        raise (T.Unsupported (Some loc, "non-function value"));
       let setup_expr, register_name = T.mk_setup loc val_desc.vd_name.id_str in
       let register_name = evar register_name in
       (* Arguments *)
@@ -65,13 +64,28 @@ module Make (B : Backend.S) = struct
     in
     Option.map process val_desc.vd_spec
 
+  let constant ~driver (vd : Tast.val_description) =
+    let process spec =
+      let term_printer = term_printer spec in
+      let loc = vd.vd_loc in
+      let setup_expr, register_name = T.mk_setup loc vd.vd_name.id_str in
+      let register_name = evar register_name in
+      let post_checks =
+        T.mk_post_checks ~driver ~register_name ~term_printer spec.sp_post
+      in
+      let body = setup_expr @@ post_checks @@ evar vd.vd_name.id_str in
+      [%stri let [%p pvar vd.vd_name.id_str] = [%e body]]
+    in
+    Option.map process vd.vd_spec
+
   let signature module_name env s =
     let driver = Drv.v env in
     let declarations =
       List.filter_map
         (fun (sig_item : Tast.signature_item) ->
           match sig_item.sig_desc with
-          | Sig_val (decl, _ghost) -> value ~driver decl
+          | Sig_val (decl, _ghost) when decl.vd_args <> [] -> value ~driver decl
+          | Sig_val (decl, _ghost) -> constant ~driver decl
           | _ -> None)
         s
     in
