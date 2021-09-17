@@ -88,8 +88,8 @@ val make_tree: tree -> int -> tree -> tree
 
 val fill: tree -> int array -> int -> int
 (*@ stop = fill t a start
-      requires 0 <= start <= length a
-      ensures  start <= stop <= length a *)
+      requires 0 <= start <= Array.length a
+      ensures  start <= stop <= Array.length a *)
 
 type alt_tree = Ealt | Nalt of (alt_tree * int * alt_tree)
 

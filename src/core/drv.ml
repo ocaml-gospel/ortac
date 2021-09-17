@@ -43,6 +43,8 @@ let v env =
       ([ "Gospelstdlib"; "max" ], "Z.max");
       ([ "Gospelstdlib"; "succ" ], "Z.succ");
       ([ "Gospelstdlib"; "pred" ], "Z.pred");
+      ([ "Gospelstdlib"; "Array"; "length" ], "Array.length");
+      ([ "Gospelstdlib"; "Array"; "get" ], "Array.get");
     ]
   in
   let translations = Hashtbl.create 0 in
