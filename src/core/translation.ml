@@ -20,43 +20,35 @@ let rec pattern p =
   | Tterm.Pas (p, v) ->
       ppat_alias (pattern p) (noloc (str "%a" Identifier.Ident.pp v.vs_name))
 
-let rec bounds ~driver (var : Tterm.vsymbol) (t : Tterm.term) :
-    (expression * expression) option =
+type bound = Inf of expression | Sup of expression
+
+let rec bounds ~driver ~loc (var : Tterm.vsymbol) (t1 : Tterm.term)
+    (t2 : Tterm.term) : expression * expression =
+  let unsupported () =
+    raise (W.Error (Unsupported "ill formed quantification", loc))
+  in
   (* [comb] extracts a bound from an the operator [f] and expression [e].
      [right] indicates if [e] is on the right side of the operator. *)
   let comb ~right (f : Tterm.lsymbol) e =
     match f.ls_name.id_str with
-    | "infix >=" -> if right then (Some e, None) else (None, Some e)
-    | "infix <=" -> if right then (None, Some e) else (Some e, None)
-    | "infix <" ->
-        if right then (None, Some (epred e)) else (Some (esucc e), None)
-    | "infix >" ->
-        if right then (Some (esucc e), None) else (None, Some (epred e))
-    | _ -> (None, None)
+    | "infix >=" -> if right then Inf e else Sup e
+    | "infix <=" -> if right then Sup e else Inf e
+    | "infix <" -> if right then Sup (epred e) else Inf (esucc e)
+    | "infix >" -> if right then Inf (esucc e) else Sup (epred e)
+    | _ -> unsupported ()
   in
   let bound = function
-    | Tterm.Tapp (f, [ x1; x2 ]) -> (
-        match (x1, x2) with
-        | { Tterm.t_node = Tvar { vs_name; _ }; _ }, _
-          when vs_name = var.vs_name ->
-            let e2 = term ~driver x2 in
-            comb ~right:true f e2
-        | _, { Tterm.t_node = Tvar { vs_name; _ }; _ }
-          when vs_name = var.vs_name ->
-            let e1 = term ~driver x1 in
-            comb ~right:false f e1
-        | _, _ -> (None, None))
-    | _ -> (None, None)
+    | Tterm.Tapp (f, [ { t_node = Tvar vs; _ }; t ])
+      when vs.vs_name = var.vs_name ->
+        comb ~right:true f (term ~driver t)
+    | Tterm.Tapp (f, [ t; { t_node = Tvar vs; _ } ])
+      when vs.vs_name = var.vs_name ->
+        comb ~right:false f (term ~driver t)
+    | _ -> unsupported ()
   in
-  match t.t_node with
-  | Tbinop (Tand, t1, t2) -> (
-      match (bound t1.t_node, bound t2.t_node) with
-      | (None, Some eupper), (Some elower, None)
-      | (Some elower, None), (None, Some eupper) ->
-          Some (elower, eupper)
-      | _, _ -> None
-      | exception _ -> None)
-  | _ -> None
+  match (bound t1.t_node, bound t2.t_node) with
+  | Inf start, Sup stop | Sup stop, Inf start -> (start, stop)
+  | _ -> unsupported ()
 
 and term ~driver (t : Tterm.term) : expression =
   let term = term ~driver in
@@ -91,29 +83,29 @@ and term ~driver (t : Tterm.term) : expression =
         (fun (p, t) -> case ~guard:None ~lhs:(pattern p) ~rhs:(term t))
         ptl
       |> pexp_match (term t)
-  | Tquant (quant, [ var ], _, t) -> (
-      match quant with
-      | Tterm.Tforall | Tterm.Texists -> (
-          let z_op = if quant = Tforall then "forall" else "exists" in
-          let gospel_op = function
-            | Tterm.Timplies -> quant = Tforall
-            | Tterm.Tand | Tand_asym -> quant = Texists
-            | _ -> false
-          in
-          match t.t_node with
-          | Tbinop (op, t1, t2) when gospel_op op -> (
-              bounds ~driver var t1 |> function
-              | None -> unsupported "forall/exists"
-              | Some (start, stop) ->
-                  let t2 = term t2 in
-                  let x = str "%a" Identifier.Ident.pp var.vs_name in
-                  let func = pexp_fun Nolabel None (pvar x) t2 in
-                  eapply (evar (str "Z.%s" z_op)) [ start; stop; func ])
-          | Tterm.Ttrue -> [%expr true]
-          | Tterm.Tfalse -> [%expr false]
-          | _ -> unsupported z_op)
-      | Tterm.Tlambda -> unsupported "lambda quantification")
-  | Tquant (_, _, _, _) -> unsupported "forall/exists with multiple variables"
+  | Tquant
+      ( (Tterm.(Tforall | Texists) as quant),
+        [ var ],
+        _,
+        Tterm.
+          {
+            t_node =
+              Tbinop
+                ( ((Timplies | Tand | Tand_asym) as op),
+                  { t_node = Tbinop (Tand, t1, t2); _ },
+                  p );
+            _;
+          } ) ->
+      (match (quant, op) with
+      | Tforall, Timplies | Texists, (Tand | Tand_asym) -> ()
+      | _, _ -> unsupported "ill formed quantification");
+      let start, stop = bounds ~driver ~loc var t1 t2 in
+      let p = term p in
+      let quant = evar (if quant = Tforall then "Z.forall" else "Z.exists") in
+      let x = str "%a" Identifier.Ident.pp var.vs_name in
+      let func = pexp_fun Nolabel None (pvar x) p in
+      eapply quant [ start; stop; func ]
+  | Tquant (_, _, _, _) -> unsupported "quantification"
   | Tbinop (op, t1, t2) -> (
       match op with
       | Tterm.Tand ->
