@@ -83,6 +83,15 @@ and term ~driver (t : Tterm.term) : expression =
         (fun (p, t) -> case ~guard:None ~lhs:(pattern p) ~rhs:(term t))
         ptl
       |> pexp_match (term t)
+  | Tquant (Tterm.Tlambda, args, _, t) ->
+      let t = term t in
+      let args =
+        List.map
+          (fun (vs : Tterm.vsymbol) ->
+            (Nolabel, pvar (str "%a" Identifier.Ident.pp vs.vs_name)))
+          args
+      in
+      efun args t
   | Tquant
       ( (Tterm.(Tforall | Texists) as quant),
         [ var ],

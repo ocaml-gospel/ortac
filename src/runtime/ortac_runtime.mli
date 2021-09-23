@@ -52,4 +52,6 @@ module Array : sig
   val get : 'a array -> Z.t -> 'a
 
   val length : 'a array -> Z.t
+
+  val for_all : ('a -> bool) -> 'a array -> bool
 end
