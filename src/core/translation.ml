@@ -1,10 +1,9 @@
+module W = Warnings
 open Ppxlib
 open Gospel
 open Fmt
 open Builder
 module F = Failure
-
-exception Unsupported of Location.t option * string
 
 let rec pattern p =
   match p.Tterm.p_node with
@@ -56,12 +55,13 @@ let rec bounds ~driver (var : Tterm.vsymbol) (t : Tterm.term) :
       | (Some elower, None), (None, Some eupper) ->
           Some (elower, eupper)
       | _, _ -> None
-      | exception Unsupported _ -> None)
+      | exception _ -> None)
   | _ -> None
 
 and term ~driver (t : Tterm.term) : expression =
   let term = term ~driver in
-  let unsupported m = raise (Unsupported (t.t_loc, m)) in
+  let loc = Option.value ~default:Location.none t.t_loc in
+  let unsupported m = raise (W.Error (W.Unsupported m, loc)) in
   match t.t_node with
   | Tvar { vs_name; _ } -> evar (str "%a" Identifier.Ident.pp vs_name)
   | Tconst c -> econst c
@@ -140,18 +140,23 @@ and term ~driver (t : Tterm.term) : expression =
   | Tfalse -> [%expr false]
 
 let term ~driver fail t =
-  [%expr
-    try [%e term ~driver t]
-    with e ->
-      [%e fail (evar "e")];
-      true]
+  try
+    Some
+      [%expr
+        try [%e term ~driver t]
+        with e ->
+          [%e fail (evar "e")];
+          true]
+  with W.Error t ->
+    W.register t;
+    None
 
 let conditions ~driver ~term_printer fail_violated fail_nonexec terms =
-  List.map
+  List.filter_map
     (fun t ->
       let s = term_printer t in
-      [%expr
-        if not [%e term ~driver (fail_nonexec s) t] then [%e fail_violated s]])
+      term ~driver (fail_nonexec s) t
+      |> Option.map (fun t -> [%expr if not [%e t] then [%e fail_violated s]]))
     terms
   |> esequence
 
@@ -208,19 +213,23 @@ let xpost_guard ~driver ~register_name ~term_printer xpost call =
     (fun map (exn, ptlist) ->
       let name = exn.Ttypes.xs_ident.id_str in
       let cases =
-        List.rev_map
+        List.filter_map
           (fun (p, t) ->
             let s = term_printer t in
             let fail_nonexec exn =
               F.spec_failure `XPost ~term:s ~exn ~register_name
             in
-            case ~guard:None
-              ~lhs:(xpost_pattern ~driver name p.Tterm.p_node)
-              ~rhs:
-                [%expr
-                  if not [%e term fail_nonexec ~driver t] then
-                    [%e F.violated `XPost ~term:s ~register_name]])
-          ptlist
+            term ~driver fail_nonexec t
+            |> Option.map (fun t ->
+                   case ~guard:None
+                     ~lhs:(xpost_pattern ~driver name p.Tterm.p_node)
+                     ~rhs:
+                       [%expr
+                         if not [%e t] then
+                           [%e F.violated `XPost ~term:s ~register_name]]))
+          (* XXX ptlist must be rev because the cases are given in the
+             reverse order by gospel *)
+          (List.rev ptlist)
         @ [ assert_false_case ]
       in
       M.update exn

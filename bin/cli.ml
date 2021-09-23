@@ -1,4 +1,4 @@
-type fontend = Default | Monolith
+type frontend = Default | Monolith
 
 let frontend_printer f = function
   | Default -> Format.pp_print_string f "Default"
@@ -9,11 +9,16 @@ let frontend_parser = function
   | "monolith" -> Ok Monolith
   | s -> Error (`Msg (Printf.sprintf "Error: `%s' is not a valid argument" s))
 
-let main = function
-  | Default -> Ortac_default.generate
-  | Monolith -> Ortac_monolith.generate
+let main frontend path () =
+  match frontend with
+  | Default -> Ortac_default.generate path
+  | Monolith -> Ortac_monolith.generate path
 
 open Cmdliner
+
+let setup_log =
+  let init style_renderer = Fmt_tty.setup_std_outputs ?style_renderer () in
+  Term.(const init $ Fmt_cli.style_renderer ())
 
 let ocaml_file =
   let parse s =
@@ -37,6 +42,6 @@ let frontend =
 
 let cmd =
   let doc = "Run ORTAC." in
-  (Term.(const main $ frontend $ ocaml_file), Term.info "ortac" ~doc)
+  (Term.(const main $ frontend $ ocaml_file $ setup_log), Term.info "ortac" ~doc)
 
 let () = Term.(exit @@ eval cmd)
