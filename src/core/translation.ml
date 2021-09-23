@@ -227,7 +227,9 @@ let xpost_guard ~driver ~register_name ~term_printer xpost call =
                        [%expr
                          if not [%e t] then
                            [%e F.violated `XPost ~term:s ~register_name]]))
-          ptlist
+          (* XXX ptlist must be rev because the cases are given in the
+             reverse order by gospel *)
+          (List.rev ptlist)
         @ [ assert_false_case ]
       in
       M.update exn
