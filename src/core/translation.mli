@@ -1,8 +1,6 @@
 open Ppxlib
 open Gospel
 
-exception Unsupported of Location.t option * string
-
 val returned_pattern : Tast.lb_arg list -> pattern * expression
 
 val mk_setup : location -> string -> (expression -> expression) * string

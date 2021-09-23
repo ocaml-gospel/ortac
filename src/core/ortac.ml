@@ -1,3 +1,4 @@
+module W = Warnings
 open Ppxlib
 open Gospel
 
@@ -89,6 +90,7 @@ module Make (B : Backend.S) = struct
           | _ -> None)
         s
     in
+    W.report ();
     let include_lib =
       pmod_ident (lident module_name) |> include_infos |> pstr_include
     in
