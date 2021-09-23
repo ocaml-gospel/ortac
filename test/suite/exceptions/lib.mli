@@ -17,5 +17,6 @@ val raise_notfound : int -> int
 
 val raise_invalidarg : string -> int
 (*@ o = raise_invalidarg i
+    raises Not_found -> true
     raises Invalid_argument s -> i = s | Invalid_argument _ -> false
     raises Invalid_argument _ -> true *)
