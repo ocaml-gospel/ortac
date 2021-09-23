@@ -2,6 +2,7 @@ val create : int -> 'a -> 'a array
 (*@ arr = create n v
     requires n >= 0
     ensures Array.length arr = n
+    ensures Array.for_all (fun x -> x = v) arr
     ensures forall i. 0 <= i < n -> arr.(i) = v *)
 
 val bad_create : int -> int -> int array

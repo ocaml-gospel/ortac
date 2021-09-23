@@ -137,4 +137,6 @@ module Array = struct
     else Array.unsafe_get arr (Z.to_int z)
 
   let length arr = Array.length arr |> Z.of_int
+
+  let for_all = Array.for_all
 end
