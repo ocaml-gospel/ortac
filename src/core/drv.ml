@@ -3,20 +3,17 @@ type t = {
   env : Gospel.Tmodule.namespace list;
 }
 
-let get_ls_env env path =
-  List.find_map
-    (fun ns ->
-      try Some (Gospel.Tmodule.ns_find_ls ns path) with Not_found -> None)
-    env
+let get_env get env path =
+  List.find_map (fun ns -> try Some (get ns path) with Not_found -> None) env
   |> function
-  | Some ls -> ls
+  | Some s -> s
   | None ->
       Fmt.(
-        failwith
-          "Internal error: path `%a' was not found when initialising ortac \
-           driver"
+        failwith "Internal error: path `%a' was not found"
           (list ~sep:(any ".") string)
           path)
+
+let get_ls_env = get_env Gospel.Tmodule.ns_find_ls
 
 let v env =
   let table =
@@ -59,3 +56,5 @@ let v env =
 let translate t ls = Hashtbl.find_opt t.translations ls
 
 let get_ls t = get_ls_env t.env
+
+let get_ts t = get_env Gospel.Tmodule.ns_find_ts t.env
