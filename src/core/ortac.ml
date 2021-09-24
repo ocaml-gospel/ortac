@@ -85,8 +85,25 @@ module Make (B : Backend.S) = struct
       List.filter_map
         (fun (sig_item : Tast.signature_item) ->
           match sig_item.sig_desc with
+          | Sig_val (decl, true) ->
+              W.register (W.Unsupported "ghost value", decl.vd_loc);
+              None
           | Sig_val (decl, _ghost) when decl.vd_args <> [] -> value ~driver decl
           | Sig_val (decl, _ghost) -> constant ~driver decl
+          | Sig_type (_, _, true) ->
+              W.register (W.Unsupported "ghost type", sig_item.sig_loc);
+              None
+          | Sig_type (_rec_flag, ty_decls, _ghost)
+            when List.exists (fun td -> td.Tast.td_spec <> None) ty_decls ->
+              W.register (W.Unsupported "type specification", sig_item.sig_loc);
+              None
+          | Sig_function func ->
+              W.register
+                (W.Unsupported "function and predicate", func.Tast.fun_loc);
+              None
+          | Sig_axiom axiom ->
+              W.register (W.Unsupported "axiom not", axiom.Tast.ax_loc);
+              None
           | _ -> None)
         s
     in
