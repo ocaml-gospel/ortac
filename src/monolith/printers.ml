@@ -38,28 +38,12 @@ and tuple drv tyl =
   let vars = List.map B.evar elts in
   let pat = A.ppat_tuple ~loc (List.map B.pvar elts) in
   let printers = List.map ty2printer tyl in
-  let rec tuple_helper acc vars printers =
-    match (vars, printers) with
-    | [], [] -> acc
-    | v :: vs, p :: ps ->
-        tuple_helper [%expr [%e acc] ^^ comma ^^ [%e p] [%e v]] vs ps
-    | _, _ ->
-        failwith
-          "from Printers.tuple, lists should be both empty or both not empty"
-  in
-  let start vars printers =
-    match (vars, printers) with
-    | [], [] -> [%expr ()]
-    | v :: vs, p :: ps -> tuple_helper [%expr [%e p] [%e v]] vs ps
-    | _, _ ->
-        failwith
-          "from Printers.start, lists should be both empty or both not empty"
-  in
+  let tuple = B.elist (List.map2 (fun p v -> B.eapply p [ v ]) printers vars) in
   let x = gen_symbol ~prefix:"__x" () in
   [%expr
     fun [%p B.pvar x] ->
       let [%p pat] = [%e B.evar x] in
-      PPrint.(lparen ^^ [%e start vars printers] ^^ rparen)]
+      M.print_tuple [%e tuple]]
 
 let lsymbol2printer drv (ls : Tterm.lsymbol) =
   match ls.ls_value with
@@ -84,7 +68,7 @@ let record_printer drv (rec_decl : Tast.rec_declaration) =
       Ppxlib__.Import.Closed
   in
   let fields_printer = List.map (mk_field drv) rec_decl.rd_ldl |> B.elist in
-  [%expr fun [%p prec] -> PPrintOCaml.record "" [%e fields_printer]]
+  [%expr fun [%p prec] -> M.print_record "" [%e fields_printer]]
 
 let ty2repr drv x (ty : Ttypes.ty) =
   let printer = ty2printer drv ty in
@@ -102,7 +86,7 @@ let variant_printer drv (constructors : Tast.constructor_decl list) =
     let cident = String.concat "." [ "R"; cname ] |> B.lident in
     let lhs = A.ppat_construct ~loc cident parg in
     let args = List.map2 ty2repr xs cargs |> B.elist in
-    let rhs = [%expr PPrintOCaml.variant "" [%e B.estring cname] 0 [%e args]] in
+    let rhs = [%expr M.print_variant "" [%e B.estring cname] 0 [%e args]] in
     A.case ~guard:None ~lhs ~rhs
   in
   let cases = List.map variant constructors in

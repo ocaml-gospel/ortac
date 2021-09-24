@@ -36,7 +36,7 @@ and tyapp2gen drv (tys : Ttypes.tysymbol) (tyl : Ttypes.ty list) =
 and tuple drv tyl =
   let tuple =
     A.pexp_tuple ~loc
-      (List.map (fun ts -> A.eapply ~loc (ty2gen drv ts) [ [%expr ()] ]) tyl)
+      (List.map (fun ts -> A.eapply ~loc (ty2gen drv ts) [ A.eunit ~loc ]) tyl)
   in
   [%expr fun () -> [%e tuple]]
 
@@ -53,7 +53,7 @@ let variant_generator drv (constructors : Tast.constructor_decl list) =
   let gen (c : Tast.constructor_decl) =
     let ty2gen = ty2gen drv in
     let gen = arg c |> List.map ty2gen in
-    List.map (fun e -> [%expr [%e e] ()]) gen |> A.pexp_tuple_opt ~loc
+    List.map (fun e -> B.eapply e [ A.eunit ~loc ]) gen |> A.pexp_tuple_opt ~loc
   in
   let variant (c : Tast.constructor_decl) =
     let name = name c in
@@ -74,7 +74,7 @@ let record_generator drv (rec_decl : Tast.rec_declaration) =
   in
   let gen (ld : Tterm.lsymbol Tast.label_declaration) =
     let gen = lsymbol2gen drv ld.ld_field in
-    [%expr [%e gen] ()]
+    B.eapply gen [ A.eunit ~loc ]
   in
   let r =
     A.pexp_record ~loc
