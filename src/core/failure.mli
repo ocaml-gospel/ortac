@@ -6,8 +6,15 @@ val violated :
   register_name:expression ->
   expression
 
+val violated_invariant :
+  state:expression ->
+  typ:string ->
+  term:string ->
+  register_name:expression ->
+  expression
+
 val spec_failure :
-  [ `Post | `Pre | `XPost ] ->
+  [ `Post | `Pre | `XPost | `Invariant ] ->
   term:string ->
   exn:expression ->
   register_name:expression ->

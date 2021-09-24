@@ -4,7 +4,11 @@ open Builder
 let eterm t = estring t
 
 let term_kind kind =
-  (match kind with `Pre -> "Pre" | `Post -> "Post" | `XPost -> "XPost")
+  (match kind with
+  | `Pre -> "Pre"
+  | `Post -> "Post"
+  | `XPost -> "XPost"
+  | `Invariant -> "Invariant")
   |> lident
   |> fun c -> pexp_construct c None
 
@@ -15,6 +19,12 @@ let violated kind ~term ~register_name =
   [%expr
     Violated_condition
       { term = [%e eterm term]; term_kind = [%e term_kind kind] }]
+  |> register ~register_name
+
+let violated_invariant ~state ~typ ~term ~register_name =
+  [%expr
+    Violated_invariant
+      { typ = [%e estring typ]; term = [%e eterm term]; state = [%e state] }]
   |> register ~register_name
 
 let spec_failure kind ~term ~exn ~register_name =

@@ -2,9 +2,10 @@ open Fmt
 
 type location = { start : Lexing.position; stop : Lexing.position }
 
-type term_kind = Pre | Post | XPost
+type term_kind = Pre | Post | XPost | Invariant
 
 type error =
+  | Violated_invariant of { typ : string; term : string; state : term_kind }
   | Violated_condition of { term : string; term_kind : term_kind }
   | Specification_failure of { term : string; term_kind : term_kind; exn : exn }
   | Unexpected_exception of { allowed_exn : string list; exn : exn }
@@ -20,7 +21,17 @@ let pp_term_kind =
     (function
       | Pre -> "pre-condition"
       | Post -> "post-condition"
-      | XPost -> "exceptional post-condition")
+      | XPost -> "exceptional post-condition"
+      | Invariant -> "type invariant")
+    (styled `Yellow string)
+
+let pp_invariant_state =
+  using
+    (function
+      | Pre -> "the prestate"
+      | Post -> "the poststate"
+      | XPost -> "an exceptional poststate"
+      | Invariant -> assert false)
     (styled `Yellow string)
 
 let pp_term = quoted (styled `Bold string)
@@ -45,6 +56,14 @@ let pp_exn = using Printexc.to_string pp_quoted_exn
 let pp_allowed_exn = list ~sep:comma pp_quoted_exn
 
 let pp_error ppf = function
+  | Violated_invariant { typ; term; state } ->
+      pf ppf "the following %a for `%a':@\n  @[%a@]@\nwas %a in %a."
+        (styled `Yellow string)
+        "type invariant"
+        (styled `Yellow string)
+        typ pp_term term
+        (styled `Red string)
+        "violated" pp_invariant_state state
   | Violated_condition { term; term_kind } ->
       pf ppf "the %a@\n  @[%a@]@\nwas %a." pp_term_kind term_kind pp_term term
         (styled `Red string)

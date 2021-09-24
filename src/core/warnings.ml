@@ -6,6 +6,8 @@ type kind =
   | Unsupported of string
   | Unsupported_old_copy of string
   | Unsupported_old_use of string
+  | Unsupported_model of string
+  | Unsupported_model_use of string
 
 type t = kind * Location.t
 
@@ -34,6 +36,13 @@ let pp_kind ppf = function
       pf ppf
         "use of unsupported old variable `%s'@\n\
          the clause has not been translated" msg
+  | Unsupported_model model ->
+      pf ppf "models are not supported@\nthe model `%s' has not been translated"
+        model
+  | Unsupported_model_use model ->
+      pf ppf
+        "this term uses the model `%s', which is not supported@\n\
+         the clause was not translated" model
 
 let pp ppf (k, loc) =
   pf ppf "%a@\n%a@[%a@]"

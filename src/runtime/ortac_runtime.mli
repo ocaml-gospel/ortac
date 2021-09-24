@@ -1,8 +1,9 @@
 type location = { start : Lexing.position; stop : Lexing.position }
 
-type term_kind = Pre | Post | XPost
+type term_kind = Pre | Post | XPost | Invariant
 
 type error =
+  | Violated_invariant of { typ : string; term : string; state : term_kind }
   | Violated_condition of { term : string; term_kind : term_kind }
   | Specification_failure of { term : string; term_kind : term_kind; exn : exn }
   | Unexpected_exception of { allowed_exn : string list; exn : exn }

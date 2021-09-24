@@ -37,3 +37,14 @@ val mk_post_checks :
   expression
 
 val mk_function_def : driver:Drv.t -> Tterm.term -> expression option
+
+val mk_invariants_checks :
+  driver:Drv.t ->
+  models:Tterm.lsymbol list ->
+  state:expression ->
+  typ:string ->
+  instance:Identifier.Ident.t ->
+  register_name:expression ->
+  term_printer:(Gospel.Tterm.term -> string) ->
+  Gospel.Tterm.term list ->
+  expression

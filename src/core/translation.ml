@@ -328,3 +328,74 @@ let mk_function_def ~driver t =
   with W.Error t ->
     W.register t;
     None
+
+let rec map f (t : Tterm.term) =
+  let map = map f in
+  match t.t_node with
+  | Tterm.Tvar _ | Tterm.Tconst _ | Tterm.Ttrue | Tterm.Tfalse -> f t
+  | Tterm.Tapp (ls, tl) ->
+      let tl = List.map map tl in
+      f { t with t_node = Tapp (ls, tl) }
+  | Tterm.Tfield (t', ls) ->
+      let t' = map t' in
+      f { t with t_node = Tfield (t', ls) }
+  | Tterm.Tif (i, t', e) ->
+      let i = map i in
+      let t' = map t' in
+      let e = map e in
+      f { t with t_node = Tif (i, t', e) }
+  | Tterm.Tlet (vs, t1, t2) ->
+      let t1 = map t1 in
+      let t2 = map t2 in
+      f { t with t_node = Tlet (vs, t1, t2) }
+  | Tterm.Tcase (t', pl) ->
+      let t' = map t' in
+      let pl = List.map (fun (p, t) -> (p, map t)) pl in
+      f { t with t_node = Tcase (t', pl) }
+  | Tterm.Tquant (quant, vsl, trl, t') ->
+      let t' = map t' in
+      f { t with t_node = Tquant (quant, vsl, trl, t') }
+  | Tterm.Tbinop (op, t1, t2) ->
+      let t1 = map t1 in
+      let t2 = map t2 in
+      f { t with t_node = Tbinop (op, t1, t2) }
+  | Tterm.Tnot t' ->
+      let t' = map t' in
+      f { t with t_node = Told t' }
+  | Tterm.Told t' ->
+      let t' = map t' in
+      f { t with t_node = Told t' }
+
+let substitute_fields models vs_name term =
+  match term.Tterm.t_node with
+  | Tterm.Tapp (ls, []) when ls.ls_field ->
+      let loc = Option.value ~default:Location.none term.Tterm.t_loc in
+      List.iter
+        (fun m ->
+          if Tterm.ls_equal ls m then
+            raise W.(Error (Unsupported_model_use m.Tterm.ls_name.id_str, loc)))
+        models;
+      let instance_vs : Tterm.vsymbol =
+        let vs_ty = Option.get ls.ls_value in
+        { vs_name; vs_ty }
+      in
+      let term = Tterm.t_var instance_vs in
+      { term with t_node = Tterm.(Tfield (term, ls)) }
+  | _ -> term
+
+let mk_invariants_checks ~driver ~models ~state ~typ ~instance ~register_name
+    ~term_printer terms =
+  let fail_violated term =
+    F.violated_invariant ~state ~typ ~term ~register_name
+  in
+  let fail_nonexec term exn =
+    F.spec_failure `Invariant ~term ~exn ~register_name
+  in
+  List.filter_map
+    (fun t ->
+      let s = term_printer t in
+      let t = map (substitute_fields models instance) t in
+      term ~driver ~olds:(Hashtbl.create 0) (fail_nonexec s) t
+      |> Option.map (fun t -> [%expr if not [%e t] then [%e fail_violated s]]))
+    terms
+  |> esequence

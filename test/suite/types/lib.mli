@@ -1,4 +1,5 @@
 type t = { x: int; y: bool }
+(*@ invariant x >= 0 *)
 
 val e : t
 (*@ ensures e.x >= 0 *)
