@@ -79,6 +79,25 @@ module Make (B : Backend.S) = struct
     in
     Option.map process vd.vd_spec
 
+  let function_ ~driver (func : Tast.function_) =
+    let loc = func.fun_loc in
+    match func.fun_def with
+    | None ->
+        W.(register (Unsupported "uninterpreted function or predicate", loc));
+        None
+    | Some def ->
+        let name = gen_symbol ~prefix:func.fun_ls.ls_name.id_str () in
+        let pargs =
+          List.map
+            (fun vs ->
+              (Nolabel, pvar (Fmt.str "%a" Identifier.Ident.pp vs.Tterm.vs_name)))
+            func.fun_params
+        in
+        T.mk_function_def ~driver def
+        |> Option.map (fun expr ->
+               let body = efun pargs expr in
+               (name, [%stri let [%p pvar name] = [%e body]]))
+
   let signature module_name env s =
     let driver = Drv.v env in
     let declarations =
@@ -98,11 +117,12 @@ module Make (B : Backend.S) = struct
               W.register (W.Unsupported "type specification", sig_item.sig_loc);
               None
           | Sig_function func ->
-              W.register
-                (W.Unsupported "function and predicate", func.Tast.fun_loc);
-              None
+              function_ ~driver func
+              |> Option.map (fun (name, stri) ->
+                     Drv.add_translation driver func.fun_ls name;
+                     stri)
           | Sig_axiom axiom ->
-              W.register (W.Unsupported "axiom not", axiom.Tast.ax_loc);
+              W.register (W.Unsupported "axiom", axiom.Tast.ax_loc);
               None
           | _ -> None)
         s
