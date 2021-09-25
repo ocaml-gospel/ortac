@@ -56,7 +56,9 @@ let v env =
 
 let translate t ls = H.find_opt t.translations ls
 
-let add_translation t ls s = H.add t.translations ls s
+let add_translation t ls s = H.replace t.translations ls s
+
+let remove_translation t ls = H.remove t.translations ls
 
 let get_ls t = get_ls_env t.env
 

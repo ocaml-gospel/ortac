@@ -85,18 +85,27 @@ module Make (B : Backend.S) = struct
     | None ->
         W.(register (Unsupported "uninterpreted function or predicate", loc));
         None
-    | Some def ->
-        let name = gen_symbol ~prefix:func.fun_ls.ls_name.id_str () in
+    | Some def -> (
+        let name = gen_symbol ~prefix:("__" ^ func.fun_ls.ls_name.id_str) () in
         let pargs =
           List.map
             (fun vs ->
               (Nolabel, pvar (Fmt.str "%a" Identifier.Ident.pp vs.Tterm.vs_name)))
             func.fun_params
         in
-        T.mk_function_def ~driver def
-        |> Option.map (fun expr ->
-               let body = efun pargs expr in
-               (name, [%stri let [%p pvar name] = [%e body]]))
+        (* This is needed for recursive functions; ideally the driver should be
+           functional.*)
+        Drv.add_translation driver func.fun_ls name;
+        let recursive = if func.fun_rec then Recursive else Nonrecursive in
+        match T.mk_function_def ~driver def with
+        | None ->
+            Drv.remove_translation driver func.fun_ls;
+            None
+        | Some expr ->
+            let body = efun pargs expr in
+            Some
+              (pstr_value recursive
+                 [ value_binding ~pat:(pvar name) ~expr:body ]))
 
   let signature module_name env s =
     let driver = Drv.v env in
@@ -116,11 +125,7 @@ module Make (B : Backend.S) = struct
             when List.exists (fun td -> td.Tast.td_spec <> None) ty_decls ->
               W.register (W.Unsupported "type specification", sig_item.sig_loc);
               None
-          | Sig_function func ->
-              function_ ~driver func
-              |> Option.map (fun (name, stri) ->
-                     Drv.add_translation driver func.fun_ls name;
-                     stri)
+          | Sig_function func -> function_ ~driver func
           | Sig_axiom axiom ->
               W.register (W.Unsupported "axiom", axiom.Tast.ax_loc);
               None
