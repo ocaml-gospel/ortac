@@ -2,11 +2,14 @@ open Ppxlib
 
 type level = Warning | Error
 
-type kind = Unsupported of string
+type kind =
+  | Unsupported of string
+  | Unsupported_old_copy of string
+  | Unsupported_old_use of string
 
 type t = kind * Location.t
 
-let level = function Unsupported _ -> Warning
+let level = function _ -> Warning
 
 exception Error of t
 
@@ -25,6 +28,12 @@ let pp_level ppf = function
 let pp_kind ppf = function
   | Unsupported msg ->
       pf ppf "unsupported %s@\nthe clause has not been translated" msg
+  | Unsupported_old_copy msg ->
+      pf ppf "unable to copy the variable `%s' in the pre-state" msg
+  | Unsupported_old_use msg ->
+      pf ppf
+        "use of unsupported old variable `%s'@\n\
+         the clause has not been translated" msg
 
 let pp ppf (k, loc) =
   pf ppf "%a@\n%a@[%a@]"

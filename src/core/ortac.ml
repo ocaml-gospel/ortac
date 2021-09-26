@@ -47,19 +47,27 @@ module Make (B : Backend.S) = struct
       let eargs, pargs = of_gospel_args spec.sp_args in
       (* Returned pattern *)
       let ret_pat, ret_expr = T.returned_pattern spec.sp_ret in
+      let all_terms =
+        spec.sp_post @ spec.sp_pre
+        @ List.fold_left
+            (fun acc (_, ptl) -> List.map snd ptl @ acc)
+            [] spec.sp_xpost
+      in
+      let olds, old_defs = Old_translation.process_olds ~driver all_terms in
       let pre_checks =
-        T.mk_pre_checks ~driver ~register_name ~term_printer spec.sp_pre
+        T.mk_pre_checks ~driver ~olds ~register_name ~term_printer spec.sp_pre
       in
       let let_call =
-        T.mk_call ~driver ~register_name ~term_printer ret_pat loc
+        T.mk_call ~driver ~olds ~register_name ~term_printer ret_pat loc
           val_desc.vd_name.id_str spec.sp_xpost eargs
       in
       let post_checks =
-        T.mk_post_checks ~driver ~register_name ~term_printer spec.sp_post
+        T.mk_post_checks ~driver ~olds ~register_name ~term_printer spec.sp_post
       in
       let body =
-        efun pargs @@ setup_expr @@ pre_checks @@ let_call @@ post_checks
-        @@ ret_expr
+        efun pargs @@ setup_expr
+        @@ old_defs
+        @@ pre_checks @@ let_call @@ post_checks @@ ret_expr
       in
       [%stri let [%p pvar val_desc.vd_name.id_str] = [%e body]]
     in
@@ -72,7 +80,8 @@ module Make (B : Backend.S) = struct
       let setup_expr, register_name = T.mk_setup loc vd.vd_name.id_str in
       let register_name = evar register_name in
       let post_checks =
-        T.mk_post_checks ~driver ~register_name ~term_printer spec.sp_post
+        T.mk_post_checks ~driver ~olds:(Hashtbl.create 0) ~register_name
+          ~term_printer spec.sp_post
       in
       let body = setup_expr @@ post_checks @@ evar vd.vd_name.id_str in
       [%stri let [%p pvar vd.vd_name.id_str] = [%e body]]
@@ -121,9 +130,14 @@ module Make (B : Backend.S) = struct
           | Sig_type (_, _, true) ->
               W.register (W.Unsupported "ghost type", sig_item.sig_loc);
               None
-          | Sig_type (_rec_flag, ty_decls, _ghost)
-            when List.exists (fun td -> td.Tast.td_spec <> None) ty_decls ->
-              W.register (W.Unsupported "type specification", sig_item.sig_loc);
+          | Sig_type (_rec_flag, ty_decls, false) ->
+              List.iter
+                (fun (td : Tast.type_declaration) ->
+                  Drv.add_type_definition driver td.td_ts td.td_kind;
+                  if td.td_spec <> None then
+                    W.register
+                      (W.Unsupported "type specification", sig_item.sig_loc))
+                ty_decls;
               None
           | Sig_function func -> function_ ~driver func
           | Sig_axiom axiom ->

@@ -22,8 +22,8 @@ let rec pattern p =
 
 type bound = Inf of expression | Sup of expression
 
-let rec bounds ~driver ~loc (var : Tterm.vsymbol) (t1 : Tterm.term)
-    (t2 : Tterm.term) : expression * expression =
+let rec bounds ~driver ~olds ~in_old ~loc (var : Tterm.vsymbol)
+    (t1 : Tterm.term) (t2 : Tterm.term) : expression * expression =
   let unsupported () =
     raise (W.Error (Unsupported "ill formed quantification", loc))
   in
@@ -40,22 +40,30 @@ let rec bounds ~driver ~loc (var : Tterm.vsymbol) (t1 : Tterm.term)
   let bound = function
     | Tterm.Tapp (f, [ { t_node = Tvar vs; _ }; t ])
       when vs.vs_name = var.vs_name ->
-        comb ~right:true f (unsafe_term ~driver t)
+        comb ~right:true f (unsafe_term ~in_old ~olds ~driver t)
     | Tterm.Tapp (f, [ t; { t_node = Tvar vs; _ } ])
       when vs.vs_name = var.vs_name ->
-        comb ~right:false f (unsafe_term ~driver t)
+        comb ~right:false f (unsafe_term ~in_old ~olds ~driver t)
     | _ -> unsupported ()
   in
   match (bound t1.t_node, bound t2.t_node) with
   | Inf start, Sup stop | Sup stop, Inf start -> (start, stop)
   | _ -> unsupported ()
 
-and unsafe_term ~driver (t : Tterm.term) : expression =
-  let term = unsafe_term ~driver in
+and unsafe_term ~driver ?(in_old = false) ~olds (t : Tterm.term) : expression =
+  let term = unsafe_term ~in_old ~olds ~driver in
   let loc = Option.value ~default:Location.none t.t_loc in
   let unsupported m = raise (W.Error (W.Unsupported m, loc)) in
   match t.t_node with
-  | Tvar { vs_name; _ } -> evar (str "%a" Identifier.Ident.pp vs_name)
+  | Tvar vs ->
+      let vs =
+        if in_old then
+          try Hashtbl.find olds vs
+          with Not_found ->
+            raise W.(Error (Unsupported_old_use vs.vs_name.id_str, loc))
+        else vs
+      in
+      evar (str "%a" Identifier.Ident.pp vs.vs_name)
   | Tconst c -> econst c
   | Tfield (t, f) -> pexp_field (term t) (lident f.ls_name.id_str)
   | Tapp (fs, []) when Tterm.(ls_equal fs fs_bool_true) -> [%expr true]
@@ -108,7 +116,7 @@ and unsafe_term ~driver (t : Tterm.term) : expression =
       (match (quant, op) with
       | Tforall, Timplies | Texists, (Tand | Tand_asym) -> ()
       | _, _ -> unsupported "ill formed quantification");
-      let start, stop = bounds ~driver ~loc var t1 t2 in
+      let start, stop = bounds ~driver ~olds ~in_old ~loc var t1 t2 in
       let p = term p in
       let quant = evar (if quant = Tforall then "Z.forall" else "Z.exists") in
       let x = str "%a" Identifier.Ident.pp var.vs_name in
@@ -136,15 +144,15 @@ and unsafe_term ~driver (t : Tterm.term) : expression =
       | Tterm.Timplies -> [%expr (not [%e term t1]) || [%e term t2]]
       | Tterm.Tiff -> [%expr [%e term t1] = [%e term t2]])
   | Tnot t -> [%expr not [%e term t]]
-  | Told _ -> unsupported "old operator"
+  | Told t -> unsafe_term ~driver ~olds ~in_old:true t
   | Ttrue -> [%expr true]
   | Tfalse -> [%expr false]
 
-let term ~driver fail t =
+let term ~driver ~olds fail t =
   try
     Some
       [%expr
-        try [%e unsafe_term ~driver t]
+        try [%e unsafe_term ~driver ~olds t]
         with e ->
           [%e fail (evar "e")];
           true]
@@ -152,11 +160,11 @@ let term ~driver fail t =
     W.register t;
     None
 
-let conditions ~driver ~term_printer fail_violated fail_nonexec terms =
+let conditions ~driver ~olds ~term_printer fail_violated fail_nonexec terms =
   List.filter_map
     (fun t ->
       let s = term_printer t in
-      term ~driver (fail_nonexec s) t
+      term ~driver ~olds (fail_nonexec s) t
       |> Option.map (fun t -> [%expr if not [%e t] then [%e fail_violated s]]))
     terms
   |> esequence
@@ -187,7 +195,7 @@ let rec xpost_pattern ~driver exn = function
         (xpost_pattern ~driver exn p.p_node)
         (noloc (str "%a" Tterm.Ident.pp s.vs_name))
 
-let xpost_guard ~driver ~register_name ~term_printer xpost call =
+let xpost_guard ~driver ~olds ~register_name ~term_printer xpost call =
   let module M = Map.Make (struct
     type t = Ttypes.xsymbol
 
@@ -220,7 +228,7 @@ let xpost_guard ~driver ~register_name ~term_printer xpost call =
             let fail_nonexec exn =
               F.spec_failure `XPost ~term:s ~exn ~register_name
             in
-            term ~driver fail_nonexec t
+            term ~driver ~olds fail_nonexec t
             |> Option.map (fun t ->
                    case ~guard:None
                      ~lhs:(xpost_pattern ~driver name p.Tterm.p_node)
@@ -292,31 +300,31 @@ let mk_setup loc fun_name =
   in
   ((fun next -> let_loc @@ let_acc @@ next), register_name)
 
-let mk_pre_checks ~driver ~register_name ~term_printer pres next =
+let mk_pre_checks ~driver ~olds ~register_name ~term_printer pres next =
   [%expr
-    [%e pre ~driver ~register_name ~term_printer pres];
+    [%e pre ~driver ~olds ~register_name ~term_printer pres];
     [%e F.report ~register_name];
     [%e next]]
 
-let mk_call ~driver ~register_name ~term_printer ret_pat loc fun_name xpost
-    eargs =
+let mk_call ~driver ~olds ~register_name ~term_printer ret_pat loc fun_name
+    xpost eargs =
   let call = pexp_apply (evar fun_name) eargs in
   let check_raises =
-    xpost_guard ~driver ~register_name ~term_printer xpost call
+    xpost_guard ~driver ~olds ~register_name ~term_printer xpost call
   in
   fun next ->
     [%expr
       let [%p ret_pat] = [%e check_raises] in
       [%e next]]
 
-let mk_post_checks ~driver ~register_name ~term_printer posts next =
+let mk_post_checks ~driver ~olds ~register_name ~term_printer posts next =
   [%expr
-    [%e post ~driver ~register_name ~term_printer posts];
+    [%e post ~driver ~olds ~register_name ~term_printer posts];
     [%e F.report ~register_name];
     [%e next]]
 
 let mk_function_def ~driver t =
-  try Some (unsafe_term ~driver t)
+  try Some (unsafe_term ~driver ~olds:(Hashtbl.create 0) t)
   with W.Error t ->
     W.register t;
     None

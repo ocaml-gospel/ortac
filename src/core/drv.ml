@@ -1,7 +1,17 @@
 open Gospel
-module H = Hashtbl.Make (Tterm.LS)
+module Hls = Hashtbl.Make (Tterm.LS)
 
-type t = { translations : string H.t; env : Tmodule.namespace list }
+module Hts = Hashtbl.Make (struct
+  include Ttypes.Ts
+
+  let hash = Hashtbl.hash
+end)
+
+type t = {
+  type_defs : Tast.type_kind Hts.t;
+  translations : string Hls.t;
+  env : Tmodule.namespace list;
+}
 
 let get_env get env path =
   List.find_map (fun ns -> try Some (get ns path) with Not_found -> None) env
@@ -46,20 +56,24 @@ let v env =
       ([ "Gospelstdlib"; "Array"; "for_all" ], "Array.for_all");
     ]
   in
-  let translations = H.create 0 in
+  let translations = Hls.create 0 in
   List.iter
     (fun (path, ocaml) ->
       let ls = get_ls_env env path in
-      H.add translations ls ocaml)
+      Hls.add translations ls ocaml)
     table;
-  { translations; env }
+  { type_defs = Hts.create 0; translations; env }
 
-let translate t ls = H.find_opt t.translations ls
+let translate t ls = Hls.find_opt t.translations ls
 
-let add_translation t ls s = H.replace t.translations ls s
+let add_translation t ls s = Hls.replace t.translations ls s
 
-let remove_translation t ls = H.remove t.translations ls
+let remove_translation t ls = Hls.remove t.translations ls
 
 let get_ls t = get_ls_env t.env
 
 let get_ts t = get_env Tmodule.ns_find_ts t.env
+
+let add_type_definition t ts tk = Hts.replace t.type_defs ts tk
+
+let get_type_definition t ts = Hts.find t.type_defs ts

@@ -7,6 +7,7 @@ val mk_setup : location -> string -> (expression -> expression) * string
 
 val mk_pre_checks :
   driver:Drv.t ->
+  olds:(Tterm.vsymbol, Tterm.vsymbol) Hashtbl.t ->
   register_name:expression ->
   term_printer:(Tterm.term -> string) ->
   Tterm.term list ->
@@ -15,6 +16,7 @@ val mk_pre_checks :
 
 val mk_call :
   driver:Drv.t ->
+  olds:(Tterm.vsymbol, Tterm.vsymbol) Hashtbl.t ->
   register_name:expression ->
   term_printer:(Tterm.term -> string) ->
   pattern ->
@@ -27,6 +29,7 @@ val mk_call :
 
 val mk_post_checks :
   driver:Drv.t ->
+  olds:(Tterm.vsymbol, Tterm.vsymbol) Hashtbl.t ->
   register_name:expression ->
   term_printer:(Tterm.term -> string) ->
   Tterm.term list ->

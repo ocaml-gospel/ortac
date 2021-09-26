@@ -13,3 +13,7 @@ val translate : t -> Tterm.lsymbol -> string option
 val get_ls : t -> string list -> Tterm.lsymbol
 
 val get_ts : t -> string list -> Ttypes.tysymbol
+
+val add_type_definition : t -> Ttypes.tysymbol -> Tast.type_kind -> unit
+
+val get_type_definition : t -> Ttypes.tysymbol -> Tast.type_kind
