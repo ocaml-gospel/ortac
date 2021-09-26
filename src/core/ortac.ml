@@ -65,9 +65,8 @@ module Make (B : Backend.S) = struct
         T.mk_post_checks ~driver ~olds ~register_name ~term_printer spec.sp_post
       in
       let body =
-        efun pargs @@ setup_expr
-        @@ old_defs
-        @@ pre_checks @@ let_call @@ post_checks @@ ret_expr
+        efun pargs @@ setup_expr @@ old_defs @@ pre_checks @@ let_call
+        @@ post_checks @@ ret_expr
       in
       [%stri let [%p pvar val_desc.vd_name.id_str] = [%e body]]
     in
