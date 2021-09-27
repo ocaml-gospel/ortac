@@ -54,19 +54,6 @@ let mk_candidate module_name =
 
 let is_arrow = function Ptyp_arrow _ -> true | _ -> false
 
-let rec translate_ret s =
-  match s.ptyp_desc with
-  | Ptyp_var _s -> [%expr sequential ()]
-  | Ptyp_constr ({ txt = Lident "unit"; _ }, _) -> [%expr unit]
-  | Ptyp_constr ({ txt = Lident "int"; _ }, _) -> [%expr int]
-  | Ptyp_constr ({ txt = Lident "bool"; _ }, _) -> [%expr bool]
-  | Ptyp_constr ({ txt = Lident "list"; _ }, [ param ]) ->
-      [%expr list [%e translate_ret param]]
-  | Ptyp_constr ({ txt = Lident "array"; _ }, [ param ]) ->
-      [%expr M.array [%e translate_ret param]]
-  | Ptyp_constr ({ txt = Lident ty; _ }, _) -> B.evar (Printf.sprintf "S.%s" ty)
-  | _ -> failwith "monolith deconstructible spec not implemented yet"
-
 let rec translate s =
   match s.ptyp_desc with
   | Ptyp_var _s -> [%expr sequential ()]
@@ -81,7 +68,8 @@ let rec translate s =
       [%expr M.array [%e translate param]]
   | Ptyp_arrow (_, x, y) when is_arrow y.ptyp_desc ->
       [%expr [%e translate x] ^> [%e translate y]]
-  | Ptyp_arrow (_, x, y) -> [%expr [%e translate x] ^!> [%e translate_ret y]]
+  | Ptyp_arrow (_, x, y) -> [%expr [%e translate x] ^!> [%e translate y]]
+  | Ptyp_tuple _ -> failwith "tuple spec"
   | Ptyp_constr ({ txt = Lident ty; _ }, _) -> B.evar (Printf.sprintf "S.%s" ty)
   | _ ->
       failwith
