@@ -110,7 +110,11 @@ and unsafe_term ~driver (t : Tterm.term) : expression =
       | _, _ -> unsupported "ill formed quantification");
       let start, stop = bounds ~driver ~loc var t1 t2 in
       let p = term p in
-      let quant = evar (if quant = Tforall then "Z.forall" else "Z.exists") in
+      let quant =
+        evar
+          (if quant = Tforall then "Ortac_runtime.Z.forall"
+          else "Ortac_runtime.Z.exists")
+      in
       let x = str "%a" Identifier.Ident.pp var.vs_name in
       let func = pexp_fun Nolabel None (pvar x) p in
       eapply quant [ start; stop; func ]
@@ -286,7 +290,7 @@ let mk_setup loc fun_name =
   let let_acc next =
     [%expr
       let [%p pvar register_name] =
-        Errors.create [%e evar loc_name] [%e estring fun_name]
+        Ortac_runtime.Errors.create [%e evar loc_name] [%e estring fun_name]
       in
       [%e next]]
   in
