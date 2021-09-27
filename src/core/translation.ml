@@ -177,6 +177,8 @@ let rec xpost_pattern ~driver exn = function
       ppat_construct (lident exn)
         (Some (ppat_var (noloc (str "%a" Tterm.Ident.pp x.vs_name))))
   | Tterm.Papp (ls, []) when Tterm.(ls_equal ls (fs_tuple 0)) -> pvar exn
+  | Tterm.Papp (ls, l) when Tterm.is_fs_tuple ls ->
+      ppat_construct (lident exn) (Some (ppat_tuple (List.map pattern l)))
   | Tterm.Papp (_ls, _l) -> assert false
   | Tterm.Por (p1, p2) ->
       ppat_or
