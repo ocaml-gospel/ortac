@@ -2,7 +2,7 @@ module W = Warnings
 open Ppxlib
 open Gospel
 
-module Make (B : Backend.S) = struct
+module Make (B : Frontend.S) = struct
   open Builder
   module T = Translation
 

@@ -1,6 +1,6 @@
 open Ppxlib
 
-module M : Ortac_core.Backend.S = struct
+module M : Ortac_core.Frontend.S = struct
   let prelude =
     let loc = Location.none in
     [

@@ -1,4 +1,4 @@
-module Make (G : Backend.S) : sig
+module Make (G : Frontend.S) : sig
   val signature :
     string ->
     Gospel.Tmodule.namespace list ->
