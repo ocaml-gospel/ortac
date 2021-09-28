@@ -42,6 +42,8 @@ let frontend =
 
 let cmd =
   let doc = "Run ORTAC." in
-  (Term.(const main $ frontend $ ocaml_file $ setup_log), Term.info "ortac" ~doc)
+  let version = "ortac version %%VERSION%%" in
+  ( Term.(const main $ frontend $ ocaml_file $ setup_log),
+    Term.info "ortac" ~version ~doc )
 
 let () = Term.(exit @@ eval cmd)
