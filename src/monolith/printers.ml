@@ -1,9 +1,12 @@
+module W = Ortac_core.Warnings
 open Ppxlib
 open Gospel
 module A = Ast_builder.Default
 module B = Ortac_core.Builder
 
 let loc = Location.none
+
+let unsupported msg loc = raise (W.Error (W.MonolithPrinter msg, loc))
 
 let rec ty2printer drv (ty : Ttypes.ty) =
   match ty.ty_node with
@@ -27,10 +30,7 @@ and tyapp2printer drv (tys : Ttypes.tysymbol) (tyl : Ttypes.ty list) =
     Ttypes.ts_equal tys (get_ts [ "Gospelstdlib"; "array" ])
     && List.length tyl = 1
   then [%expr Print.array [%e ty2printer drv (List.hd tyl)]]
-  else
-    failwith
-      (Printf.sprintf "%s printer is not yet implemented from tys2printer"
-         tys.ts_ident.id_str)
+  else unsupported tys.ts_ident.id_str tys.ts_ident.id_loc
 
 and tuple drv tyl =
   let ty2printer = ty2printer drv in

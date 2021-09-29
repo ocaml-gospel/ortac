@@ -1,3 +1,4 @@
+module W = Ortac_core.Warnings
 open Ppxlib
 open Gospel
 
@@ -38,6 +39,8 @@ module B = Ortac_core.Builder
 
 let loc = Location.none
 
+let unsupported msg loc = raise (W.Error (W.MonolithSpec msg, loc))
+
 let mk_reference module_name env s =
   let rtac = G.signature module_name env s in
   let module_r = A.pmod_structure ~loc rtac in
@@ -75,9 +78,7 @@ and tyapp2spec drv (ts : Ttypes.tysymbol) (tl : Ttypes.ty list) =
     let a = (Nolabel, ty2spec drv (List.hd tl)) in
     let b = (Nolabel, ty2spec drv (List.nth tl 1)) in
     B.pexp_apply [%expr ( *** )] [ a; b ]
-  else
-    failwith
-      (Printf.sprintf "%s spec is not yet implemented" ts.ts_ident.id_str)
+  else unsupported ts.ts_ident.id_str ts.ts_ident.id_loc
 
 let translate drv (lb_arg : Tast.lb_arg) =
   match lb_arg with
@@ -99,8 +100,7 @@ let spec drv args ret =
         let a = (Nolabel, translate drv r1) in
         let b = (Nolabel, translate drv r2) in
         B.pexp_apply [%expr ( *** )] [ a; b ]
-    (* TODO: reconstruct if deconstructed *)
-    | _ -> assert false
+    | _ -> unsupported "tuple bigger than pair" loc
   in
   let mk_arrow a img dom = B.pexp_apply a [ (Nolabel, img); (Nolabel, dom) ] in
   let rec spec = function
@@ -113,21 +113,28 @@ let spec drv args ret =
 let mk_declaration drv (sig_item : Tast.signature_item) =
   match sig_item.sig_desc with
   | Tast.Sig_val (decl, _ghost) ->
-      let fun_name = decl.vd_name.id_str in
-      (* let fun_type = decl.vd_type in *)
-      let spec = spec drv decl.vd_args decl.vd_ret in
-      let msg = B.estring (Printf.sprintf "%s is Ok" fun_name) in
-      let reference = Printf.sprintf "R.%s" fun_name in
-      let candidate = Printf.sprintf "C.%s" fun_name in
-      Some
-        [%expr
-          let spec = [%e spec] in
-          declare [%e msg] spec [%e B.evar reference] [%e B.evar candidate]]
+      if decl.vd_spec <> None then (
+        try
+          let fun_name = decl.vd_name.id_str in
+          let spec = spec drv decl.vd_args decl.vd_ret in
+          let msg = B.estring (Printf.sprintf "%s is Ok" fun_name) in
+          let reference = Printf.sprintf "R.%s" fun_name in
+          let candidate = Printf.sprintf "C.%s" fun_name in
+          Some
+            [%expr
+              let spec = [%e spec] in
+              declare [%e msg] spec [%e B.evar reference] [%e B.evar candidate]]
+        with W.Error e ->
+          W.register e;
+          None)
+      else None
   | _ -> None
 
 let mk_declarations drv s =
   match List.filter_map (mk_declaration drv) s with
-  | [] -> raise (failwith "module is empty")
+  | [] ->
+      W.report ();
+      raise (failwith "module is empty")
   | [ e ] -> [%stri let () = [%e e]]
   | e1 :: es -> [%stri let () = [%e List.fold_left B.pexp_sequence e1 es]]
 
@@ -148,6 +155,7 @@ let standalone module_name env s =
   let module_p = Printers.printers driver s in
   let module_s = Spec.specs s in
   let specs = mk_specs driver s in
+  W.report ();
   [%stri open Monolith]
   :: [%stri module M = Ortac_runtime_monolith]
   :: module_r :: module_c :: module_g :: module_p :: module_s :: specs

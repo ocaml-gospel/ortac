@@ -1,7 +1,10 @@
+module W = Ortac_core.Warnings
 open Ppxlib
 open Gospel
 
 let loc = Location.none
+
+let unsupported msg loc = raise (W.Error (W.MonolithGen msg, loc))
 
 module A = Ast_builder.Default
 module B = Ortac_core.Builder
@@ -29,9 +32,9 @@ and tyapp2gen drv (tys : Ttypes.tysymbol) (tyl : Ttypes.ty list) =
     && List.length tyl = 1
   then [%expr Gen.array [%e ty2gen drv (List.hd tyl)]]
   else
-    failwith
-      (Printf.sprintf "%s generator is not yet implemented from tys2printer"
-         tys.ts_ident.id_str)
+    unsupported
+      (Printf.sprintf "%s Monolith generator" tys.ts_ident.id_str)
+      tys.ts_ident.id_loc
 
 and tuple drv tyl =
   let tuple =
