@@ -71,6 +71,10 @@ and tyapp2spec drv (ts : Ttypes.tysymbol) (tl : Ttypes.ty list) =
     Ttypes.ts_equal ts (get_ts [ "Gospelstdlib"; "array" ])
     && List.length tl = 1
   then [%expr array [%e ty2spec drv (List.hd tl)]]
+  else if Ttypes.is_ts_tuple ts && List.length tl = 2 then
+    let a = (Nolabel, ty2spec drv (List.hd tl)) in
+    let b = (Nolabel, ty2spec drv (List.nth tl 1)) in
+    B.pexp_apply [%expr ( *** )] [ a; b ]
   else
     failwith
       (Printf.sprintf "%s spec is not yet implemented" ts.ts_ident.id_str)
@@ -91,6 +95,10 @@ let spec drv args ret =
     match ret with
     | [] -> assert false
     | [ r ] -> translate drv r
+    | [ r1; r2 ] ->
+        let a = (Nolabel, translate drv r1) in
+        let b = (Nolabel, translate drv r2) in
+        B.pexp_apply [%expr ( *** )] [ a; b ]
     (* TODO: reconstruct if deconstructed *)
     | _ -> assert false
   in
