@@ -5,20 +5,21 @@ open Fmt
 open Builder
 module F = Failure
 
-let rec pattern p =
-  match p.Tterm.p_node with
+let rec pattern pn =
+  let pattern' (p : Tterm.pattern) = pattern p.p_node in
+  match pn with
   | Tterm.Pwild -> ppat_any
   | Tterm.Pvar v -> pvar (str "%a" Identifier.Ident.pp v.vs_name)
   | Tterm.Papp (l, pl) when Tterm.is_fs_tuple l ->
-      ppat_tuple (List.map pattern pl)
+      ppat_tuple (List.map pattern' pl)
   | Tterm.Papp (l, pl) ->
       let args =
-        if pl = [] then None else Some (ppat_tuple (List.map pattern pl))
+        if pl = [] then None else Some (ppat_tuple (List.map pattern' pl))
       in
       ppat_construct (lident l.ls_name.id_str) args
-  | Tterm.Por (p1, p2) -> ppat_or (pattern p1) (pattern p2)
+  | Tterm.Por (p1, p2) -> ppat_or (pattern' p1) (pattern' p2)
   | Tterm.Pas (p, v) ->
-      ppat_alias (pattern p) (noloc (str "%a" Identifier.Ident.pp v.vs_name))
+      ppat_alias (pattern' p) (noloc (str "%a" Identifier.Ident.pp v.vs_name))
 
 type bound = Inf of expression | Sup of expression
 
@@ -80,7 +81,8 @@ and unsafe_term ~driver (t : Tterm.term) : expression =
         [%e term t2]]
   | Tcase (t, ptl) ->
       List.map
-        (fun (p, t) -> case ~guard:None ~lhs:(pattern p) ~rhs:(term t))
+        (fun (p, t) ->
+          case ~guard:None ~lhs:(pattern p.Tterm.p_node) ~rhs:(term t))
         ptl
       |> pexp_match (term t)
   | Tquant (Tterm.Tlambda, args, _, t) ->
@@ -172,12 +174,8 @@ let pre ~driver ~register_name ~term_printer =
   conditions ~driver ~term_printer fail_violated fail_nonexec
 
 let rec xpost_pattern ~driver exn = function
-  | Tterm.Pwild -> ppat_construct (lident exn) (Some ppat_any)
-  | Tterm.Pvar x ->
-      ppat_construct (lident exn)
-        (Some (ppat_var (noloc (str "%a" Tterm.Ident.pp x.vs_name))))
   | Tterm.Papp (ls, []) when Tterm.(ls_equal ls (fs_tuple 0)) -> pvar exn
-  | Tterm.Papp (_ls, _l) -> assert false
+  | Tterm.Papp (ls, _l) when not (Tterm.is_fs_tuple ls) -> assert false
   | Tterm.Por (p1, p2) ->
       ppat_or
         (xpost_pattern ~driver exn p1.p_node)
@@ -186,6 +184,7 @@ let rec xpost_pattern ~driver exn = function
       ppat_alias
         (xpost_pattern ~driver exn p.p_node)
         (noloc (str "%a" Tterm.Ident.pp s.vs_name))
+  | pn -> ppat_construct (lident exn) (Some (pattern pn))
 
 let xpost_guard ~driver ~register_name ~term_printer xpost call =
   let module M = Map.Make (struct
