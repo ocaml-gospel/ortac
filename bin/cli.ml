@@ -9,10 +9,16 @@ let frontend_parser = function
   | "monolith" -> Ok Monolith
   | s -> Error (`Msg (Printf.sprintf "Error: `%s' is not a valid argument" s))
 
-let main frontend path () =
+let output_printer f = function _ -> Format.pp_print_string f "stdout"
+
+let output_parser file =
+  try Ok (open_out file)
+  with _ -> Error (`Msg (Printf.sprintf "Error: can't open file %s" file))
+
+let main frontend output path () =
   match frontend with
-  | Default -> Ortac_default.generate path
-  | Monolith -> Ortac_monolith.generate path
+  | Default -> Ortac_default.generate path output
+  | Monolith -> Ortac_monolith.generate path output
 
 open Cmdliner
 
@@ -40,10 +46,16 @@ let frontend =
     & opt (conv ~docv:"FRONTEND" (frontend_parser, frontend_printer)) Default
     & info [ "f"; "frontend" ] ~docv:"FRONTEND")
 
+let output_file =
+  Arg.(
+    value
+    & opt (conv ~docv:"OUTPUT" (output_parser, output_printer)) stdout
+    & info [ "o"; "output" ] ~docv:"OUTPUT")
+
 let cmd =
   let doc = "Run ORTAC." in
   let version = "ortac version %%VERSION%%" in
-  ( Term.(const main $ frontend $ ocaml_file $ setup_log),
+  ( Term.(const main $ frontend $ output_file $ ocaml_file $ setup_log),
     Term.info "ortac" ~version ~doc )
 
 let () = Term.(exit @@ eval cmd)

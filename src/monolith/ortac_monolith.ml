@@ -160,9 +160,10 @@ let standalone module_name env s =
   :: [%stri module M = Ortac_runtime_monolith]
   :: module_r :: module_c :: module_g :: module_p :: module_s :: specs
 
-let generate path =
+let generate path output =
   let module_name = Ortac_core.Utils.module_name_of_path path in
   Gospel.Parser_frontend.parse_ocaml_gospel path
   |> Ortac_core.Utils.type_check [] path
   |> fun (env, sigs) ->
-  standalone module_name env sigs |> Ppxlib_ast.Pprintast.structure Fmt.stdout
+  standalone module_name env sigs
+  |> Ppxlib_ast.Pprintast.structure (Format.formatter_of_out_channel output)
