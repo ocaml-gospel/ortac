@@ -1,4 +1,4 @@
-module W = Ortac_core.Warnings
+module W = Warnings
 open Ppxlib
 open Gospel
 module A = Ast_builder.Default
