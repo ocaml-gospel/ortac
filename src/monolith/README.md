@@ -14,6 +14,11 @@
 
 This frontend makes Ortac generate a [Monolith](https://gitlab.inria.fr/fpottier/monolith) program ready to be fuzzed.
 
+There are some limitations the user should know about:
+
+- as Monolith does not support tuple greater than pairs, this frontend does not either
+- the generated data generators are not very smart, so if you have strict preconditions or invariants, Monolith of afl-fuzz will generate a lot of uninformative inputs.
+
 ## Getting Started
 
 ### Installation
