@@ -1,4 +1,6 @@
+module W = Warnings
 open Ppxlib
+open Gospel
 
 module M : Ortac_core.Frontend.S = struct
   let prelude =
@@ -37,6 +39,8 @@ module B = Ortac_core.Builder
 
 let loc = Location.none
 
+let unsupported msg loc = raise (W.Error (W.MonolithSpec msg, loc))
+
 let mk_reference module_name env s =
   let rtac = G.signature module_name env s in
   let module_r = A.pmod_structure ~loc rtac in
@@ -52,77 +56,106 @@ let mk_candidate module_name =
   in
   A.pstr_module ~loc module_bind
 
-let is_arrow = function Ptyp_arrow _ -> true | _ -> false
+let rec ty2spec drv (ty : Ttypes.ty) =
+  match ty.ty_node with
+  | Tyvar _ -> [%expr sequential ()]
+  | Tyapp (ts, tl) -> tyapp2spec drv ts tl
 
-let rec translate_ret s =
-  match s.ptyp_desc with
-  | Ptyp_var _s -> [%expr sequential ()]
-  | Ptyp_constr ({ txt = Lident "unit"; _ }, _) -> [%expr unit]
-  | Ptyp_constr ({ txt = Lident "int"; _ }, _) -> [%expr int]
-  | Ptyp_constr ({ txt = Lident "bool"; _ }, _) -> [%expr bool]
-  | Ptyp_constr ({ txt = Lident "list"; _ }, [ param ]) ->
-      [%expr list [%e translate_ret param]]
-  | Ptyp_constr ({ txt = Lident "array"; _ }, [ param ]) ->
-      [%expr M.array [%e translate_ret param]]
-  | Ptyp_constr ({ txt = Lident ty; _ }, _) -> B.evar (Printf.sprintf "S.%s" ty)
-  | _ -> failwith "monolith deconstructible spec not implemented yet"
+and tyapp2spec drv (ts : Ttypes.tysymbol) (tl : Ttypes.ty list) =
+  let get_ts = Ortac_core.Drv.get_ts drv in
+  if Ttypes.ts_equal ts Ttypes.ts_unit then [%expr unit]
+  else if Ttypes.ts_equal ts Ttypes.ts_char then [%expr char]
+  else if Ttypes.ts_equal ts Ttypes.ts_integer then [%expr int]
+  else if Ttypes.ts_equal ts Ttypes.ts_string then [%expr string]
+  else if Ttypes.ts_equal ts Ttypes.ts_list && List.length tl = 1 then
+    [%expr list [%e ty2spec drv (List.hd tl)]]
+  else if Ttypes.ts_equal ts (get_ts [ "Gospelstdlib"; "int" ]) then [%expr int]
+  else if
+    Ttypes.ts_equal ts (get_ts [ "Gospelstdlib"; "array" ])
+    && List.length tl = 1
+  then [%expr array [%e ty2spec drv (List.hd tl)]]
+  else if Ttypes.is_ts_tuple ts && List.length tl = 2 then
+    let a = (Nolabel, ty2spec drv (List.hd tl)) in
+    let b = (Nolabel, ty2spec drv (List.nth tl 1)) in
+    B.pexp_apply [%expr ( *** )] [ a; b ]
+  else unsupported ts.ts_ident.id_str ts.ts_ident.id_loc
 
-let rec translate s =
-  match s.ptyp_desc with
-  | Ptyp_var _s -> [%expr sequential ()]
-  | Ptyp_constr ({ txt = Lident "unit"; _ }, _params) -> [%expr unit]
-  | Ptyp_constr ({ txt = Lident "bool"; _ }, _params) -> [%expr bool]
-  | Ptyp_constr ({ txt = Lident "char"; _ }, _params) -> [%expr char]
-  | Ptyp_constr ({ txt = Lident "int"; _ }, _params) -> [%expr M.int]
-  | Ptyp_constr ({ txt = Lident "string"; _ }, _params) -> [%expr string]
-  | Ptyp_constr ({ txt = Lident "list"; _ }, [ param ]) ->
-      [%expr list [%e translate param]]
-  | Ptyp_constr ({ txt = Lident "array"; _ }, [ param ]) ->
-      [%expr M.array [%e translate param]]
-  | Ptyp_arrow (_, x, y) when is_arrow y.ptyp_desc ->
-      [%expr [%e translate x] ^> [%e translate y]]
-  | Ptyp_arrow (_, x, y) -> [%expr [%e translate x] ^!> [%e translate_ret y]]
-  | Ptyp_constr ({ txt = Lident ty; _ }, _) -> B.evar (Printf.sprintf "S.%s" ty)
+let translate drv (lb_arg : Tast.lb_arg) =
+  match lb_arg with
+  | Lunit -> [%expr unit]
   | _ ->
-      failwith
-        "monolith constructible spec not implemented yet (from translate)"
+      let vs = Tast.vs_of_lb_arg lb_arg in
+      let tn = vs.Tterm.vs_ty in
+      ty2spec drv tn
 
-let mk_declaration (sig_item : Gospel.Tast.signature_item) =
+let spec drv args ret =
+  let arr = [%expr ( ^> )] in
+  let xarr = [%expr ( ^!> )] in
+  let args = List.map (translate drv) args in
+  let ret =
+    match ret with
+    | [] -> assert false
+    | [ r ] -> translate drv r
+    | [ r1; r2 ] ->
+        let a = (Nolabel, translate drv r1) in
+        let b = (Nolabel, translate drv r2) in
+        B.pexp_apply [%expr ( *** )] [ a; b ]
+    | _ -> unsupported "tuple bigger than pair" loc
+  in
+  let mk_arrow a img dom = B.pexp_apply a [ (Nolabel, img); (Nolabel, dom) ] in
+  let rec spec = function
+    | [] -> assert false
+    | [ arg ] -> mk_arrow xarr arg ret
+    | arg :: arg' :: args -> mk_arrow arr arg (spec (arg' :: args))
+  in
+  spec args
+
+let mk_declaration drv (sig_item : Tast.signature_item) =
   match sig_item.sig_desc with
-  | Gospel.Tast.Sig_val (decl, _ghost) ->
-      let fun_name = decl.vd_name.id_str in
-      let fun_type = decl.vd_type in
-      let msg = B.estring (Printf.sprintf "%s is Ok" fun_name) in
-      let reference = Printf.sprintf "R.%s" fun_name in
-      let candidate = Printf.sprintf "C.%s" fun_name in
-      Some
-        [%expr
-          let spec = [%e translate fun_type] in
-          declare [%e msg] spec [%e B.evar reference] [%e B.evar candidate]]
+  | Tast.Sig_val (decl, _ghost) ->
+      if decl.vd_spec <> None then (
+        try
+          let fun_name = decl.vd_name.id_str in
+          let spec = spec drv decl.vd_args decl.vd_ret in
+          let msg = B.estring (Printf.sprintf "%s is Ok" fun_name) in
+          let reference = Printf.sprintf "R.%s" fun_name in
+          let candidate = Printf.sprintf "C.%s" fun_name in
+          Some
+            [%expr
+              let spec = [%e spec] in
+              declare [%e msg] spec [%e B.evar reference] [%e B.evar candidate]]
+        with W.Error e ->
+          W.register e;
+          None)
+      else None
   | _ -> None
 
-let mk_declarations s =
-  match List.filter_map mk_declaration s with
-  | [] -> raise (failwith "module is empty")
+let mk_declarations drv s =
+  match List.filter_map (mk_declaration drv) s with
+  | [] ->
+      W.report ();
+      raise (failwith "module is empty")
   | [ e ] -> [%stri let () = [%e e]]
   | e1 :: es -> [%stri let () = [%e List.fold_left B.pexp_sequence e1 es]]
 
-let mk_specs s =
+let mk_specs drv s =
   let main =
     [%stri
       let () =
         let fuel = 100 in
         main fuel]
   in
-  [ mk_declarations s; main ]
+  [ mk_declarations drv s; main ]
 
 let standalone module_name env s =
+  let driver = Ortac_core.Drv.v env in
   let module_r = mk_reference module_name env s in
   let module_c = mk_candidate module_name in
-  let module_g = Generators.generators s in
-  let module_p = Printers.printers s in
+  let module_g = Generators.generators driver s in
+  let module_p = Printers.printers driver s in
   let module_s = Spec.specs s in
-  let specs = mk_specs s in
+  let specs = mk_specs driver s in
+  W.report ();
   [%stri open Monolith]
   :: [%stri module M = Ortac_runtime_monolith]
   :: module_r :: module_c :: module_g :: module_p :: module_s :: specs
