@@ -23,27 +23,27 @@ let v env =
       ([ "[]" ], "[]");
       ([ "infix ::" ], "(::)");
       ([ "infix =" ], "(=)");
-      ([ "Gospelstdlib"; "infix +" ], "Z.add");
-      ([ "Gospelstdlib"; "infix -" ], "Z.sub");
-      ([ "Gospelstdlib"; "infix *" ], "Z.mul");
-      ([ "Gospelstdlib"; "infix /" ], "Z.div");
-      ([ "Gospelstdlib"; "mod" ], "Z.rem");
-      ([ "Gospelstdlib"; "pow" ], "Z.pow");
-      ([ "Gospelstdlib"; "logand" ], "Z.logand");
-      ([ "Gospelstdlib"; "prefix -" ], "Z.neg");
-      ([ "Gospelstdlib"; "infix >" ], "Z.gt");
-      ([ "Gospelstdlib"; "infix >=" ], "Z.geq");
-      ([ "Gospelstdlib"; "infix <" ], "Z.lt");
-      ([ "Gospelstdlib"; "infix <=" ], "Z.leq");
-      ([ "Gospelstdlib"; "integer_of_int" ], "Z.of_int");
-      ([ "Gospelstdlib"; "abs" ], "Z.abs");
-      ([ "Gospelstdlib"; "min" ], "Z.min");
-      ([ "Gospelstdlib"; "max" ], "Z.max");
-      ([ "Gospelstdlib"; "succ" ], "Z.succ");
-      ([ "Gospelstdlib"; "pred" ], "Z.pred");
-      ([ "Gospelstdlib"; "Array"; "length" ], "Array.length");
-      ([ "Gospelstdlib"; "Array"; "get" ], "Array.get");
-      ([ "Gospelstdlib"; "Array"; "for_all" ], "Array.for_all");
+      ([ "Gospelstdlib"; "infix +" ], "Ortac_runtime.Z.add");
+      ([ "Gospelstdlib"; "infix -" ], "Ortac_runtime.Z.sub");
+      ([ "Gospelstdlib"; "infix *" ], "Ortac_runtime.Z.mul");
+      ([ "Gospelstdlib"; "infix /" ], "Ortac_runtime.Z.div");
+      ([ "Gospelstdlib"; "mod" ], "Ortac_runtime.Z.rem");
+      ([ "Gospelstdlib"; "pow" ], "Ortac_runtime.Z.pow");
+      ([ "Gospelstdlib"; "logand" ], "Ortac_runtime.Z.logand");
+      ([ "Gospelstdlib"; "prefix -" ], "Ortac_runtime.Z.neg");
+      ([ "Gospelstdlib"; "infix >" ], "Ortac_runtime.Z.gt");
+      ([ "Gospelstdlib"; "infix >=" ], "Ortac_runtime.Z.geq");
+      ([ "Gospelstdlib"; "infix <" ], "Ortac_runtime.Z.lt");
+      ([ "Gospelstdlib"; "infix <=" ], "Ortac_runtime.Z.leq");
+      ([ "Gospelstdlib"; "integer_of_int" ], "Ortac_runtime.Z.of_int");
+      ([ "Gospelstdlib"; "abs" ], "Ortac_runtime.Z.abs");
+      ([ "Gospelstdlib"; "min" ], "Ortac_runtime.Z.min");
+      ([ "Gospelstdlib"; "max" ], "Ortac_runtime.Z.max");
+      ([ "Gospelstdlib"; "succ" ], "Ortac_runtime.Z.succ");
+      ([ "Gospelstdlib"; "pred" ], "Ortac_runtime.Z.pred");
+      ([ "Gospelstdlib"; "Array"; "length" ], "Ortac_runtime.Array.length");
+      ([ "Gospelstdlib"; "Array"; "get" ], "Ortac_runtime.Array.get");
+      ([ "Gospelstdlib"; "Array"; "for_all" ], "Ortac_runtime.Array.for_all");
     ]
   in
   let translations = H.create 0 in

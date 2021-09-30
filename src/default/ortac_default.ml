@@ -1,9 +1,5 @@
-open Ppxlib
-
 module M : Ortac_core.Frontend.S = struct
-  let prelude =
-    let loc = Location.none in
-    [ [%stri open Ortac_runtime] ]
+  let prelude = []
 end
 
 module G = Ortac_core.Ortac.Make (M)

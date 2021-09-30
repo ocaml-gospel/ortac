@@ -4,21 +4,22 @@ module M : Ortac_core.Frontend.S = struct
   let prelude =
     let loc = Location.none in
     [
-      [%stri open Ortac_runtime];
       [%stri
         module Errors = struct
-          type t = error_report
+          type t = Ortac_runtime.error_report
 
-          let create loc fun_name = { loc; fun_name; errors = [] }
+          let create loc fun_name =
+            { Ortac_runtime.loc; Ortac_runtime.fun_name; errors = [] }
 
-          let register t e = t.errors <- e :: t.errors
+          let register t e = Ortac_runtime.(t.errors <- e :: t.errors)
 
           let is_pre = function
-            | Violated_condition e -> e.term_kind = Pre
-            | Specification_failure e -> e.term_kind = Pre
+            | Ortac_runtime.Violated_condition e -> e.term_kind = Pre
+            | Ortac_runtime.Specification_failure e -> e.term_kind = Pre
             | _ -> false
 
           let report t =
+            let open Ortac_runtime in
             match t.errors with
             | [] -> ()
             | errs when List.exists is_pre errs -> raise Monolith.PleaseBackOff
