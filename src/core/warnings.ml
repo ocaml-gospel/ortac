@@ -31,4 +31,4 @@ let pp ppf (k, loc) =
     (styled `Bold Location.print)
     loc pp_level (level k) pp_kind k
 
-let report () = epr "%a@." (list ~sep:(any "@\n") pp) !w
+let report () = if !w <> [] then epr "%a@." (list ~sep:(any "@\n") pp) !w
