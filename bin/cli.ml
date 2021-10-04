@@ -1,5 +1,9 @@
 type frontend = Default | Monolith
 
+type output = Stdout | Path of string * out_channel
+
+let get_channel = function Stdout -> stdout | Path (_, channel) -> channel
+
 let frontend_printer f = function
   | Default -> Format.pp_print_string f "Default"
   | Monolith -> Format.pp_print_string f "Monolith"
@@ -9,16 +13,21 @@ let frontend_parser = function
   | "monolith" -> Ok Monolith
   | s -> Error (`Msg (Printf.sprintf "Error: `%s' is not a valid argument" s))
 
-let output_printer f = function _ -> Format.pp_print_string f "stdout"
+let output_printer f = function
+  | Stdout -> Format.pp_print_string f "stdout"
+  | Path (path, _) -> Format.pp_print_string f path
 
-let output_parser file =
-  try Ok (open_out file)
-  with _ -> Error (`Msg (Printf.sprintf "Error: can't open file %s" file))
+let output_parser = function
+  | "stdout" -> Ok Stdout
+  | path -> (
+      try Ok (Path (path, open_out path))
+      with _ -> Error (`Msg (Printf.sprintf "Error: can't open file %s" path)))
 
 let main frontend output path () =
+  let channel = get_channel output in
   match frontend with
-  | Default -> Ortac_default.generate path output
-  | Monolith -> Ortac_monolith.generate path output
+  | Default -> Ortac_default.generate path channel
+  | Monolith -> Ortac_monolith.generate path channel
 
 open Cmdliner
 
@@ -49,7 +58,7 @@ let frontend =
 let output_file =
   Arg.(
     value
-    & opt (conv ~docv:"OUTPUT" (output_parser, output_printer)) stdout
+    & opt (conv ~docv:"OUTPUT" (output_parser, output_printer)) Stdout
     & info [ "o"; "output" ] ~docv:"OUTPUT")
 
 let cmd =
