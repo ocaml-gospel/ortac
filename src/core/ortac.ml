@@ -68,6 +68,17 @@ module Make (B : Frontend.S) = struct
         efun pargs @@ setup_expr @@ pre_checks @@ let_call @@ post_checks
         @@ ret_expr
       in
+      (if spec.sp_pure then
+       let ret_ty_from_list (lb : Tast.lb_arg list) =
+         if List.length lb = 0 then None
+         else Some (Ttypes.ty_tuple (List.map Tast.ty_of_lb_arg lb))
+       in
+       let ls =
+         Tterm.lsymbol ~field:false val_desc.vd_name
+           (List.map Tast.ty_of_lb_arg val_desc.vd_args)
+           (ret_ty_from_list val_desc.vd_ret)
+       in
+       Drv.add_translation driver ls val_desc.vd_name.id_str);
       [%stri let [%p pvar val_desc.vd_name.id_str] = [%e body]]
     in
     Option.map process val_desc.vd_spec
