@@ -1,12 +1,16 @@
 open Ppxlib
 open Gospel
 
+type config
+
+val config : Drv.t -> Tterm.vsymbol list -> config
+
 val returned_pattern : Tast.lb_arg list -> pattern * expression
 
 val mk_setup : location -> string -> (expression -> expression) * string
 
 val mk_pre_checks :
-  driver:Drv.t ->
+  config:config ->
   register_name:expression ->
   term_printer:(Tterm.term -> string) ->
   Tterm.term list ->
@@ -14,7 +18,7 @@ val mk_pre_checks :
   expression
 
 val mk_call :
-  driver:Drv.t ->
+  config:config ->
   register_name:expression ->
   term_printer:(Tterm.term -> string) ->
   pattern ->
@@ -26,11 +30,11 @@ val mk_call :
   expression
 
 val mk_post_checks :
-  driver:Drv.t ->
+  config:config ->
   register_name:expression ->
   term_printer:(Tterm.term -> string) ->
   Tterm.term list ->
   expression ->
   expression
 
-val mk_function_def : driver:Drv.t -> Tterm.term -> expression option
+val mk_function_def : config:config -> Tterm.term -> expression option
