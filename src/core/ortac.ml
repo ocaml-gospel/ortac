@@ -38,13 +38,6 @@ module Make (B : Frontend.S) = struct
 
   let value ~driver (val_desc : Tast.val_description) =
     let process (spec : Tast.val_spec) =
-      let config =
-        T.config driver
-          (List.filter_map
-             (fun x ->
-               try Some (Tast.vs_of_lb_arg x) with Invalid_argument _ -> None)
-             spec.sp_args)
-      in
       let term_printer = term_printer spec in
       (* Declaration location *)
       let loc = val_desc.vd_loc in
@@ -55,14 +48,14 @@ module Make (B : Frontend.S) = struct
       (* Returned pattern *)
       let ret_pat, ret_expr = T.returned_pattern spec.sp_ret in
       let pre_checks =
-        T.mk_pre_checks ~config ~register_name ~term_printer spec.sp_pre
+        T.mk_pre_checks ~driver ~register_name ~term_printer spec.sp_pre
       in
       let let_call =
-        T.mk_call ~config ~register_name ~term_printer ret_pat loc
+        T.mk_call ~driver ~register_name ~term_printer ret_pat loc
           val_desc.vd_name.id_str spec.sp_xpost eargs
       in
       let post_checks =
-        T.mk_post_checks ~config ~register_name ~term_printer spec.sp_post
+        T.mk_post_checks ~driver ~register_name ~term_printer spec.sp_post
       in
       let body =
         efun pargs @@ setup_expr @@ pre_checks @@ let_call @@ post_checks
@@ -84,20 +77,13 @@ module Make (B : Frontend.S) = struct
     Option.map process val_desc.vd_spec
 
   let constant ~driver (vd : Tast.val_description) =
-    let config =
-      T.config driver
-        (List.filter_map
-           (fun x ->
-             try Some (Tast.vs_of_lb_arg x) with Invalid_argument _ -> None)
-           vd.vd_args)
-    in
     let process spec =
       let term_printer = term_printer spec in
       let loc = vd.vd_loc in
       let setup_expr, register_name = T.mk_setup loc vd.vd_name.id_str in
       let register_name = evar register_name in
       let post_checks =
-        T.mk_post_checks ~config ~register_name ~term_printer spec.sp_post
+        T.mk_post_checks ~driver ~register_name ~term_printer spec.sp_post
       in
       let body = setup_expr @@ post_checks @@ evar vd.vd_name.id_str in
       [%stri let [%p pvar vd.vd_name.id_str] = [%e body]]
@@ -111,7 +97,6 @@ module Make (B : Frontend.S) = struct
         W.(register (Unsupported "uninterpreted function or predicate", loc));
         None
     | Some def -> (
-        let config = T.config driver func.fun_params in
         let name = gen_symbol ~prefix:("__" ^ func.fun_ls.ls_name.id_str) () in
         let pargs =
           List.map
@@ -123,7 +108,7 @@ module Make (B : Frontend.S) = struct
            functional.*)
         Drv.add_translation driver func.fun_ls name;
         let recursive = if func.fun_rec then Recursive else Nonrecursive in
-        match T.mk_function_def ~config def with
+        match T.mk_function_def ~driver def with
         | None ->
             Drv.remove_translation driver func.fun_ls;
             None

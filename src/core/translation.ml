@@ -5,10 +5,6 @@ open Fmt
 open Builder
 module F = Failure
 
-type config = { drv : Drv.t; args : Tterm.vsymbol list }
-
-let config drv args = { drv; args }
-
 let rec pattern pn =
   let pattern' (p : Tterm.pattern) = pattern p.p_node in
   match pn with
@@ -27,7 +23,7 @@ let rec pattern pn =
 
 type bound = Inf of expression | Sup of expression
 
-let rec bounds ~config ~loc (var : Tterm.vsymbol) (t1 : Tterm.term)
+let rec bounds ~driver ~loc (var : Tterm.vsymbol) (t1 : Tterm.term)
     (t2 : Tterm.term) : expression * expression =
   let unsupported () =
     raise (W.Error (Unsupported "ill formed quantification", loc))
@@ -45,18 +41,18 @@ let rec bounds ~config ~loc (var : Tterm.vsymbol) (t1 : Tterm.term)
   let bound = function
     | Tterm.Tapp (f, [ { t_node = Tvar vs; _ }; t ])
       when vs.vs_name = var.vs_name ->
-        comb ~right:true f (unsafe_term ~config t)
+        comb ~right:true f (unsafe_term ~driver t)
     | Tterm.Tapp (f, [ t; { t_node = Tvar vs; _ } ])
       when vs.vs_name = var.vs_name ->
-        comb ~right:false f (unsafe_term ~config t)
+        comb ~right:false f (unsafe_term ~driver t)
     | _ -> unsupported ()
   in
   match (bound t1.t_node, bound t2.t_node) with
   | Inf start, Sup stop | Sup stop, Inf start -> (start, stop)
   | _ -> unsupported ()
 
-and unsafe_term ~config (t : Tterm.term) : expression =
-  let term = unsafe_term ~config in
+and unsafe_term ~driver (t : Tterm.term) : expression =
+  let term = unsafe_term ~driver in
   let loc = Option.value ~default:Location.none t.t_loc in
   let unsupported m = raise (W.Error (W.Unsupported m, loc)) in
   match t.t_node with
@@ -68,7 +64,7 @@ and unsafe_term ~config (t : Tterm.term) : expression =
   | Tapp (fs, tlist) when Tterm.is_fs_tuple fs ->
       List.map term tlist |> pexp_tuple
   | Tapp (ls, tlist) -> (
-      Drv.translate config.drv ls |> function
+      Drv.translate driver ls |> function
       | Some f -> eapply (evar f) (List.map term tlist)
       | None ->
           let func = ls.ls_name.id_str in
@@ -76,11 +72,13 @@ and unsafe_term ~config (t : Tterm.term) : expression =
             (if tlist = [] then None
             else Some (List.map term tlist |> pexp_tuple))
             |> pexp_construct (lident func)
-          else if
-            List.exists
-              (fun (x : Tterm.vsymbol) -> x.vs_name.id_str = func)
-              config.args
-          then eapply (evar func) (List.map term tlist)
+          else if func = "apply" then
+            let f, args =
+              match tlist with
+              | [] -> assert false
+              | x :: xs -> (term x, List.map term xs)
+            in
+            eapply f args
           else kstr unsupported "function application `%s`" func)
   | Tif (i, t, e) -> [%expr if [%e term i] then [%e term t] else [%e term e]]
   | Tlet (x, t1, t2) ->
@@ -119,7 +117,7 @@ and unsafe_term ~config (t : Tterm.term) : expression =
       (match (quant, op) with
       | Tforall, Timplies | Texists, (Tand | Tand_asym) -> ()
       | _, _ -> unsupported "ill formed quantification");
-      let start, stop = bounds ~config ~loc var t1 t2 in
+      let start, stop = bounds ~driver ~loc var t1 t2 in
       let p = term p in
       let quant =
         evar
@@ -155,11 +153,11 @@ and unsafe_term ~config (t : Tterm.term) : expression =
   | Ttrue -> [%expr true]
   | Tfalse -> [%expr false]
 
-let term ~config fail t =
+let term ~driver fail t =
   try
     Some
       [%expr
-        try [%e unsafe_term ~config t]
+        try [%e unsafe_term ~driver t]
         with e ->
           [%e fail (evar "e")];
           true]
@@ -167,39 +165,39 @@ let term ~config fail t =
     W.register t;
     None
 
-let conditions ~config ~term_printer fail_violated fail_nonexec terms =
+let conditions ~driver ~term_printer fail_violated fail_nonexec terms =
   List.filter_map
     (fun t ->
       let s = term_printer t in
-      term ~config (fail_nonexec s) t
+      term ~driver (fail_nonexec s) t
       |> Option.map (fun t -> [%expr if not [%e t] then [%e fail_violated s]]))
     terms
   |> esequence
 
-let post ~config ~register_name ~term_printer =
+let post ~driver ~register_name ~term_printer =
   let fail_violated term = F.violated `Post ~term ~register_name in
   let fail_nonexec term exn = F.spec_failure `Post ~term ~exn ~register_name in
-  conditions ~config ~term_printer fail_violated fail_nonexec
+  conditions ~driver ~term_printer fail_violated fail_nonexec
 
-let pre ~config ~register_name ~term_printer =
+let pre ~driver ~register_name ~term_printer =
   let fail_violated term = F.violated `Pre ~term ~register_name in
   let fail_nonexec term exn = F.spec_failure `Pre ~term ~exn ~register_name in
-  conditions ~config ~term_printer fail_violated fail_nonexec
+  conditions ~driver ~term_printer fail_violated fail_nonexec
 
-let rec xpost_pattern ~config exn = function
+let rec xpost_pattern ~driver exn = function
   | Tterm.Papp (ls, []) when Tterm.(ls_equal ls (fs_tuple 0)) -> pvar exn
   | Tterm.Papp (ls, _l) when not (Tterm.is_fs_tuple ls) -> assert false
   | Tterm.Por (p1, p2) ->
       ppat_or
-        (xpost_pattern ~config exn p1.p_node)
-        (xpost_pattern ~config exn p2.p_node)
+        (xpost_pattern ~driver exn p1.p_node)
+        (xpost_pattern ~driver exn p2.p_node)
   | Tterm.Pas (p, s) ->
       ppat_alias
-        (xpost_pattern ~config exn p.p_node)
+        (xpost_pattern ~driver exn p.p_node)
         (noloc (str "%a" Tterm.Ident.pp s.vs_name))
   | pn -> ppat_construct (lident exn) (Some (pattern pn))
 
-let xpost_guard ~config ~register_name ~term_printer xpost call =
+let xpost_guard ~driver ~register_name ~term_printer xpost call =
   let module M = Map.Make (struct
     type t = Ttypes.xsymbol
 
@@ -232,10 +230,10 @@ let xpost_guard ~config ~register_name ~term_printer xpost call =
             let fail_nonexec exn =
               F.spec_failure `XPost ~term:s ~exn ~register_name
             in
-            term ~config fail_nonexec t
+            term ~driver fail_nonexec t
             |> Option.map (fun t ->
                    case ~guard:None
-                     ~lhs:(xpost_pattern ~config name p.Tterm.p_node)
+                     ~lhs:(xpost_pattern ~driver name p.Tterm.p_node)
                      ~rhs:
                        [%expr
                          if not [%e t] then
@@ -304,31 +302,31 @@ let mk_setup loc fun_name =
   in
   ((fun next -> let_loc @@ let_acc @@ next), register_name)
 
-let mk_pre_checks ~config ~register_name ~term_printer pres next =
+let mk_pre_checks ~driver ~register_name ~term_printer pres next =
   [%expr
-    [%e pre ~config ~register_name ~term_printer pres];
+    [%e pre ~driver ~register_name ~term_printer pres];
     [%e F.report ~register_name];
     [%e next]]
 
-let mk_call ~config ~register_name ~term_printer ret_pat loc fun_name xpost
+let mk_call ~driver ~register_name ~term_printer ret_pat loc fun_name xpost
     eargs =
   let call = pexp_apply (evar fun_name) eargs in
   let check_raises =
-    xpost_guard ~config ~register_name ~term_printer xpost call
+    xpost_guard ~driver ~register_name ~term_printer xpost call
   in
   fun next ->
     [%expr
       let [%p ret_pat] = [%e check_raises] in
       [%e next]]
 
-let mk_post_checks ~config ~register_name ~term_printer posts next =
+let mk_post_checks ~driver ~register_name ~term_printer posts next =
   [%expr
-    [%e post ~config ~register_name ~term_printer posts];
+    [%e post ~driver ~register_name ~term_printer posts];
     [%e F.report ~register_name];
     [%e next]]
 
-let mk_function_def ~config t =
-  try Some (unsafe_term ~config t)
+let mk_function_def ~driver t =
+  try Some (unsafe_term ~driver t)
   with W.Error t ->
     W.register t;
     None
