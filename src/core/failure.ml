@@ -17,6 +17,13 @@ let violated kind ~term ~register_name =
       { term = [%e eterm term]; term_kind = [%e term_kind kind] }]
   |> register ~register_name
 
+let violated_axiom ~register_name =
+  register ~register_name [%expr Ortac_runtime.Violated_axiom]
+
+let axiom_failure ~exn ~register_name =
+  [%expr Ortac_runtime.Axiom_failure { exn = [%e exn] }]
+  |> register ~register_name
+
 let spec_failure kind ~term ~exn ~register_name =
   [%expr
     Ortac_runtime.Specification_failure

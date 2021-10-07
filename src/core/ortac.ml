@@ -110,6 +110,13 @@ module Make (B : Frontend.S) = struct
               (pstr_value recursive
                  [ value_binding ~pat:(pvar name) ~expr:body ]))
 
+  let axiom ~driver (axiom : Tast.axiom) =
+    let loc = axiom.ax_loc in
+    let setup_expr, register_name = T.mk_setup loc axiom.ax_name.id_str in
+    let register_name = evar register_name in
+    T.mk_axiom_body ~driver ~register_name axiom.ax_term
+    |> Option.map (fun body -> [%stri let () = [%e setup_expr body]])
+
   let signature module_name env s =
     let driver = Drv.v env in
     let declarations =
@@ -129,9 +136,7 @@ module Make (B : Frontend.S) = struct
               W.register (W.Unsupported "type specification", sig_item.sig_loc);
               None
           | Sig_function func -> function_ ~driver func
-          | Sig_axiom axiom ->
-              W.register (W.Unsupported "axiom", axiom.Tast.ax_loc);
-              None
+          | Sig_axiom ax -> axiom ~driver ax
           | _ -> None)
         s
     in

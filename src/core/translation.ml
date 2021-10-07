@@ -269,6 +269,15 @@ let xpost_guard ~driver ~register_name ~term_printer xpost call =
     cases default_cases
   |> pexp_try call
 
+let mk_axiom_body ~driver ~register_name t =
+  let fail_violated = F.violated_axiom ~register_name in
+  let fail_nonexec exn = F.axiom_failure ~exn ~register_name in
+  term ~driver fail_nonexec t
+  |> Option.map (fun check ->
+         [%expr
+           if not [%e check] then [%e fail_violated];
+           [%e F.report ~register_name]])
+
 let returned_pattern rets =
   let to_string x = str "%a" Tast.Ident.pp x.Tterm.vs_name in
   let pvars, evars =
