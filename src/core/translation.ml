@@ -216,9 +216,9 @@ let subst_invariant_fields var (t : Tterm.term) =
         let ptl = List.map (fun (p, t) -> (p, aux t)) ptl in
         let t_node = Tterm.Tcase (t, ptl) in
         { t with t_node }
-    | Tquant (q, vsl, tr, t) ->
+    | Tquant (q, vsl, t) ->
         let t = aux t in
-        let t_node = Tterm.Tquant (q, vsl, tr, t) in
+        let t_node = Tterm.Tquant (q, vsl, t) in
         { t with t_node }
     | Tterm.Tbinop (op, t1, t2) ->
         let t1 = aux t1 in

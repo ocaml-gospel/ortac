@@ -50,7 +50,7 @@ let var_of_arg ~driver arg : Translated.ocaml_var =
         let name = vsname vs in
         (Labelled name, name)
   in
-  let type_ = type_of_ty ~driver (Tast.ty_of_lb_arg arg) in
+  let type_ = type_of_ty ~driver (Tast_helper.ty_of_lb_arg arg) in
   { name; label; type_; modified = false; consumed = false }
 
 let type_ ~driver ~ghost (td : Tast.type_declaration) =
@@ -113,7 +113,7 @@ let constant ~driver ~ghost (vd : Tast.val_description) =
   let register_name = register_name () in
   let type_ =
     assert (List.length vd.vd_ret = 1);
-    type_of_ty ~driver (Tast.ty_of_lb_arg (List.hd vd.vd_ret))
+    type_of_ty ~driver (Tast_helper.ty_of_lb_arg (List.hd vd.vd_ret))
   in
   let constant = constant ~name ~loc ~register_name ~type_ ~ghost in
   let process ~constant (spec : Tast.val_spec) =
