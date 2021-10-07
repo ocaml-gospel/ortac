@@ -61,6 +61,9 @@ module Make (B : Frontend.S) = struct
         efun pargs @@ setup_expr @@ pre_checks @@ let_call @@ post_checks
         @@ ret_expr
       in
+      (if spec.sp_pure then
+       let ls = Drv.get_ls driver [ val_desc.vd_name.id_str ] in
+       Drv.add_translation driver ls val_desc.vd_name.id_str);
       [%stri let [%p pvar val_desc.vd_name.id_str] = [%e body]]
     in
     Option.map process val_desc.vd_spec

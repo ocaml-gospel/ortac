@@ -63,6 +63,13 @@ and unsafe_term ~driver (t : Tterm.term) : expression =
   | Tapp (fs, []) when Tterm.(ls_equal fs fs_bool_false) -> [%expr false]
   | Tapp (fs, tlist) when Tterm.is_fs_tuple fs ->
       List.map term tlist |> pexp_tuple
+  | Tapp (ls, tlist) when Tterm.(ls_equal ls fs_apply) ->
+      let f, args =
+        match tlist with
+        | [] -> assert false
+        | x :: xs -> (term x, List.map term xs)
+      in
+      eapply f args
   | Tapp (ls, tlist) -> (
       Drv.translate driver ls |> function
       | Some f -> eapply (evar f) (List.map term tlist)

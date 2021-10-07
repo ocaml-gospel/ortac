@@ -74,6 +74,7 @@ type tree = E | N of tree * int * tree
 
 val size: tree -> int
 (*@ s = size t
+      pure
       ensures t <> E -> s > 0
       ensures s = size t *)
 
