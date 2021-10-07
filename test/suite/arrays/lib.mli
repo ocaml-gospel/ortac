@@ -33,6 +33,26 @@ val fill : 'a array -> int -> int -> 'a -> unit
     requires 0 <= ofs <= ofs + len <= Array.length arr
     ensures  forall j. ofs <= j < ofs + len -> arr.(j) = v *)
 
+val length : 'a array -> int
+(*@ i = length a
+    pure
+    ensures i = Array.length a *)
+    
+val map : ('a -> 'b) -> 'a array -> 'b array
+(*@ arr = map f a
+    ensures length arr = length a
+    ensures forall i. 0 <= i < length a -> arr.(i) = f a.(i) *)
+
+val bad_map_length : ('a -> 'b) -> 'a array -> 'b array
+(*@ arr = bad_map_length f a
+    ensures length arr = length a
+    ensures forall i. 0 <= i < length a -> arr.(i) = f a.(i) *)
+
+val bad_map_fun : (int -> int) -> int array -> int array
+ (*@ arr = bad_map_fun f a
+    ensures length arr = length a
+    ensures forall i. 0 <= i < length a -> arr.(i) = f a.(i) *)
+    
 val sort : int array -> unit
 (*@ sort a
     ensures forall i. 0 <= i < Array.length a

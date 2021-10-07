@@ -28,6 +28,21 @@ let normal () =
       let _ = get arr 3 in
       fill arr 3 7 1729)
 
+let map () =
+  check_success "map correct" (fun () ->
+      let a = create 10 0 in
+      map (fun x -> x + 1) a |> ignore)
+
+let bad_map_length () =
+  check_raises_ortac "bad_map_length returns an empty array" (fun () ->
+      let a = create 10 0 in
+      bad_map_length (fun x -> x + 1) a |> ignore)
+
+let bad_map_fun () =
+  check_raises_ortac "bad_map_fun apply another function" (fun () ->
+      let a = create 10 0 in
+      bad_map_fun (fun x -> x + 1) a |> ignore)
+
 let sort_success () =
   check_success "sort array of int" (fun () -> sort [| 314; 42; 73; 57; 421 |])
 
@@ -56,6 +71,9 @@ let suite =
       ("get wrong value", `Quick, bad_get_wrong_value);
       ("create wrong value", `Quick, bad_create);
       ("correct implementations", `Quick, normal);
+      ("map correct", `Quick, map);
+      ("map wrong length", `Quick, bad_map_length);
+      ("map wrong function", `Quick, bad_map_fun);
       ("create with wrong arguments", `Quick, create);
       ("sort is correct", `Quick, sort_success);
       ("copy sort is correct", `Quick, copy_sort_success);
