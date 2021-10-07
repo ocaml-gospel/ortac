@@ -5,6 +5,8 @@ type location = { start : Lexing.position; stop : Lexing.position }
 type term_kind = Pre | Post | XPost
 
 type error =
+  | Violated_axiom
+  | Axiom_failure of { exn : exn }
   | Violated_condition of { term : string; term_kind : term_kind }
   | Specification_failure of { term : string; term_kind : term_kind; exn : exn }
   | Unexpected_exception of { allowed_exn : string list; exn : exn }
@@ -45,6 +47,11 @@ let pp_exn = using Printexc.to_string pp_quoted_exn
 let pp_allowed_exn = list ~sep:comma pp_quoted_exn
 
 let pp_error ppf = function
+  | Violated_axiom -> pf ppf "the axiom was %a." (styled `Red string) "violated"
+  | Axiom_failure { exn } ->
+      pf ppf "the evaluation of the axiom %a:@\n  @[%a@]"
+        (styled `Red string)
+        "raised an exception" pp_exn exn
   | Violated_condition { term; term_kind } ->
       pf ppf "the %a@\n  @[%a@]@\nwas %a." pp_term_kind term_kind pp_term term
         (styled `Red string)
@@ -108,7 +115,7 @@ module Errors = struct
     match t.errors with
     | [] -> ()
     | _ ->
-        pp_error_report stderr t;
+        pf stderr "%a@." pp_error_report t;
         raise (Error t)
 end
 
@@ -126,7 +133,7 @@ module Z = struct
 end
 
 module Array = struct
-  let create z =
+  let make z =
     if Z.(z > of_int Sys.max_array_length) then
       raise (Invalid_argument "Array length too big")
     else Array.make (Z.to_int z)

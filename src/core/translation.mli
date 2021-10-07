@@ -5,6 +5,9 @@ val returned_pattern : Tast.lb_arg list -> pattern * expression
 
 val mk_setup : location -> string -> (expression -> expression) * string
 
+val mk_axiom_body :
+  driver:Drv.t -> register_name:expression -> Tterm.term -> expression option
+
 val mk_pre_checks :
   driver:Drv.t ->
   register_name:expression ->

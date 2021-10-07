@@ -3,6 +3,8 @@ type location = { start : Lexing.position; stop : Lexing.position }
 type term_kind = Pre | Post | XPost
 
 type error =
+  | Violated_axiom
+  | Axiom_failure of { exn : exn }
   | Violated_condition of { term : string; term_kind : term_kind }
   | Specification_failure of { term : string; term_kind : term_kind; exn : exn }
   | Unexpected_exception of { allowed_exn : string list; exn : exn }
@@ -47,7 +49,7 @@ module Z : sig
 end
 
 module Array : sig
-  val create : Z.t -> 'a -> 'a array
+  val make : Z.t -> 'a -> 'a array
 
   val get : 'a array -> Z.t -> 'a
 

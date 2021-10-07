@@ -14,6 +14,10 @@ val get : 'a array -> int -> 'a
     requires 0 <= i < Array.length arr
     ensures o = arr.(i) *)
 
+(*@ axiom a :
+      let arr = Array.make 10 0 in
+      forall i. 0 <= i < 10 -> arr.(i) = 0 *)
+    
 val bad_get : 'a array -> int -> 'a
 (*@ o = bad_get arr i
     requires 0 <= i < Array.length arr

@@ -41,6 +41,7 @@ let v env =
       ([ "Gospelstdlib"; "max" ], "Ortac_runtime.Z.max");
       ([ "Gospelstdlib"; "succ" ], "Ortac_runtime.Z.succ");
       ([ "Gospelstdlib"; "pred" ], "Ortac_runtime.Z.pred");
+      ([ "Gospelstdlib"; "Array"; "make" ], "Ortac_runtime.Array.make");
       ([ "Gospelstdlib"; "Array"; "length" ], "Ortac_runtime.Array.length");
       ([ "Gospelstdlib"; "Array"; "get" ], "Ortac_runtime.Array.get");
       ([ "Gospelstdlib"; "Array"; "for_all" ], "Ortac_runtime.Array.for_all");
