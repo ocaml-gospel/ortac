@@ -132,7 +132,7 @@ module Make (B : Frontend.S) = struct
           | _ -> None)
         s
     in
-    W.report ();
+    (* W.report (); *)
     let include_lib =
       pmod_ident (lident module_name) |> include_infos |> pstr_include
     in

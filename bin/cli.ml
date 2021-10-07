@@ -1,18 +1,21 @@
 type frontend = Default | Monolith
 
-let frontend_printer f = function
-  | Default -> Format.pp_print_string f "Default"
-  | Monolith -> Format.pp_print_string f "Monolith"
+let get_channel = function None -> stdout | Some path -> open_out path
+
+let frontend_printer ppf = function
+  | Default -> Fmt.string ppf "Default"
+  | Monolith -> Fmt.string ppf "Monolith"
 
 let frontend_parser = function
   | "default" -> Ok Default
   | "monolith" -> Ok Monolith
-  | s -> Error (`Msg (Printf.sprintf "Error: `%s' is not a valid argument" s))
+  | s -> Error (`Msg (Fmt.str "Error: `%s' is not a valid argument" s))
 
-let main frontend path () =
+let main frontend input output () =
+  let channel = get_channel output in
   match frontend with
-  | Default -> Ortac_default.generate path
-  | Monolith -> Ortac_monolith.generate path
+  | Default -> Ortac_default.generate input channel
+  | Monolith -> Ortac_monolith.generate input channel
 
 open Cmdliner
 
@@ -20,19 +23,27 @@ let setup_log =
   let init style_renderer = Fmt_tty.setup_std_outputs ?style_renderer () in
   Term.(const init $ Fmt_cli.style_renderer ())
 
+let output_file =
+  let parse s =
+    match Sys.is_directory s with
+    | true -> Error (`Msg (Fmt.str "Error: `%s' is a directory" s))
+    | false | (exception Sys_error _) -> Ok (Some s)
+  in
+  Arg.(
+    value
+    & opt (conv ~docv:"OUTPUT" (parse, Fmt.(option string))) None
+    & info [ "o"; "output" ] ~docv:"OUTPUT")
+
 let ocaml_file =
   let parse s =
     match Sys.file_exists s with
     | true ->
-        if Sys.is_directory s (* || Filename.extension s <> ".mli" *) then
-          `Error (Printf.sprintf "Error: `%s' is not an OCaml interface file" s)
+        if Sys.is_directory s || Filename.extension s <> ".mli" then
+          `Error (Fmt.str "Error: `%s' is not an OCaml interface file" s)
         else `Ok s
-    | false -> `Error (Printf.sprintf "Error: `%s' not found" s)
+    | false -> `Error (Fmt.str "Error: `%s' not found" s)
   in
-  Arg.(
-    required
-    & pos 0 (some (parse, Format.pp_print_string)) None
-    & info [] ~docv:"FILE")
+  Arg.(required & pos 0 (some (parse, Fmt.string)) None & info [] ~docv:"FILE")
 
 let frontend =
   Arg.(
@@ -43,7 +54,7 @@ let frontend =
 let cmd =
   let doc = "Run ORTAC." in
   let version = "ortac version %%VERSION%%" in
-  ( Term.(const main $ frontend $ ocaml_file $ setup_log),
+  ( Term.(const main $ frontend $ ocaml_file $ output_file $ setup_log),
     Term.info "ortac" ~version ~doc )
 
 let () = Term.(exit @@ eval cmd)

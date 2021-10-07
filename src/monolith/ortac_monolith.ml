@@ -155,14 +155,17 @@ let standalone module_name env s =
   let module_p = Printers.printers driver s in
   let module_s = Spec.specs s in
   let specs = mk_specs driver s in
-  W.report ();
   [%stri open Monolith]
   :: [%stri module M = Ortac_runtime_monolith]
   :: module_r :: module_c :: module_g :: module_p :: module_s :: specs
 
-let generate path =
+let generate path output =
   let module_name = Ortac_core.Utils.module_name_of_path path in
+  let output = Format.formatter_of_out_channel output in
   Gospel.Parser_frontend.parse_ocaml_gospel path
   |> Ortac_core.Utils.type_check [] path
   |> fun (env, sigs) ->
-  standalone module_name env sigs |> Ppxlib_ast.Pprintast.structure Fmt.stdout
+  standalone module_name env sigs
+  |> Fmt.pf output "%a@." Ppxlib_ast.Pprintast.structure;
+  W.report ();
+  Ortac_core.Warnings.report ()
