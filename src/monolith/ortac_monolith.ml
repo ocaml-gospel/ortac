@@ -165,8 +165,7 @@ let generate path output =
   Gospel.Parser_frontend.parse_ocaml_gospel path
   |> Ortac_core.Utils.type_check [] path
   |> fun (env, sigs) ->
-  standalone module_name env sigs |> Ppxlib_ast.Pprintast.structure output;
-  Format.pp_force_newline output ();
-  Format.pp_print_flush output ();
+  standalone module_name env sigs
+  |> Fmt.pf output "%a@." Ppxlib_ast.Pprintast.structure;
   W.report ();
   Ortac_core.Warnings.report ()
