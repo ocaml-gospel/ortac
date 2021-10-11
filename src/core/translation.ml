@@ -92,7 +92,7 @@ and unsafe_term ~driver (t : Tterm.term) : expression =
           case ~guard:None ~lhs:(pattern p.Tterm.p_node) ~rhs:(term t))
         ptl
       |> pexp_match (term t)
-  | Tquant (Tterm.Tlambda, args, _, t) ->
+  | Tquant (Tterm.Tlambda, args, t) ->
       let t = term t in
       let args =
         List.map
@@ -104,7 +104,6 @@ and unsafe_term ~driver (t : Tterm.term) : expression =
   | Tquant
       ( (Tterm.(Tforall | Texists) as quant),
         [ var ],
-        _,
         Tterm.
           {
             t_node =
@@ -127,7 +126,7 @@ and unsafe_term ~driver (t : Tterm.term) : expression =
       let x = str "%a" Identifier.Ident.pp var.vs_name in
       let func = pexp_fun Nolabel None (pvar x) p in
       eapply quant [ start; stop; func ]
-  | Tquant (_, _, _, _) -> unsupported "quantification"
+  | Tquant (_, _, _) -> unsupported "quantification"
   | Tbinop (op, t1, t2) -> (
       match op with
       | Tterm.Tand ->

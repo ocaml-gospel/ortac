@@ -84,7 +84,7 @@ let translate drv (lb_arg : Tast.lb_arg) =
   match lb_arg with
   | Lunit -> [%expr unit]
   | _ ->
-      let vs = Tast.vs_of_lb_arg lb_arg in
+      let vs = Tast_helper.vs_of_lb_arg lb_arg in
       let tn = vs.Tterm.vs_ty in
       ty2spec drv tn
 
