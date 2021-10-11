@@ -35,5 +35,5 @@ depends: [
   "monolith" {>= "20201026"}
 ]
 pin-depends: [
-  [ "gospel.dev" "git+https://github.com/ocaml-gospel/gospel#92e903b4859893679ceae869c122b4b5ae096262" ]
+  [ "gospel.dev" "git+https://github.com/ocaml-gospel/gospel#6eadafbe982f8ff53eac4c0912179220b12d3b10" ]
 ]
