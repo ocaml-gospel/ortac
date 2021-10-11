@@ -10,6 +10,6 @@ let generate path output =
   Gospel.Parser_frontend.parse_ocaml_gospel path
   |> Ortac_core.Utils.type_check [] path
   |> fun (env, sigs) ->
-  G.signature module_name env sigs
-  |> Fmt.pf output "%a@." Ppxlib_ast.Pprintast.structure;
-  Ortac_core.Warnings.report ()
+  assert (List.length env = 1);
+  G.signature module_name (List.hd env) sigs
+  |> Fmt.pf output "%a@." Ppxlib_ast.Pprintast.structure

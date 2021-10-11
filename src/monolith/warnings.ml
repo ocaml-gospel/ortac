@@ -15,7 +15,6 @@ let level = function
 exception Error of t
 
 let w = ref []
-
 let register t = w := t :: !w
 
 open Fmt

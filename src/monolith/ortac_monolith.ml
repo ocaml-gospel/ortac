@@ -38,7 +38,6 @@ module A = Ast_builder.Default
 module B = Ortac_core.Builder
 
 let loc = Location.none
-
 let unsupported msg loc = raise (W.Error (W.MonolithSpec msg, loc))
 
 let mk_reference module_name env s =
@@ -148,7 +147,7 @@ let mk_specs drv s =
   [ mk_declarations drv s; main ]
 
 let standalone module_name env s =
-  let driver = Ortac_core.Drv.v env in
+  let driver = Ortac_core.Drv.init module_name env in
   let module_r = mk_reference module_name env s in
   let module_c = mk_candidate module_name in
   let module_g = Generators.generators driver s in
@@ -157,7 +156,12 @@ let standalone module_name env s =
   let specs = mk_specs driver s in
   [%stri open Monolith]
   :: [%stri module M = Ortac_runtime_monolith]
-  :: module_r :: module_c :: module_g :: module_p :: module_s :: specs
+  :: module_r
+  :: module_c
+  :: module_g
+  :: module_p
+  :: module_s
+  :: specs
 
 let generate path output =
   let module_name = Ortac_core.Utils.module_name_of_path path in
@@ -165,7 +169,7 @@ let generate path output =
   Gospel.Parser_frontend.parse_ocaml_gospel path
   |> Ortac_core.Utils.type_check [] path
   |> fun (env, sigs) ->
-  standalone module_name env sigs
+  assert (List.length env = 1);
+  standalone module_name (List.hd env) sigs
   |> Fmt.pf output "%a@." Ppxlib_ast.Pprintast.structure;
-  W.report ();
-  Ortac_core.Warnings.report ()
+  W.report ()
