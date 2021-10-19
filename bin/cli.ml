@@ -11,7 +11,7 @@ let frontend_parser = function
   | "monolith" -> Ok Monolith
   | s -> Error (`Msg (Fmt.str "Error: `%s' is not a valid argument" s))
 
-let main frontend input output () =
+let generate frontend input output () =
   let channel = get_channel output in
   match frontend with
   | Default -> Ortac_default.generate input channel
@@ -51,10 +51,18 @@ let frontend =
     & opt (conv ~docv:"FRONTEND" (frontend_parser, frontend_printer)) Default
     & info [ "f"; "frontend" ] ~docv:"FRONTEND")
 
-let cmd =
-  let doc = "Run ORTAC." in
-  let version = "ortac version %%VERSION%%" in
-  ( Term.(const main $ frontend $ ocaml_file $ output_file $ setup_log),
-    Term.info "ortac" ~version ~doc )
+let gen =
+  let doc = "Ortac code generation." in
+  ( Term.(const generate $ frontend $ ocaml_file $ output_file $ setup_log),
+    Term.info "gen" ~doc )
 
-let () = Term.(exit @@ eval cmd)
+let report =
+  let doc = "Ortac report." in
+  (Term.(const Ortac_default.report $ ocaml_file), Term.info "report" ~doc)
+
+let usage_cmd =
+  let doc = "Ortac command line tool." in
+  let version = "ortac version %%VERSION%%" in
+  (Term.(ret (const (`Help (`Auto, None)))), Term.info "ortac" ~doc ~version)
+
+let () = Term.(exit @@ eval_choice usage_cmd [ gen; report ])

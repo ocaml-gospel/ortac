@@ -59,174 +59,181 @@ let emit_warnings ppf driver =
     | Axiom a -> axiom ppf a)
 
 open Fmt
-open Ppxlib
 
-let pp_loc ppf loc =
-  pf ppf "File \"%s\", line %d, characters %d-%d:" loc.loc_start.pos_fname
-    loc.loc_start.pos_lnum
-    (loc.loc_start.pos_cnum - loc.loc_start.pos_bol)
-    (loc.loc_end.pos_cnum - loc.loc_start.pos_bol)
+module Full_report = struct
+  let pp_loc ppf loc =
+    let open Ppxlib in
+    pf ppf "%a" (styled `Bold Location.print) loc
 
-let translated_term ppf (term : Translated.term) =
-  pf ppf "+ %s has been translated" term.txt
+  let quoted ppf s = pf ppf "`%s'" s
 
-let not_translated_term ppf (term : Translated.term) =
-  pf ppf "+ %s has not been translated" term.txt
+  let report_translation ppf = function
+    | Error _ -> (styled `Yellow pf) ppf "has not been translated"
+    | Ok _ -> (styled `Green pf) ppf "has been translated"
 
-let report_term ppf (term : Translated.term) =
-  if Result.is_ok term.translation then translated_term ppf term
-  else not_translated_term ppf term
+  let report_several_translations ppf = function
+    | Error _ -> (styled `Yellow pf) ppf "have not been translated"
+    | Ok _ -> (styled `Green pf) ppf "have been translated"
 
-let report_derived ppf = function
-  | Error _ -> pf ppf "has not been derived"
-  | Ok _ -> pf ppf "has been derived"
+  let report_derived ppf = function
+    | Error _ -> (styled `Yellow pf) ppf "has not been derived"
+    | Ok _ -> (styled `Green pf) ppf "has been derived"
 
-let report_terms = list ~sep:(any "@\n") report_term
+  let report_term ppf (term : Translated.term) =
+    pf ppf "+ @[%a@\n%a %a@]" pp_loc term.loc quoted term.txt report_translation
+      term.translation
 
-let report_exn ppf xpost =
-  if Result.is_ok xpost.translation then
-    pf ppf "+ the clauses concerning the exception %s have been translated"
-      xpost.exn
-  else
-    pf ppf "+ the clauses concerning the exception %s have not been translated"
-      xpost.exn
+  let report_terms = list ~sep:(any "@\n") report_term
 
-let report_xposts = list ~sep:(any "@\n") report_exn
+  let report_invariant ppf (invariant : Translated.invariant) =
+    pf ppf "+ @[%a@\n%a %a@]" pp_loc invariant.loc quoted invariant.txt
+      report_translation invariant.translation
 
-let report_argument ppf (argument : Translated.ocaml_var) =
-  let cs = if argument.consumed then "is consumed" else "is not consumed" in
-  pf ppf "%s %s@\n+ Invariants involved:@\n  @[%a@]" argument.name cs
-    report_terms argument.type_.invariants
+  let report_invariants = list ~sep:(any "@\n") report_invariant
 
-let report_arguments = list ~sep:(any "@\n") report_argument
+  let report_exn ppf (xpost : xpost) =
+    pf ppf "+ the clauses concerning the exception %s %a" xpost.exn
+      report_several_translations xpost.translation
 
-let report_return ppf (argument : Translated.ocaml_var) =
-  pf ppf "%s@\n+ Invariants involved:@\n  @[%a@]" argument.name report_terms
-    argument.type_.invariants
+  let report_xposts = list ~sep:(any "@\n") report_exn
 
-let report_return_pattern = list ~sep:(any "@\n") report_return
+  let report_argument ppf (argument : Translated.ocaml_var) =
+    let cs = if argument.consumed then "is consumed" else "is not consumed" in
+    let md = if argument.modified then "is modified" else "is not modified" in
+    pf ppf "%s %s and %s@\n+ Invariants involved:@\n  @[%a@]" argument.name cs
+      md report_invariants argument.type_.invariants
 
-let report_value ppf (value : Translated.value) =
-  pf ppf
-    "%a@\n\
-     \the value %s:@\n\
-    \ - Pure: %b@\n\
-    \ - Ghost: %b@\n\
-    \ - Preconditions:@\n\
-    \  @[%a@]@\n\
-     - Postconditions:@\n\
-    \  @[%a@]@\n\
-     - Xpostconditions:@\n\
-    \  @[%a@]@\n\
-     - Arguments:@\n\
-    \  @[%a@]@\n\
-     - Return:@\n\
-    \  @[%a@]@\n"
-    pp_loc value.loc value.name value.pure value.ghost report_terms
-    value.preconditions report_terms value.postconditions report_xposts
-    value.xpostconditions report_arguments value.arguments report_return_pattern
-    value.returns
+  let report_arguments = list ~sep:(any "@\n") report_argument
 
-let report_values = list ~sep:(any "@\n") report_value
+  let report_return ppf (argument : Translated.ocaml_var) =
+    pf ppf "%s@\n+ Invariants involved:@\n  @[%a@]" argument.name
+      report_invariants argument.type_.invariants
 
-let report_constant ppf (constant : Translated.constant) =
-  pf ppf
-    "%a@\n\
-     the constant value %s:@\n\
-     - Ghost: %b@\n\
-     - Checks:@\n\
-    \  @[%a@]@\n\
-     - Invariants: XXX TODO XXX" pp_loc constant.loc constant.name
-    constant.ghost report_terms constant.checks
+  let report_return_pattern = list ~sep:(any "@\n") report_return
 
-let report_constants = list ~sep:(any "@\n") report_constant
+  let report_value ppf (value : Translated.value) =
+    pf ppf
+      "%a@\n\
+       the value %s:@\n\
+      \ - Pure: %b@\n\
+      \ - Ghost: %b@\n\
+      \ - Preconditions:@\n\
+      \  @[%a@]@\n\
+       - Postconditions:@\n\
+      \  @[%a@]@\n\
+       - Xpostconditions:@\n\
+      \  @[%a@]@\n\
+       - Arguments:@\n\
+      \  @[%a@]@\n\
+       - Return:@\n\
+      \  @[%a@]@\n"
+      pp_loc value.loc value.name value.pure value.ghost report_terms
+      value.preconditions report_terms value.postconditions report_xposts
+      value.xpostconditions report_arguments value.arguments
+      report_return_pattern value.returns
 
-let report_type ppf (type_ : type_) =
-  pf ppf
-    "%a@\n\
-    \ the type %s:@\n\
-     - Mutable: %b@\n\
-     - Ghost: %b@\n\
-     - Invariants:@\n\
-    \  @[%a@]@\n\
-     - Equality: %a@\n\
-     - Comparison: %a@\n\
-     - Copy: %a@\n"
-    pp_loc type_.loc type_.name type_.mutable_ type_.ghost report_terms
-    type_.invariants report_derived type_.equality report_derived
-    type_.comparison report_derived type_.copy
+  let report_values = list ~sep:(any "@\n") report_value
 
-let report_types = list ~sep:(any "@\n") report_type
+  let report_constant ppf (constant : Translated.constant) =
+    pf ppf
+      "%a@\n\
+       the constant value %s:@\n\
+       - Ghost: %b@\n\
+       - Checks:@\n\
+      \  @[%a@]@\n\
+       - Invariants: XXX TODO XXX" pp_loc constant.loc constant.name
+      constant.ghost report_terms constant.checks
 
-let report_function ppf s (function_ : function_) =
-  let translation =
-    match function_.definition with
-    | None -> "has not been translated"
-    | Some def ->
-        Result.fold
-          ~ok:(fun _ -> "has been translated")
-          ~error:(fun _ -> "has not been translated")
-          def.translation
-  in
-  pf ppf "%a@\nthe %s %s %s" pp_loc function_.loc s function_.name translation
+  let report_constants = list ~sep:(any "@\n") report_constant
 
-let report_function_ ppf = report_function ppf "Gospel function"
-let report_functions = list ~sep:(any "@\n") report_function_
-let report_predicate ppf = report_function ppf "Gospel predicate"
-let report_predicates = list ~sep:(any "@\n") report_predicate
+  let report_type ppf (type_ : type_) =
+    pf ppf
+      "%a@\n\
+       the type %s:@\n\
+       - Mutable: %b@\n\
+       - Ghost: %b@\n\
+       - Invariants:@\n\
+      \  @[%a@]@\n\
+       - Equality: %a@\n\
+       - Comparison: %a@\n\
+       - Copy: %a@\n"
+      pp_loc type_.loc type_.name type_.mutable_ type_.ghost report_invariants
+      type_.invariants report_derived type_.equality report_derived
+      type_.comparison report_derived type_.copy
 
-let report_axiom ppf (axiom : axiom) =
-  let translated =
-    Result.fold
-      ~ok:(fun _ -> "has been translated")
-      ~error:(fun _ -> "has not been translated")
-      axiom.definition.translation
-  in
-  pf ppf "%a@\nthe Gospel axiom %s %s" pp_loc axiom.loc axiom.name translated
+  let report_types = list ~sep:(any "@\n") report_type
 
-let report_axioms = list ~sep:(any "@\n") report_axiom
+  let report_function ppf s (function_ : function_) =
+    let translation =
+      match function_.definition with
+      | None -> "has not been translated"
+      | Some def ->
+          Result.fold
+            ~ok:(fun _ -> "has been translated")
+            ~error:(fun _ -> "has not been translated")
+            def.translation
+    in
+    pf ppf "%a@\nthe %s %s %s" pp_loc function_.loc s function_.name translation
 
-type triage = {
-  types : Translated.type_ list;
-  values : Translated.value list;
-  constants : Translated.constant list;
-  functions : Translated.function_ list;
-  predicates : Translated.function_ list;
-  axioms : Translated.axiom list;
-}
+  let report_function_ ppf = report_function ppf "Gospel function"
+  let report_functions = list ~sep:(any "@\n") report_function_
+  let report_predicate ppf = report_function ppf "Gospel predicate"
+  let report_predicates = list ~sep:(any "@\n") report_predicate
 
-let empty =
-  {
-    types = [];
-    values = [];
-    constants = [];
-    functions = [];
-    predicates = [];
-    axioms = [];
+  let report_axiom ppf (axiom : axiom) =
+    let translated =
+      Result.fold
+        ~ok:(fun _ -> "has been translated")
+        ~error:(fun _ -> "has not been translated")
+        axiom.definition.translation
+    in
+    pf ppf "%a@\nthe Gospel axiom %s %s" pp_loc axiom.loc axiom.name translated
+
+  let report_axioms = list ~sep:(any "@\n") report_axiom
+
+  type triage = {
+    types : Translated.type_ list;
+    values : Translated.value list;
+    constants : Translated.constant list;
+    functions : Translated.function_ list;
+    predicates : Translated.function_ list;
+    axioms : Translated.axiom list;
   }
 
-let triage (item : Translated.structure_item) triage =
-  match item with
-  | Type t ->
-      let types = t :: triage.types in
-      { triage with types }
-  | Value v ->
-      let values = v :: triage.values in
-      { triage with values }
-  | Constant c ->
-      let constants = c :: triage.constants in
-      { triage with constants }
-  | Function f ->
-      let functions = f :: triage.functions in
-      { triage with functions }
-  | Predicate p ->
-      let predicates = p :: triage.predicates in
-      { triage with predicates }
-  | Axiom a ->
-      let axioms = a :: triage.axioms in
-      { triage with axioms }
+  let empty =
+    {
+      types = [];
+      values = [];
+      constants = [];
+      functions = [];
+      predicates = [];
+      axioms = [];
+    }
 
-let report_module ppf (driver : Drv.t) =
+  let triage (item : Translated.structure_item) triage =
+    match item with
+    | Type t ->
+        let types = t :: triage.types in
+        { triage with types }
+    | Value v ->
+        let values = v :: triage.values in
+        { triage with values }
+    | Constant c ->
+        let constants = c :: triage.constants in
+        { triage with constants }
+    | Function f ->
+        let functions = f :: triage.functions in
+        { triage with functions }
+    | Predicate p ->
+        let predicates = p :: triage.predicates in
+        { triage with predicates }
+    | Axiom a ->
+        let axioms = a :: triage.axioms in
+        { triage with axioms }
+end
+
+let report ppf (driver : Drv.t) =
+  let open Full_report in
   let triage = List.fold_right triage (Drv.translations driver) empty in
   pf ppf "%s@\n@[%a@]@\n@[%a@]@\n@[%a@]@\n@[%a@]@\n@[%a@]@\n@[%a@]"
     (Drv.module_name driver) report_types triage.types report_values
