@@ -3,7 +3,6 @@ open Ppxlib
 open Gospel
 
 let loc = Location.none
-
 let unsupported msg loc = raise (W.Error (W.MonolithGen msg, loc))
 
 module A = Ast_builder.Default

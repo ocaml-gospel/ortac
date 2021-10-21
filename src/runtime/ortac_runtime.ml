@@ -1,12 +1,12 @@
 open Fmt
 
 type location = { start : Lexing.position; stop : Lexing.position }
-
 type term_kind = Pre | Post | XPost
 
 type error =
   | Violated_axiom
   | Axiom_failure of { exn : exn }
+  | Violated_invariant of { term : string; position : term_kind }
   | Violated_condition of { term : string; term_kind : term_kind }
   | Specification_failure of { term : string; term_kind : term_kind; exn : exn }
   | Unexpected_exception of { allowed_exn : string list; exn : exn }
@@ -14,7 +14,6 @@ type error =
   | Unexpected_checks of { terms : string list }
 
 let styled_list l pp = List.fold_left (fun acc x -> styled x acc) pp l
-
 let quoted pp ppf = pf ppf "`%a'" pp
 
 let pp_term_kind =
@@ -25,8 +24,15 @@ let pp_term_kind =
       | XPost -> "exceptional post-condition")
     (styled `Yellow string)
 
-let pp_term = quoted (styled `Bold string)
+let pp_position =
+  using
+    (function
+      | Pre -> "the pre-state"
+      | Post -> "the post-state"
+      | XPost -> "an exceptional post-state")
+    (styled `Yellow string)
 
+let pp_term = quoted (styled `Bold string)
 let pp_terms = list ~sep:(any "@\n") pp_term
 
 let pp_loc =
@@ -39,11 +45,8 @@ let pp_loc =
   styled_list [ `Underline; `Bold ] unstyled
 
 let pp_fun_name = quoted (styled `Blue string)
-
 let pp_quoted_exn = quoted (styled `Bold string)
-
 let pp_exn = using Printexc.to_string pp_quoted_exn
-
 let pp_allowed_exn = list ~sep:comma pp_quoted_exn
 
 let pp_error ppf = function
@@ -52,6 +55,12 @@ let pp_error ppf = function
       pf ppf "the evaluation of the axiom %a:@\n  @[%a@]"
         (styled `Red string)
         "raised an exception" pp_exn exn
+  | Violated_invariant { term; position } ->
+      pf ppf "the %a@\n  @[%a@]@\nwas %a in %a."
+        (styled `Yellow string)
+        "invariant" pp_term term
+        (styled `Red string)
+        "violated" pp_position position
   | Violated_condition { term; term_kind } ->
       pf ppf "the %a@\n  @[%a@]@\nwas %a." pp_term_kind term_kind pp_term term
         (styled `Red string)
@@ -108,7 +117,6 @@ module Errors = struct
   type t = error_report
 
   let create loc fun_name = { loc; fun_name; errors = [] }
-
   let register t e = t.errors <- e :: t.errors
 
   let report t =
@@ -144,6 +152,5 @@ module Array = struct
     else Array.unsafe_get arr (Z.to_int z)
 
   let length arr = Array.length arr |> Z.of_int
-
   let for_all = Array.for_all
 end

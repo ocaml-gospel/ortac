@@ -5,7 +5,8 @@ let module_name_of_path p =
 let type_check load_path name sigs =
   let md = Gospel.Tmodule.init_muc name in
   let penv =
-    module_name_of_path name |> Gospel.Utils.Sstr.singleton
+    module_name_of_path name
+    |> Gospel.Utils.Sstr.singleton
     |> Gospel.Typing.penv load_path
   in
   let gfile = List.fold_left (Gospel.Typing.type_sig_item penv) md sigs in

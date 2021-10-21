@@ -1,39 +1,55 @@
-open Ppxlib
+module W = Warnings
 open Gospel
 
-val returned_pattern : Tast.lb_arg list -> pattern * expression
-
-val mk_setup : location -> string -> (expression -> expression) * string
-
-val mk_axiom_body :
-  driver:Drv.t -> register_name:expression -> Tterm.term -> expression option
-
-val mk_pre_checks :
+val with_pres :
   driver:Drv.t ->
-  register_name:expression ->
   term_printer:(Tterm.term -> string) ->
   Tterm.term list ->
-  expression ->
-  expression
+  Translated.value ->
+  Translated.value
 
-val mk_call :
+val with_models :
   driver:Drv.t ->
-  register_name:expression ->
+  (Tterm.lsymbol * bool) list ->
+  Translated.type_ ->
+  Translated.type_
+
+val with_invariants :
+  driver:Drv.t ->
+  term_printer:(Gospel.Tterm.term -> string) ->
+  Gospel.Tterm.term list ->
+  Translated.type_ ->
+  Translated.type_
+
+val with_consumes :
+  Gospel.Tterm.term list -> Translated.value -> Translated.value
+
+val with_modified :
+  Gospel.Tterm.term list -> Translated.value -> Translated.value
+
+val with_posts :
+  driver:Drv.t ->
   term_printer:(Tterm.term -> string) ->
-  pattern ->
-  location ->
-  label ->
+  Tterm.term list ->
+  Translated.value ->
+  Translated.value
+
+val with_constant_checks :
+  driver:Drv.t ->
+  term_printer:(Tterm.term -> string) ->
+  Tterm.term list ->
+  Translated.constant ->
+  Translated.constant
+
+val with_xposts :
+  driver:Drv.t ->
+  term_printer:(Tterm.term -> string) ->
   (Ttypes.xsymbol * (Tterm.pattern * Tterm.term) list) list ->
-  (arg_label * expression) list ->
-  expression ->
-  expression
+  Translated.value ->
+  Translated.value
 
-val mk_post_checks :
-  driver:Drv.t ->
-  register_name:expression ->
-  term_printer:(Tterm.term -> string) ->
-  Tterm.term list ->
-  expression ->
-  expression
+val function_definition :
+  driver:Drv.t -> Tterm.lsymbol -> string -> Tterm.term -> Translated.term
 
-val mk_function_def : driver:Drv.t -> Tterm.term -> expression option
+val axiom_definition :
+  driver:Drv.t -> register_name:string -> Tterm.term -> Translated.term

@@ -2,17 +2,22 @@ open Ppxlib
 
 type level = Warning | Error
 
-type kind = Unsupported of string
+type kind =
+  | Unsupported of string
+  | Ghost_value of string
+  | Ghost_type of string
+  | Unsupported_model of string * string
+  | Function_without_definition of string
+  | Predicate_without_definition of string
 
 type t = kind * Location.t
 
-let level = function Unsupported _ -> Warning
+let level = function
+  | Unsupported _ | Ghost_value _ | Ghost_type _ | Unsupported_model _
+  | Function_without_definition _ | Predicate_without_definition _ ->
+      Warning
 
 exception Error of t
-
-let w = ref []
-
-let register t = w := t :: !w
 
 open Fmt
 
@@ -22,13 +27,26 @@ let pp_level ppf = function
   | Warning -> pf ppf "%a: " (styled_list [ `Yellow; `Bold ] string) "Warning"
   | Error -> pf ppf "%a: " (styled_list [ `Red; `Bold ] string) "Error"
 
+let quoted ppf = pf ppf "`%s'"
+
 let pp_kind ppf = function
   | Unsupported msg ->
-      pf ppf "unsupported %s@\nthe clause has not been translated" msg
+      pf ppf "unsupported %s. The clause has not been translated" msg
+  | Ghost_value name ->
+      pf ppf "%a is a ghost value. It was not translated." quoted name
+  | Ghost_type name ->
+      pf ppf "%a is a ghost type. It was not translated." quoted name
+  | Unsupported_model (type_, name) ->
+      pf ppf "Model %a of type %a is not supported. It was not translated."
+        quoted name quoted type_
+  | Function_without_definition name ->
+      pf ppf "The function %a has no definition. It was not translated." quoted
+        name
+  | Predicate_without_definition name ->
+      pf ppf "The predicate %a has no definition. It was not translated." quoted
+        name
 
 let pp ppf (k, loc) =
-  pf ppf "%a@\n%a@[%a@]"
+  pf ppf "%a@\n%a@[%a@]@\n"
     (styled `Bold Location.print)
     loc pp_level (level k) pp_kind k
-
-let report () = if !w <> [] then epr "%a@." (list ~sep:(any "@\n") pp) !w

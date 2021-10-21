@@ -5,7 +5,6 @@ module A = Ast_builder.Default
 module B = Ortac_core.Builder
 
 let loc = Location.none
-
 let unsupported msg loc = raise (W.Error (W.MonolithPrinter msg, loc))
 
 let rec ty2printer drv (ty : Ttypes.ty) =
