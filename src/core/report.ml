@@ -141,8 +141,9 @@ module Full_report = struct
        - Ghost: %b@\n\
        - Checks:@\n\
       \  @[%a@]@\n\
-       - Invariants: XXX TODO XXX" pp_loc constant.loc constant.name
-      constant.ghost report_terms constant.checks
+       - Invariants:@\n\
+      \  @[%a@]" pp_loc constant.loc constant.name constant.ghost report_terms
+      constant.checks report_invariants constant.type_.invariants
 
   let report_constants = list ~sep:(any "@\n") report_constant
 
