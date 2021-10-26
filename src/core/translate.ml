@@ -50,10 +50,44 @@ let var_of_arg ~driver arg : Translated.ocaml_var =
   let type_ = type_of_ty ~driver (Tast_helper.ty_of_lb_arg arg) in
   { name; label; type_; modified = false; consumed = false }
 
+let rec ty_is_mutable ~driver (ty : Ttypes.ty) =
+  match ty.ty_node with
+  | Tyvar _ -> false
+  | Tyapp (ty, tyl) ->
+      (* an array, a reference or a container of something mutable *)
+      Ttypes.ts_equal ty (Drv.get_ts driver [ "Gospelstdlib"; "array" ])
+      || Ttypes.ts_equal ty (Drv.get_ts driver [ "Gospelstdlib"; "ref" ])
+      || List.exists (ty_is_mutable ~driver) tyl
+
+let cd_is_mutable ~driver cd =
+  List.exists
+    (fun (ld : (Identifier.Ident.t * Ttypes.ty) Tast.label_declaration) ->
+      ld.ld_mut = Mutable || ty_is_mutable ~driver (snd ld.ld_field))
+    cd
+
+let lsymbol_is_mutable ~driver (ls : Tterm.lsymbol) =
+  List.exists (ty_is_mutable ~driver) ls.ls_args
+
+let rd_is_mutable ~driver (rd : Tast.rec_declaration) =
+  List.exists
+    (fun (ld : Tterm.lsymbol Tast.label_declaration) ->
+      ld.ld_mut = Mutable || lsymbol_is_mutable ~driver ld.ld_field)
+    rd.rd_ldl
+
+let rec is_mutable ~driver (td : Tast.type_declaration) =
+  match td.td_kind with
+  | Pty_abstract -> false
+  | Pty_variant cdl ->
+      List.exists
+        (fun (cd : Tast.constructor_decl) -> cd_is_mutable ~driver cd.cd_ld)
+        cdl
+  | Pty_record rd -> rd_is_mutable ~driver rd
+  | Pty_open -> false
+
 let type_ ~driver ~ghost (td : Tast.type_declaration) =
   let name = td.td_ts.ts_ident.id_str in
   let loc = td.td_loc in
-  let mutable_ = false (* XXX FIXME look at the ocaml type *) in
+  let mutable_ = is_mutable ~driver td in
   let type_ = type_ ~name ~loc ~mutable_ ~ghost in
   let process ~type_ (spec : Tast.type_spec) =
     let term_printer = Fmt.str "%a" Tterm.print_term in
