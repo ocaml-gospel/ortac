@@ -24,7 +24,7 @@ build: [
 
 depends: [
   "ocaml" {>= "4.10.0"}
-  "dune" {>= "2.0"}
+  "dune" {>= "2.7"}
   "cmdliner"
   "fmt"
   "ppxlib" {>= "0.20.0"}

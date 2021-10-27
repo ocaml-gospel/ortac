@@ -25,7 +25,7 @@ build: [
 ]
 depends: [
   "ocaml" {>= "4.08.0"}
-  "dune" {>= "2.0"}
+  "dune" {>= "2.7"}
   "monolith" {>= "20201026"}
   "pprint"
   ]
