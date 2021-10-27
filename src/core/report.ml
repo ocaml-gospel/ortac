@@ -66,42 +66,32 @@ module Full_report = struct
     pf ppf "%a" (styled `Bold Location.print) loc
 
   let quoted ppf s = pf ppf "`%s'" s
-
-  let translation ppf = function
-    | Error _ -> (styled `Yellow pf) ppf "has not been translated"
-    | Ok _ -> (styled `Green pf) ppf "has been translated"
-
-  let several_translations ppf = function
-    | Error _ -> (styled `Yellow pf) ppf "have not been translated"
-    | Ok _ -> (styled `Green pf) ppf "have been translated"
-
-  let derived ppf = function
-    | Error _ -> (styled `Yellow pf) ppf "has not been derived"
-    | Ok _ -> (styled `Green pf) ppf "has been derived"
+  let is_it ppf b = if not b then (styled `Yellow pf) ppf " not" else pf ppf ""
+  let has_it ppf res = is_it ppf (Result.is_ok res)
 
   let term ppf (term : Translated.term) =
-    pf ppf "+ @[%a@\n%a %a@]" pp_loc term.loc quoted term.txt translation
-      term.translation
+    pf ppf "+ @[%a@\n%a has %a been translated@]" pp_loc term.loc quoted
+      term.txt has_it term.translation
 
   let terms = list ~sep:(any "@\n") term
 
   let invariant ppf (invariant : Translated.invariant) =
-    pf ppf "+ @[%a@\n%a %a@]" pp_loc invariant.loc quoted invariant.txt
-      translation invariant.translation
+    pf ppf "+ @[%a@\n%a has%a been translated@]" pp_loc invariant.loc quoted
+      invariant.txt has_it invariant.translation
 
   let invariants = list ~sep:(any "@\n") invariant
 
   let exn ppf (xpost : xpost) =
-    pf ppf "+ the clauses concerning the exception %s %a" xpost.exn
-      several_translations xpost.translation
+    pf ppf "+ the clauses concerning the exception %s have%a been translated"
+      xpost.exn has_it xpost.translation
 
   let xposts = list ~sep:(any "@\n") exn
 
   let argument ppf (argument : Translated.ocaml_var) =
-    let cs = if argument.consumed then "is consumed" else "is not consumed" in
-    let md = if argument.modified then "is modified" else "is not modified" in
-    pf ppf "%s %s and %s@\n+ Invariants involved:@\n  @[%a@]" argument.name cs
-      md invariants argument.type_.invariants
+    pf ppf
+      "%s is%a consumed and is%a modified@\n+ Invariants involved:@\n  @[%a@]"
+      argument.name is_it argument.consumed is_it argument.modified invariants
+      argument.type_.invariants
 
   let arguments = list ~sep:(any "@\n") argument
 
@@ -151,11 +141,11 @@ module Full_report = struct
        - Ghost: %b@\n\
        - Invariants:@\n\
       \  @[%a@]@\n\
-       - Equality: %a@\n\
-       - Comparison: %a@\n\
-       - Copy: %a@\n"
+       - Equality: has%a been derived@\n\
+       - Comparison: has%a been derived@\n\
+       - Copy: has%a been derived@\n"
       pp_loc type_.loc type_.name type_.mutable_ type_.ghost invariants
-      type_.invariants derived type_.equality derived type_.comparison derived
+      type_.invariants has_it type_.equality has_it type_.comparison has_it
       type_.copy
 
   let function_ ppf s (function_ : function_) =
