@@ -121,7 +121,7 @@ module Full_report = struct
       \  @[%a@]@\n\
        - Postconditions:@\n\
       \  @[%a@]@\n\
-       - Xpostconditions:@\n\
+       - Exceptional postconditions:@\n\
       \  @[%a@]@\n\
        - Arguments:@\n\
       \  @[%a@]@\n\
