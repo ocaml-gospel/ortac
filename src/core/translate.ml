@@ -13,43 +13,6 @@ let term_printer text global_loc (t : Tterm.term) =
       (t.t_loc.loc_end.pos_cnum - t.t_loc.loc_start.pos_cnum)
   with Invalid_argument _ -> Fmt.str "%a" Tterm.print_term t
 
-let type_of_ty ~driver (ty : Ttypes.ty) =
-  match ty.ty_node with
-  | Tyvar a ->
-      Translated.type_ ~name:a.tv_name.id_str ~loc:a.tv_name.id_loc
-        ~mutable_:false ~ghost:false
-  | Tyapp (ts, _tvs) -> (
-      (* XXX FIXME should look at tvs *)
-      match Drv.get_type ts driver with
-      | None ->
-          Translated.type_ ~name:ts.ts_ident.id_str ~loc:ts.ts_ident.id_loc
-            ~mutable_:false ~ghost:false
-          (* XXX FIXME type could be mutable *)
-      | Some (type_ : Translated.type_) -> type_)
-
-let vsname (vs : Tterm.vsymbol) = Fmt.str "%a" Tast.Ident.pp vs.vs_name
-
-let var_of_vs ~driver (vs : Tterm.vsymbol) : Translated.ocaml_var =
-  let name = vsname vs in
-  let label = Nolabel in
-  let type_ = type_of_ty ~driver vs.vs_ty in
-  { name; label; type_; modified = false; consumed = false }
-
-let var_of_arg ~driver arg : Translated.ocaml_var =
-  let label, name =
-    match arg with
-    | Tast.Lunit -> (Nolabel, "()")
-    | Tast.Lnone vs | Tast.Lghost vs -> (Nolabel, vsname vs)
-    | Tast.Loptional vs ->
-        let name = vsname vs in
-        (Optional name, name)
-    | Tast.Lnamed vs ->
-        let name = vsname vs in
-        (Labelled name, name)
-  in
-  let type_ = type_of_ty ~driver (Tast_helper.ty_of_lb_arg arg) in
-  { name; label; type_; modified = false; consumed = false }
-
 let rec ty_is_mutable ~driver (ty : Ttypes.ty) =
   match ty.ty_node with
   | Tyvar _ -> false
@@ -74,7 +37,7 @@ let rd_is_mutable ~driver (rd : Tast.rec_declaration) =
       ld.ld_mut = Mutable || lsymbol_is_mutable ~driver ld.ld_field)
     rd.rd_ldl
 
-let rec is_mutable ~driver (td : Tast.type_declaration) =
+let is_mutable ~driver (td : Tast.type_declaration) =
   match td.td_kind with
   | Pty_abstract -> false
   | Pty_variant cdl ->
@@ -83,6 +46,43 @@ let rec is_mutable ~driver (td : Tast.type_declaration) =
         cdl
   | Pty_record rd -> rd_is_mutable ~driver rd
   | Pty_open -> false
+
+let type_of_ty ~driver (ty : Ttypes.ty) =
+  match ty.ty_node with
+  | Tyvar a ->
+      Translated.type_ ~name:a.tv_name.id_str ~loc:a.tv_name.id_loc
+        ~mutable_:false ~ghost:false
+  | Tyapp (ts, _tvs) -> (
+      (* XXX FIXME should look at tvs *)
+      match Drv.get_type ts driver with
+      | None ->
+          let mutable_ = ty_is_mutable ~driver ty in
+          Translated.type_ ~name:ts.ts_ident.id_str ~loc:ts.ts_ident.id_loc
+            ~mutable_ ~ghost:false
+      | Some (type_ : Translated.type_) -> type_)
+
+let vsname (vs : Tterm.vsymbol) = Fmt.str "%a" Tast.Ident.pp vs.vs_name
+
+let var_of_vs ~driver (vs : Tterm.vsymbol) : Translated.ocaml_var =
+  let name = vsname vs in
+  let label = Nolabel in
+  let type_ = type_of_ty ~driver vs.vs_ty in
+  { name; label; type_; modified = false; consumed = false }
+
+let var_of_arg ~driver arg : Translated.ocaml_var =
+  let label, name =
+    match arg with
+    | Tast.Lunit -> (Nolabel, "()")
+    | Tast.Lnone vs | Tast.Lghost vs -> (Nolabel, vsname vs)
+    | Tast.Loptional vs ->
+        let name = vsname vs in
+        (Optional name, name)
+    | Tast.Lnamed vs ->
+        let name = vsname vs in
+        (Labelled name, name)
+  in
+  let type_ = type_of_ty ~driver (Tast_helper.ty_of_lb_arg arg) in
+  { name; label; type_; modified = false; consumed = false }
 
 let type_ ~driver ~ghost (td : Tast.type_declaration) =
   let name = td.td_ts.ts_ident.id_str in
