@@ -13,13 +13,19 @@ let term_printer text global_loc (t : Tterm.term) =
       (t.t_loc.loc_end.pos_cnum - t.t_loc.loc_start.pos_cnum)
   with Invalid_argument _ -> Fmt.str "%a" Tterm.print_term t
 
+let known_as_mutable ~driver (ts : Ttypes.tysymbol) =
+  match Drv.get_type ts driver with
+  | None -> false
+  | Some type_ -> type_.mutable_
+
 let rec ty_is_mutable ~driver (ty : Ttypes.ty) =
   match ty.ty_node with
   | Tyvar _ -> false
-  | Tyapp (ty, tyl) ->
-      (* an array, a reference or a container of something mutable *)
-      Ttypes.ts_equal ty (Drv.get_ts driver [ "Gospelstdlib"; "array" ])
-      || Ttypes.ts_equal ty (Drv.get_ts driver [ "Gospelstdlib"; "ref" ])
+  | Tyapp (ts, tyl) ->
+      (* already known as mutable, an array, a reference or a container of something mutable *)
+      known_as_mutable ~driver ts
+      || Ttypes.ts_equal ts (Drv.get_ts driver [ "Gospelstdlib"; "array" ])
+      || Ttypes.ts_equal ts (Drv.get_ts driver [ "Gospelstdlib"; "ref" ])
       || List.exists (ty_is_mutable ~driver) tyl
 
 let cd_is_mutable ~driver cd =
@@ -38,6 +44,7 @@ let rd_is_mutable ~driver (rd : Tast.rec_declaration) =
     rd.rd_ldl
 
 let is_mutable ~driver (td : Tast.type_declaration) =
+  (* what about type t = int array ? what kind of type_decalration is it ?*)
   match td.td_kind with
   | Pty_abstract -> false
   | Pty_variant cdl ->
@@ -53,13 +60,12 @@ let type_of_ty ~driver (ty : Ttypes.ty) =
       Translated.type_ ~name:a.tv_name.id_str ~loc:a.tv_name.id_loc
         ~mutable_:false ~ghost:false
   | Tyapp (ts, _tvs) -> (
-      (* XXX FIXME should look at tvs *)
       match Drv.get_type ts driver with
       | None ->
           let mutable_ = ty_is_mutable ~driver ty in
           Translated.type_ ~name:ts.ts_ident.id_str ~loc:ts.ts_ident.id_loc
             ~mutable_ ~ghost:false
-      | Some (type_ : Translated.type_) -> type_)
+      | Some type_ -> type_)
 
 let vsname (vs : Tterm.vsymbol) = Fmt.str "%a" Tast.Ident.pp vs.vs_name
 
