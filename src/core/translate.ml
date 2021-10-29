@@ -4,6 +4,49 @@ open Gospel
 open Translated
 module T = Translation
 
+module Mutability = struct
+  let known_tysymbol ~driver (ts : Ttypes.tysymbol) =
+    match Drv.get_type ts driver with
+    | None -> false
+    | Some type_ -> type_.mutable_
+
+  let rec ty ~driver (t : Ttypes.ty) =
+    match t.ty_node with
+    | Tyvar _ -> false
+    | Tyapp (ts, tyl) ->
+        (* already known as mutable, an array, a reference or a container of something mutable *)
+        known_tysymbol ~driver ts
+        || Ttypes.ts_equal ts (Drv.get_ts driver [ "Gospelstdlib"; "array" ])
+        || Ttypes.ts_equal ts (Drv.get_ts driver [ "Gospelstdlib"; "ref" ])
+        || List.exists (ty ~driver) tyl
+
+  let constructor_declaration ~driver cd =
+    List.exists
+      (fun (ld : (Identifier.Ident.t * Ttypes.ty) Tast.label_declaration) ->
+        ld.ld_mut = Mutable || ty ~driver (snd ld.ld_field))
+      cd
+
+  let lsymbol ~driver (ls : Tterm.lsymbol) = List.exists (ty ~driver) ls.ls_args
+
+  let rec_declaration ~driver (rd : Tast.rec_declaration) =
+    List.exists
+      (fun (ld : Tterm.lsymbol Tast.label_declaration) ->
+        ld.ld_mut = Mutable || lsymbol ~driver ld.ld_field)
+      rd.rd_ldl
+
+  let type_declaration ~driver (td : Tast.type_declaration) =
+    (* what about type t = int array ? what kind of type_decalration is it ?*)
+    match td.td_kind with
+    | Pty_abstract -> false
+    | Pty_variant cdl ->
+        List.exists
+          (fun (cd : Tast.constructor_decl) ->
+            constructor_declaration ~driver cd.cd_ld)
+          cdl
+    | Pty_record rd -> rec_declaration ~driver rd
+    | Pty_open -> false
+end
+
 let register_name = gen_symbol ~prefix:"__error"
 
 let term_printer text global_loc (t : Tterm.term) =
@@ -13,47 +56,6 @@ let term_printer text global_loc (t : Tterm.term) =
       (t.t_loc.loc_end.pos_cnum - t.t_loc.loc_start.pos_cnum)
   with Invalid_argument _ -> Fmt.str "%a" Tterm.print_term t
 
-let known_as_mutable ~driver (ts : Ttypes.tysymbol) =
-  match Drv.get_type ts driver with
-  | None -> false
-  | Some type_ -> type_.mutable_
-
-let rec ty_is_mutable ~driver (ty : Ttypes.ty) =
-  match ty.ty_node with
-  | Tyvar _ -> false
-  | Tyapp (ts, tyl) ->
-      (* already known as mutable, an array, a reference or a container of something mutable *)
-      known_as_mutable ~driver ts
-      || Ttypes.ts_equal ts (Drv.get_ts driver [ "Gospelstdlib"; "array" ])
-      || Ttypes.ts_equal ts (Drv.get_ts driver [ "Gospelstdlib"; "ref" ])
-      || List.exists (ty_is_mutable ~driver) tyl
-
-let cd_is_mutable ~driver cd =
-  List.exists
-    (fun (ld : (Identifier.Ident.t * Ttypes.ty) Tast.label_declaration) ->
-      ld.ld_mut = Mutable || ty_is_mutable ~driver (snd ld.ld_field))
-    cd
-
-let lsymbol_is_mutable ~driver (ls : Tterm.lsymbol) =
-  List.exists (ty_is_mutable ~driver) ls.ls_args
-
-let rd_is_mutable ~driver (rd : Tast.rec_declaration) =
-  List.exists
-    (fun (ld : Tterm.lsymbol Tast.label_declaration) ->
-      ld.ld_mut = Mutable || lsymbol_is_mutable ~driver ld.ld_field)
-    rd.rd_ldl
-
-let is_mutable ~driver (td : Tast.type_declaration) =
-  (* what about type t = int array ? what kind of type_decalration is it ?*)
-  match td.td_kind with
-  | Pty_abstract -> false
-  | Pty_variant cdl ->
-      List.exists
-        (fun (cd : Tast.constructor_decl) -> cd_is_mutable ~driver cd.cd_ld)
-        cdl
-  | Pty_record rd -> rd_is_mutable ~driver rd
-  | Pty_open -> false
-
 let type_of_ty ~driver (ty : Ttypes.ty) =
   match ty.ty_node with
   | Tyvar a ->
@@ -62,7 +64,7 @@ let type_of_ty ~driver (ty : Ttypes.ty) =
   | Tyapp (ts, _tvs) -> (
       match Drv.get_type ts driver with
       | None ->
-          let mutable_ = ty_is_mutable ~driver ty in
+          let mutable_ = Mutability.ty ~driver ty in
           Translated.type_ ~name:ts.ts_ident.id_str ~loc:ts.ts_ident.id_loc
             ~mutable_ ~ghost:false
       | Some type_ -> type_)
@@ -93,7 +95,7 @@ let var_of_arg ~driver arg : Translated.ocaml_var =
 let type_ ~driver ~ghost (td : Tast.type_declaration) =
   let name = td.td_ts.ts_ident.id_str in
   let loc = td.td_loc in
-  let mutable_ = is_mutable ~driver td in
+  let mutable_ = Mutability.type_declaration ~driver td in
   let type_ = type_ ~name ~loc ~mutable_ ~ghost in
   let process ~type_ (spec : Tast.type_spec) =
     let term_printer = Fmt.str "%a" Tterm.print_term in
