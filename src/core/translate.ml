@@ -37,12 +37,11 @@ module Mutability = struct
     || lsymbol ~driver rd.rd_cs
 
   let type_declaration ~driver (td : Tast.type_declaration) =
-    (* what about type t = int array ? what kind of type_decalration is it ?*)
+    Option.fold ~none:false ~some:(ty ~driver) td.td_ts.ts_alias
+    ||
     match td.td_kind with
     | Pty_abstract -> false
-    | Pty_variant cdl ->
-        List.exists (constructor_declaration ~driver) cdl
-        (* cdl is empty if defined through a tuple ??? *)
+    | Pty_variant cdl -> List.exists (constructor_declaration ~driver) cdl
     | Pty_record rd -> rec_declaration ~driver rd
     | Pty_open -> false
 end
