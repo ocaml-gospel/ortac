@@ -20,29 +20,29 @@ module Mutability = struct
         || Ttypes.ts_equal ts (Drv.get_ts driver [ "Gospelstdlib"; "ref" ])
         || List.exists (ty ~driver) tyl
 
-  let constructor_declaration ~driver cd =
+  let lsymbol ~driver (ls : Tterm.lsymbol) = List.exists (ty ~driver) ls.ls_args
+
+  let constructor_declaration ~driver (cd : Tast.constructor_decl) =
     List.exists
       (fun (ld : (Identifier.Ident.t * Ttypes.ty) Tast.label_declaration) ->
         ld.ld_mut = Mutable || ty ~driver (snd ld.ld_field))
-      cd
-
-  let lsymbol ~driver (ls : Tterm.lsymbol) = List.exists (ty ~driver) ls.ls_args
+      cd.cd_ld
+    || lsymbol ~driver cd.cd_cs
 
   let rec_declaration ~driver (rd : Tast.rec_declaration) =
     List.exists
       (fun (ld : Tterm.lsymbol Tast.label_declaration) ->
         ld.ld_mut = Mutable || lsymbol ~driver ld.ld_field)
       rd.rd_ldl
+    || lsymbol ~driver rd.rd_cs
 
   let type_declaration ~driver (td : Tast.type_declaration) =
     (* what about type t = int array ? what kind of type_decalration is it ?*)
     match td.td_kind with
     | Pty_abstract -> false
     | Pty_variant cdl ->
-        List.exists
-          (fun (cd : Tast.constructor_decl) ->
-            constructor_declaration ~driver cd.cd_ld)
-          cdl
+        List.exists (constructor_declaration ~driver) cdl
+        (* cdl is empty if defined through a tuple ??? *)
     | Pty_record rd -> rec_declaration ~driver rd
     | Pty_open -> false
 end
