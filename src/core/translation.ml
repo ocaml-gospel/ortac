@@ -55,7 +55,7 @@ let rec bounds ~driver ~loc (var : Tterm.vsymbol) (t1 : Tterm.term)
 
 and unsafe_term ~driver (t : Tterm.term) : expression =
   let term = unsafe_term ~driver in
-  let loc = Option.value ~default:Location.none t.t_loc in
+  let loc = t.t_loc in
   let unsupported m = raise (W.Error (W.Unsupported m, loc)) in
   match t.t_node with
   | Tvar { vs_name; _ } -> evar (str "%a" Ident.pp vs_name)
@@ -171,7 +171,7 @@ let conditions ~driver ~term_printer fail_violated fail_nonexec terms =
   List.map
     (fun t ->
       let txt = term_printer t in
-      let loc = Option.value ~default:Location.none t.Tterm.t_loc in
+      let loc = t.Tterm.t_loc in
       let translation =
         term ~driver (fail_nonexec txt) t
         |> Result.map (fun t ->
@@ -216,9 +216,9 @@ let subst_invariant_fields var (t : Tterm.term) =
         let ptl = List.map (fun (p, t) -> (p, aux t)) ptl in
         let t_node = Tterm.Tcase (t, ptl) in
         { t with t_node }
-    | Tquant (q, vsl, tr, t) ->
+    | Tquant (q, vsl, t) ->
         let t = aux t in
-        let t_node = Tterm.Tquant (q, vsl, tr, t) in
+        let t_node = Tterm.Tquant (q, vsl, t) in
         { t with t_node }
     | Tterm.Tbinop (op, t1, t2) ->
         let t1 = aux t1 in
@@ -238,12 +238,12 @@ let subst_invariant_fields var (t : Tterm.term) =
 
 let invariant ~driver ~term_printer (invariant : Tterm.term) =
   let function_name = gen_symbol ~prefix:"__invariant_" () in
-  let instance_id = Ident.create (gen_symbol ~prefix:"__self_" ()) in
+  let instance_id = Ident.create ~loc (gen_symbol ~prefix:"__self_" ()) in
   let instance_arg = (Nolabel, pvar (Fmt.str "%a" Ident.pp instance_id)) in
   let instance_term =
-    (* XXX This is not the correct type, but it doesn't matter for the
-       translation *)
-    Tterm.t_var { vs_name = instance_id; vs_ty = Ttypes.ty_unit }
+    (* XXX This is not the correct type or location, but it doesn't matter for
+       the translation *)
+    Tterm.t_var { vs_name = instance_id; vs_ty = Ttypes.ty_unit } loc
   in
 
   let register_name = gen_symbol ~prefix:"__error_" () in
@@ -259,7 +259,7 @@ let invariant ~driver ~term_printer (invariant : Tterm.term) =
     F.invariant_failure eposition ~term ~exn ~register_name
   in
   let txt = term_printer invariant in
-  let loc = Option.value ~default:Location.none invariant.Tterm.t_loc in
+  let loc = invariant.Tterm.t_loc in
   let translation =
     let invariant = subst_invariant_fields instance_term invariant in
     term ~driver (nonexec txt) invariant
@@ -391,7 +391,7 @@ let with_xposts ~driver ~term_printer xposts (value : value) =
 
 let function_definition ~driver ls i t : term =
   let txt = Fmt.str "%a" Tterm.print_term t in
-  let loc = Option.value ~default:Location.none t.t_loc in
+  let loc = t.t_loc in
   let translation =
     let driver = Drv.add_function ls i driver in
     try Ok (unsafe_term ~driver t) with W.Error t -> Error t
@@ -403,7 +403,7 @@ let axiom_definition ~driver ~register_name t : term =
   let fail_violated = F.violated_axiom ~register_name in
   let fail_nonexec exn = F.axiom_failure ~exn ~register_name in
   let txt = Fmt.str "%a" Tterm.print_term t in
-  let loc = Option.value ~default:Location.none t.t_loc in
+  let loc = t.t_loc in
   let translation =
     term ~driver fail_nonexec t
     |> Result.map (fun check ->
