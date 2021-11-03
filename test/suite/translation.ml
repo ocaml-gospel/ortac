@@ -30,6 +30,15 @@ let type_mutability () =
         true (is_mutable t))
     translations
 
+let type_immutability () =
+  let translations = translate "./translation/immutable.mli" in
+  Ortac_core.Drv.iter_translation
+    ~f:(fun t ->
+      Alcotest.(check bool)
+        (Fmt.str "%s is immutable" (type_name t))
+        false (is_mutable t))
+    translations
+
 let val_pure () =
   let translations = translate "./translation/pure.mli" in
   Ortac_core.Drv.iter_translation
@@ -41,5 +50,6 @@ let suite =
   ( "Translation",
     [
       ("type mutability", `Quick, type_mutability);
+      ("type immutability", `Quick, type_immutability);
       ("value purity", `Quick, val_pure);
     ] )
