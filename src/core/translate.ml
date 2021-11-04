@@ -20,7 +20,9 @@ module Mutability = struct
         || Ttypes.ts_equal ts (Drv.get_ts driver [ "Gospelstdlib"; "ref" ])
         || List.exists (ty ~driver) tyl
 
-  let lsymbol ~driver (ls : Tterm.lsymbol) = List.exists (ty ~driver) ls.ls_args
+  let lsymbol ~driver (ls : Tterm.lsymbol) =
+    (match ls.ls_value with None -> false | Some t -> ty ~driver t)
+    || List.exists (ty ~driver) ls.ls_args
 
   let constructor_declaration ~driver (cd : Tast.constructor_decl) =
     List.exists
@@ -44,6 +46,9 @@ module Mutability = struct
     | Pty_variant cdl -> List.exists (constructor_declaration ~driver) cdl
     | Pty_record rd -> rec_declaration ~driver rd
     | Pty_open -> false
+
+  let mutable_model ~driver (ty_fields : (Tterm.lsymbol * bool) list) =
+    List.exists (fun (ls, b) -> b || lsymbol ~driver ls) ty_fields
 end
 
 let register_name = gen_symbol ~prefix:"__error"
@@ -98,7 +103,11 @@ let type_ ~driver ~ghost (td : Tast.type_declaration) =
   let type_ = type_ ~name ~loc ~mutable_ ~ghost in
   let process ~type_ (spec : Tast.type_spec) =
     let term_printer = Fmt.str "%a" Tterm.print_term in
-    let mutable_ = type_.mutable_ || spec.ty_ephemeral in
+    let mutable_ =
+      type_.mutable_
+      || spec.ty_ephemeral
+      || Mutability.mutable_model ~driver spec.ty_fields
+    in
     let type_ =
       type_
       |> T.with_models ~driver spec.ty_fields

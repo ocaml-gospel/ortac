@@ -4,6 +4,9 @@ type t_ephemeral
 type 'a with_mutable_model
 (*@ mutable model content : 'a set *)
 
+type 'a with_deep_mutable_model
+(*@ model content : 'a array *)
+
 type record_with_mutable_flag = { mutable m : int }
 type record_with_known_mutable_field = { t : t_ephemeral }
 type variant_with_known_mutable_field = K of t_ephemeral
