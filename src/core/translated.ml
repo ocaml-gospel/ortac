@@ -1,6 +1,8 @@
 module W = Warnings
 open Ppxlib
 
+type mutability = Unknown | Immutable | Mutable
+
 type term = {
   txt : string;
   loc : Location.t;
@@ -24,7 +26,7 @@ type invariant = {
 type type_ = {
   name : string;
   loc : Location.t;
-  mutable_ : bool;
+  mutable_ : mutability;
   ghost : bool;
   models : (string * bool) list;
   invariants : invariant list;

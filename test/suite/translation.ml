@@ -8,7 +8,7 @@ let translate path =
   Ortac_core.Translate.signature ~driver sigs
 
 let is_mutable = function
-  | Ortac_core.Translated.Type t -> t.mutable_
+  | Ortac_core.Translated.Type t -> t.mutable_ = Ortac_core.Translated.Mutable
   | _ -> false
 
 let is_pure = function Ortac_core.Translated.Value v -> v.pure | _ -> false

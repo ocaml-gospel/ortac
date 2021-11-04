@@ -18,7 +18,7 @@ let type_of_ty ~driver (ty : Ttypes.ty) =
   match ty.ty_node with
   | Tyvar a ->
       Translated.type_ ~name:a.tv_name.id_str ~loc:a.tv_name.id_loc
-        ~mutable_:false ~ghost:false
+        ~mutable_:Translated.Unknown ~ghost:false
   | Tyapp (ts, _tvs) -> (
       match Drv.get_type ts driver with
       | None ->
@@ -58,9 +58,9 @@ let type_ ~driver ~ghost (td : Tast.type_declaration) =
   let process ~type_ (spec : Tast.type_spec) =
     let term_printer = Fmt.str "%a" Tterm.print_term in
     let mutable_ =
-      type_.mutable_
-      || spec.ty_ephemeral
-      || Mutability.mutable_model ~driver spec.ty_fields
+      max
+        (if spec.ty_ephemeral then Translated.Mutable else type_.mutable_)
+        (Mutability.mutable_model ~driver spec.ty_fields)
     in
     let type_ =
       type_
