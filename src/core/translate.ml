@@ -7,14 +7,11 @@ module T = Translation
 let register_name = gen_symbol ~prefix:"__error"
 
 let term_printer text global_loc (t : Tterm.term) =
-  match t.t_loc with
-  | None -> Fmt.str "%a" Tterm.print_term t
-  | Some loc -> (
-      try
-        String.sub text
-          (loc.loc_start.pos_cnum - global_loc.loc_start.pos_cnum)
-          (loc.loc_end.pos_cnum - loc.loc_start.pos_cnum)
-      with Invalid_argument _ -> Fmt.str "%a" Tterm.print_term t)
+  try
+    String.sub text
+      (t.t_loc.loc_start.pos_cnum - global_loc.loc_start.pos_cnum)
+      (t.t_loc.loc_end.pos_cnum - t.t_loc.loc_start.pos_cnum)
+  with Invalid_argument _ -> Fmt.str "%a" Tterm.print_term t
 
 let type_of_ty ~driver (ty : Ttypes.ty) =
   match ty.ty_node with
@@ -50,7 +47,7 @@ let var_of_arg ~driver arg : Translated.ocaml_var =
         let name = vsname vs in
         (Labelled name, name)
   in
-  let type_ = type_of_ty ~driver (Tast.ty_of_lb_arg arg) in
+  let type_ = type_of_ty ~driver (Tast_helper.ty_of_lb_arg arg) in
   { name; label; type_; modified = false; consumed = false }
 
 let type_ ~driver ~ghost (td : Tast.type_declaration) =
@@ -113,7 +110,7 @@ let constant ~driver ~ghost (vd : Tast.val_description) =
   let register_name = register_name () in
   let type_ =
     assert (List.length vd.vd_ret = 1);
-    type_of_ty ~driver (Tast.ty_of_lb_arg (List.hd vd.vd_ret))
+    type_of_ty ~driver (Tast_helper.ty_of_lb_arg (List.hd vd.vd_ret))
   in
   let constant = constant ~name ~loc ~register_name ~type_ ~ghost in
   let process ~constant (spec : Tast.val_spec) =
