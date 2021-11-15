@@ -1,39 +1,6 @@
 module W = Warnings
 open Ppxlib
 open Gospel
-
-module M : Ortac_core.Frontend.S = struct
-  let prelude =
-    let loc = Location.none in
-    [
-      [%stri
-        module Errors = struct
-          type t = Ortac_runtime.error_report
-
-          let create loc fun_name =
-            { Ortac_runtime.loc; Ortac_runtime.fun_name; errors = [] }
-
-          let register t e = Ortac_runtime.(t.errors <- e :: t.errors)
-
-          let is_pre = function
-            | Ortac_runtime.Violated_condition e -> e.term_kind = Pre
-            | Ortac_runtime.Specification_failure e -> e.term_kind = Pre
-            | _ -> false
-
-          let report t =
-            let open Ortac_runtime in
-            match t.errors with
-            | [] -> ()
-            | errs when List.exists is_pre errs -> raise Monolith.PleaseBackOff
-            | _ ->
-                Fmt.flush Fmt.stderr (pp_error_report Fmt.stderr t);
-                (* pp_error_report Fmt.stderr t; *)
-                raise (Error t)
-        end];
-    ]
-end
-
-module G = Ortac_core.Ortac.Make (M)
 module A = Ast_builder.Default
 module B = Ortac_core.Builder
 
@@ -41,7 +8,9 @@ let loc = Location.none
 let unsupported msg loc = raise (W.Error (W.MonolithSpec msg, loc))
 
 let mk_reference module_name env s =
-  let rtac = G.signature module_name env s in
+  let rtac =
+    Ortac_core.Ortac.signature "Ortac_runtime_monolith" module_name env s
+  in
   let module_r = A.pmod_structure ~loc rtac in
   let module_bind =
     A.module_binding ~loc ~name:(B.noloc (Some "R")) ~expr:module_r
@@ -64,11 +33,12 @@ and tyapp2spec drv (ts : Ttypes.tysymbol) (tl : Ttypes.ty list) =
   let get_ts = Ortac_core.Drv.get_ts drv in
   if Ttypes.ts_equal ts Ttypes.ts_unit then [%expr unit]
   else if Ttypes.ts_equal ts Ttypes.ts_char then [%expr char]
-  else if Ttypes.ts_equal ts Ttypes.ts_integer then [%expr int]
+  else if Ttypes.ts_equal ts Ttypes.ts_integer then [%expr M.int]
   else if Ttypes.ts_equal ts Ttypes.ts_string then [%expr string]
   else if Ttypes.ts_equal ts Ttypes.ts_list && List.length tl = 1 then
     [%expr list [%e ty2spec drv (List.hd tl)]]
-  else if Ttypes.ts_equal ts (get_ts [ "Gospelstdlib"; "int" ]) then [%expr int]
+  else if Ttypes.ts_equal ts (get_ts [ "Gospelstdlib"; "int" ]) then
+    [%expr M.int]
   else if
     Ttypes.ts_equal ts (get_ts [ "Gospelstdlib"; "array" ])
     && List.length tl = 1

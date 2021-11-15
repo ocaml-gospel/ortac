@@ -5,13 +5,13 @@ include Ast_builder.Make (struct
 end)
 
 let noloc txt = { txt; loc = Location.none }
-let epred e = eapply (evar "Ortac_runtime.Z.pred") [ e ]
-let esucc e = eapply (evar "Ortac_runtime.Z.succ") [ e ]
+let epred e = eapply (evar "Runtime.Z.pred") [ e ]
+let esucc e = eapply (evar "Runtime.Z.succ") [ e ]
 
 let econst = function
   | Pconst_integer (c, o) ->
       Pconst_integer (c, o) |> pexp_constant |> fun e ->
-      eapply (evar "Ortac_runtime.Z.of_int") [ e ]
+      eapply (evar "Runtime.Z.of_int") [ e ]
   | _ as e -> pexp_constant e
 
 let eposition pos =
@@ -26,8 +26,8 @@ let eposition pos =
 let elocation loc =
   [%expr
     {
-      Ortac_runtime.start = [%e eposition loc.loc_start];
-      Ortac_runtime.stop = [%e eposition loc.loc_end];
+      Runtime.start = [%e eposition loc.loc_start];
+      Runtime.stop = [%e eposition loc.loc_end];
     }]
 
 let efun args expr =

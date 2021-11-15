@@ -1,3 +1,5 @@
+include Ortac_runtime__Ortac_runtime_intf.S
+
 val print_record :
   string -> (string * PPrintEngine.document) list -> PPrintEngine.document
 
