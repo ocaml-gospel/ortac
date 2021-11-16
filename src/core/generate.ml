@@ -9,7 +9,7 @@ module M = Map.Make (String)
 let setup name loc register_name next =
   [%expr
     let [%p pvar register_name] =
-      Runtime.Errors.create [%e elocation loc] [%e estring name]
+      Ortac_runtime.Errors.create [%e elocation loc] [%e estring name]
     in
     [%e next]]
 
@@ -165,7 +165,7 @@ let structure runtime driver : structure =
   (pmod_ident (lident (Drv.module_name driver)) |> include_infos |> pstr_include)
   :: pstr_module
        (module_binding
-          ~name:{ txt = Some "Runtime"; loc }
+          ~name:{ txt = Some "Ortac_runtime"; loc }
           ~expr:(pmod_ident (lident runtime)))
   :: (Drv.map_translation driver ~f:(function
         | Translated.Value v -> value v

@@ -125,7 +125,8 @@ and unsafe_term ~driver (t : Tterm.term) : expression =
       let p = term p in
       let quant =
         evar
-          (if quant = Tforall then "Runtime.Z.forall" else "Runtime.Z.exists")
+          (if quant = Tforall then "Ortac_runtime.Z.forall"
+          else "Ortac_runtime.Z.exists")
       in
       let x = str "%a" Ident.pp var.vs_name in
       let func = pexp_fun Nolabel None (pvar x) p in
