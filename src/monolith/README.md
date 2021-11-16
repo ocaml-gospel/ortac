@@ -46,7 +46,7 @@ use a Dune file:
 ```dune
 (executable
   (name main)
-  (libraries ortac_runtime ortac_runtime_monolith monolith fmt))
+  (libraries ortac_runtime_monolith monolith))
 ```
 
 Then you can compile the Monolith program:

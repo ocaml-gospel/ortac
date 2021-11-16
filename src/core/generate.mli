@@ -1,1 +1,1 @@
-val structure : Drv.t -> Ppxlib.structure
+val structure : string -> Drv.t -> Ppxlib.structure
