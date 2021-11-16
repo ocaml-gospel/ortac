@@ -1,6 +1,13 @@
 open Gospel
 
 module Mutability = struct
+  let max m n =
+    let open Translated in
+    match m with
+    | Mutable -> Mutable
+    | Immutable -> ( match n with Mutable -> Mutable | _ -> Immutable)
+    | Unknown -> n
+
   let known_tysymbol ~driver (ts : Ttypes.tysymbol) =
     Option.fold ~none:Translated.Unknown
       ~some:(fun (t : Translated.type_) -> t.mutable_)
