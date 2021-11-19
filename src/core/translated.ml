@@ -1,7 +1,11 @@
 module W = Warnings
 open Ppxlib
 
-type mutability = Unknown | Immutable | Mutable
+type mutability =
+  | Unknown
+  | Immutable
+  | Mutable
+  | Dependant of (mutability list -> mutability)
 
 type term = {
   txt : string;

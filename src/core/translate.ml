@@ -57,11 +57,7 @@ let type_ ~driver ~ghost (td : Tast.type_declaration) =
   let type_ = type_ ~name ~loc ~mutable_ ~ghost in
   let process ~type_ (spec : Tast.type_spec) =
     let term_printer = Fmt.str "%a" Tterm.print_term in
-    let mutable_ =
-      max
-        (if spec.ty_ephemeral then Translated.Mutable else type_.mutable_)
-        (Mutability.mutable_model ~driver spec.ty_fields)
-    in
+    let mutable_ = Mutability.(max type_.mutable_ (type_spec ~driver spec)) in
     let type_ =
       type_
       |> T.with_models ~driver spec.ty_fields

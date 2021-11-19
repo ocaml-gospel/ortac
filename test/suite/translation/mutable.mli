@@ -16,3 +16,4 @@ type record_with_list_of_known_mutable = { f : t_ephemeral list }
 type int_array = int array
 type int_ref = int ref
 type list_of_mutable = int ref list
+type 'a abstract_and_mutable = 'a * int array

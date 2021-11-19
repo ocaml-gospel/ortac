@@ -1,5 +1,7 @@
 (test
  (name test)
  (package ortac)
+ (deps
+  (source_tree translation/))
  (libraries alcotest ortac-runtime ortac_core gospel fmt arrays arith
    exceptions terms ltypes))
