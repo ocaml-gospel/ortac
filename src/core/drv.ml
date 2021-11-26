@@ -62,7 +62,9 @@ let stdlib_types =
         ~mutable_:(Dependant (fun _ -> Mutable))
         ~ghost:false );
     ( [ "Gospelstdlib"; "array" ],
-      type_ ~name:"array" ~loc ~mutable_:Mutable ~ghost:false );
+      type_ ~name:"array" ~loc
+        ~mutable_:(Dependant (fun _ -> Mutable))
+        ~ghost:false );
     ( [ "Gospelstdlib"; "set" ],
       type_ ~name:"set" ~loc
         ~mutable_:(Dependant (function [ m ] -> m | _ -> assert false))

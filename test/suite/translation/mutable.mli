@@ -17,6 +17,4 @@ type int_array = int array
 type int_ref = int ref
 type list_of_mutable = int ref list
 type 'a abstract_and_mutable = 'a * int array
-
-type dependant_instanciated_with_int =
-  int Translation.Dependant.alpha_list_is_dependant
+type dependant_instanciated_with_int = int Dependant.alpha_list_is_dependant
