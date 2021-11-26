@@ -1,3 +1,7 @@
+type 'a t_dependant = 'a list
+
+val start : unit -> unit
+
 type t_ephemeral
 (*@ ephemeral*)
 
@@ -5,7 +9,7 @@ type 'a with_mutable_model
 (*@ mutable model content : 'a set *)
 
 type 'a with_deep_mutable_model
-(*@ model content : 'a array *)
+(*@ model content : int array *)
 
 type record_with_mutable_flag = { mutable m : int }
 type record_with_known_mutable_field = { t : t_ephemeral }
@@ -17,4 +21,4 @@ type int_array = int array
 type int_ref = int ref
 type list_of_mutable = int ref list
 type 'a abstract_and_mutable = 'a * int array
-type dependant_instanciated_with_int = int Dependant.alpha_list_is_dependant
+type int_ref_dependant_list = int_ref t_dependant

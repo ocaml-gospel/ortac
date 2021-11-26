@@ -43,44 +43,45 @@ let val_name = function
   | Ortac_core.Translated.Value v -> v.name
   | _ -> assert false
 
+let mutability_to_string = function
+  | Ortac_core.Translated.Mutable -> "mutable"
+  | Ortac_core.Translated.Unknown -> "unknown"
+  | Ortac_core.Translated.Dependant _ -> "dependant"
+  | Ortac_core.Translated.Immutable -> "immutable"
+
+let is_val (t : Ortac_core.Translated.structure_item) =
+  match t with Ortac_core.Translated.Value _ -> true | _ -> false
+
+let test_mutability path mut flag () =
+  let translations = translate path in
+  Ortac_core.Drv.iter_translation
+    ~f:(fun t ->
+      if !flag then (
+        print_endline (type_name t);
+        Alcotest.(check mutability)
+          (Fmt.str "%s is %s" (type_name t) (mutability_to_string mut))
+          mut (get_mutability t))
+      else if is_val t then flag := true)
+    translations
+
 let type_unknown () =
-  let translations = translate "./translation/unknown.mli" in
-  Ortac_core.Drv.iter_translation
-    ~f:(fun t ->
-      print_endline (type_name t);
-      Alcotest.(check mutability)
-        (Fmt.str "%s is unknown" (type_name t))
-        Ortac_core.Translated.Unknown (get_mutability t))
-    translations
+  let flag = ref false in
+  test_mutability "./translation/unknown.mli" Ortac_core.Translated.Unknown flag
 
-let type_mutability () =
-  let translations = translate "./translation/mutable.mli" in
-  Ortac_core.Drv.iter_translation
-    ~f:(fun t ->
-      Alcotest.(check mutability)
-        (Fmt.str "%s is mutable" (type_name t))
-        Ortac_core.Translated.Mutable (get_mutability t))
-    translations
+let type_mutable () =
+  let flag = ref false in
+  test_mutability "./translation/mutable.mli" Ortac_core.Translated.Mutable flag
 
-let type_immutability () =
-  let translations = translate "./translation/immutable.mli" in
-  Ortac_core.Drv.iter_translation
-    ~f:(fun t ->
-      Alcotest.(check mutability)
-        (Fmt.str "%s is immutable" (type_name t))
-        Ortac_core.Translated.Immutable (get_mutability t))
-    translations
+let type_immutable () =
+  let flag = ref false in
+  test_mutability "./translation/immutable.mli" Ortac_core.Translated.Immutable
+    flag
 
 let type_dependant () =
-  let translations = translate "./translation/dependant.mli" in
-  Ortac_core.Drv.iter_translation
-    ~f:(fun t ->
-      Alcotest.(check mutability)
-        (Fmt.str "%s is dependant" (type_name t))
-        (Ortac_core.Translated.Dependant
-           (fun _ -> Ortac_core.Translated.Unknown))
-        (get_mutability t))
-    translations
+  let flag = ref false in
+  test_mutability "./translation/dependant.mli"
+    (Ortac_core.Translated.Dependant (fun _ -> Ortac_core.Translated.Unknown))
+    flag
 
 let val_pure () =
   let translations = translate "./translation/pure.mli" in
@@ -92,8 +93,9 @@ let val_pure () =
 let suite =
   ( "Translation",
     [
-      ("type mutability", `Quick, type_mutability);
-      ("type immutability", `Quick, type_immutability);
-      ("type unknown", `Quick, type_unknown);
+      ("type mutable", `Quick, type_mutable ());
+      ("type immutable", `Quick, type_immutable ());
+      ("type unknown", `Quick, type_unknown ());
+      ("type dependant", `Quick, type_dependant ());
       ("value purity", `Quick, val_pure);
     ] )

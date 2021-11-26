@@ -28,11 +28,20 @@ module Mutability = struct
 
   let rec ty ~driver (t : Ttypes.ty) =
     match t.ty_node with
-    (* A `Tyvar` is an alpha *)
-    | Tyvar _ -> Translated.Unknown
+    | Tyvar _ ->
+        (* A `Tyvar` is an alpha *)
+        Translated.Unknown
     | Tyapp (ts, tyl) when Ttypes.is_ts_tuple ts ->
-        (* The mutability of a tuple is the max of the mutability of its elements *)
-        List.map (ty ~driver) tyl |> List.fold_left max min_mut
+        (* XXX not sure about that decision... *)
+        (* In the presence of a tuple there are three cases
+           1. There is at least an alpha in its element but another element is already known to be mutable
+           2. There is at least an alpha but none element is known to be mutable
+           3. All the elements are known types *)
+        if List.exists alpha tyl then
+          max
+            (List.map (ty ~driver) tyl |> List.fold_left max min_mut)
+            (Translated.Dependant (fun tyl -> List.fold_right max tyl min_mut))
+        else List.map (ty ~driver) tyl |> List.fold_left max min_mut
     | Tyapp (ts, tyl) when List.length tyl = 0 ->
         (* If `tyl` is empty, we just look at `ts`. The mutability can't be `Dependant` *)
         tysymbol ~driver ts
