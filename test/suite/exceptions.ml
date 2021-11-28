@@ -24,6 +24,18 @@ let raise_std () =
   check_raises "raise_stackoverflow" Stack_overflow (fun () ->
       raise_stackoverflow 0 |> ignore)
 
+let valid_checks () =
+  check_success "check true" (fun () -> check true |> ignore);
+  check_raises "check false" (Invalid_argument "invalid") (fun () ->
+      check false |> ignore)
+
+let bad_checks () =
+  check_raises_ortac "bad_check true" (fun () -> bad_check true |> ignore);
+  check_raises "bad_check false" (Invalid_argument "invalid") (fun () ->
+      bad_check false |> ignore);
+  check_success "bad_check2 true" (fun () -> bad_check2 true |> ignore);
+  check_raises_ortac "bad_check2 false" (fun () -> bad_check2 false |> ignore)
+
 let suite =
   ( "Exceptions",
     [
@@ -33,4 +45,6 @@ let suite =
       ("allowed exceptions", `Quick, raise_std);
       ("raise_invalidarg", `Quick, raise_invalidarg);
       ("bad_raise_notfound", `Quick, bad_raise_notfound);
+      ("valid_checks", `Quick, valid_checks);
+      ("bad_checks", `Quick, bad_checks);
     ] )

@@ -4,7 +4,7 @@ val violated_invariant :
   expression -> term:string -> register_name:expression -> expression
 
 val violated :
-  [ `Post | `Pre | `XPost | `Invariant ] ->
+  [ `Check | `Post | `Pre | `XPost | `Invariant ] ->
   term:string ->
   register_name:expression ->
   expression
@@ -20,7 +20,7 @@ val invariant_failure :
   expression
 
 val spec_failure :
-  [ `Post | `Pre | `XPost | `Invariant ] ->
+  [ `Check | `Post | `Pre | `XPost | `Invariant ] ->
   term:string ->
   exn:expression ->
   register_name:expression ->
@@ -33,8 +33,5 @@ val unexpected_exn :
   expression
 
 val uncaught_checks : term:string -> register_name:expression -> expression
-
-val unexpected_checks :
-  terms:string list -> register_name:expression -> expression
-
+val unexpected_checks : register_name:expression -> expression
 val report : register_name:expression -> expression

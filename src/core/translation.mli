@@ -1,6 +1,13 @@
 module W = Warnings
 open Gospel
 
+val with_checks :
+  driver:Drv.t ->
+  term_printer:(Tterm.term -> string) ->
+  Tterm.term list ->
+  Translated.value ->
+  Translated.value
+
 val with_pres :
   driver:Drv.t ->
   term_printer:(Tterm.term -> string) ->

@@ -7,6 +7,14 @@ type term = {
   translation : (expression, W.t) result;
 }
 
+type check = {
+  txt : string;
+  loc : Location.t;
+  translations : (expression * expression, W.t) result;
+      (** The first expression ensures the condition holds, the second one
+          contains the negative test (used when [Invalid_argument] is raised) *)
+}
+
 type invariant = {
   txt : string;
   loc : Location.t;
@@ -60,6 +68,7 @@ type value = {
   register_name : string;
   ghost : bool;
   pure : bool;
+  checks : check list;
   preconditions : term list;
   postconditions : term list;
   xpostconditions : xpost list;
@@ -74,6 +83,7 @@ let value ~name ~loc ~arguments ~returns ~register_name ~ghost ~pure =
     register_name;
     ghost;
     pure;
+    checks = [];
     preconditions = [];
     postconditions = [];
     xpostconditions = [];

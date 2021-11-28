@@ -1,7 +1,7 @@
 open Fmt
 
 type location = { start : Lexing.position; stop : Lexing.position }
-type term_kind = Pre | Post | XPost
+type term_kind = Check | Pre | Post | XPost
 
 type error =
   | Violated_axiom
@@ -19,6 +19,7 @@ let quoted pp ppf = pf ppf "`%a'" pp
 let pp_term_kind =
   using
     (function
+      | Check -> "`checks' pre-condition"
       | Pre -> "pre-condition"
       | Post -> "post-condition"
       | XPost -> "exceptional post-condition")
@@ -27,7 +28,7 @@ let pp_term_kind =
 let pp_position =
   using
     (function
-      | Pre -> "the pre-state"
+      | Pre | Check -> "the pre-state"
       | Post -> "the post-state"
       | XPost -> "an exceptional post-state")
     (styled `Yellow string)

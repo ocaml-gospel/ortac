@@ -86,6 +86,7 @@ let value ~driver ~ghost (vd : Tast.val_description) =
     let term_printer = term_printer spec.sp_text spec.sp_loc in
     let value =
       value
+      |> T.with_checks ~driver ~term_printer spec.sp_checks
       |> T.with_pres ~driver ~term_printer spec.sp_pre
       |> T.with_posts ~driver ~term_printer spec.sp_post
       |> T.with_xposts ~driver ~term_printer spec.sp_xpost
