@@ -13,9 +13,11 @@ let frontend_parser = function
 
 let main frontend input output () =
   let channel = get_channel output in
-  match frontend with
-  | Default -> Ortac_default.generate input channel
-  | Monolith -> Ortac_monolith.generate input channel
+  try
+    match frontend with
+    | Default -> Ortac_default.generate input channel
+    | Monolith -> Ortac_monolith.generate input channel
+  with e -> Ppxlib.Location.report_exception Format.err_formatter e
 
 open Cmdliner
 
