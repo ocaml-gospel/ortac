@@ -34,6 +34,7 @@ and tyapp2spec drv (ts : Ttypes.tysymbol) (tl : Ttypes.ty list) =
   let get_ts = Ortac_core.Drv.get_ts drv in
   if Ttypes.ts_equal ts Ttypes.ts_unit then [%expr unit]
   else if Ttypes.ts_equal ts Ttypes.ts_char then [%expr char]
+  else if Ttypes.ts_equal ts Ttypes.ts_bool then [%expr bool]
   else if Ttypes.ts_equal ts Ttypes.ts_integer then [%expr M.int]
   else if Ttypes.ts_equal ts Ttypes.ts_string then [%expr string]
   else if Ttypes.ts_equal ts Ttypes.ts_list && List.length tl = 1 then
@@ -48,7 +49,7 @@ and tyapp2spec drv (ts : Ttypes.tysymbol) (tl : Ttypes.ty list) =
     let a = (Nolabel, ty2spec drv (List.hd tl)) in
     let b = (Nolabel, ty2spec drv (List.nth tl 1)) in
     B.pexp_apply [%expr ( *** )] [ a; b ]
-  else unsupported ts.ts_ident.id_str ts.ts_ident.id_loc
+  else B.evar ("S." ^ ts.ts_ident.id_str)
 
 let translate drv (lb_arg : Tast.lb_arg) =
   match lb_arg with
@@ -64,7 +65,7 @@ let spec drv args ret =
   let args = List.map (translate drv) args in
   let ret =
     match ret with
-    | [] -> assert false
+    | [] -> [%expr unit]
     | [ r ] -> translate drv r
     | [ r1; r2 ] ->
         let a = (Nolabel, translate drv r1) in
