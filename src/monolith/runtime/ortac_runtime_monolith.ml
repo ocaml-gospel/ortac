@@ -10,6 +10,7 @@ module Errors = struct
   let is_pre = function
     | Violated_condition e -> e.term_kind = Pre
     | Specification_failure e -> e.term_kind = Pre
+    | Violated_invariant e -> e.position = Pre
     | _ -> false
 
   let report t =
