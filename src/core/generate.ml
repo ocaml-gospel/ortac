@@ -18,6 +18,14 @@ let term (t : Translated.term) next =
 
 let terms terms next = List.fold_left (fun acc t -> term t acc) next terms
 
+let check positive (c : Translated.check) next =
+  match c.translations with
+  | Error _ -> next
+  | Ok (p, n) -> pexp_sequence (if positive then p else n) next
+
+let checks positive checks next =
+  List.fold_left (fun acc t -> check positive t acc) next checks
+
 let invariants ~register_name pos instance (t : type_) next =
   List.fold_left
     (fun next (t : invariant) ->
@@ -38,27 +46,36 @@ let vars_invariants ~register_name pos ignore_consumes vl next =
     (fun acc t -> var_invariants ~register_name pos ignore_consumes t acc)
     next vl
 
-let group_xpost (value : Translated.value) =
-  let register_name = evar value.register_name in
-  let invariants =
-    vars_invariants ~register_name "XPost" true value.arguments
-  in
+let group_xpost (v : Translated.value) =
+  let register_name = evar v.register_name in
+  let invariants = vars_invariants ~register_name "XPost" true v.arguments in
   let default_cases =
     [
       case ~guard:None
         ~lhs:[%pat? (Stack_overflow | Out_of_memory) as e]
         ~rhs:
           [%expr
-            [%e invariants @@ F.report ~register_name];
+            [%e checks true v.checks @@ invariants @@ F.report ~register_name];
             raise e];
       case ~guard:None
         ~lhs:[%pat? e]
         ~rhs:
           [%expr
             [%e F.unexpected_exn ~allowed_exn:[] ~exn:(evar "e") ~register_name];
-            [%e invariants @@ F.report ~register_name];
+            [%e checks true v.checks @@ invariants @@ F.report ~register_name];
             raise e];
     ]
+  in
+  let default_cases =
+    let invalid_arg_case =
+      case ~guard:None
+        ~lhs:[%pat? Invalid_argument _ as e]
+        ~rhs:
+          [%expr
+            [%e checks false v.checks @@ invariants @@ F.report ~register_name];
+            raise e]
+    in
+    if v.checks = [] then default_cases else invalid_arg_case :: default_cases
   in
   let tbl = Hashtbl.create 0 in
   let rec aux keys = function
@@ -68,7 +85,7 @@ let group_xpost (value : Translated.value) =
         aux (M.add exn args keys) t
     | _ :: t -> aux keys t
   in
-  aux M.empty value.xpostconditions |> fun s ->
+  aux M.empty v.xpostconditions |> fun s ->
   M.fold
     (fun exn args acc ->
       let e = gen_symbol ~prefix:"__e_" () in
@@ -85,7 +102,7 @@ let group_xpost (value : Translated.value) =
         esequence
           [
             matches;
-            invariants @@ F.report ~register_name;
+            checks true v.checks @@ invariants @@ F.report ~register_name;
             eapply (evar "raise") [ evar e ];
           ]
       in
@@ -119,6 +136,7 @@ let value (v : Translated.value) =
     @@ report
     @@ pexp_let Nonrecursive [ value_binding ~pat:pret ~expr:try_call ]
     @@ terms v.postconditions
+    @@ checks true v.checks
     @@ vars_invariants ~register_name "Post" true v.arguments
     @@ vars_invariants ~register_name "Post" false v.returns
     @@ report

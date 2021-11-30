@@ -1,6 +1,6 @@
 module type S = sig
   type location = { start : Lexing.position; stop : Lexing.position }
-  type term_kind = Pre | Post | XPost
+  type term_kind = Check | Pre | Post | XPost
 
   type error =
     | Violated_axiom

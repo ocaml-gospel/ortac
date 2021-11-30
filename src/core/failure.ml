@@ -5,6 +5,7 @@ let eterm t = estring t
 
 let term_kind kind =
   (match kind with
+  | `Check -> "Check"
   | `Pre -> "Pre"
   | `Post -> "Post"
   | `XPost -> "XPost"
@@ -49,9 +50,9 @@ let uncaught_checks ~term ~register_name =
   [%expr Ortac_runtime.Uncaught_checks { term = [%e eterm term] }]
   |> register ~register_name
 
-let unexpected_checks ~terms ~register_name =
-  let terms = List.map eterm terms |> elist in
-  [%expr Ortac_runtime.Unexpected_checks { terms = [%e terms] }]
+let unexpected_checks ~register_name =
+  (* let terms = List.map eterm terms |> elist in *)
+  [%expr Ortac_runtime.Unexpected_checks { terms = [] }]
   |> register ~register_name
 
 let report ~register_name =

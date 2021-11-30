@@ -20,3 +20,15 @@ val raise_invalidarg : string -> int
     raises Not_found -> true
     raises Invalid_argument s -> i = s | Invalid_argument _ -> false
     raises Invalid_argument _ -> true *)
+
+val check : bool -> bool
+(*@ y = check x
+    checks x = true *)
+
+val bad_check : bool -> bool
+(*@ y = bad_check x
+    checks x = true *)
+
+val bad_check2 : bool -> bool
+(*@ y = bad_check2 x
+    checks x = true *)

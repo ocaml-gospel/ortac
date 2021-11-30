@@ -315,6 +315,30 @@ let with_pres ~driver ~term_printer pres (value : value) =
   let preconditions = conditions ~driver ~term_printer violated nonexec pres in
   { value with preconditions }
 
+let with_checks ~driver ~term_printer checks (value : value) =
+  let register_name = evar value.register_name in
+  let nonexec term exn = F.spec_failure `Check ~term ~exn ~register_name in
+  let checks =
+    List.map
+      (fun t ->
+        let txt = term_printer t in
+        let loc = t.Tterm.t_loc in
+        let term = term ~driver (nonexec txt) t in
+        let translations =
+          Result.map
+            (fun t ->
+              ( [%expr
+                  if not [%e t] then
+                    [%e F.uncaught_checks ~register_name ~term:txt]],
+                [%expr if [%e t] then [%e F.unexpected_checks ~register_name]]
+              ))
+            term
+        in
+        { txt; loc; translations })
+      checks
+  in
+  { value with checks }
+
 let with_posts ~driver ~term_printer posts (value : value) =
   let register_name = evar value.register_name in
   let violated term = F.violated `Post ~term ~register_name in
