@@ -1,1 +1,2 @@
 test/suite/*/lib.mli
+test/generated/*/wrapper.expected.ml
