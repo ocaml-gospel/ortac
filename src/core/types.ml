@@ -32,15 +32,10 @@ module Mutability = struct
         (* A `Tyvar` is an alpha *)
         Translated.Unknown
     | Tyapp (ts, tyl) when Ttypes.is_ts_tuple ts ->
-        (* XXX not sure about that decision... *)
-        (* In the presence of a tuple there are three cases
-           1. There is at least an alpha in its element but another element is already known to be mutable
-           2. There is at least an alpha but none element is known to be mutable
-           3. All the elements are known types *)
+        (* If a tuple contains at least one alpha, the mutablity is Dependant, otherwise
+           it is the max of its elements' mutability *)
         if List.exists alpha tyl then
-          max
-            (List.map (ty ~driver) tyl |> List.fold_left max min_mut)
-            (Translated.Dependant (fun tyl -> List.fold_right max tyl min_mut))
+          Translated.Dependant (fun tyl -> List.fold_right max tyl min_mut)
         else List.map (ty ~driver) tyl |> List.fold_left max min_mut
     | Tyapp (ts, tyl) when List.length tyl = 0 ->
         (* If `tyl` is empty, we just look at `ts`. The mutability can't be `Dependant` *)
