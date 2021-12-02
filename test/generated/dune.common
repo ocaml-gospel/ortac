@@ -1,0 +1,16 @@
+(rule
+ (target lib.mli)
+ (action
+  (copy ../lib.mli %{target})))
+
+(rule
+ (target lib.ml)
+ (action
+  (copy ../lib.ml %{target})))
+
+(rule
+ (alias runtest)
+ (action
+  (progn
+   (diff errors.expected errors)
+   (diff wrapper.expected.ml wrapper.ml))))
