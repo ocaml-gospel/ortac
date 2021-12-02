@@ -1,4 +1,5 @@
 module W = Warnings
+open Types
 open Ppxlib
 open Gospel
 open Translated
@@ -17,15 +18,14 @@ let type_of_ty ~driver (ty : Ttypes.ty) =
   match ty.ty_node with
   | Tyvar a ->
       Translated.type_ ~name:a.tv_name.id_str ~loc:a.tv_name.id_loc
-        ~mutable_:false ~ghost:false
+        ~mutable_:Translated.Unknown ~ghost:false
   | Tyapp (ts, _tvs) -> (
-      (* XXX FIXME should look at tvs *)
       match Drv.get_type ts driver with
       | None ->
+          let mutable_ = Mutability.ty ~driver ty in
           Translated.type_ ~name:ts.ts_ident.id_str ~loc:ts.ts_ident.id_loc
-            ~mutable_:false ~ghost:false
-          (* XXX FIXME type could be mutable *)
-      | Some (type_ : Translated.type_) -> type_)
+            ~mutable_ ~ghost:false
+      | Some type_ -> type_)
 
 let vsname (vs : Tterm.vsymbol) = Fmt.str "%a" Tast.Ident.pp vs.vs_name
 
@@ -53,11 +53,11 @@ let var_of_arg ~driver arg : Translated.ocaml_var =
 let type_ ~driver ~ghost (td : Tast.type_declaration) =
   let name = td.td_ts.ts_ident.id_str in
   let loc = td.td_loc in
-  let mutable_ = false (* XXX FIXME look at the ocaml type *) in
+  let mutable_ = Mutability.type_declaration ~driver td in
   let type_ = type_ ~name ~loc ~mutable_ ~ghost in
   let process ~type_ (spec : Tast.type_spec) =
     let term_printer = Fmt.str "%a" Tterm.print_term in
-    let mutable_ = type_.mutable_ || spec.ty_ephemeral in
+    let mutable_ = Mutability.(max type_.mutable_ (type_spec ~driver spec)) in
     let type_ =
       type_
       |> T.with_models ~driver spec.ty_fields

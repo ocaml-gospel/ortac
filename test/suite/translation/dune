@@ -1,0 +1,3 @@
+(library
+ (name translation)
+ (modules_without_implementation mutable immutable unknown dependant pure))

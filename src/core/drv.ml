@@ -20,6 +20,7 @@ let get_env get ns path =
         path)
 
 let get_ls_env = get_env ns_find_ls
+let get_ts_env = get_env ns_find_ts
 let translate_stdlib ls t = L.find_opt ls t.stdlib
 let add_translation i t = { t with translations = i :: t.translations }
 let add_type ts i t = { t with types = T.add ts i t.types }
@@ -29,6 +30,47 @@ let find_function ls t = L.find ls t.functions
 let is_function ls t = L.mem ls t.functions
 let get_ls t = get_ls_env t.env
 let get_ts t = get_env ns_find_ts t.env
+
+let stdlib_types =
+  let open Translated in
+  let loc = Ppxlib.Location.none in
+  [
+    ([ "unit" ], type_ ~name:"unit" ~loc ~mutable_:Immutable ~ghost:false);
+    ([ "string" ], type_ ~name:"string" ~loc ~mutable_:Immutable ~ghost:false);
+    ([ "char" ], type_ ~name:"char" ~loc ~mutable_:Immutable ~ghost:false);
+    ([ "float" ], type_ ~name:"float" ~loc ~mutable_:Immutable ~ghost:false);
+    ([ "bool" ], type_ ~name:"bool" ~loc ~mutable_:Immutable ~ghost:false);
+    ([ "integer" ], type_ ~name:"integer" ~loc ~mutable_:Immutable ~ghost:false);
+    ( [ "option" ],
+      type_ ~name:"option" ~loc
+        ~mutable_:(Dependant (function [ m ] -> m | _ -> assert false))
+        ~ghost:false );
+    ( [ "list" ],
+      type_ ~name:"list" ~loc
+        ~mutable_:(Dependant (function [ m ] -> m | _ -> assert false))
+        ~ghost:false );
+    ( [ "Gospelstdlib"; "seq" ],
+      type_ ~name:"seq" ~loc
+        ~mutable_:(Dependant (function [ m ] -> m | _ -> assert false))
+        ~ghost:false );
+    ( [ "Gospelstdlib"; "bag" ],
+      type_ ~name:"bag" ~loc
+        ~mutable_:(Dependant (function [ m ] -> m | _ -> assert false))
+        ~ghost:false );
+    ( [ "Gospelstdlib"; "ref" ],
+      type_ ~name:"ref" ~loc
+        ~mutable_:(Dependant (fun _ -> Mutable))
+        ~ghost:false );
+    ( [ "Gospelstdlib"; "array" ],
+      type_ ~name:"array" ~loc
+        ~mutable_:(Dependant (fun _ -> Mutable))
+        ~ghost:false );
+    ( [ "Gospelstdlib"; "set" ],
+      type_ ~name:"set" ~loc
+        ~mutable_:(Dependant (function [ m ] -> m | _ -> assert false))
+        ~ghost:false );
+    ([ "int" ], type_ ~name:"int" ~loc ~mutable_:Immutable ~ghost:false);
+  ]
 
 let stdlib =
   [
@@ -69,14 +111,14 @@ let init module_name env =
         L.add ls ocaml acc)
       L.empty stdlib
   in
-  {
-    module_name;
-    stdlib;
-    env;
-    translations = [];
-    types = T.empty;
-    functions = L.empty;
-  }
+  let types =
+    List.fold_left
+      (fun acc (path, type_) ->
+        let ls = get_ts_env env path in
+        T.add ls type_ acc)
+      T.empty stdlib_types
+  in
+  { module_name; stdlib; env; translations = []; types; functions = L.empty }
 
 let map_translation ~f t = List.rev_map f t.translations
 let iter_translation ~f t = List.iter f (List.rev t.translations)
