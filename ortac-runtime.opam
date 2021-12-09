@@ -10,6 +10,15 @@ homepage: "https://github.com/ocaml-gospel/ortac"
 dev-repo: "git+https://github.com/ocaml-gospel/ortac.git"
 doc: "https://pascutto.github.io/ortac/"
 bug-reports: "https://github.com/ocaml-gospel/ortac/issues"
+depends: [
+  "ocaml"
+  "dune" {>= "2.7"}
+  "fmt"
+  "ppxlib" {>= "0.20.0"}
+  "zarith"
+  "monolith" {>= "20201026" & with-test}
+  "pprint" {>= "20200410" & with-test}
+]
 build: [
   ["dune" "subst"] {dev}
   [
@@ -23,13 +32,4 @@ build: [
     "@runtest" {with-test}
     "@doc" {with-doc}
   ]
-]
-
-depends: [
-  "ocaml"
-  "dune" {>= "2.7"}
-  "fmt"
-  "ppxlib" {>= "0.20.0"}
-  "zarith"
-  "monolith" {>= "20201026"}
 ]

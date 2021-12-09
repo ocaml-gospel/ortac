@@ -26,19 +26,64 @@ let check positive (c : Translated.check) next =
 let checks positive checks next =
   List.fold_left (fun acc t -> check positive t acc) next checks
 
+let check_invariant ~register_name pos instance (t : invariant) =
+  match t.translation with
+  | Error _ -> None
+  | Ok (name, _) ->
+      Some (eapply (evar name) [ register_name; evar pos; evar instance ])
+
 let invariants ~register_name pos instance (t : type_) next =
   List.fold_left
     (fun next (t : invariant) ->
-      match t.translation with
-      | Error _ -> next
-      | Ok (name, _) ->
-          pexp_sequence
-            (eapply (evar name) [ register_name; evar pos; evar instance ])
-            next)
+      match check_invariant ~register_name pos instance t with
+      | None -> next
+      | Some e -> pexp_sequence e next)
     next t.invariants
 
+let rec fold_eunit es =
+  match es with
+  | [] -> eunit
+  | [ e ] -> e
+  | e :: es -> pexp_sequence e (fold_eunit es)
+
+let fold_invariants ~register_name pos instance (t : type_) =
+  List.filter_map (check_invariant ~register_name pos instance) t.invariants
+  |> fold_eunit
+
+let container (t : type_) =
+  let known = [ "option"; "list"; "array"; "ref" ] in
+  List.mem t.name known
+
+let rec inner_invariants ~register_name pos instance (t : type_) =
+  (* XXX At this point, we only have a name to identify a type *)
+  match t.name with
+  | "option" ->
+      let var = gen_symbol ~prefix:"__option_" () in
+      let inv = inner_invariants ~register_name pos var (List.hd t.args) in
+      [%expr
+        match [%e evar instance] with
+        | None -> ()
+        | Some [%p pvar var] -> [%e inv]]
+  | "list" ->
+      let var = gen_symbol ~prefix:"__list_elt_" () in
+      assert (List.length t.args = 1);
+      let inv = inner_invariants ~register_name pos var (List.hd t.args) in
+      [%expr List.iter (fun [%p pvar var] -> [%e inv]) [%e evar instance]]
+  | "array" ->
+      let var = gen_symbol ~prefix:"__array_elt_" () in
+      let inv = inner_invariants ~register_name pos var (List.hd t.args) in
+      [%expr Array.iter (fun [%p pvar var] -> [%e inv]) [%e evar instance]]
+  | "ref" ->
+      let var = gen_symbol ~prefix:"__ref_" () in
+      let inv = inner_invariants ~register_name pos var (List.hd t.args) in
+      [%expr (fun [%p pvar var] -> [%e inv]) ![%e evar instance]]
+  | _ -> fold_invariants ~register_name pos instance t
+
 let var_invariants ~register_name pos ignore_consumes (v : ocaml_var) next =
-  if ignore_consumes && v.consumed then next
+  if container v.type_ then
+    let contained = inner_invariants ~register_name pos v.name v.type_ in
+    pexp_sequence contained next
+  else if ignore_consumes && v.consumed then next
   else invariants ~register_name pos v.name v.type_ next
 
 let vars_invariants ~register_name pos ignore_consumes vl next =

@@ -26,7 +26,7 @@ let rec type_of_ty ~driver (ty : Ttypes.ty) =
           let mutable_ = Mutability.ty ~driver ty in
           Translated.type_ ~name:ts.ts_ident.id_str ~args
             ~loc:ts.ts_ident.id_loc ~mutable_ ~ghost:false
-      | Some type_ -> type_)
+      | Some type_ -> { type_ with args })
 
 let vsname (vs : Tterm.vsymbol) = Fmt.str "%a" Tast.Ident.pp vs.vs_name
 
