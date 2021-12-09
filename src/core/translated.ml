@@ -29,6 +29,7 @@ type invariant = {
 
 type type_ = {
   name : string;
+  args : type_ list;
   loc : Location.t;
   mutable_ : mutability;
   ghost : bool;
@@ -39,9 +40,10 @@ type type_ = {
   copy : (expression, W.t) result;
 }
 
-let type_ ~name ~loc ~mutable_ ~ghost =
+let type_ ~name ~args ~loc ~mutable_ ~ghost =
   {
     name;
+    args;
     loc;
     mutable_;
     ghost;
@@ -51,6 +53,9 @@ let type_ ~name ~loc ~mutable_ ~ghost =
     comparison = Error (W.Unsupported "comparison", loc);
     copy = Error (W.Unsupported "copy", loc);
   }
+
+let alpha =
+  type_ ~name:"alpha" ~args:[] ~loc:Location.none ~mutable_:Unknown ~ghost:false
 
 type ocaml_var = {
   name : string;
