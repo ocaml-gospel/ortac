@@ -114,6 +114,17 @@ module Equality = struct
   module W = Warnings
   open Ppxlib
 
+  let rec type_depth (t : Translated.type_) =
+    (* XXX could be more precise:
+       - taking into account the number of parameters
+       - distinguishing between lists and option for example *)
+    match t.args with
+    | [] -> 0
+    | xs -> List.map type_depth xs |> List.fold_left max 0
+
+  let depth_treshold = 2
+  let complex t = type_depth t > depth_treshold
+
   let rec derive (t : Translated.type_) =
     let loc = t.loc in
     let polymorphic = [%expr fun a b -> a = b] in
@@ -122,29 +133,36 @@ module Equality = struct
         Ok polymorphic
     | "option" -> (
         match derive (List.hd t.args) with
-        | Error t -> Error t
-        | Ok eq ->
-            Ok
-              [%expr
-                fun a b ->
-                  match (a, b) with
-                  | None, None -> true
-                  | Some a', Some b' -> [%e eq] a' b'
-                  | _, _ -> false])
+        | Error e -> Error e
+        | Ok eq -> Ok [%expr Option.equal [%e eq]])
     | "list" -> (
         match derive (List.hd t.args) with
-        | Error t -> Error t
-        | Ok eq -> Ok [%expr fun a b -> List.for_all2 [%e eq] a b])
+        | Error e -> Error e
+        | Ok eq ->
+            if complex t then
+              Ok
+                [%expr
+                  fun a b -> List.compare_lengths a b && List.equal [%e eq] a b]
+            else Ok [%expr List.equal [%e eq]])
     | "array" -> (
         match derive (List.hd t.args) with
-        | Error t -> Error t
-        | Ok eq -> Ok [%expr fun a b -> Array.for_all2 [%e eq] a b])
+        | Error e -> Error e
+        | Ok eq ->
+            Ok
+              (* since 4.11.0, stdlib already check length before comparing elements *)
+              [%expr
+                fun a b ->
+                  try Array.for_all2 [%e eq] a b
+                  with Invalid_argument -> false])
     | "bag" -> (
         match derive (List.hd t.args) with
-        | Error t -> Error t
+        | Error e -> Error e
         | Ok eq ->
             (* XXX completely inefficient
                but we need comparison to sort the arrays and compare them pointwise with eq *)
+            (* Two bags a and b are equals iff:
+               - for all elements in a there are the same occurences in b
+               - and no element of b is not an element of a (no need to check numbre of occurrences here *)
             Ok
               [%expr
                 let occ a x =
@@ -154,10 +172,10 @@ module Equality = struct
                 in
                 fun a b ->
                   Array.for_all (fun x -> occ a x = occ b x) a
-                  && Array.for_all (fun x -> occ b x = occ a x) b])
+                  && Array.for_all (fun x -> Array.mem x a) b])
     | "set" -> (
         match derive (List.hd t.args) with
-        | Error t -> Error t
+        | Error e -> Error e
         | Ok eq ->
             Ok
               [%expr
@@ -168,5 +186,8 @@ module Equality = struct
                   && Array.for_all
                        (fun x -> Array.exists (fun i -> [%e eq] i x) a)
                        b])
+    | "seq" ->
+        (* XXX how are implemented sequences ? *)
+        Error (W.Unsupported_equality "seq", loc)
     | ty -> Error (W.Unsupported_equality ty, loc)
 end

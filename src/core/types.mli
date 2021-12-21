@@ -12,4 +12,6 @@ module Equality : sig
   open Ppxlib
 
   val derive : Translated.type_ -> (expression, W.t) result
+  (** [derive t] derive the equality function that can be used in runtime
+      assertion checking. *)
 end
