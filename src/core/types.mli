@@ -8,7 +8,8 @@ module Mutability : sig
 end
 
 module Equality : sig
+  module W = Warnings
   open Ppxlib
 
-  val derive : Translated.type_ -> expression option
+  val derive : Translated.type_ -> (expression, W.t) result
 end

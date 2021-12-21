@@ -111,6 +111,7 @@ module Mutability = struct
 end
 
 module Equality = struct
+  module W = Warnings
   open Ppxlib
 
   let rec derive (t : Translated.type_) =
@@ -118,12 +119,12 @@ module Equality = struct
     let polymorphic = [%expr fun a b -> a = b] in
     match t.name with
     | "unit" | "int" | "integer" | "char" | "string" | "bool" | "float" ->
-        Some polymorphic
+        Ok polymorphic
     | "option" -> (
         match derive (List.hd t.args) with
-        | None -> None
-        | Some eq ->
-            Some
+        | Error t -> Error t
+        | Ok eq ->
+            Ok
               [%expr
                 fun a b ->
                   match (a, b) with
@@ -132,19 +133,19 @@ module Equality = struct
                   | _, _ -> false])
     | "list" -> (
         match derive (List.hd t.args) with
-        | None -> None
-        | Some eq -> Some [%expr fun a b -> List.for_all2 [%e eq] a b])
+        | Error t -> Error t
+        | Ok eq -> Ok [%expr fun a b -> List.for_all2 [%e eq] a b])
     | "array" -> (
         match derive (List.hd t.args) with
-        | None -> None
-        | Some eq -> Some [%expr fun a b -> Array.for_all2 [%e eq] a b])
+        | Error t -> Error t
+        | Ok eq -> Ok [%expr fun a b -> Array.for_all2 [%e eq] a b])
     | "bag" -> (
         match derive (List.hd t.args) with
-        | None -> None
-        | Some eq ->
+        | Error t -> Error t
+        | Ok eq ->
             (* XXX completely inefficient
                but we need comparison to sort the arrays and compare them pointwise with eq *)
-            Some
+            Ok
               [%expr
                 let occ a x =
                   Array.fold_right
@@ -156,9 +157,9 @@ module Equality = struct
                   && Array.for_all (fun x -> occ b x = occ a x) b])
     | "set" -> (
         match derive (List.hd t.args) with
-        | None -> None
-        | Some eq ->
-            Some
+        | Error t -> Error t
+        | Ok eq ->
+            Ok
               [%expr
                 fun a b ->
                   Array.for_all
@@ -167,5 +168,5 @@ module Equality = struct
                   && Array.for_all
                        (fun x -> Array.exists (fun i -> [%e eq] i x) a)
                        b])
-    | _ -> None
+    | ty -> Error (W.Unsupported_equality ty, loc)
 end

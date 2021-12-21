@@ -9,12 +9,14 @@ type kind =
   | Unsupported_model of string * string
   | Function_without_definition of string
   | Predicate_without_definition of string
+  | Unsupported_equality of string
 
 type t = kind * Location.t
 
 let level = function
   | Unsupported _ | Ghost_value _ | Ghost_type _ | Unsupported_model _
-  | Function_without_definition _ | Predicate_without_definition _ ->
+  | Function_without_definition _ | Predicate_without_definition _
+  | Unsupported_equality _ ->
       Warning
 
 exception Error of t
@@ -45,6 +47,9 @@ let pp_kind ppf = function
   | Predicate_without_definition name ->
       pf ppf "The predicate %a has no definition. It was not translated." quoted
         name
+  | Unsupported_equality type_ ->
+      pf ppf "unsupported equality for %a. The clause has not been translated."
+        quoted type_
 
 let pp ppf (k, loc) =
   pf ppf "%a@\n%a@[%a@]@\n"
