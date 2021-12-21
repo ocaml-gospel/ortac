@@ -109,3 +109,63 @@ module Mutability = struct
     if spec.ty_ephemeral then Translated.Mutable
     else mutable_model ~driver spec.ty_fields
 end
+
+module Equality = struct
+  open Ppxlib
+
+  let rec derive (t : Translated.type_) =
+    let loc = t.loc in
+    let polymorphic = [%expr fun a b -> a = b] in
+    match t.name with
+    | "unit" | "int" | "integer" | "char" | "string" | "bool" | "float" ->
+        Some polymorphic
+    | "option" -> (
+        match derive (List.hd t.args) with
+        | None -> None
+        | Some eq ->
+            Some
+              [%expr
+                fun a b ->
+                  match (a, b) with
+                  | None, None -> true
+                  | Some a', Some b' -> [%e eq] a' b'
+                  | _, _ -> false])
+    | "list" -> (
+        match derive (List.hd t.args) with
+        | None -> None
+        | Some eq -> Some [%expr fun a b -> List.for_all2 [%e eq] a b])
+    | "array" -> (
+        match derive (List.hd t.args) with
+        | None -> None
+        | Some eq -> Some [%expr fun a b -> Array.for_all2 [%e eq] a b])
+    | "bag" -> (
+        match derive (List.hd t.args) with
+        | None -> None
+        | Some eq ->
+            (* XXX completely inefficient
+               but we need comparison to sort the arrays and compare them pointwise with eq *)
+            Some
+              [%expr
+                let occ a x =
+                  Array.fold_right
+                    (fun y n -> if [%e eq] x y then succ n else n)
+                    a 0
+                in
+                fun a b ->
+                  Array.for_all (fun x -> occ a x = occ b x) a
+                  && Array.for_all (fun x -> occ b x = occ a x) b])
+    | "set" -> (
+        match derive (List.hd t.args) with
+        | None -> None
+        | Some eq ->
+            Some
+              [%expr
+                fun a b ->
+                  Array.for_all
+                    (fun x -> Array.exists (fun i -> [%e eq] i x) b)
+                    a
+                  && Array.for_all
+                       (fun x -> Array.exists (fun i -> [%e eq] i x) a)
+                       b])
+    | _ -> None
+end
