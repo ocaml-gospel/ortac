@@ -7,11 +7,16 @@ module Mutability : sig
   val type_spec : driver:Drv.t -> Gospel.Tast.type_spec -> Translated.mutability
 end
 
-module Equality : sig
-  module W = Warnings
-  open Ppxlib
+open Ppxlib
 
-  val derive : Translated.type_ -> (expression, W.t) result
+module Equality : sig
+  val derive : Translated.type_ -> (expression, Ortac_core__Warnings.t) result
   (** [derive t] derive the equality function that can be used in runtime
+      assertion checking. *)
+end
+
+module Comparison : sig
+  val derive : Translated.type_ -> (expression, Ortac_core__Warnings.t) result
+  (** [derive t] derive the comparison function that can be used in runtime
       assertion checking. *)
 end
