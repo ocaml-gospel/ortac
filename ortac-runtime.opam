@@ -7,9 +7,17 @@ authors: [
   "Nicolas Osborne <nicolas.osborne@tarides.fr>"
 ]
 homepage: "https://github.com/ocaml-gospel/ortac"
-dev-repo: "git+https://github.com/ocaml-gospel/ortac.git"
 doc: "https://pascutto.github.io/ortac/"
 bug-reports: "https://github.com/ocaml-gospel/ortac/issues"
+depends: [
+  "ocaml"
+  "dune" {>= "2.7"}
+  "fmt"
+  "ppxlib" {>= "0.20.0"}
+  "zarith"
+  "monolith" {>= "20201026" & with-test}
+  "pprint" {>= "20211129" & with-test}
+]
 build: [
   ["dune" "subst"] {dev}
   [
@@ -24,12 +32,4 @@ build: [
     "@doc" {with-doc}
   ]
 ]
-
-depends: [
-  "ocaml"
-  "dune" {>= "2.7"}
-  "fmt"
-  "ppxlib" {>= "0.20.0"}
-  "zarith"
-  "monolith" {>= "20201026"}
-]
+dev-repo: "git+https://github.com/ocaml-gospel/ortac.git"

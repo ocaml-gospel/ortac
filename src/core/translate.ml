@@ -14,17 +14,20 @@ let term_printer text global_loc (t : Tterm.term) =
       (t.t_loc.loc_end.pos_cnum - t.t_loc.loc_start.pos_cnum)
   with Invalid_argument _ -> Fmt.str "%a" Tterm.print_term t
 
-let type_of_ty ~driver (ty : Ttypes.ty) =
+let rec type_of_ty ~driver (ty : Ttypes.ty) =
   match ty.ty_node with
   | Tyvar a ->
-      Translated.type_ ~name:a.tv_name.id_str ~loc:a.tv_name.id_loc
+      Translated.type_ ~name:a.tv_name.id_str ~kind:Alpha ~loc:a.tv_name.id_loc
         ~mutable_:Translated.Unknown ~ghost:false
-  | Tyapp (ts, _tvs) -> (
+  | Tyapp (ts, tvs) -> (
       match Drv.get_type ts driver with
       | None ->
           let mutable_ = Mutability.ty ~driver ty in
-          Translated.type_ ~name:ts.ts_ident.id_str ~loc:ts.ts_ident.id_loc
-            ~mutable_ ~ghost:false
+          let kind =
+            Synonyms (ts.ts_ident.id_str, List.map (type_of_ty ~driver) tvs)
+          in
+          Translated.type_ ~name:ts.ts_ident.id_str ~kind
+            ~loc:ts.ts_ident.id_loc ~mutable_ ~ghost:false
       | Some type_ -> type_)
 
 let vsname (vs : Tterm.vsymbol) = Fmt.str "%a" Tast.Ident.pp vs.vs_name
@@ -50,11 +53,41 @@ let var_of_arg ~driver arg : Translated.ocaml_var =
   let type_ = type_of_ty ~driver (Tast_helper.ty_of_lb_arg arg) in
   { name; label; type_; modified = false; consumed = false }
 
-let type_ ~driver ~ghost (td : Tast.type_declaration) =
+let label_declaration ~driver (ld : ('a * Ttypes.ty) Tast.label_declaration) =
+  type_of_ty ~driver (snd ld.ld_field)
+
+let constructor_decl ~driver (cd : Tast.constructor_decl) =
+  (cd.cd_cs.ls_name.id_str, List.map (label_declaration ~driver) cd.cd_ld)
+
+let lsymbol ~driver (ls : Tterm.lsymbol) =
+  (ls.ls_name.id_str, (type_of_ty ~driver) (List.hd ls.ls_args))
+
+let rec_declaration ~driver (rd : Tast.rec_declaration) =
+  List.map
+    (fun (ld : Tterm.lsymbol Tast.label_declaration) ->
+      lsymbol ~driver ld.ld_field)
+    rd.rd_ldl
+
+let rec kind ~driver (td : Tast.type_declaration) =
+  match td.td_manifest with
+  | Some ty -> (
+      match ty.ty_node with
+      | Tyvar _ -> Alpha
+      | Tyapp (ts, tvs) ->
+          Synonyms (ts.ts_ident.id_str, List.map (type_of_ty ~driver) tvs))
+  | None -> (
+      match td.td_kind with
+      | Pty_abstract -> Abstract
+      | Pty_variant cdl -> Variant (List.map (constructor_decl ~driver) cdl)
+      | Pty_record rd -> Record (rec_declaration ~driver rd)
+      | Pty_open -> assert false)
+
+and type_ ~driver ~ghost (td : Tast.type_declaration) =
   let name = td.td_ts.ts_ident.id_str in
+  let kind = kind ~driver td in
   let loc = td.td_loc in
   let mutable_ = Mutability.type_declaration ~driver td in
-  let type_ = type_ ~name ~loc ~mutable_ ~ghost in
+  let type_ = Translated.type_ ~name ~kind ~loc ~mutable_ ~ghost in
   let process ~type_ (spec : Tast.type_spec) =
     let term_printer = Fmt.str "%a" Tterm.print_term in
     let mutable_ = Mutability.(max type_.mutable_ (type_spec ~driver spec)) in

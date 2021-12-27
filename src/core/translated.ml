@@ -29,6 +29,7 @@ type invariant = {
 
 type type_ = {
   name : string;
+  kind : kind;
   loc : Location.t;
   mutable_ : mutability;
   ghost : bool;
@@ -39,9 +40,24 @@ type type_ = {
   copy : (expression, W.t) result;
 }
 
-let type_ ~name ~loc ~mutable_ ~ghost =
+and kind =
+  | Abstract (* type t *)
+  | Alpha (* 'a for polymorphic types *)
+  | Core of type_ list (* core types are the ones defined in the stdlib *)
+  | Synonyms of type_ * type_ list (* synonymes with the name of the type constructors and its arguments *)
+  | Variant of constructor (* variant with the list of contructors *)
+  | Record of (string * type_) list (* record with the list of of fields *)
+  | Tuple of type_ list
+(* tuples with the type_s of the elements *)
+
+and constructor =
+  | Unnamed of (string * type_) list
+  | Named of (string * type_ list) list
+
+let type_ ~name ~kind ~loc ~mutable_ ~ghost =
   {
     name;
+    kind;
     loc;
     mutable_;
     ghost;

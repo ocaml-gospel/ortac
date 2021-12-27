@@ -31,45 +31,77 @@ let is_function ls t = L.mem ls t.functions
 let get_ls t = get_ls_env t.env
 let get_ts t = get_env ns_find_ts t.env
 
+let alpha =
+  let open Translated in
+  type_ ~name:"alpha" ~kind:Alpha ~loc:Ppxlib.Location.none ~mutable_:Unknown
+    ~ghost:false
+
 let stdlib_types =
   let open Translated in
   let loc = Ppxlib.Location.none in
   [
-    ([ "unit" ], type_ ~name:"unit" ~loc ~mutable_:Immutable ~ghost:false);
-    ([ "string" ], type_ ~name:"string" ~loc ~mutable_:Immutable ~ghost:false);
-    ([ "char" ], type_ ~name:"char" ~loc ~mutable_:Immutable ~ghost:false);
-    ([ "float" ], type_ ~name:"float" ~loc ~mutable_:Immutable ~ghost:false);
-    ([ "bool" ], type_ ~name:"bool" ~loc ~mutable_:Immutable ~ghost:false);
-    ([ "integer" ], type_ ~name:"integer" ~loc ~mutable_:Immutable ~ghost:false);
+    ( [ "unit" ],
+      type_ ~name:"unit" ~kind:(Core []) ~loc ~mutable_:Immutable ~ghost:false
+    );
+    ( [ "string" ],
+      type_ ~name:"string" ~kind:(Core []) ~loc ~mutable_:Immutable ~ghost:false
+    );
+    ( [ "char" ],
+      type_ ~name:"char" ~kind:(Core []) ~loc ~mutable_:Immutable ~ghost:false
+    );
+    ( [ "float" ],
+      type_ ~name:"float" ~kind:(Core []) ~loc ~mutable_:Immutable ~ghost:false
+    );
+    ( [ "bool" ],
+      type_ ~name:"bool" ~kind:(Core []) ~loc ~mutable_:Immutable ~ghost:false
+    );
+    ( [ "integer" ],
+      type_ ~name:"integer" ~kind:(Core []) ~loc ~mutable_:Immutable
+        ~ghost:false );
     ( [ "option" ],
-      type_ ~name:"option" ~loc
+      type_ ~name:"option"
+        ~kind:(Core [ alpha ])
+        ~loc
         ~mutable_:(Dependant (function [ m ] -> m | _ -> assert false))
         ~ghost:false );
     ( [ "list" ],
-      type_ ~name:"list" ~loc
+      type_ ~name:"list"
+        ~kind:(Core [ alpha ])
+        ~loc
         ~mutable_:(Dependant (function [ m ] -> m | _ -> assert false))
         ~ghost:false );
     ( [ "Gospelstdlib"; "seq" ],
-      type_ ~name:"seq" ~loc
+      type_ ~name:"seq"
+        ~kind:(Core [ alpha ])
+        ~loc
         ~mutable_:(Dependant (function [ m ] -> m | _ -> assert false))
         ~ghost:false );
     ( [ "Gospelstdlib"; "bag" ],
-      type_ ~name:"bag" ~loc
+      type_ ~name:"bag"
+        ~kind:(Core [ alpha ])
+        ~loc
         ~mutable_:(Dependant (function [ m ] -> m | _ -> assert false))
         ~ghost:false );
     ( [ "Gospelstdlib"; "ref" ],
-      type_ ~name:"ref" ~loc
+      type_ ~name:"ref"
+        ~kind:(Core [ alpha ])
+        ~loc
         ~mutable_:(Dependant (fun _ -> Mutable))
         ~ghost:false );
     ( [ "Gospelstdlib"; "array" ],
-      type_ ~name:"array" ~loc
+      type_ ~name:"array"
+        ~kind:(Core [ alpha ])
+        ~loc
         ~mutable_:(Dependant (fun _ -> Mutable))
         ~ghost:false );
     ( [ "Gospelstdlib"; "set" ],
-      type_ ~name:"set" ~loc
+      type_ ~name:"set"
+        ~kind:(Core [ alpha ])
+        ~loc
         ~mutable_:(Dependant (function [ m ] -> m | _ -> assert false))
         ~ghost:false );
-    ([ "int" ], type_ ~name:"int" ~loc ~mutable_:Immutable ~ghost:false);
+    ( [ "int" ],
+      type_ ~name:"int" ~kind:(Core []) ~loc ~mutable_:Immutable ~ghost:false );
   ]
 
 let stdlib =
