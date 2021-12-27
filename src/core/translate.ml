@@ -92,7 +92,7 @@ let rec kind ~driver (td : Tast.type_declaration) =
             match Drv.get_type ts driver with
             | None ->
                 Translated.type_ ~name:ts.ts_ident.id_str ~kind:Abstract
-                  ~loc:Location.none ~mutable_:Unknown ~ghost:false
+                  ~loc:td.td_loc ~mutable_:Unknown ~ghost:false
             | Some t -> t
           in
           Synonyms (t, List.map (type_of_ty ~driver) tvs))

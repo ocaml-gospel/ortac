@@ -48,8 +48,8 @@ and kind =
   | Variant of (string * constructor) list (* variant with the list of contructors *)
   | Record of (string * type_) list (* record with the list of of fields *)
   | Tuple of type_ list
-(* tuples with the type_s of the elements *)
 
+(* tuples with the type_s of the elements *)
 and constructor = Unnamed of type_ list | Named of (string * type_) list
 
 let type_ ~name ~kind ~loc ~mutable_ ~ghost =
