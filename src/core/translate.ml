@@ -24,7 +24,14 @@ let rec type_of_ty ~driver (ty : Ttypes.ty) =
       | None ->
           let mutable_ = Mutability.ty ~driver ty in
           let kind =
-            Synonyms (ts.ts_ident.id_str, List.map (type_of_ty ~driver) tvs)
+            let t =
+              match Drv.get_type ts driver with
+              | None ->
+                  Translated.type_ ~name:ts.ts_ident.id_str ~kind:Abstract
+                    ~loc:Location.none ~mutable_:Unknown ~ghost:false
+              | Some t -> t
+            in
+            Synonyms (t, List.map (type_of_ty ~driver) tvs)
           in
           Translated.type_ ~name:ts.ts_ident.id_str ~kind
             ~loc:ts.ts_ident.id_loc ~mutable_ ~ghost:false
@@ -53,11 +60,18 @@ let var_of_arg ~driver arg : Translated.ocaml_var =
   let type_ = type_of_ty ~driver (Tast_helper.ty_of_lb_arg arg) in
   { name; label; type_; modified = false; consumed = false }
 
-let label_declaration ~driver (ld : ('a * Ttypes.ty) Tast.label_declaration) =
-  type_of_ty ~driver (snd ld.ld_field)
+let label_declaration ~driver
+    (ld : (Identifier.Ident.t * Ttypes.ty) Tast.label_declaration) =
+  ((fst ld.ld_field).id_str, type_of_ty ~driver (snd ld.ld_field))
 
 let constructor_decl ~driver (cd : Tast.constructor_decl) =
-  (cd.cd_cs.ls_name.id_str, List.map (label_declaration ~driver) cd.cd_ld)
+  let name = cd.cd_cs.ls_name.id_str in
+  let c =
+    match cd.cd_ld with
+    | [] -> Unnamed (List.map (type_of_ty ~driver) cd.cd_cs.ls_args)
+    | _ -> Named (List.map (label_declaration ~driver) cd.cd_ld)
+  in
+  (name, c)
 
 let lsymbol ~driver (ls : Tterm.lsymbol) =
   (ls.ls_name.id_str, (type_of_ty ~driver) (List.hd ls.ls_args))
@@ -74,7 +88,14 @@ let rec kind ~driver (td : Tast.type_declaration) =
       match ty.ty_node with
       | Tyvar _ -> Alpha
       | Tyapp (ts, tvs) ->
-          Synonyms (ts.ts_ident.id_str, List.map (type_of_ty ~driver) tvs))
+          let t =
+            match Drv.get_type ts driver with
+            | None ->
+                Translated.type_ ~name:ts.ts_ident.id_str ~kind:Abstract
+                  ~loc:Location.none ~mutable_:Unknown ~ghost:false
+            | Some t -> t
+          in
+          Synonyms (t, List.map (type_of_ty ~driver) tvs))
   | None -> (
       match td.td_kind with
       | Pty_abstract -> Abstract

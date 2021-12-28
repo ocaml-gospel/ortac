@@ -45,14 +45,12 @@ and kind =
   | Alpha (* 'a for polymorphic types *)
   | Core of type_ list (* core types are the ones defined in the stdlib *)
   | Synonyms of type_ * type_ list (* synonymes with the name of the type constructors and its arguments *)
-  | Variant of constructor (* variant with the list of contructors *)
+  | Variant of (string * constructor) list (* variant with the list of contructors *)
   | Record of (string * type_) list (* record with the list of of fields *)
   | Tuple of type_ list
 (* tuples with the type_s of the elements *)
 
-and constructor =
-  | Unnamed of (string * type_) list
-  | Named of (string * type_ list) list
+and constructor = Unnamed of type_ list | Named of (string * type_) list
 
 let type_ ~name ~kind ~loc ~mutable_ ~ghost =
   {
