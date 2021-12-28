@@ -7,6 +7,7 @@ type kind =
   | Ghost_value of string
   | Ghost_type of string
   | Unsupported_model of string * string
+  | Unsupported_comparison of string
   | Function_without_definition of string
   | Predicate_without_definition of string
 
@@ -14,7 +15,8 @@ type t = kind * Location.t
 
 let level = function
   | Unsupported _ | Ghost_value _ | Ghost_type _ | Unsupported_model _
-  | Function_without_definition _ | Predicate_without_definition _ ->
+  | Unsupported_comparison _ | Function_without_definition _
+  | Predicate_without_definition _ ->
       Warning
 
 exception Error of t
@@ -39,6 +41,11 @@ let pp_kind ppf = function
   | Unsupported_model (type_, name) ->
       pf ppf "Model %a of type %a is not supported. It was not translated."
         quoted name quoted type_
+  | Unsupported_comparison name ->
+      pf ppf
+        "Comparison for the type %a is not supported. The clause has not been \
+         translated."
+        quoted name
   | Function_without_definition name ->
       pf ppf "The function %a has no definition. It was not translated." quoted
         name

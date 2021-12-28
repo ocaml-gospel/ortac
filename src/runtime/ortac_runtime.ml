@@ -154,4 +154,14 @@ module Array = struct
 
   let length arr = Array.length arr |> Z.of_int
   let for_all = Array.for_all
+
+  let compare cmp a b =
+    let stop = Array.length a in
+    let wrong = Array.length b in
+    let rec loop i =
+      if i = stop then compare stop wrong
+      else if i = wrong then -1
+      else match cmp a.(i) b.(i) with 0 -> loop (succ i) | i -> i
+    in
+    loop 0
 end

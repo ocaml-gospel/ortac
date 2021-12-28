@@ -58,5 +58,6 @@ module type S = sig
     val get : 'a array -> Z.t -> 'a
     val length : 'a array -> Z.t
     val for_all : ('a -> bool) -> 'a array -> bool
+    val compare : ('a -> 'a -> int) -> 'a array -> 'a array -> int
   end
 end
