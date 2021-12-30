@@ -156,7 +156,7 @@ module Comparison = struct
       end) in
       let res = gen_symbol ~prefix:"__res" () in
       [%expr
-        let [%e pvar res] = [%e cmp] [%e evar elt_a] [%e evar elt_b] in
+        let [%p pvar res] = [%e cmp] [%e evar elt_a] [%e evar elt_b] in
         if [%e evar res] <> 0 then [%e evar res] else [%e next]]
 
     let rec fold ~loc cmps elts_a elts_b =
@@ -193,6 +193,22 @@ module Comparison = struct
       in
       (names, ppat_construct cstr rec_pat)
 
+    let constructor_any_pattern ~loc (name, constructor) =
+      (* build the pattern corresponding to the constructor when we don't
+         need to have variable for its arguments *)
+      let open Ast_builder.Make (struct
+        let loc = loc
+      end) in
+      let cstr = Builder.lident name in
+      let rec_pat =
+        match constructor with
+        | Translated.Named _fields -> Some ppat_any
+        | Translated.Unnamed args ->
+            if List.length args = 0 then None
+            else Some (ppat_tuple (List.map (fun _ -> ppat_any) args))
+      in
+      ppat_construct cstr rec_pat
+
     let lhs ~loc (c0, arg0) (c1, args1) =
       let open Ast_builder.Make (struct
         let loc = loc
@@ -203,8 +219,8 @@ module Comparison = struct
         let var1, pat1 = constructor_pattern ~loc (c1, args1) in
         (ppat_tuple [ pat0; pat1 ], var0, var1)
       else
-        let pat0 = ppat_construct (Builder.lident c0) None in
-        let pat1 = ppat_construct (Builder.lident c1) None in
+        let pat0 = constructor_any_pattern ~loc (c0, arg0) in
+        let pat1 = constructor_any_pattern ~loc (c1, args1) in
         (ppat_tuple [ pat0; pat1 ], [], [])
 
     let rhs ~loc cmps var0 var1 =

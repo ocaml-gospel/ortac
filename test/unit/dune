@@ -1,0 +1,12 @@
+(rule
+ (targets generated.ml)
+ (deps generate/suite.exe)
+ (action
+  (with-stdout-to
+   %{targets}
+   (run %{deps}))))
+
+(test
+ (name test)
+ (package ortac)
+ (libraries ortac_core ortac-runtime fmt alcotest))
