@@ -21,7 +21,6 @@ depends: [
   "ortac-runtime" {with-test}
   "ortac-runtime-monolith" {with-test}
   "monolith" {>= "20201026"}
-  "ortac_runtime" {>= "0" & with-test}
 ]
 build: [
   ["dune" "subst"] {dev}

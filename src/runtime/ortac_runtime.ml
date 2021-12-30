@@ -155,6 +155,17 @@ module Array = struct
   let length arr = Array.length arr |> Z.of_int
   let for_all = Array.for_all
 
+  let equal eq a b =
+    let stop = Array.length a in
+    let wrong = Array.length b in
+    let rec loop i =
+      if i = stop then stop = wrong
+      else if i = wrong then false
+      else if eq a.(i) b.(i) then loop (succ i)
+      else false
+    in
+    loop 0
+
   let compare cmp a b =
     let stop = Array.length a in
     let wrong = Array.length b in

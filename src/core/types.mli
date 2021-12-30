@@ -10,3 +10,7 @@ end
 module Comparison : sig
   val derive : Translated.type_ -> (Ppxlib.expression, Warnings.kind) result
 end
+
+module Equality : sig
+  val derive : Translated.type_ -> (Ppxlib.expression, Warnings.kind) result
+end
