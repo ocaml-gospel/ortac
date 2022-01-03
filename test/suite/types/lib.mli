@@ -1,4 +1,4 @@
-type t = { x: int; y: bool }
+type t = { x : int; y : bool }
 (*@ invariant y = false *)
 
 val e : t
