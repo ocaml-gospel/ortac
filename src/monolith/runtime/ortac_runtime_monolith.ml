@@ -23,9 +23,9 @@ module Errors = struct
         raise (Error t)
 end
 
-let print_record = PPrintOCaml.record
-let print_variant = PPrintOCaml.variant
-let print_tuple = PPrintOCaml.tuple
+let print_record = PPrint.OCaml.record
+let print_variant = PPrint.OCaml.variant
+let print_tuple = PPrint.OCaml.tuple
 let constructible_int = int_within (Gen.semi_open_interval (-420000) 420000)
 let int = ifpol constructible_int int
 let positive_int = int_within (Gen.int Int.max_int)
