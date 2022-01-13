@@ -65,6 +65,10 @@ and unsafe_term ~driver (t : Tterm.term) : expression =
   | Tapp (fs, []) when Tterm.(ls_equal fs fs_bool_false) -> [%expr false]
   | Tapp (fs, tlist) when Tterm.is_fs_tuple fs ->
       List.map term tlist |> pexp_tuple
+  | Tapp (ls, tlist) when Derivation.is_derivable ls -> (
+      match Derivation.derive driver ls with
+      | Error u -> raise (W.Error (u, loc))
+      | Ok e -> eapply e (List.map term tlist))
   | Tapp (ls, tlist) when Drv.is_function ls driver ->
       let f = Drv.find_function ls driver in
       eapply (evar f) (List.map term tlist)
