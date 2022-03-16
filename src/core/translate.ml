@@ -1,4 +1,3 @@
-module W = Warnings
 open Types
 open Ppxlib
 open Gospel

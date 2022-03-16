@@ -6,3 +6,11 @@ module Mutability : sig
 
   val type_spec : driver:Drv.t -> Gospel.Tast.type_spec -> Translated.mutability
 end
+
+module Equality : sig
+  val derive :
+    loc:Ppxlib.Location.t ->
+    Drv.t ->
+    Gospel.Ttypes.ty option ->
+    Ppxlib.expression
+end

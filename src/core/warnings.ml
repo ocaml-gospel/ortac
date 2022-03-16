@@ -7,6 +7,8 @@ type kind =
   | Ghost_value of string
   | Ghost_type of string
   | Unsupported_model of string * string
+  | Unsupported_equality of string
+  | Unsupported_equality_abstract
   | Function_without_definition of string
   | Predicate_without_definition of string
 
@@ -14,6 +16,7 @@ type t = kind * Location.t
 
 let level = function
   | Unsupported _ | Ghost_value _ | Ghost_type _ | Unsupported_model _
+  | Unsupported_equality _ | Unsupported_equality_abstract
   | Function_without_definition _ | Predicate_without_definition _ ->
       Warning
 
@@ -39,6 +42,13 @@ let pp_kind ppf = function
   | Unsupported_model (type_, name) ->
       pf ppf "Model %a of type %a is not supported. It was not translated."
         quoted name quoted type_
+  | Unsupported_equality type_ ->
+      pf ppf "Equality on type %a is not supported. It has not been translated."
+        quoted type_
+  | Unsupported_equality_abstract ->
+      pf ppf
+        "Equality on abstract is not supported. The clause has not been \
+         translated."
   | Function_without_definition name ->
       pf ppf "The function %a has no definition. It was not translated." quoted
         name

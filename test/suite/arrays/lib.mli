@@ -2,8 +2,8 @@ val create : int -> 'a -> 'a array
 (*@ arr = create n v
     requires n >= 0
     ensures Array.length arr = n
-    ensures Array.for_all (fun x -> x = v) arr
-    ensures forall i. 0 <= i < n -> arr.(i) = v *)
+    (* ensures Array.for_all (fun x -> x = v) arr *)
+    (* ensures forall i. 0 <= i < n -> arr.(i) = v *) *)
 
 val bad_create : int -> int -> int array
 (*@ arr = bad_create n v
@@ -12,7 +12,7 @@ val bad_create : int -> int -> int array
 val get : 'a array -> int -> 'a
 (*@ o = get arr i
     requires 0 <= i < Array.length arr
-    ensures o = arr.(i) *)
+    (* ensures o = arr.(i) *) *)
 
 (*@ axiom a :
       let arr = Array.make 10 0 in
@@ -21,12 +21,12 @@ val get : 'a array -> int -> 'a
 val bad_get : 'a array -> int -> 'a
 (*@ o = bad_get arr i
     requires 0 <= i < Array.length arr
-    ensures o = arr.(i) *)
+    (* ensures o = arr.(i) *) *)
 
 val set : 'a array -> int -> 'a -> unit
 (*@ set arr i v
     requires 0 <= i < Array.length arr
-    ensures  arr.(i) = v
+    (* ensures  arr.(i) = v *)
     (*
      ensures  forall j. 0 <= j < Array.length arr -> j <> i ->
              arr.(j) = old arr.(j) *)
@@ -35,7 +35,7 @@ val set : 'a array -> int -> 'a -> unit
 val fill : 'a array -> int -> int -> 'a -> unit
 (*@ fill arr ofs len v
     requires 0 <= ofs <= ofs + len <= Array.length arr
-    ensures  forall j. ofs <= j < ofs + len -> arr.(j) = v *)
+    (* ensures  forall j. ofs <= j < ofs + len -> arr.(j) = v *) *)
 
 val length : 'a array -> int
 (*@ i = length a
@@ -45,12 +45,12 @@ val length : 'a array -> int
 val map : ('a -> 'b) -> 'a array -> 'b array
 (*@ arr = map f a
     ensures length arr = length a
-    ensures forall i. 0 <= i < length a -> arr.(i) = f a.(i) *)
+    (* ensures forall i. 0 <= i < length a -> arr.(i) = f a.(i) *) *)
 
 val bad_map_length : ('a -> 'b) -> 'a array -> 'b array
 (*@ arr = bad_map_length f a
     ensures length arr = length a
-    ensures forall i. 0 <= i < length a -> arr.(i) = f a.(i) *)
+    (* ensures forall i. 0 <= i < length a -> arr.(i) = f a.(i) *) *)
 
 val bad_map_fun : (int -> int) -> int array -> int array
 (*@ arr = bad_map_fun f a

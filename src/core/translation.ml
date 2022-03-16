@@ -1,4 +1,4 @@
-module W = Warnings
+module T = Types
 open Ppxlib
 open Gospel
 open Fmt
@@ -75,6 +75,9 @@ and unsafe_term ~driver (t : Tterm.term) : expression =
         | x :: xs -> (term x, List.map term xs)
       in
       eapply f args
+  | Tapp (ls, [ lhs; rhs ]) when Tterm.(ls_equal ls ps_equ) ->
+      let eq = T.Equality.derive ~loc driver lhs.t_ty in
+      eapply eq [ term lhs; term rhs ]
   | Tapp (ls, tlist) -> (
       Drv.translate_stdlib ls driver |> function
       | Some f -> eapply (evar f) (List.map term tlist)

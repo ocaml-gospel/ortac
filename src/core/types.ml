@@ -109,3 +109,41 @@ module Mutability = struct
     if spec.ty_ephemeral then Translated.Mutable
     else mutable_model ~driver spec.ty_fields
 end
+
+module Equality = struct
+  let core_types drv =
+    Ttypes.
+      [
+        ts_unit;
+        ts_integer;
+        ts_bool;
+        ts_char;
+        ts_string;
+        Drv.get_ts drv [ "Gospelstdlib"; "int" ];
+      ]
+
+  let is_core drv ts =
+    List.exists (fun t -> Ttypes.ts_equal ts t) (core_types drv)
+
+  let rec is_abstract (ty : Ttypes.ty) =
+    match ty.ty_node with
+    | Ttypes.Tyvar _ -> true
+    | Ttypes.Tyapp (_, tyl) -> List.exists is_abstract tyl
+
+  let derive ~loc drv (ty : Ttypes.ty option) =
+    (* XXX where we should use repr *)
+    match ty with
+    | None -> raise Warnings.(Error (Unsupported_equality "no type", loc))
+    | Some ty -> (
+        match ty.ty_node with
+        | Ttypes.Tyvar _tv ->
+            raise Warnings.(Error (Unsupported_equality_abstract, loc))
+        | Ttypes.Tyapp (ts, []) when is_core drv ts ->
+            let open Ppxlib in
+            [%expr ( = )]
+        | Ttypes.Tyapp (_, tyl) when List.exists is_abstract tyl ->
+            raise Warnings.(Error (Unsupported_equality_abstract, loc))
+        | Ttypes.Tyapp (ts, _) ->
+            raise
+              Warnings.(Error (Unsupported_equality ts.ts_ident.id_str, loc)))
+end

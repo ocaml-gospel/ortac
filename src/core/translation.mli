@@ -1,4 +1,3 @@
-module W = Warnings
 open Gospel
 
 val with_checks :
