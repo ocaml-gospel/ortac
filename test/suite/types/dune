@@ -1,6 +1,6 @@
 (library
  (name ltypes)
  (flags :standard -w -27-11)
- (libraries ortac-runtime))
+ (libraries ortac-runtime repr))
 
 (include ../dune.common)

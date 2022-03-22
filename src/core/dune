@@ -2,4 +2,4 @@
  (name ortac_core)
  (preprocess
   (pps ppxlib.metaquot))
- (libraries fmt gospel ppxlib ppxlib.ast))
+ (libraries fmt repr gospel ppxlib ppxlib.ast))

@@ -1,6 +1,6 @@
 (test
  (name wrapper)
- (libraries ortac-runtime))
+ (libraries repr ortac-runtime))
 
 (rule
  (target wrapper.ml)

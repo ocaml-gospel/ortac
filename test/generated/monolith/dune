@@ -1,6 +1,6 @@
 (executable
  (name wrapper)
- (libraries pprint ortac-runtime-monolith monolith))
+ (libraries pprint repr ortac-runtime-monolith monolith))
 
 (alias
  (name runtest)

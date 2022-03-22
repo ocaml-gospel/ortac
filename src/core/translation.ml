@@ -75,9 +75,14 @@ and unsafe_term ~driver (t : Tterm.term) : expression =
         | x :: xs -> (term x, List.map term xs)
       in
       eapply f args
-  | Tapp (ls, [ lhs; rhs ]) when Tterm.(ls_equal ls ps_equ) ->
-      let eq = T.Equality.derive ~loc driver lhs.t_ty in
-      eapply eq [ term lhs; term rhs ]
+  | Tapp (ls, [ lhs; rhs ]) when Tterm.(ls_equal ls ps_equ) -> (
+      let ty = Tterm.t_type lhs in
+      match ty.ty_node with
+      | Tyvar _ -> assert false
+      | Tyapp (ts, _tyl) -> (
+          match Drv.get_repr_equality ts driver with
+          | None -> assert false
+          | Some eq -> eapply (evar eq) [ term lhs; term rhs ]))
   | Tapp (ls, tlist) -> (
       Drv.translate_stdlib ls driver |> function
       | Some f -> eapply (evar f) (List.map term tlist)

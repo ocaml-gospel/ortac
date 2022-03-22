@@ -179,17 +179,45 @@ let axiom (a : Translated.axiom) =
   in
   [ [%stri let () = [%e body]] ]
 
+(** generate the [Repr.t] declaration, unstage and declare equality and
+    comparison function concerning [ts] *)
+let repr (drv : Drv.t) (ts : Gospel.Ttypes.tysymbol) : structure =
+  match
+    ( Drv.get_repr_name ts drv,
+      Drv.get_repr_expr ts drv,
+      Drv.get_repr_equality ts drv,
+      Drv.get_repr_comparison ts drv )
+  with
+  | Some n, Some e, Some eq, Some cmp ->
+      [
+        [%stri let [%p pvar n] = [%e e]];
+        [%stri let [%p pvar eq] = Repr.(unstage (equal [%e evar n]))];
+        [%stri let [%p pvar cmp] = Repr.(unstage (compare [%e evar n]))];
+      ]
+  | _ -> []
+
+let reprs drv ts = List.concat_map (repr drv) ts
+
 let structure runtime driver : structure =
   (pmod_ident (lident (Drv.module_name driver)) |> include_infos |> pstr_include)
   :: pstr_module
        (module_binding
           ~name:{ txt = Some "Ortac_runtime"; loc }
           ~expr:(pmod_ident (lident runtime)))
-  :: (Drv.map_translation driver ~f:(function
-        | Translated.Value v -> value v
-        | Translated.Function f -> function_ f
-        | Translated.Predicate f -> function_ f
-        | Translated.Constant c -> constant c
-        | Translated.Type t -> type_ t
-        | Translated.Axiom a -> axiom a)
-     |> List.flatten)
+  :: reprs driver
+       (* XXX TODO: build the actual list of tysymbols*)
+       Gospel.Ttypes.
+         [
+           ts_integer;
+           ts_bool;
+           ts_string;
+           Drv.get_ts driver [ "Gospelstdlib"; "int" ];
+         ]
+  @ (Drv.map_translation driver ~f:(function
+       | Translated.Value v -> value v
+       | Translated.Function f -> function_ f
+       | Translated.Predicate f -> function_ f
+       | Translated.Constant c -> constant c
+       | Translated.Type t -> type_ t
+       | Translated.Axiom a -> axiom a)
+    |> List.flatten)

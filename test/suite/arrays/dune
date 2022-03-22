@@ -1,6 +1,6 @@
 (library
  (name arrays)
  (flags :standard -w -27-11)
- (libraries ortac-runtime))
+ (libraries repr ortac-runtime))
 
 (include ../dune.common)
