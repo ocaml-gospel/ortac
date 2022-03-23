@@ -77,21 +77,16 @@ and unsafe_term ~driver (t : Tterm.term) : expression =
       in
       eapply f args
   | Tapp (ls, [ lhs; rhs ]) when Tterm.(ls_equal ls ps_equ) -> (
+      (* Gospel already checked that it is the same for rhs *)
       let ty = Tterm.t_type lhs in
-      match ty.ty_node with
-      | Tyvar _ -> raise W.(Error (Unsupported_equality_abstract, loc))
-      | Tyapp (t, _tyl) -> (
-          if
-            (* XXX FIXME temporary fix until there is a [Z.t Repr.t] *)
-            Ttypes.(ts_equal t ts_integer)
-          then eapply [%expr ( = )] [ term lhs; term rhs ]
-          else
-            match Drv.get_repr_equality t driver with
-            | None ->
-                raise
-                  W.(
-                    Error (Unsupported_equality Ttypes.(t.ts_ident.id_str), loc))
-            | Some eq -> eapply (evar eq) [ term lhs; term rhs ]))
+      (* XXX FIXME temporary hack until there is a good [Repr.t] for integers *)
+      if ty = Ttypes.(ty_app ts_integer []) then
+        eapply [%expr ( = )] [ term lhs; term rhs ]
+      else
+        match Drv.get_equality driver ty with
+        | None ->
+            raise W.(Error (Unsupported_equality (Derive.raw_key ty), loc))
+        | Some eq -> eapply (evar eq) [ term lhs; term rhs ])
   | Tapp (ls, tlist) -> (
       Drv.translate_stdlib ls driver |> function
       | Some f -> eapply (evar f) (List.map term tlist)

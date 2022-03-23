@@ -7,7 +7,7 @@ type kind =
   | Ghost_value of string
   | Ghost_type of string
   | Unsupported_model of string * string
-  | Unsupported_equality of string
+  | Unsupported_equality of Derive.key
   | Unsupported_equality_abstract
   | Function_without_definition of string
   | Predicate_without_definition of string
@@ -42,9 +42,9 @@ let pp_kind ppf = function
   | Unsupported_model (type_, name) ->
       pf ppf "Model %a of type %a is not supported. It was not translated."
         quoted name quoted type_
-  | Unsupported_equality type_ ->
+  | Unsupported_equality key ->
       pf ppf "Equality on type %a is not supported. It has not been translated."
-        quoted type_
+        quoted (Derive.to_string key)
   | Unsupported_equality_abstract ->
       pf ppf
         "Equality on abstract is not supported. The clause has not been \

@@ -103,6 +103,6 @@ val make_alt_tree : alt_tree -> int -> alt_tree -> alt_tree
 (*@ t = make_alt_tree l x r
       ensures let c = (l, x, r) in t = Nalt c *)
 
-val ref_access : 'a ref -> 'a
+val ref_access : int ref -> int
 (*@ y = ref_access x
     ensures y = !x *)

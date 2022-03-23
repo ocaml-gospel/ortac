@@ -179,24 +179,20 @@ let axiom (a : Translated.axiom) =
   in
   [ [%stri let () = [%e body]] ]
 
-(** generate the [Repr.t] declaration, unstage and declare equality and
-    comparison function concerning [ts] *)
-let repr (drv : Drv.t) (ts : Gospel.Ttypes.tysymbol) : structure =
-  match
-    ( Drv.get_repr_name ts drv,
-      Drv.get_repr_expr ts drv,
-      Drv.get_repr_equality ts drv,
-      Drv.get_repr_comparison ts drv )
-  with
-  | Some n, Some e, Some eq, Some cmp ->
-      [
-        [%stri let [%p pvar n] = [%e e]];
-        [%stri let [%p pvar eq] = Repr.(unstage (equal [%e evar n]))];
-        [%stri let [%p pvar cmp] = Repr.(unstage (compare [%e evar n]))];
-      ]
-  | _ -> []
-
-let reprs drv ts = List.concat_map (repr drv) ts
+let repr ~driver : structure =
+  let f i =
+    let open Derive in
+    match (i.e, i.eq) with
+    | _, None -> []
+    | Base repr, Some eq ->
+        let n = gen_symbol ~prefix:"__repr" () in
+        [
+          [%stri let [%p pvar n] = [%e repr]];
+          [%stri let [%p pvar eq] = Repr.(unstage (equal [%e evar n]))];
+        ]
+    | _, _ -> []
+  in
+  Drv.map_reprs ~f driver |> List.flatten
 
 let structure runtime driver : structure =
   (pmod_ident (lident (Drv.module_name driver)) |> include_infos |> pstr_include)
@@ -204,15 +200,7 @@ let structure runtime driver : structure =
        (module_binding
           ~name:{ txt = Some "Ortac_runtime"; loc }
           ~expr:(pmod_ident (lident runtime)))
-  :: reprs driver
-       (* XXX TODO: build the actual list of tysymbols*)
-       Gospel.Ttypes.
-         [
-           ts_integer;
-           ts_bool;
-           ts_string;
-           Drv.get_ts driver [ "Gospelstdlib"; "int" ];
-         ]
+  :: repr ~driver
   @ (Drv.map_translation driver ~f:(function
        | Translated.Value v -> value v
        | Translated.Function f -> function_ f

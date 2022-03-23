@@ -147,6 +147,7 @@ let axiom ~driver (ax : Tast.axiom) =
   Drv.add_translation (Axiom { name; loc; register_name; definition }) driver
 
 let signature ~driver s =
+  let driver = Preprocess.preprocess ~driver s in
   List.fold_left
     (fun driver (sig_item : Tast.signature_item) ->
       match sig_item.sig_desc with
