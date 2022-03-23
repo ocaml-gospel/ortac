@@ -1,4 +1,5 @@
 module T = Types
+module W = Warnings
 open Ppxlib
 open Gospel
 open Fmt
@@ -78,11 +79,19 @@ and unsafe_term ~driver (t : Tterm.term) : expression =
   | Tapp (ls, [ lhs; rhs ]) when Tterm.(ls_equal ls ps_equ) -> (
       let ty = Tterm.t_type lhs in
       match ty.ty_node with
-      | Tyvar _ -> assert false
-      | Tyapp (ts, _tyl) -> (
-          match Drv.get_repr_equality ts driver with
-          | None -> assert false
-          | Some eq -> eapply (evar eq) [ term lhs; term rhs ]))
+      | Tyvar _ -> raise W.(Error (Unsupported_equality_abstract, loc))
+      | Tyapp (t, _tyl) -> (
+          if
+            (* XXX FIXME temporary fix until there is a [Z.t Repr.t] *)
+            Ttypes.(ts_equal t ts_integer)
+          then eapply [%expr ( = )] [ term lhs; term rhs ]
+          else
+            match Drv.get_repr_equality t driver with
+            | None ->
+                raise
+                  W.(
+                    Error (Unsupported_equality Ttypes.(t.ts_ident.id_str), loc))
+            | Some eq -> eapply (evar eq) [ term lhs; term rhs ]))
   | Tapp (ls, tlist) -> (
       Drv.translate_stdlib ls driver |> function
       | Some f -> eapply (evar f) (List.map term tlist)
