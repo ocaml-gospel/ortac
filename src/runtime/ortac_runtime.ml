@@ -53,39 +53,32 @@ let pp_allowed_exn = list ~sep:comma pp_quoted_exn
 let pp_error ppf = function
   | Violated_axiom -> pf ppf "the axiom was %a." (styled `Red string) "violated"
   | Axiom_failure { exn } ->
-      pf ppf "the evaluation of the axiom %a:@\n  @[%a@]"
-        (styled `Red string)
+      pf ppf "the evaluation of the axiom %a:@\n  @[%a@]" (styled `Red string)
         "raised an exception" pp_exn exn
   | Violated_invariant { term; position } ->
-      pf ppf "the %a@\n  @[%a@]@\nwas %a in %a."
-        (styled `Yellow string)
-        "invariant" pp_term term
-        (styled `Red string)
-        "violated" pp_position position
+      pf ppf "the %a@\n  @[%a@]@\nwas %a in %a." (styled `Yellow string)
+        "invariant" pp_term term (styled `Red string) "violated" pp_position
+        position
   | Violated_condition { term; term_kind } ->
       pf ppf "the %a@\n  @[%a@]@\nwas %a." pp_term_kind term_kind pp_term term
-        (styled `Red string)
-        "violated"
+        (styled `Red string) "violated"
   | Specification_failure { term; term_kind; exn } ->
       pf ppf "the evaluation of the %a@\n  @[%a@]@\n%a:@\n  @[%a@]" pp_term_kind
-        term_kind pp_term term
-        (styled `Red string)
-        "raised an exception" pp_exn exn
+        term_kind pp_term term (styled `Red string) "raised an exception" pp_exn
+        exn
   | Unexpected_exception { allowed_exn; exn } ->
       pf ppf
         "it raised an %a:@\n\
         \  @[%a@]@\n\
          only the following exceptions were declared:@\n\
-        \  @[%a@]"
-        (styled `Red string)
-        "unexpected exception" pp_exn exn pp_allowed_exn allowed_exn
+        \  @[%a@]" (styled `Red string) "unexpected exception" pp_exn exn
+        pp_allowed_exn allowed_exn
   | Uncaught_checks { term } ->
       pf ppf
         "a %a in@\n\
         \  @[%a@]@\n\
          was not detected.@\n\
-         Function should have raised %a."
-        (styled `Red string)
+         Function should have raised %a." (styled `Red string)
         "`checks' precondition violation" pp_term term pp_quoted_exn
         "Invalid_argument"
   | Unexpected_checks { terms } ->
@@ -94,9 +87,8 @@ let pp_error ppf = function
         \   @[%a@]\n\
          but none of the declared `checks' preconditions@\n\
         \  @[%a@]\n\
-         were violated."
-        (styled `Red string)
-        "raised exception" pp_quoted_exn "Invalid_argument" pp_terms terms
+         were violated." (styled `Red string) "raised exception" pp_quoted_exn
+        "Invalid_argument" pp_terms terms
 
 type error_report = {
   loc : location;
