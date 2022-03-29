@@ -3,6 +3,8 @@ open Gospel
 module KEY = struct
   open Gospel.Ttypes
 
+  (* keys has some structure so that we can recursively reconstruct the corresponding [Repr.t]
+     from it given that the elements are already in the container *)
   type t = Alpha | Leaf of tysymbol | Node of (t * t list)
 
   let rec compare t0 t1 =
@@ -26,19 +28,21 @@ let rec to_string key =
   | Leaf ts -> ts.ts_ident.id_str
   | Node (k, keys) -> String.concat " " (List.rev_map to_string (k :: keys))
 
+(* The [kind] type constructor allows to discriminate between core and
+    parametric types *)
 (* [kind] is not necessarily the best name *)
-type 'a kind = Base of 'a | Forall of int * ('a list -> 'a)
 (* it is possible, if necessary, to curry that
    For example if we want to store partial application of a type constructor *)
+type 'a kind = Base of 'a | Forall of int * ('a list -> 'a)
 
 let base a = Base a
 let forall i f = Forall (i, f)
 
 type expr = Ppxlib.expression kind
-type info = { e : expr; eq : string option; cmp : string option }
+type info = { expr : expr; eq : string option; cmp : string option }
 
-let info e = { e; eq = None; cmp = None }
-let e info = info.e
+let info expr = { expr; eq = None; cmp = None }
+let expr info = info.expr
 let eq info = info.eq
 let cmp info = info.cmp
 
@@ -56,7 +60,7 @@ type map = info M.t
 
 let empty = M.empty
 let get_info = M.find_opt
-let get_repr key map = Option.map e (get_info key map)
+let get_repr key map = Option.map expr (get_info key map)
 let get prj key map = Option.bind (get_info key map) prj
 let get_equality = get eq
 let get_cmp = get cmp
@@ -79,9 +83,9 @@ let expr_from_key (map : map) key =
     match key with
     | Alpha -> assert false
     | Leaf _ as k -> (
-        match (M.find k map).e with Base e -> e | Forall _ -> assert false)
+        match (M.find k map).expr with Base e -> e | Forall _ -> assert false)
     | Node (k, keys) -> (
-        match (M.find k map).e with
+        match (M.find k map).expr with
         | Base _ -> assert false
         | Forall (i, f) ->
             assert (List.length keys = i);
@@ -96,8 +100,8 @@ let add toogle key map =
     | None -> (
         match expr_from_key map key with
         | Some expr ->
-            let e = Base expr in
-            Some (toogle { e; eq = None; cmp = None })
+            let expr = Base expr in
+            Some (toogle { expr; eq = None; cmp = None })
         | None -> None)
   in
   match info with None -> map | Some info -> M.add key info map

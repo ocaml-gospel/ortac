@@ -4,75 +4,81 @@ module R =
   struct
     include Lib
     module Ortac_runtime = Ortac_runtime_monolith
-    let __invariant___001_ __error___003_ __position___004_ __self___002_ =
+    let __repr__028_ = Repr.int
+    let __equal___001_ = let open Repr in unstage (equal __repr__028_)
+    let __repr__029_ = Repr.bool
+    let __equal___003_ = let open Repr in unstage (equal __repr__029_)
+    let __repr__030_ = Repr.int
+    let __equal___002_ = let open Repr in unstage (equal __repr__030_)
+    let __invariant___004_ __error___006_ __position___007_ __self___005_ =
       if
         not
           (try
-             let __t1__005_ =
+             let __t1__008_ =
                Ortac_runtime.Z.leq (Ortac_runtime.Z.of_int 0)
-                 (Ortac_runtime.Z.of_int __self___002_.size) in
-             let __t2__006_ =
+                 (Ortac_runtime.Z.of_int __self___005_.size) in
+             let __t2__009_ =
                Ortac_runtime.Z.leq
-                 (Ortac_runtime.Z.of_int __self___002_.size)
+                 (Ortac_runtime.Z.of_int __self___005_.size)
                  (Ortac_runtime.Z.of_int 32) in
-             __t1__005_ && __t2__006_
+             __t1__008_ && __t2__009_
            with
            | e ->
                ((Ortac_runtime.Specification_failure
                    {
                      term =
                        "(0:integer <= (integer_of_int \n(size ):int):integer):prop /\\ ((integer_of_int \n(size ):int):integer <= 32:integer):prop";
-                     term_kind = __position___004_;
+                     term_kind = __position___007_;
                      exn = e
                    })
-                  |> (Ortac_runtime.Errors.register __error___003_);
+                  |> (Ortac_runtime.Errors.register __error___006_);
                 true))
       then
         (Ortac_runtime.Violated_invariant
            {
              term =
                "(0:integer <= (integer_of_int \n(size ):int):integer):prop /\\ ((integer_of_int \n(size ):int):integer <= 32:integer):prop";
-             position = __position___004_
+             position = __position___007_
            })
-          |> (Ortac_runtime.Errors.register __error___003_)
-    let __invariant___007_ __error___009_ __position___010_ __self___008_ =
+          |> (Ortac_runtime.Errors.register __error___006_)
+    let __invariant___010_ __error___012_ __position___013_ __self___011_ =
       if
         not
           (try
-             let __t1__011_ =
+             let __t1__014_ =
                Ortac_runtime.Z.leq (Ortac_runtime.Z.of_int 0)
-                 (Ortac_runtime.Z.of_int __self___008_.mask) in
-             let __t2__012_ =
-               Ortac_runtime.Z.lt (Ortac_runtime.Z.of_int __self___008_.mask)
+                 (Ortac_runtime.Z.of_int __self___011_.mask) in
+             let __t2__015_ =
+               Ortac_runtime.Z.lt (Ortac_runtime.Z.of_int __self___011_.mask)
                  (Ortac_runtime.Z.pow (Ortac_runtime.Z.of_int 2)
-                    (Ortac_runtime.Z.of_int __self___008_.size)) in
-             __t1__011_ && __t2__012_
+                    (Ortac_runtime.Z.of_int __self___011_.size)) in
+             __t1__014_ && __t2__015_
            with
            | e ->
                ((Ortac_runtime.Specification_failure
                    {
                      term =
                        "(0:integer <= (integer_of_int \n(mask ):int):integer):prop /\\ ((integer_of_int  (mask ):int):integer < (pow \n2:integer (integer_of_int  (size ):int):integer):integer):prop";
-                     term_kind = __position___010_;
+                     term_kind = __position___013_;
                      exn = e
                    })
-                  |> (Ortac_runtime.Errors.register __error___009_);
+                  |> (Ortac_runtime.Errors.register __error___012_);
                 true))
       then
         (Ortac_runtime.Violated_invariant
            {
              term =
                "(0:integer <= (integer_of_int \n(mask ):int):integer):prop /\\ ((integer_of_int  (mask ):int):integer < (pow \n2:integer (integer_of_int  (size ):int):integer):integer):prop";
-             position = __position___010_
+             position = __position___013_
            })
-          |> (Ortac_runtime.Errors.register __error___009_)
-    let __logical_mem__013_ i bv =
+          |> (Ortac_runtime.Errors.register __error___012_)
+    let __logical_mem__016_ i bv =
       not
         ((Ortac_runtime.Z.logand (Ortac_runtime.Z.of_int bv.mask)
             (Ortac_runtime.Z.pow (Ortac_runtime.Z.of_int 2) i))
            = (Ortac_runtime.Z.of_int 0))
     let create n =
-      let __error__014_ =
+      let __error__017_ =
         Ortac_runtime.Errors.create
           {
             Ortac_runtime.start =
@@ -93,41 +99,41 @@ module R =
       if
         not
           (try
-             let __t1__015_ =
+             let __t1__018_ =
                Ortac_runtime.Z.leq (Ortac_runtime.Z.of_int 0)
                  (Ortac_runtime.Z.of_int n) in
-             let __t2__016_ =
+             let __t2__019_ =
                Ortac_runtime.Z.leq (Ortac_runtime.Z.of_int n)
                  (Ortac_runtime.Z.of_int 32) in
-             __t1__015_ && __t2__016_
+             __t1__018_ && __t2__019_
            with
            | e ->
                ((Ortac_runtime.Specification_failure
                    { term = "0 <= n <= 32"; term_kind = Pre; exn = e })
-                  |> (Ortac_runtime.Errors.register __error__014_);
+                  |> (Ortac_runtime.Errors.register __error__017_);
                 true))
       then
         (Ortac_runtime.Violated_invariant
            { term = "0 <= n <= 32"; position = Pre })
-          |> (Ortac_runtime.Errors.register __error__014_);
-      Ortac_runtime.Errors.report __error__014_;
+          |> (Ortac_runtime.Errors.register __error__017_);
+      Ortac_runtime.Errors.report __error__017_;
       (let bv_1 =
          try create n
          with
          | Stack_overflow|Out_of_memory as e ->
-             (Ortac_runtime.Errors.report __error__014_; raise e)
+             (Ortac_runtime.Errors.report __error__017_; raise e)
          | e ->
              ((Ortac_runtime.Unexpected_exception
                  { allowed_exn = []; exn = e })
-                |> (Ortac_runtime.Errors.register __error__014_);
-              Ortac_runtime.Errors.report __error__014_;
+                |> (Ortac_runtime.Errors.register __error__017_);
+              Ortac_runtime.Errors.report __error__017_;
               raise e) in
        if
          not
            (try
               Ortac_runtime.Z.forall (Ortac_runtime.Z.of_int 0)
                 (Ortac_runtime.Z.pred (Ortac_runtime.Z.of_int n))
-                (fun i_1 -> not (__logical_mem__013_ i_1 bv_1))
+                (fun i_1 -> not (__logical_mem__016_ i_1 bv_1))
             with
             | e ->
                 ((Ortac_runtime.Specification_failure
@@ -136,7 +142,7 @@ module R =
                       term_kind = Post;
                       exn = e
                     })
-                   |> (Ortac_runtime.Errors.register __error__014_);
+                   |> (Ortac_runtime.Errors.register __error__017_);
                  true))
        then
          (Ortac_runtime.Violated_invariant
@@ -144,26 +150,26 @@ module R =
               term = "forall i. 0 <= i < n -> not (mem i bv)";
               position = Post
             })
-           |> (Ortac_runtime.Errors.register __error__014_);
+           |> (Ortac_runtime.Errors.register __error__017_);
        if
          not
-           (try bv_1.size = n
+           (try __equal___002_ bv_1.size n
             with
             | e ->
                 ((Ortac_runtime.Specification_failure
                     { term = "bv.size = n"; term_kind = Post; exn = e })
-                   |> (Ortac_runtime.Errors.register __error__014_);
+                   |> (Ortac_runtime.Errors.register __error__017_);
                  true))
        then
          (Ortac_runtime.Violated_invariant
             { term = "bv.size = n"; position = Post })
-           |> (Ortac_runtime.Errors.register __error__014_);
-       __invariant___007_ __error__014_ Post bv_1;
-       __invariant___001_ __error__014_ Post bv_1;
-       Ortac_runtime.Errors.report __error__014_;
+           |> (Ortac_runtime.Errors.register __error__017_);
+       __invariant___010_ __error__017_ Post bv_1;
+       __invariant___004_ __error__017_ Post bv_1;
+       Ortac_runtime.Errors.report __error__017_;
        bv_1)
     let add i_2 bv_2 =
-      let __error__017_ =
+      let __error__020_ =
         Ortac_runtime.Errors.create
           {
             Ortac_runtime.start =
@@ -184,48 +190,48 @@ module R =
       if
         not
           (try
-             let __t1__018_ =
+             let __t1__021_ =
                Ortac_runtime.Z.leq (Ortac_runtime.Z.of_int 0)
                  (Ortac_runtime.Z.of_int i_2) in
-             let __t2__019_ =
+             let __t2__022_ =
                Ortac_runtime.Z.lt (Ortac_runtime.Z.of_int i_2)
                  (Ortac_runtime.Z.of_int bv_2.size) in
-             __t1__018_ && __t2__019_
+             __t1__021_ && __t2__022_
            with
            | e ->
                ((Ortac_runtime.Specification_failure
                    { term = "0 <= i < bv.size"; term_kind = Pre; exn = e })
-                  |> (Ortac_runtime.Errors.register __error__017_);
+                  |> (Ortac_runtime.Errors.register __error__020_);
                 true))
       then
         (Ortac_runtime.Violated_invariant
            { term = "0 <= i < bv.size"; position = Pre })
-          |> (Ortac_runtime.Errors.register __error__017_);
-      __invariant___007_ __error__017_ Pre bv_2;
-      __invariant___001_ __error__017_ Pre bv_2;
-      Ortac_runtime.Errors.report __error__017_;
+          |> (Ortac_runtime.Errors.register __error__020_);
+      __invariant___010_ __error__020_ Pre bv_2;
+      __invariant___004_ __error__020_ Pre bv_2;
+      Ortac_runtime.Errors.report __error__020_;
       (let () =
          try add i_2 bv_2
          with
          | Stack_overflow|Out_of_memory as e ->
-             ((__invariant___007_ __error__017_ XPost bv_2;
-               __invariant___001_ __error__017_ XPost bv_2;
-               Ortac_runtime.Errors.report __error__017_);
+             ((__invariant___010_ __error__020_ XPost bv_2;
+               __invariant___004_ __error__020_ XPost bv_2;
+               Ortac_runtime.Errors.report __error__020_);
               raise e)
          | e ->
              ((Ortac_runtime.Unexpected_exception
                  { allowed_exn = []; exn = e })
-                |> (Ortac_runtime.Errors.register __error__017_);
-              (__invariant___007_ __error__017_ XPost bv_2;
-               __invariant___001_ __error__017_ XPost bv_2;
-               Ortac_runtime.Errors.report __error__017_);
+                |> (Ortac_runtime.Errors.register __error__020_);
+              (__invariant___010_ __error__020_ XPost bv_2;
+               __invariant___004_ __error__020_ XPost bv_2;
+               Ortac_runtime.Errors.report __error__020_);
               raise e) in
-       __invariant___007_ __error__017_ Post bv_2;
-       __invariant___001_ __error__017_ Post bv_2;
-       Ortac_runtime.Errors.report __error__017_;
+       __invariant___010_ __error__020_ Post bv_2;
+       __invariant___004_ __error__020_ Post bv_2;
+       Ortac_runtime.Errors.report __error__020_;
        ())
     let mem i_3 bv_3 =
-      let __error__022_ =
+      let __error__025_ =
         Ortac_runtime.Errors.create
           {
             Ortac_runtime.start =
@@ -246,60 +252,60 @@ module R =
       if
         not
           (try
-             let __t1__023_ =
+             let __t1__026_ =
                Ortac_runtime.Z.leq (Ortac_runtime.Z.of_int 0)
                  (Ortac_runtime.Z.of_int i_3) in
-             let __t2__024_ =
+             let __t2__027_ =
                Ortac_runtime.Z.lt (Ortac_runtime.Z.of_int i_3)
                  (Ortac_runtime.Z.of_int bv_3.size) in
-             __t1__023_ && __t2__024_
+             __t1__026_ && __t2__027_
            with
            | e ->
                ((Ortac_runtime.Specification_failure
                    { term = "0 <= i < bv.size"; term_kind = Pre; exn = e })
-                  |> (Ortac_runtime.Errors.register __error__022_);
+                  |> (Ortac_runtime.Errors.register __error__025_);
                 true))
       then
         (Ortac_runtime.Violated_invariant
            { term = "0 <= i < bv.size"; position = Pre })
-          |> (Ortac_runtime.Errors.register __error__022_);
-      __invariant___007_ __error__022_ Pre bv_3;
-      __invariant___001_ __error__022_ Pre bv_3;
-      Ortac_runtime.Errors.report __error__022_;
+          |> (Ortac_runtime.Errors.register __error__025_);
+      __invariant___010_ __error__025_ Pre bv_3;
+      __invariant___004_ __error__025_ Pre bv_3;
+      Ortac_runtime.Errors.report __error__025_;
       (let b =
          try mem i_3 bv_3
          with
          | Stack_overflow|Out_of_memory as e ->
-             ((__invariant___007_ __error__022_ XPost bv_3;
-               __invariant___001_ __error__022_ XPost bv_3;
-               Ortac_runtime.Errors.report __error__022_);
+             ((__invariant___010_ __error__025_ XPost bv_3;
+               __invariant___004_ __error__025_ XPost bv_3;
+               Ortac_runtime.Errors.report __error__025_);
               raise e)
          | e ->
              ((Ortac_runtime.Unexpected_exception
                  { allowed_exn = []; exn = e })
-                |> (Ortac_runtime.Errors.register __error__022_);
-              (__invariant___007_ __error__022_ XPost bv_3;
-               __invariant___001_ __error__022_ XPost bv_3;
-               Ortac_runtime.Errors.report __error__022_);
+                |> (Ortac_runtime.Errors.register __error__025_);
+              (__invariant___010_ __error__025_ XPost bv_3;
+               __invariant___004_ __error__025_ XPost bv_3;
+               Ortac_runtime.Errors.report __error__025_);
               raise e) in
        if
          not
            (try
-              (b = true) =
-                (__logical_mem__013_ (Ortac_runtime.Z.of_int i_3) bv_3)
+              (__equal___003_ b true) =
+                (__logical_mem__016_ (Ortac_runtime.Z.of_int i_3) bv_3)
             with
             | e ->
                 ((Ortac_runtime.Specification_failure
                     { term = "b <-> mem i bv"; term_kind = Post; exn = e })
-                   |> (Ortac_runtime.Errors.register __error__022_);
+                   |> (Ortac_runtime.Errors.register __error__025_);
                  true))
        then
          (Ortac_runtime.Violated_invariant
             { term = "b <-> mem i bv"; position = Post })
-           |> (Ortac_runtime.Errors.register __error__022_);
-       __invariant___007_ __error__022_ Post bv_3;
-       __invariant___001_ __error__022_ Post bv_3;
-       Ortac_runtime.Errors.report __error__022_;
+           |> (Ortac_runtime.Errors.register __error__025_);
+       __invariant___010_ __error__025_ Post bv_3;
+       __invariant___004_ __error__025_ Post bv_3;
+       Ortac_runtime.Errors.report __error__025_;
        b)
   end
 module C = Lib

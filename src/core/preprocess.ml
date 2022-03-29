@@ -13,12 +13,12 @@ let value ~driver vd =
   | Some spec ->
       let f map =
         map
-        |> Derive.fold_traverse spec.sp_checks
-        |> Derive.fold_traverse spec.sp_pre
-        |> Derive.fold_traverse spec.sp_post
+        |> fold_traverse spec.sp_checks
+        |> fold_traverse spec.sp_pre
+        |> fold_traverse spec.sp_post
         |> xpost spec.sp_xpost
-        |> Derive.fold_traverse spec.sp_cs
-        |> Derive.fold_traverse spec.sp_wr
+        |> fold_traverse spec.sp_cs
+        |> fold_traverse spec.sp_wr
       in
       Drv.map_repr ~f driver
 
@@ -26,12 +26,17 @@ let type_ ~driver td =
   match td.td_spec with
   | None -> driver
   | Some spec ->
-      let f map = Derive.fold_traverse spec.ty_invariants map in
+      let f map = fold_traverse spec.ty_invariants map in
       Drv.map_repr ~f driver
 
 let types ~driver = List.fold_left (fun driver -> type_ ~driver) driver
 
 let function_ ~driver func =
+  let driver =
+    match func.fun_def with
+    | None -> driver
+    | Some def -> Drv.map_repr ~f:(traverse def) driver
+  in
   match func.fun_spec with
   | None -> driver
   | Some spec ->

@@ -38,12 +38,18 @@ val exists_ : unit -> unit
 
 type t = A | B of string
 
+(*@ function t_equal (a: t) (b: t) : bool =
+  match a, b with
+  | A, A -> true
+  | B s0, B s1 -> s0 = s1
+  | _, _ -> false *)
+
 val a : t -> unit
 (*@ a x
     requires match x with
             | A -> true
             | B s -> false
-    requires x = A *)
+    requires t_equal x A *)
 
 val b : t -> unit
 (*@ b x
@@ -53,29 +59,42 @@ val b : t -> unit
 
 type peano = O | S of peano
 
+(*@ function rec peano_equal (i: peano) (j: peano) : bool =
+    match i, j with
+    | O, O -> true
+    | S i', S j' -> peano_equal i' j'
+    | _, _ -> false *)
+
 val succ : peano -> peano
 (*@ y = succ x
-      ensures y = S x *)
+      ensures peano_equal y (S x) *)
 
 val add : peano -> peano -> peano
 (*@ z = add x y
-        ensures x <> O -> z <> O
-        ensures y <> O -> z <> O *)
+      ensures not (peano_equal x O) -> not (peano_equal z O)
+      ensures not (peano_equal y O) -> not (peano_equal z O) *)
 
 val bad_add : peano -> peano -> peano
 (*@ z = bad_add x y
-      ensures x <> O -> z <> O
-      ensures y <> O -> z <> O *)
+      ensures not (peano_equal x O) -> not (peano_equal z O)
+      ensures not (peano_equal y O) -> not (peano_equal z  O) *)
 
 type tree = E | N of tree * int * tree
 
 (*@ function rec size (t: tree) : integer =
     match t with E -> 0 | N (l, _, r) -> size l + 1 + size r *)
 
+(*@ function rec tree_equal (t0: tree) (t1: tree) : bool =
+    match t0, t1 with
+     | E, E -> true
+     | N (l0, i0, r0), N (l1, i1, r1) -> i0 = i1 && tree_equal l0 l1 && tree_equal r0 r1
+     | _, _ -> false
+*)
+
 val size : tree -> int
 (*@ s = size t
       pure
-      ensures t <> E -> s > 0
+      ensures not (tree_equal t E) -> s > 0
       ensures s = size t *)
 
 val size_wrong_spec : tree -> int
@@ -86,11 +105,11 @@ val test_tree : tree -> bool
 (*@ b = test_tree t
       ensures b = match t with
                   | E -> true
-                  | N (l, x, t) -> l = t && x = 0 *)
+                  | N (l, x, t) -> tree_equal l t && x = 0 *)
 
 val make_tree : tree -> int -> tree -> tree
 (*@ t = make_tree l x r
-      ensures t = N (l, x, r) *)
+      ensures tree_equal t (N (l, x, r)) *)
 
 val fill : tree -> int array -> int -> int
 (*@ stop = fill t a start
@@ -99,9 +118,16 @@ val fill : tree -> int array -> int -> int
 
 type alt_tree = Ealt | Nalt of (alt_tree * int * alt_tree)
 
+(*@ function rec alt_tree_equal (t0: alt_tree) (t1: alt_tree) : bool =
+  match t0, t1 with
+  | Ealt, Ealt -> true
+  | Nalt (l0, i0, r0), Nalt (l1, i1, r1) -> i0 = i1 && alt_tree_equal l0 l1 && alt_tree_equal r0 r1
+  | _, _ -> false
+*)
+
 val make_alt_tree : alt_tree -> int -> alt_tree -> alt_tree
 (*@ t = make_alt_tree l x r
-      ensures let c = (l, x, r) in t = Nalt c *)
+      ensures let c = (l, x, r) in alt_tree_equal t (Nalt c) *)
 
 val ref_access : int ref -> int
 (*@ y = ref_access x

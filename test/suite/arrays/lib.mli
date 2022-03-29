@@ -9,33 +9,31 @@ val bad_create : int -> int -> int array
 (*@ arr = bad_create n v
     ensures forall i. 0 <= i < n -> arr.(i) = v *)
 
-val get : 'a array -> int -> 'a
+val get : int array -> int -> int
 (*@ o = get arr i
     requires 0 <= i < Array.length arr
-    (* ensures o = arr.(i) *) *)
+    ensures o = arr.(i) *)
 
 (*@ axiom a :
       let arr = Array.make 10 0 in
       forall i. 0 <= i < 10 -> arr.(i) = 0 *)
 
-val bad_get : 'a array -> int -> 'a
+val bad_get : int array -> int -> int
 (*@ o = bad_get arr i
     requires 0 <= i < Array.length arr
-    (* ensures o = arr.(i) *) *)
+    ensures o = arr.(i) *)
 
-val set : 'a array -> int -> 'a -> unit
+val set : int array -> int -> int -> unit
 (*@ set arr i v
     requires 0 <= i < Array.length arr
-    (* ensures  arr.(i) = v *)
-    (*
+    ensures  arr.(i) = v
      ensures  forall j. 0 <= j < Array.length arr -> j <> i ->
              arr.(j) = old arr.(j) *)
-*)
 
-val fill : 'a array -> int -> int -> 'a -> unit
+val fill : int array -> int -> int -> int -> unit
 (*@ fill arr ofs len v
     requires 0 <= ofs <= ofs + len <= Array.length arr
-    (* ensures  forall j. ofs <= j < ofs + len -> arr.(j) = v *) *)
+    ensures  forall j. ofs <= j < ofs + len -> arr.(j) = v *)
 
 val length : 'a array -> int
 (*@ i = length a

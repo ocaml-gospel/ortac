@@ -182,7 +182,7 @@ let axiom (a : Translated.axiom) =
 let repr ~driver : structure =
   let f i =
     let open Derive in
-    match (i.e, i.eq) with
+    match (expr i, eq i) with
     | _, None -> []
     | Base repr, Some eq ->
         let n = gen_symbol ~prefix:"__repr" () in
