@@ -84,6 +84,7 @@ and unsafe_term ~driver (t : Tterm.term) : expression =
         eapply [%expr ( = )] [ term lhs; term rhs ]
       else
         match Drv.get_equality driver ty with
+        (* needed equalities are supposed to have been added in [Preprocess.traverse] *)
         | None ->
             raise W.(Error (Unsupported_equality (Derive.raw_key ty), loc))
         | Some eq -> eapply (evar eq) [ term lhs; term rhs ])

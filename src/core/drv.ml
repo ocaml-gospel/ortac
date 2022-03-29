@@ -37,6 +37,7 @@ let derive_get getter t ty =
 
 let get_repr = derive_get Derive.get_repr
 let get_equality = derive_get Derive.get_equality
+let add_equality k t = { t with repr = Derive.add_equality k t.repr }
 
 let stdlib_types =
   let open Translated in
@@ -153,7 +154,7 @@ let init module_name env =
   let repr =
     List.fold_left
       (fun acc (path, info) ->
-        let key : key = get_ts_env env path |> key_from_lsymbol in
+        let key : key = get_ts_env env path |> key_from_tysymbol in
         add_info key info acc)
       empty stdlib_repr
   in

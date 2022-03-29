@@ -123,7 +123,7 @@ let rec raw_key ty =
   | Tyapp (ts, []) -> KEY.Leaf ts
   | Tyapp (ts, tyl) -> Node (Leaf ts, List.map raw_key tyl)
 
-let key_from_lsymbol ls = KEY.Leaf ls
+let key_from_tysymbol (ts : Ttypes.tysymbol) = KEY.Leaf ts
 let add_info = M.add
 
 let rec traverse (term : Tterm.term) map =
