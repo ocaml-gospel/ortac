@@ -15,10 +15,9 @@ val add_function : Tterm.lsymbol -> string -> t -> t
 val add_translation : Translated.structure_item -> t -> t
 val iter_translation : f:(Translated.structure_item -> unit) -> t -> unit
 val map_translation : f:(Translated.structure_item -> 'a) -> t -> 'a list
-val get_repr : t -> Ttypes.ty -> Derive.expr option
 val get_equality : t -> Ttypes.ty -> string option
 val add_equality : Derive.key -> t -> t
 
 (*XXX find a better name!!!*)
+val repr : t -> Derive.map
 val map_repr : f:(Derive.map -> Derive.map) -> t -> t
-val map_reprs : f:(Derive.info -> 'a) -> t -> 'a list

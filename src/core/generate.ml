@@ -179,20 +179,7 @@ let axiom (a : Translated.axiom) =
   in
   [ [%stri let () = [%e body]] ]
 
-let repr ~driver : structure =
-  let f i =
-    let open Derive in
-    match (expr i, eq i) with
-    | _, None -> []
-    | Base repr, Some eq ->
-        let n = gen_symbol ~prefix:"__repr" () in
-        [
-          [%stri let [%p pvar n] = [%e repr]];
-          [%stri let [%p pvar eq] = Repr.(unstage (equal [%e evar n]))];
-        ]
-    | _, _ -> []
-  in
-  Drv.map_reprs ~f driver |> List.flatten
+let repr ~driver : structure = Drv.repr driver |> Derive.derive_all
 
 let structure runtime driver : structure =
   (pmod_ident (lident (Drv.module_name driver)) |> include_infos |> pstr_include)

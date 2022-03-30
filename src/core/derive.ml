@@ -33,8 +33,6 @@ module M = Map.Make (KEY)
 
 type key = KEY.t
 
-let mbindings = M.bindings
-
 let rec to_string key =
   let open KEY in
   match key with
@@ -56,9 +54,23 @@ type expr = Ppxlib.expression kind
 type info = { expr : expr; eq : string option; cmp : string option }
 
 let info expr = { expr; eq = None; cmp = None }
-let expr info = info.expr
 let eq info = info.eq
 (* let cmp info = info.cmp *)
+
+let derive (info : info) =
+  match info with
+  | { expr = Base repr; eq = Some eq; cmp = _ } ->
+      let open Ppxlib in
+      let open Builder in
+      let loc = Location.none in
+      let n = gen_symbol ~prefix:"__repr" () in
+      [
+        [%stri let [%p pvar n] = [%e repr]];
+        [%stri let [%p pvar eq] = Repr.(unstage (equal [%e evar n]))];
+      ]
+  | _ -> []
+
+let derive_all map = M.bindings map |> List.concat_map (fun (_, i) -> derive i)
 
 let toogle_eq info =
   if Option.is_none info.eq then
@@ -74,12 +86,9 @@ type map = info M.t
 
 let empty = M.empty
 let get_info = M.find_opt
-let get_repr key map = Option.map expr (get_info key map)
 let get prj key map = Option.bind (get_info key map) prj
 let get_equality = get eq
 (* let get_cmp = get cmp *)
-
-(* XXX TODO: better control flow for the two following functions *)
 
 (** [expr_from_key map key] computes the [Ppxlib.expression] corresponding to
     the [Repr.t] of the type encoded by [key].
@@ -91,16 +100,16 @@ let get_equality = get eq
     - [expr_from_key map (Node (ts_list, \[Leaf ts_int\]))] will return
       [\[%expr Repr.list Repr.int\]]
     - [expr_from_key map (Node (ts_option, \[\]))] will fail *)
-let expr_from_key (map : map) key =
+let expr_from_key map key =
   let rec aux key =
     let open KEY in
     match key with
-    | Alpha -> assert false
+    | Alpha -> raise Exit
     | Leaf _ as k -> (
-        match (M.find k map).expr with Base e -> e | Forall _ -> assert false)
+        match (M.find k map).expr with Base e -> e | Forall _ -> raise Exit)
     | Node (k, keys) -> (
         match (M.find k map).expr with
-        | Base _ -> assert false
+        | Base _ -> raise Exit
         | Forall (i, f) ->
             assert (List.length keys = i);
             List.map aux keys |> f)
@@ -108,17 +117,12 @@ let expr_from_key (map : map) key =
   try Some (aux key) with _ -> None
 
 let add toogle key map =
-  let info =
-    match M.find_opt key map with
-    | Some info -> Some (toogle info)
-    | None -> (
-        match expr_from_key map key with
-        | Some expr ->
-            let expr = Base expr in
-            Some (toogle { expr; eq = None; cmp = None })
-        | None -> None)
-  in
-  match info with None -> map | Some info -> M.add key info map
+  (match M.find_opt key map with
+  | Some info -> Some (toogle info)
+  | None ->
+      let f expr = base expr |> info |> toogle in
+      Option.map f (expr_from_key map key))
+  |> Option.fold ~none:map ~some:(fun i -> M.add key i map)
 
 (* let add_expr = add (fun x -> x) *)
 let add_equality = add toogle_eq

@@ -35,7 +35,6 @@ let get_ts t = get_env ns_find_ts t.env
 let derive_get getter t ty =
   Option.bind (Derive.key ty) (fun k -> getter k t.repr)
 
-let get_repr = derive_get Derive.get_repr
 let get_equality = derive_get Derive.get_equality
 let add_equality k t = { t with repr = Derive.add_equality k t.repr }
 
@@ -168,8 +167,8 @@ let init module_name env =
     functions = L.empty;
   }
 
+let repr t = t.repr
 let map_repr ~f t = { t with repr = f t.repr }
-let map_reprs ~f t = Derive.mbindings t.repr |> List.map (fun (_, x) -> f x)
 let map_translation ~f t = List.rev_map f t.translations
 let iter_translation ~f t = List.iter f (List.rev t.translations)
 let module_name t = t.module_name
