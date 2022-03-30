@@ -33,6 +33,8 @@ module M = Map.Make (KEY)
 
 type key = KEY.t
 
+let mbindings = M.bindings
+
 let rec to_string key =
   let open KEY in
   match key with
@@ -56,7 +58,7 @@ type info = { expr : expr; eq : string option; cmp : string option }
 let info expr = { expr; eq = None; cmp = None }
 let expr info = info.expr
 let eq info = info.eq
-let cmp info = info.cmp
+(* let cmp info = info.cmp *)
 
 let toogle_eq info =
   if Option.is_none info.eq then
@@ -75,7 +77,7 @@ let get_info = M.find_opt
 let get_repr key map = Option.map expr (get_info key map)
 let get prj key map = Option.bind (get_info key map) prj
 let get_equality = get eq
-let get_cmp = get cmp
+(* let get_cmp = get cmp *)
 
 (* XXX TODO: better control flow for the two following functions *)
 

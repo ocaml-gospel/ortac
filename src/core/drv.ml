@@ -169,7 +169,7 @@ let init module_name env =
   }
 
 let map_repr ~f t = { t with repr = f t.repr }
-let map_reprs ~f t = Derive.M.(map f t.repr |> bindings) |> List.map snd
+let map_reprs ~f t = Derive.mbindings t.repr |> List.map (fun (_, x) -> f x)
 let map_translation ~f t = List.rev_map f t.translations
 let iter_translation ~f t = List.iter f (List.rev t.translations)
 let module_name t = t.module_name
