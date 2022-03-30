@@ -114,7 +114,7 @@ let stdlib =
 let stdlib_repr =
   let loc = Ppxlib.Location.none in
   let base exp = Derive.(info (base exp)) in
-  (* only one parameter type constructore here *)
+  (* only one parameter type constructor here *)
   let forall exp = Derive.(info (forall 1 (fun x -> Builder.eapply exp x))) in
   [
     ([ "unit" ], base [%expr Repr.unit]);
@@ -123,7 +123,26 @@ let stdlib_repr =
     ([ "float" ], base [%expr Repr.float]);
     ([ "bool" ], base [%expr Repr.bool]);
     (* XXX FIXME not unbound integer here! *)
-    ([ "integer" ], base [%expr Repr.int]);
+    ( [ "integer" ],
+      base
+        [%expr
+          let open Ortac_runtime in
+          let pp = Z.pp_print in
+          let of_string _ = Ok Z.zero in
+          let ejson : Z.t Repr.encode_json = fun _ _ -> () in
+          let djson : Z.t Repr.decode_json = fun _ -> assert false in
+          let json : Z.t Repr.encode_json * Z.t Repr.decode_json =
+            (ejson, djson)
+          in
+          let ebin : Z.t Repr.encode_bin = fun _ _ -> () in
+          let dbin : Z.t Repr.decode_bin = fun _ _ -> assert false in
+          let bin = (ebin, dbin, Repr.Size.custom_static 0) in
+          let equal = Z.equal in
+          let compare = Z.compare in
+          let short_hash ?seed:_ = Z.to_int in
+          let pre_hash _ _ = () in
+          Repr.abstract ~pp ~of_string ~json ~bin ~equal ~compare ~short_hash
+            ~pre_hash ()] );
     ([ "option" ], forall [%expr Repr.option]);
     ([ "list" ], forall [%expr Repr.list]);
     ([ "Gospelstdlib"; "seq" ], forall [%expr Repr.list]);

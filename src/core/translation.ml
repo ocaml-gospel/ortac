@@ -80,14 +80,13 @@ and unsafe_term ~driver (t : Tterm.term) : expression =
       (* Gospel already checked that it is the same for rhs *)
       let ty = Tterm.t_type lhs in
       (* XXX FIXME temporary hack until there is a good [Repr.t] for integers *)
-      if ty = Ttypes.(ty_app ts_integer []) then
-        eapply [%expr ( = )] [ term lhs; term rhs ]
-      else
-        match Drv.get_equality driver ty with
-        (* needed equalities are supposed to have been added in [Preprocess.traverse] *)
-        | None ->
-            raise W.(Error (Unsupported_equality (Derive.raw_key ty), loc))
-        | Some eq -> eapply (evar eq) [ term lhs; term rhs ])
+      (* if ty = Ttypes.(ty_app ts_integer []) then *)
+      (*   eapply [%expr ( = )] [ term lhs; term rhs ] *)
+      (* else *)
+      match Drv.get_equality driver ty with
+      (* needed equalities are supposed to have been added in [Preprocess.traverse] *)
+      | None -> raise W.(Error (Unsupported_equality (Derive.raw_key ty), loc))
+      | Some eq -> eapply (evar eq) [ term lhs; term rhs ])
   | Tapp (ls, tlist) -> (
       Drv.translate_stdlib ls driver |> function
       | Some f -> eapply (evar f) (List.map term tlist)

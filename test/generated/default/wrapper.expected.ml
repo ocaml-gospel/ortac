@@ -1,6 +1,21 @@
 include Lib
 module Ortac_runtime = Ortac_runtime
-let __repr__028_ = Repr.int
+let __repr__028_ =
+  let open Ortac_runtime in
+    let pp = Z.pp_print in
+    let of_string _ = Ok Z.zero in
+    let ejson : Z.t Repr.encode_json = fun _ -> fun _ -> () in
+    let djson : Z.t Repr.decode_json = fun _ -> assert false in
+    let json : (Z.t Repr.encode_json * Z.t Repr.decode_json) = (ejson, djson) in
+    let ebin : Z.t Repr.encode_bin = fun _ -> fun _ -> () in
+    let dbin : Z.t Repr.decode_bin = fun _ -> fun _ -> assert false in
+    let bin = (ebin, dbin, (Repr.Size.custom_static 0)) in
+    let equal = Z.equal in
+    let compare = Z.compare in
+    let short_hash ?seed:_  = Z.to_int in
+    let pre_hash _ _ = () in
+    Repr.abstract ~pp ~of_string ~json ~bin ~equal ~compare ~short_hash
+      ~pre_hash ()
 let __equal___001_ = let open Repr in unstage (equal __repr__028_)
 let __repr__029_ = Repr.bool
 let __equal___003_ = let open Repr in unstage (equal __repr__029_)
@@ -69,9 +84,10 @@ let __invariant___010_ __error___012_ __position___013_ __self___011_ =
       |> (Ortac_runtime.Errors.register __error___012_)
 let __logical_mem__016_ i bv =
   not
-    ((Ortac_runtime.Z.logand (Ortac_runtime.Z.of_int bv.mask)
-        (Ortac_runtime.Z.pow (Ortac_runtime.Z.of_int 2) i))
-       = (Ortac_runtime.Z.of_int 0))
+    (__equal___001_
+       (Ortac_runtime.Z.logand (Ortac_runtime.Z.of_int bv.mask)
+          (Ortac_runtime.Z.pow (Ortac_runtime.Z.of_int 2) i))
+       (Ortac_runtime.Z.of_int 0))
 let create n =
   let __error__017_ =
     Ortac_runtime.Errors.create
