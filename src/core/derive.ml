@@ -12,7 +12,19 @@ module KEY = struct
     match (t0, t1) with
     | Leaf x, Leaf y -> cmp x y
     | Node (x, xs), Node (y, ys) -> (
-        match compare x y with 0 -> List.compare compare xs ys | i -> i)
+        match compare x y with
+        | 0 ->
+            (* List.compare is not in stdlib before 4.12.0 *)
+            let rec list_cmp l0 l1 =
+              match (l0, l1) with
+              | [], [] -> 0
+              | _ :: _, [] -> 1
+              | [], _ :: _ -> -1
+              | x :: xs, y :: ys -> (
+                  match compare x y with 0 -> list_cmp xs ys | i -> i)
+            in
+            list_cmp xs ys
+        | i -> i)
     | Leaf _, _ -> 1
     | _, _ -> -1
 end
