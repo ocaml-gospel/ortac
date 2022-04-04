@@ -59,4 +59,10 @@ module type S = sig
     val length : 'a array -> Z.t
     val for_all : ('a -> bool) -> 'a array -> bool
   end
+
+  module Repr : sig
+    include module type of Repr
+
+    val integer : Z.t Repr.ty
+  end
 end

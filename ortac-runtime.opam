@@ -17,6 +17,7 @@ depends: [
   "zarith"
   "monolith" {>= "20201026" & with-test}
   "pprint" {>= "20220103" & with-test}
+  "repr"
 ]
 build: [
   ["dune" "subst"] {dev}

@@ -1,4 +1,4 @@
 (library
  (name ortac_runtime)
  (public_name ortac-runtime)
- (libraries fmt ppxlib zarith))
+ (libraries fmt ppxlib zarith repr))

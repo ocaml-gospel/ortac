@@ -32,7 +32,7 @@ depends: [
   "fmt"
   "ppxlib" {>= "0.20.0"}
   "gospel"
-  "repr"
+  "repr" {with-test}
   "alcotest" {with-test}
   "pprint" {with-test}
   "ortac-runtime" {with-test}
