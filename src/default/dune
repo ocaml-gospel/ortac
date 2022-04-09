@@ -2,4 +2,5 @@
  (name ortac_default)
  (preprocess
   (pps ppxlib.metaquot))
+ (package ortac)
  (libraries ortac_core fmt gospel ppxlib ppxlib.astlib))

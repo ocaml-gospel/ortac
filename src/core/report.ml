@@ -13,27 +13,31 @@ let xpost ppf (xp : xpost) =
 let xposts ppf = List.iter (xpost ppf)
 
 let value ppf (v : value) =
-  if v.ghost then W.pp ppf (W.Ghost_value v.name, v.loc)
-  else (
-    terms ppf v.preconditions;
-    terms ppf v.postconditions;
-    xposts ppf v.xpostconditions)
+  match v.ghost with
+  | Gospel.Tast.Ghost -> W.pp ppf (W.Ghost_value v.name, v.loc)
+  | Nonghost ->
+      terms ppf v.preconditions;
+      terms ppf v.postconditions;
+      xposts ppf v.xpostconditions
 
 let type_ ppf (t : type_) =
-  if t.ghost then W.pp ppf (W.Ghost_type t.name, t.loc)
-  else (
-    List.iter
-      (fun (m, _) ->
-        let t = (W.Unsupported_model (t.name, m), t.loc) in
-        W.pp ppf t)
-      t.models;
-    (* Result.iter_error (W.pp ppf) t.equality; *)
-    (* Result.iter_error (W.pp ppf) t.comparison; *)
-    (* Result.iter_error (W.pp ppf) t.copy; *)
-    invariants ppf t.invariants)
+  match t.ghost with
+  | Gospel.Tast.Ghost -> W.pp ppf (W.Ghost_type t.name, t.loc)
+  | Nonghost ->
+      List.iter
+        (fun (m, _) ->
+          let t = (W.Unsupported_model (t.name, m), t.loc) in
+          W.pp ppf t)
+        t.models;
+      (* Result.iter_error (W.pp ppf) t.equality; *)
+      (* Result.iter_error (W.pp ppf) t.comparison; *)
+      (* Result.iter_error (W.pp ppf) t.copy; *)
+      invariants ppf t.invariants
 
 let constant ppf (c : constant) =
-  if c.ghost then W.pp ppf (W.Ghost_value c.name, c.loc) else terms ppf c.checks
+  match c.ghost with
+  | Gospel.Tast.Ghost -> W.pp ppf (W.Ghost_value c.name, c.loc)
+  | Nonghost -> terms ppf c.checks
 
 let definition ppf w loc = function
   | None -> W.pp ppf (w, loc)

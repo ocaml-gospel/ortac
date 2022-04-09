@@ -1,5 +1,5 @@
 let test_forall _i _j = 42
-let double_forall _i _j = ()
+let double_forall _i _j = 42
 
 let rec power x n =
   if n = 0 then 1

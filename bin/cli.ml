@@ -17,7 +17,9 @@ let main frontend input output () =
     match frontend with
     | Default -> Ortac_default.generate input channel
     | Monolith -> Ortac_monolith.generate input channel
-  with e -> Ppxlib.Location.report_exception Format.err_formatter e
+  with Gospel.Warnings.Error e ->
+    Fmt.epr "%a@." Gospel.Warnings.pp e;
+    exit 1
 
 open Cmdliner
 

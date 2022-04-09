@@ -14,7 +14,6 @@ let rec ty2gen drv (ty : Ttypes.ty) =
   | Tyapp (tys, tyl) -> tyapp2gen drv tys tyl
 
 and tyapp2gen drv (tys : Ttypes.tysymbol) (tyl : Ttypes.ty list) =
-  let get_ts = Ortac_core.Drv.get_ts drv in
   if Ttypes.ts_equal tys Ttypes.ts_unit then [%expr Gen.unit]
   else if Ttypes.ts_equal tys Ttypes.ts_bool then [%expr Gen.bool]
   else if Ttypes.ts_equal tys Ttypes.ts_char then [%expr Gen.char]
@@ -24,12 +23,9 @@ and tyapp2gen drv (tys : Ttypes.tysymbol) (tyl : Ttypes.ty list) =
   else if Ttypes.ts_equal tys Ttypes.ts_list && List.length tyl = 1 then
     [%expr Gen.list [%e ty2gen drv (List.hd tyl)]]
   else if Ttypes.is_ts_tuple tys then tuple drv tyl
-  else if Ttypes.ts_equal tys (get_ts [ "Gospelstdlib"; "int" ]) then
-    [%expr Gen.int Int.max_int]
-  else if
-    Ttypes.ts_equal tys (get_ts [ "Gospelstdlib"; "array" ])
-    && List.length tyl = 1
-  then [%expr Gen.array [%e ty2gen drv (List.hd tyl)]]
+  else if Ttypes.ts_equal tys Ttypes.ts_int then [%expr Gen.int Int.max_int]
+  else if Ttypes.ts_equal tys Ttypes.ts_array && List.length tyl = 1 then
+    [%expr Gen.array [%e ty2gen drv (List.hd tyl)]]
   else
     unsupported
       (Printf.sprintf "%s Monolith generator" tys.ts_ident.id_str)
@@ -42,7 +38,7 @@ and tuple drv tyl =
   in
   [%expr fun () -> [%e tuple]]
 
-let lsymbol2gen drv (ls : Tterm.lsymbol) =
+let lsymbol2gen drv (ls : Symbols.lsymbol) =
   match ls.ls_value with
   | Some ty -> ty2gen drv ty
   | None -> failwith "can't find type to build generator"
@@ -71,10 +67,10 @@ let variant_generator drv (constructors : Tast.constructor_decl list) =
       v.(Gen.int (Array.length v) ()) ()]
 
 let record_generator drv (rec_decl : Tast.rec_declaration) =
-  let field (ld : Tterm.lsymbol Tast.label_declaration) =
+  let field (ld : Symbols.lsymbol Tast.label_declaration) =
     Printf.sprintf "R.%s" ld.ld_field.ls_name.id_str
   in
-  let gen (ld : Tterm.lsymbol Tast.label_declaration) =
+  let gen (ld : Symbols.lsymbol Tast.label_declaration) =
     let gen = lsymbol2gen drv ld.ld_field in
     B.eapply gen [ A.eunit ~loc ]
   in
@@ -90,7 +86,6 @@ let generator_expr drv (ty_kind : Tast.type_kind) =
   | Pty_abstract -> None
   | Pty_variant constructors -> Some (variant_generator drv constructors)
   | Pty_record rec_decl -> Some (record_generator drv rec_decl)
-  | Pty_open -> None
 
 let generator_definition drv (type_decl : Tast.type_declaration) =
   let id = B.pvar type_decl.td_ts.ts_ident.id_str in

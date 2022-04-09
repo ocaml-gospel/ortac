@@ -26,27 +26,27 @@ val if_forall : int -> int
 (*@ y = if_forall x
     requires if forall i. 0 <= i < 10 -> x <> i then x = 10 else x = 3 *)
 
-val equiv : unit -> unit
-(*@ equiv ()
+val equiv : unit -> int
+(*@ y = equiv ()
     ensures (1 = 2) <-> (2 = 3) *)
 
-val exists_ : unit -> unit
-(*@ exists_ ()
+val exists_ : unit -> int
+(*@ y = exists_ ()
     ensures exists x. 0 <= x < 10 /\ x = 3 *)
 
 (* Pattern matching *)
 
 type t = A | B of string
 
-val a : t -> unit
-(*@ a x
+val a : t -> int
+(*@ y = a x
     requires match x with
             | A -> true
             | B s -> false
     requires x = A *)
 
-val b : t -> unit
-(*@ b x
+val b : t -> int
+(*@ y = b x
     requires match x with
             | A -> false
             | B _ -> true *)

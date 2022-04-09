@@ -6,6 +6,7 @@ at this point, and its behaviour is still unstable.
 ## Installation
 
 ```
+opam pin add -y https://github.com/ocaml-gospel/gospel.git
 opam pin add -y https://github.com/ocaml-gospel/ortac.git
 opam install ortac
 ```

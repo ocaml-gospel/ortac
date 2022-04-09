@@ -3,13 +3,13 @@ let not_lazy_or x = x
 let not_lazy_and x = x
 let scope1 x = x
 let if_forall x = x
-let equiv () = ()
-let exists_ () = ()
+let equiv () = 1
+let exists_ () = 1
 
 type t = A | B of string
 
-let a = ignore
-let b = ignore
+let a _ = 1
+let b _ = 1
 
 type peano = O | S of peano
 

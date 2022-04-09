@@ -12,7 +12,7 @@ let rec pattern pn =
   match pn with
   | Tterm.Pwild -> ppat_any
   | Tterm.Pvar v -> pvar (str "%a" Ident.pp v.vs_name)
-  | Tterm.Papp (l, pl) when Tterm.is_fs_tuple l ->
+  | Tterm.Papp (l, pl) when Symbols.is_fs_tuple l ->
       ppat_tuple (List.map pattern' pl)
   | Tterm.Papp (l, pl) ->
       let args =
@@ -22,17 +22,19 @@ let rec pattern pn =
   | Tterm.Por (p1, p2) -> ppat_or (pattern' p1) (pattern' p2)
   | Tterm.Pas (p, v) ->
       ppat_alias (pattern' p) (noloc (str "%a" Ident.pp v.vs_name))
+  | Tterm.Pinterval (c1, c2) -> ppat_interval (Pconst_char c1) (Pconst_char c2)
+  | Tterm.Pconst c -> ppat_constant c
 
 type bound = Inf of expression | Sup of expression
 
-let rec bounds ~driver ~loc (var : Tterm.vsymbol) (t1 : Tterm.term)
+let rec bounds ~driver ~loc (var : Symbols.vsymbol) (t1 : Tterm.term)
     (t2 : Tterm.term) =
   let unsupported () =
     raise (W.Error (Unsupported "ill formed quantification", loc))
   in
   (* [comb] extracts a bound from an the operator [f] and expression [e].
      [right] indicates if [e] is on the right side of the operator. *)
-  let comb ~right (f : Tterm.lsymbol) e =
+  let comb ~right (f : Symbols.lsymbol) e =
     match f.ls_name.id_str with
     | "infix >=" -> if right then Inf e else Sup e
     | "infix <=" -> if right then Sup e else Inf e
@@ -61,14 +63,14 @@ and unsafe_term ~driver (t : Tterm.term) : expression =
   | Tvar { vs_name; _ } -> evar (str "%a" Ident.pp vs_name)
   | Tconst c -> econst c
   | Tfield (t, f) -> pexp_field (term t) (lident f.ls_name.id_str)
-  | Tapp (fs, []) when Tterm.(ls_equal fs fs_bool_true) -> [%expr true]
-  | Tapp (fs, []) when Tterm.(ls_equal fs fs_bool_false) -> [%expr false]
-  | Tapp (fs, tlist) when Tterm.is_fs_tuple fs ->
+  | Tapp (fs, []) when Symbols.(ls_equal fs fs_bool_true) -> [%expr true]
+  | Tapp (fs, []) when Symbols.(ls_equal fs fs_bool_false) -> [%expr false]
+  | Tapp (fs, tlist) when Symbols.is_fs_tuple fs ->
       List.map term tlist |> pexp_tuple
   | Tapp (ls, tlist) when Drv.is_function ls driver ->
       let f = Drv.find_function ls driver in
       eapply (evar f) (List.map term tlist)
-  | Tapp (ls, tlist) when Tterm.(ls_equal ls fs_apply) ->
+  | Tapp (ls, tlist) when Symbols.(ls_equal ls fs_apply) ->
       let f, args =
         match tlist with
         | [] -> assert false
@@ -93,15 +95,16 @@ and unsafe_term ~driver (t : Tterm.term) : expression =
         [%e term t2]]
   | Tcase (t, ptl) ->
       List.map
-        (fun (p, t) ->
-          case ~guard:None ~lhs:(pattern p.Tterm.p_node) ~rhs:(term t))
+        (fun (p, g, t) ->
+          case ~guard:(Option.map term g) ~lhs:(pattern p.Tterm.p_node)
+            ~rhs:(term t))
         ptl
       |> pexp_match (term t)
   | Tquant (Tterm.Tlambda, args, t) ->
       let t = term t in
       let args =
         List.map
-          (fun (vs : Tterm.vsymbol) ->
+          (fun (vs : Symbols.vsymbol) ->
             (Nolabel, pvar (str "%a" Ident.pp vs.vs_name)))
           args
       in
@@ -182,7 +185,7 @@ let conditions ~driver ~term_printer fail_violated fail_nonexec terms =
 
 let with_models ~driver:_ fields (type_ : type_) =
   let models =
-    List.map (fun ((ls : Tterm.lsymbol), b) -> (ls.ls_name.id_str, b)) fields
+    List.map (fun ((ls : Symbols.lsymbol), b) -> (ls.ls_name.id_str, b)) fields
   in
   { type_ with models }
 
@@ -213,7 +216,9 @@ let subst_invariant_fields var (t : Tterm.term) =
         { t with t_node }
     | Tterm.Tcase (t, ptl) ->
         let t = aux t in
-        let ptl = List.map (fun (p, t) -> (p, aux t)) ptl in
+        let ptl =
+          List.map (fun (p, g, t) -> (p, Option.map aux g, aux t)) ptl
+        in
         let t_node = Tterm.Tcase (t, ptl) in
         { t with t_node }
     | Tquant (q, vsl, t) ->
@@ -236,14 +241,18 @@ let subst_invariant_fields var (t : Tterm.term) =
   in
   aux t
 
-let invariant ~driver ~term_printer (invariant : Tterm.term) =
+let invariant ~driver ~term_printer self (invariant : Tterm.term) =
   let function_name = gen_symbol ~prefix:"__invariant_" () in
-  let instance_id = Ident.create ~loc (gen_symbol ~prefix:"__self_" ()) in
+  let instance_id =
+    match self with
+    | None -> Ident.create ~loc (gen_symbol ~prefix:"__self_" ())
+    | Some self -> self.Symbols.vs_name
+  in
   let instance_arg = (Nolabel, pvar (Fmt.str "%a" Ident.pp instance_id)) in
   let instance_term =
     (* XXX This is not the correct type or location, but it doesn't matter for
        the translation *)
-    Tterm.t_var { vs_name = instance_id; vs_ty = Ttypes.ty_unit } loc
+    Tterm_helper.t_var { vs_name = instance_id; vs_ty = Ttypes.ty_unit } loc
   in
 
   let register_name = gen_symbol ~prefix:"__error_" () in
@@ -270,8 +279,8 @@ let invariant ~driver ~term_printer (invariant : Tterm.term) =
   in
   { txt; loc; translation }
 
-let with_invariants ~driver ~term_printer invariants (type_ : type_) =
-  let invariants = List.map (invariant ~driver ~term_printer) invariants in
+let with_invariants ~driver ~term_printer (self, invariants) (type_ : type_) =
+  let invariants = List.map (invariant ~driver ~term_printer self) invariants in
   { type_ with invariants }
 
 let with_consumes consumes (value : value) =
@@ -356,8 +365,8 @@ let with_constant_checks ~driver ~term_printer checks (constant : constant) =
   { constant with checks }
 
 let rec xpost_pattern ~driver exn = function
-  | Tterm.Papp (ls, []) when Tterm.(ls_equal ls (fs_tuple 0)) -> pvar exn
-  | Tterm.Papp (ls, _l) when not (Tterm.is_fs_tuple ls) -> assert false
+  | Tterm.Papp (ls, []) when Symbols.(ls_equal ls (fs_tuple 0)) -> pvar exn
+  | Tterm.Papp (ls, _l) when not (Symbols.is_fs_tuple ls) -> assert false
   | Tterm.Por (p1, p2) ->
       ppat_or
         (xpost_pattern ~driver exn p1.p_node)
@@ -414,7 +423,7 @@ let with_xposts ~driver ~term_printer xposts (value : value) =
   { value with xpostconditions }
 
 let function_definition ~driver ls i t : term =
-  let txt = Fmt.str "%a" Tterm.print_term t in
+  let txt = Fmt.str "%a" Tterm_printer.print_term t in
   let loc = t.t_loc in
   let translation =
     let driver = Drv.add_function ls i driver in
@@ -426,7 +435,7 @@ let axiom_definition ~driver ~register_name t : term =
   let register_name = evar register_name in
   let fail_violated = F.violated_axiom ~register_name in
   let fail_nonexec exn = F.axiom_failure ~exn ~register_name in
-  let txt = Fmt.str "%a" Tterm.print_term t in
+  let txt = Fmt.str "%a" Tterm_printer.print_term t in
   let loc = t.t_loc in
   let translation =
     term ~driver fail_nonexec t

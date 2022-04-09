@@ -14,7 +14,6 @@ let rec ty2printer drv (ty : Ttypes.ty) =
   | Tyapp (tys, tyl) -> tyapp2printer drv tys tyl
 
 and tyapp2printer drv (tys : Ttypes.tysymbol) (tyl : Ttypes.ty list) =
-  let get_ts = Ortac_core.Drv.get_ts drv in
   if Ttypes.ts_equal tys Ttypes.ts_unit then [%expr Print.unit]
   else if Ttypes.ts_equal tys Ttypes.ts_bool then [%expr Print.bool]
   else if Ttypes.ts_equal tys Ttypes.ts_char then [%expr Print.char]
@@ -23,12 +22,9 @@ and tyapp2printer drv (tys : Ttypes.tysymbol) (tyl : Ttypes.ty list) =
   else if Ttypes.ts_equal tys Ttypes.ts_list && List.length tyl = 1 then
     [%expr Print.list [%e ty2printer drv (List.hd tyl)]]
   else if Ttypes.is_ts_tuple tys then tuple drv tyl
-  else if Ttypes.ts_equal tys (get_ts [ "Gospelstdlib"; "int" ]) then
-    [%expr Print.int]
-  else if
-    Ttypes.ts_equal tys (get_ts [ "Gospelstdlib"; "array" ])
-    && List.length tyl = 1
-  then [%expr Print.array [%e ty2printer drv (List.hd tyl)]]
+  else if Ttypes.ts_equal tys Ttypes.ts_int then [%expr Print.int]
+  else if Ttypes.ts_equal tys Ttypes.ts_array && List.length tyl = 1 then
+    [%expr Print.array [%e ty2printer drv (List.hd tyl)]]
   else unsupported tys.ts_ident.id_str tys.ts_ident.id_loc
 
 and tuple drv tyl =
@@ -44,12 +40,12 @@ and tuple drv tyl =
       let [%p pat] = [%e B.evar x] in
       M.print_tuple [%e tuple]]
 
-let lsymbol2printer drv (ls : Tterm.lsymbol) =
+let lsymbol2printer drv (ls : Symbols.lsymbol) =
   match ls.ls_value with
   | Some ty -> ty2printer drv ty
   | None -> failwith "can't find type to build printer"
 
-let mk_field drv (ld : Tterm.lsymbol Tast.label_declaration) =
+let mk_field drv (ld : Symbols.lsymbol Tast.label_declaration) =
   let field = ld.ld_field.ls_name.id_str in
   let printer = lsymbol2printer drv ld.ld_field in
   [%expr [%e B.estring field], [%e printer] [%e B.evar field]]
@@ -57,7 +53,7 @@ let mk_field drv (ld : Tterm.lsymbol Tast.label_declaration) =
 let record_printer drv (rec_decl : Tast.rec_declaration) =
   let fields =
     List.map
-      (fun (ld : Tterm.lsymbol Tast.label_declaration) ->
+      (fun (ld : Symbols.lsymbol Tast.label_declaration) ->
         String.concat "." [ "R"; ld.ld_field.ls_name.id_str ])
       rec_decl.rd_ldl
   in
@@ -96,7 +92,6 @@ let printer_expr drv (ty_kind : Tast.type_kind) =
   | Pty_abstract -> None
   | Pty_variant constructors -> Some (variant_printer drv constructors)
   | Pty_record rec_decl -> Some (record_printer drv rec_decl)
-  | Pty_open -> None
 
 let printer_definition drv (type_decl : Tast.type_declaration) =
   let id = B.pvar type_decl.td_ts.ts_ident.id_str in

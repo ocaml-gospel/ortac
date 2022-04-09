@@ -2,4 +2,5 @@
  (name ortac_monolith)
  (preprocess
   (pps ppxlib.metaquot))
+ (package ortac)
  (libraries ortac_core monolith fmt gospel ppxlib ppxlib.astlib))

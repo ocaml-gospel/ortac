@@ -31,7 +31,6 @@ let rec ty2spec drv (ty : Ttypes.ty) =
   | Tyapp (ts, tl) -> tyapp2spec drv ts tl
 
 and tyapp2spec drv (ts : Ttypes.tysymbol) (tl : Ttypes.ty list) =
-  let get_ts = Ortac_core.Drv.get_ts drv in
   if Ttypes.ts_equal ts Ttypes.ts_unit then [%expr unit]
   else if Ttypes.ts_equal ts Ttypes.ts_char then [%expr char]
   else if Ttypes.ts_equal ts Ttypes.ts_bool then [%expr bool]
@@ -39,12 +38,9 @@ and tyapp2spec drv (ts : Ttypes.tysymbol) (tl : Ttypes.ty list) =
   else if Ttypes.ts_equal ts Ttypes.ts_string then [%expr string]
   else if Ttypes.ts_equal ts Ttypes.ts_list && List.length tl = 1 then
     [%expr list [%e ty2spec drv (List.hd tl)]]
-  else if Ttypes.ts_equal ts (get_ts [ "Gospelstdlib"; "int" ]) then
-    [%expr M.int]
-  else if
-    Ttypes.ts_equal ts (get_ts [ "Gospelstdlib"; "array" ])
-    && List.length tl = 1
-  then [%expr array [%e ty2spec drv (List.hd tl)]]
+  else if Ttypes.ts_equal ts Ttypes.ts_int then [%expr M.int]
+  else if Ttypes.ts_equal ts Ttypes.ts_array && List.length tl = 1 then
+    [%expr array [%e ty2spec drv (List.hd tl)]]
   else if Ttypes.is_ts_tuple ts && List.length tl = 2 then
     let a = (Nolabel, ty2spec drv (List.hd tl)) in
     let b = (Nolabel, ty2spec drv (List.nth tl 1)) in
@@ -56,7 +52,7 @@ let translate drv (lb_arg : Tast.lb_arg) =
   | Lunit -> [%expr unit]
   | _ ->
       let vs = Tast_helper.vs_of_lb_arg lb_arg in
-      let tn = vs.Tterm.vs_ty in
+      let tn = vs.Symbols.vs_ty in
       ty2spec drv tn
 
 let spec drv args ret =
