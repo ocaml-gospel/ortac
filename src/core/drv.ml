@@ -79,6 +79,7 @@ let stdlib =
     ([ "[]" ], "[]");
     ([ "infix ::" ], "(::)");
     ([ "infix =" ], "(=)");
+    ([ "prefix !" ], "!");
     ([ "Gospelstdlib"; "infix +" ], "Ortac_runtime.Z.add");
     ([ "Gospelstdlib"; "infix -" ], "Ortac_runtime.Z.sub");
     ([ "Gospelstdlib"; "infix *" ], "Ortac_runtime.Z.mul");

@@ -17,7 +17,7 @@ val get : 'a array -> int -> 'a
 (*@ axiom a :
       let arr = Array.make 10 0 in
       forall i. 0 <= i < 10 -> arr.(i) = 0 *)
-    
+
 val bad_get : 'a array -> int -> 'a
 (*@ o = bad_get arr i
     requires 0 <= i < Array.length arr
@@ -30,7 +30,7 @@ val set : 'a array -> int -> 'a -> unit
     (*
      ensures  forall j. 0 <= j < Array.length arr -> j <> i ->
              arr.(j) = old arr.(j) *)
-    *)
+*)
 
 val fill : 'a array -> int -> int -> 'a -> unit
 (*@ fill arr ofs len v
@@ -41,7 +41,7 @@ val length : 'a array -> int
 (*@ i = length a
     pure
     ensures i = Array.length a *)
-    
+
 val map : ('a -> 'b) -> 'a array -> 'b array
 (*@ arr = map f a
     ensures length arr = length a
@@ -53,10 +53,10 @@ val bad_map_length : ('a -> 'b) -> 'a array -> 'b array
     ensures forall i. 0 <= i < length a -> arr.(i) = f a.(i) *)
 
 val bad_map_fun : (int -> int) -> int array -> int array
- (*@ arr = bad_map_fun f a
-    ensures length arr = length a
-    ensures forall i. 0 <= i < length a -> arr.(i) = f a.(i) *)
-    
+(*@ arr = bad_map_fun f a
+   ensures length arr = length a
+   ensures forall i. 0 <= i < length a -> arr.(i) = f a.(i) *)
+
 val sort : int array -> unit
 (*@ sort a
     ensures forall i. 0 <= i < Array.length a
