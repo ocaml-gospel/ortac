@@ -37,3 +37,4 @@ let rec fill t a start =
 type alt_tree = Ealt | Nalt of (alt_tree * int * alt_tree)
 
 let make_alt_tree l x r = Nalt (l, x, r)
+let ref_access x = !x

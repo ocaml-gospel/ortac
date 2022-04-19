@@ -36,6 +36,9 @@ let trees () =
   check_raises_ortac "fill 2" (fun () -> fill E [||] 1 |> ignore);
   check_success "fill 3" (fun () -> fill (N (E, 42, E)) [| 0; 1 |] 1 |> ignore)
 
+let ref_access () =
+  check_success "good_ref" (fun () -> ref_access (ref 0) |> ignore)
+
 let suite =
   ( "Terms",
     [
@@ -45,4 +48,5 @@ let suite =
       ("patterns", `Quick, patterns);
       ("peano", `Quick, peano);
       ("trees", `Quick, trees);
+      ("ref_access", `Quick, ref_access);
     ] )
