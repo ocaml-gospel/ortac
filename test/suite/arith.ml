@@ -10,7 +10,7 @@ let forall () =
   check_success "formula satisfied" (fun () -> test_forall 2 3 |> ignore)
 
 let double_forall () =
-  check_success "double forall" (fun () -> double_forall (-10) 10)
+  check_success "double forall" (fun () -> double_forall (-10) 10 |> ignore)
 
 let power () =
   for i = 0 to 20 do

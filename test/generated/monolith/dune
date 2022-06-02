@@ -1,16 +1,17 @@
-(executable
- (name wrapper)
- (libraries pprint ortac-runtime-monolith monolith))
+; (executable
+;  (name wrapper)
+;  (libraries pprint ortac-runtime-monolith monolith))
 
-(alias
- (name runtest)
- (deps wrapper.exe))
+; (rule
+;  (alias runtest)
+;  (deps wrapper.exe)
+;  (action (progn)))
 
 (rule
  (target wrapper.ml)
  (action
   (with-stderr-to
    errors
-   (run ortac -f monolith -o %{target} lib.mli))))
+   (run ortac -f monolith -o %{target} %{dep:lib.mli}))))
 
 (include ../dune.common)

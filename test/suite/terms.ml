@@ -12,14 +12,14 @@ let scopes () =
 
 let logic () =
   check_success "forall in if" (fun () -> if_forall 3 |> ignore);
-  check_success "equivalence" equiv;
-  check_success "exists" exists_
+  check_success "equivalence" (fun () -> equiv () |> ignore);
+  check_success "exists" (fun () -> exists_ () |> ignore)
 
 let patterns () =
-  check_success "valid match" (fun () -> a A);
-  check_success "valid match with argument" (fun () -> b (B "hello"));
-  check_raises_ortac "invalid match" (fun () -> a (B "hello"));
-  check_raises_ortac "invalid match with arguments" (fun () -> b A)
+  check_success "valid match" (fun () -> a A |> ignore);
+  check_success "valid match with argument" (fun () -> b (B "hello") |> ignore);
+  check_raises_ortac "invalid match" (fun () -> a (B "hello") |> ignore);
+  check_raises_ortac "invalid match with arguments" (fun () -> b A |> ignore)
 
 let peano () =
   check_success "succ" (fun () -> succ O |> ignore);

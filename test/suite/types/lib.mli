@@ -1,5 +1,11 @@
-type t = { x : int; y : bool }
-(*@ invariant y = false *)
+type t = private { x : int; y : bool }
+(*@ with t
+    invariant t.y = false *)
+
+val v : int -> bool -> t
+(*@ t = v x y
+    ensures x = t.x
+    ensures y = t.y *)
 
 val e : t
 (*@ ensures e.x >= 0 *)

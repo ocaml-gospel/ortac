@@ -1,6 +1,7 @@
-type set = { size : int; mutable mask : int }
-(*@ invariant 0 <= size <= 32
-    invariant 0 <= mask < pow 2 size *)
+type set = private { size : int; mutable mask : int }
+(*@ with t
+    invariant 0 <= t.size <= 32
+    invariant 0 <= t.mask < pow 2 t.size *)
 
 (*@ predicate mem (i: integer) (bv: set) =
       logand bv.mask (pow 2 i) <> 0 *)

@@ -1,12 +1,14 @@
 (test
  (name wrapper)
+ (package ortac)
  (libraries ortac-runtime))
 
 (rule
  (target wrapper.ml)
+ (package ortac)
  (action
   (with-stderr-to
    errors
-   (run ortac -o %{target} lib.mli))))
+   (run ortac -o %{target} %{dep:lib.mli}))))
 
 (include ../dune.common)

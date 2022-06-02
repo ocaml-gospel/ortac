@@ -26,15 +26,19 @@ build: [
 ]
 
 depends: [
-  "ocaml" {>= "4.10.0"}
-  "dune" {>= "2.7"}
+  "ocaml" {>= "4.11.0"}
+  "dune" {>= "3.0"}
   "cmdliner" {>= "1.1.0"}
   "fmt"
-  "ppxlib" {>= "0.20.0"}
+  "ppxlib" {>= "0.26.0"}
   "gospel"
   "alcotest" {with-test}
   "pprint" {with-test}
   "ortac-runtime" {with-test}
   "ortac-runtime-monolith" {with-test}
   "monolith" {>= "20201026"}
+]
+
+pin-depends: [
+  "gospel.dev" "git+https://github.com/ocaml-gospel/gospel#2f902ad50168a10135051904f7857bb45fe8b3f9"
 ]

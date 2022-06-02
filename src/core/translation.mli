@@ -17,14 +17,14 @@ val with_pres :
 
 val with_models :
   driver:Drv.t ->
-  (Tterm.lsymbol * bool) list ->
+  (Symbols.lsymbol * bool) list ->
   Translated.type_ ->
   Translated.type_
 
 val with_invariants :
   driver:Drv.t ->
   term_printer:(Gospel.Tterm.term -> string) ->
-  Gospel.Tterm.term list ->
+  Gospel.Symbols.vsymbol option * Gospel.Tterm.term list ->
   Translated.type_ ->
   Translated.type_
 
@@ -56,7 +56,7 @@ val with_xposts :
   Translated.value
 
 val function_definition :
-  driver:Drv.t -> Tterm.lsymbol -> string -> Tterm.term -> Translated.term
+  driver:Drv.t -> Symbols.lsymbol -> string -> Tterm.term -> Translated.term
 
 val axiom_definition :
   driver:Drv.t -> register_name:string -> Tterm.term -> Translated.term

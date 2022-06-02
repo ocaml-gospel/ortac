@@ -55,7 +55,7 @@ module Mutability = struct
             if List.exists alpha tyl then dep else f (List.map (ty ~driver) tyl)
         | _ -> assert false)
 
-  let lsymbol ~driver (ls : Tterm.lsymbol) =
+  let lsymbol ~driver (ls : Symbols.lsymbol) =
     (* To determine the mutability of a `lsymbol` we look at its `ls_value`
        which is a `Ttypes.ty option`.
        If there is none, the mutability is unknown *)
@@ -65,7 +65,7 @@ module Mutability = struct
     (* The mutability of a constructor is the max od the mutability of its argument *)
     List.map (ty ~driver) cd.cd_cs.ls_args |> List.fold_left max min_mut
 
-  let field_declaration ~driver (ld : Tterm.lsymbol Tast.label_declaration) =
+  let field_declaration ~driver (ld : Symbols.lsymbol Tast.label_declaration) =
     (* A record field is mutable if it is annotated as mutable, if not we look
        at the lsymbol it contains i.e. the field itself. *)
     match ld.ld_mut with
@@ -90,10 +90,9 @@ module Mutability = struct
         | Pty_record rd ->
             (* The mutability of a record is the max of the mutability of its fields *)
             List.map (field_declaration ~driver) rd.rd_ldl
-            |> List.fold_left max min_mut
-        | Pty_open -> Translated.Unknown (* ? *))
+            |> List.fold_left max min_mut)
 
-  let mutable_model ~driver (ty_fields : (Tterm.lsymbol * bool) list) =
+  let mutable_model ~driver (ty_fields : (Symbols.lsymbol * bool) list) =
     List.map
       (* if a model is annotated as mutable, it is mutable, if not we look at
          the type of the model *)

@@ -1,5 +1,6 @@
 (rule
  (target lib_rtac.ml)
+ (package ortac)
  (action
   (with-stdout-to
     %{target}
@@ -7,5 +8,6 @@
 
 (rule
  (target lib_rtac.mli)
+ (package ortac)
  (action
   (copy %{dep:lib.mli} %{target})))

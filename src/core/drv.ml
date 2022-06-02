@@ -1,5 +1,5 @@
 open Gospel.Tmodule
-module L = Map.Make (Gospel.Tterm.LS)
+module L = Map.Make (Gospel.Symbols.LS)
 module T = Map.Make (Gospel.Ttypes.Ts)
 
 type t = {
@@ -34,42 +34,40 @@ let get_ts t = get_env ns_find_ts t.env
 let stdlib_types =
   let open Translated in
   let loc = Ppxlib.Location.none in
+  let ghost = Gospel.Tast.Nonghost in
   [
-    ([ "unit" ], type_ ~name:"unit" ~loc ~mutable_:Immutable ~ghost:false);
-    ([ "string" ], type_ ~name:"string" ~loc ~mutable_:Immutable ~ghost:false);
-    ([ "char" ], type_ ~name:"char" ~loc ~mutable_:Immutable ~ghost:false);
-    ([ "float" ], type_ ~name:"float" ~loc ~mutable_:Immutable ~ghost:false);
-    ([ "bool" ], type_ ~name:"bool" ~loc ~mutable_:Immutable ~ghost:false);
-    ([ "integer" ], type_ ~name:"integer" ~loc ~mutable_:Immutable ~ghost:false);
+    ([ "unit" ], type_ ~name:"unit" ~loc ~mutable_:Immutable ~ghost);
+    ([ "string" ], type_ ~name:"string" ~loc ~mutable_:Immutable ~ghost);
+    ([ "char" ], type_ ~name:"char" ~loc ~mutable_:Immutable ~ghost);
+    ([ "float" ], type_ ~name:"float" ~loc ~mutable_:Immutable ~ghost);
+    ([ "bool" ], type_ ~name:"bool" ~loc ~mutable_:Immutable ~ghost);
+    ([ "integer" ], type_ ~name:"integer" ~loc ~mutable_:Immutable ~ghost);
     ( [ "option" ],
       type_ ~name:"option" ~loc
         ~mutable_:(Dependant (function [ m ] -> m | _ -> assert false))
-        ~ghost:false );
+        ~ghost );
     ( [ "list" ],
       type_ ~name:"list" ~loc
         ~mutable_:(Dependant (function [ m ] -> m | _ -> assert false))
-        ~ghost:false );
+        ~ghost );
     ( [ "Gospelstdlib"; "seq" ],
       type_ ~name:"seq" ~loc
         ~mutable_:(Dependant (function [ m ] -> m | _ -> assert false))
-        ~ghost:false );
+        ~ghost );
     ( [ "Gospelstdlib"; "bag" ],
       type_ ~name:"bag" ~loc
         ~mutable_:(Dependant (function [ m ] -> m | _ -> assert false))
-        ~ghost:false );
+        ~ghost );
     ( [ "Gospelstdlib"; "ref" ],
-      type_ ~name:"ref" ~loc
-        ~mutable_:(Dependant (fun _ -> Mutable))
-        ~ghost:false );
-    ( [ "Gospelstdlib"; "array" ],
-      type_ ~name:"array" ~loc
-        ~mutable_:(Dependant (fun _ -> Mutable))
-        ~ghost:false );
+      type_ ~name:"ref" ~loc ~mutable_:(Dependant (fun _ -> Mutable)) ~ghost );
+    ( [ "array" ],
+      type_ ~name:"array" ~loc ~mutable_:(Dependant (fun _ -> Mutable)) ~ghost
+    );
     ( [ "Gospelstdlib"; "set" ],
       type_ ~name:"set" ~loc
         ~mutable_:(Dependant (function [ m ] -> m | _ -> assert false))
-        ~ghost:false );
-    ([ "int" ], type_ ~name:"int" ~loc ~mutable_:Immutable ~ghost:false);
+        ~ghost );
+    ([ "int" ], type_ ~name:"int" ~loc ~mutable_:Immutable ~ghost);
   ]
 
 let stdlib =
