@@ -100,6 +100,24 @@ let stdlib =
     ([ "Gospelstdlib"; "Array"; "length" ], "Ortac_runtime.Array.length");
     ([ "Gospelstdlib"; "Array"; "get" ], "Ortac_runtime.Array.get");
     ([ "Gospelstdlib"; "Array"; "for_all" ], "Ortac_runtime.Array.for_all");
+    (* List *)
+    ([ "Gospelstdlib"; "List"; "length" ], "Ortac_runtime.List.length");
+    ([ "Gospelstdlib"; "List"; "hd" ], "List.hd");
+    ([ "Gospelstdlib"; "List"; "tl" ], "List.tl");
+    ([ "Gospelstdlib"; "List"; "nth" ], "List.nth");
+    ([ "Gospelstdlib"; "List"; "nth_opt" ], "List.nth_opt");
+    ([ "Gospelstdlib"; "List"; "rev" ], "List.rev");
+    ([ "Gospelstdlib"; "List"; "init" ], "List.init");
+    ([ "Gospelstdlib"; "List"; "map" ], "List.map");
+    ([ "Gospelstdlib"; "List"; "mapi" ], "List.mapi");
+    ([ "Gospelstdlib"; "List"; "fold_left" ], "List.fold_left");
+    ([ "Gospelstdlib"; "List"; "fold_right" ], "List.fold_right");
+    ([ "Gospelstdlib"; "List"; "map2" ], "List.map2");
+    ([ "Gospelstdlib"; "List"; "for_all" ], "List.for_all");
+    ([ "Gospelstdlib"; "List"; "_exists" ], "List.exists");
+    ([ "Gospelstdlib"; "List"; "for_all2" ], "List.for_all2");
+    ([ "Gospelstdlib"; "List"; "_exists2" ], "List.exists2");
+    ([ "Gospelstdlib"; "List"; "mem" ], "List.mem");
   ]
 
 let init module_name env =

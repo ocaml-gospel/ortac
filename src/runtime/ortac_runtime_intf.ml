@@ -59,4 +59,8 @@ module type S = sig
     val length : 'a array -> Z.t
     val for_all : ('a -> bool) -> 'a array -> bool
   end
+
+  module List : sig
+    val length : 'a list -> Z.t
+  end
 end

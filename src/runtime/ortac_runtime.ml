@@ -147,3 +147,7 @@ module Array = struct
   let length arr = Array.length arr |> Z.of_int
   let for_all = Array.for_all
 end
+
+module List = struct
+  let length l = Z.of_int (List.length l)
+end

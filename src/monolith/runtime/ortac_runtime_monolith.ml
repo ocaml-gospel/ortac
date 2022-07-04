@@ -16,7 +16,7 @@ module Errors = struct
   let report t =
     match t.errors with
     | [] -> ()
-    | errs when List.exists is_pre errs -> raise Monolith.PleaseBackOff
+    | errs when Stdlib.List.exists is_pre errs -> raise Monolith.PleaseBackOff
     | _ ->
         Fmt.flush Fmt.stderr (pp_error_report Fmt.stderr t);
         (* pp_error_report Fmt.stderr t; *)
