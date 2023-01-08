@@ -25,6 +25,11 @@ val check : bool -> bool
 (*@ y = check x
     checks x = true *)
 
+val bad_check_modifies : bool ref -> bool
+(*@ y = bad_check_modifies x
+    modifies x
+    checks !x = true *)
+
 val bad_check : bool -> bool
 (*@ y = bad_check x
     checks x = true *)

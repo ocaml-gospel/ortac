@@ -30,6 +30,10 @@ let valid_checks () =
       check false |> ignore)
 
 let bad_checks () =
+  check_raises_ortac "bad_check_modifies (ref false)" (fun () ->
+      bad_check_modifies (ref false) |> ignore);
+  check_success "bad_check_modifies (ref true)" (fun () ->
+      bad_check_modifies (ref true) |> ignore);
   check_raises_ortac "bad_check true" (fun () -> bad_check true |> ignore);
   check_raises "bad_check false" (Invalid_argument "invalid") (fun () ->
       bad_check false |> ignore);
