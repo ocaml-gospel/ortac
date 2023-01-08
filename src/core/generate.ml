@@ -21,19 +21,32 @@ let terms terms next = List.fold_left (fun acc t -> term t acc) next terms
 let compute_check (c : Translated.check) next =
   match c.translations with
   | Error _ -> next
-  | Ok ((x, e), _, _) ->
+  | Ok ((x, e), _) ->
       pexp_let Nonrecursive [ value_binding ~pat:(pvar x) ~expr:e ] next
 
 let compute_checks checks next =
   List.fold_left (fun acc t -> compute_check t acc) next checks
 
-let check positive (c : Translated.check) next =
+let check_positive (c : Translated.check) next =
   match c.translations with
   | Error _ -> next
-  | Ok (_, p, n) -> pexp_sequence (if positive then p else n) next
+  | Ok (_, p) -> pexp_sequence p next
 
-let checks positive checks next =
-  List.fold_left (fun acc t -> check positive t acc) next checks
+let checks ~register_name positive checks next =
+  if positive then
+    List.fold_left (fun acc t -> check_positive t acc) next checks
+  else
+    let all_checks =
+      List.fold_left
+        (fun acc c ->
+          match c.translations with
+          | Error _ -> acc
+          | Ok ((x, _), _) -> eapply (evar "(&&)") [ acc; evar x ])
+        (ebool true) checks
+    in
+    [%expr
+      if [%e all_checks] then [%e F.unexpected_checks ~register_name];
+      [%e next]]
 
 let invariants ~register_name pos instance (t : type_) next =
   List.fold_left
@@ -64,14 +77,20 @@ let group_xpost (v : Translated.value) =
         ~lhs:[%pat? (Stack_overflow | Out_of_memory) as e]
         ~rhs:
           [%expr
-            [%e checks true v.checks @@ invariants @@ F.report ~register_name];
+            [%e
+              checks ~register_name true v.checks
+              @@ invariants
+              @@ F.report ~register_name];
             raise e];
       case ~guard:None
         ~lhs:[%pat? e]
         ~rhs:
           [%expr
             [%e F.unexpected_exn ~allowed_exn:[] ~exn:(evar "e") ~register_name];
-            [%e checks true v.checks @@ invariants @@ F.report ~register_name];
+            [%e
+              checks ~register_name true v.checks
+              @@ invariants
+              @@ F.report ~register_name];
             raise e];
     ]
   in
@@ -81,7 +100,10 @@ let group_xpost (v : Translated.value) =
         ~lhs:[%pat? Invalid_argument _ as e]
         ~rhs:
           [%expr
-            [%e checks false v.checks @@ invariants @@ F.report ~register_name];
+            [%e
+              checks ~register_name false v.checks
+              @@ invariants
+              @@ F.report ~register_name];
             raise e]
     in
     if v.checks = [] then default_cases else invalid_arg_case :: default_cases
@@ -111,7 +133,9 @@ let group_xpost (v : Translated.value) =
         esequence
           [
             matches;
-            checks true v.checks @@ invariants @@ F.report ~register_name;
+            checks ~register_name true v.checks
+            @@ invariants
+            @@ F.report ~register_name;
             eapply (evar "raise") [ evar e ];
           ]
       in
@@ -146,7 +170,7 @@ let value (v : Translated.value) =
     @@ report
     @@ pexp_let Nonrecursive [ value_binding ~pat:pret ~expr:try_call ]
     @@ terms v.postconditions
-    @@ checks true v.checks
+    @@ checks ~register_name true v.checks
     @@ vars_invariants ~register_name "Post" true v.arguments
     @@ vars_invariants ~register_name "Post" false v.returns
     @@ report

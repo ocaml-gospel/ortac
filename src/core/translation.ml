@@ -340,10 +340,7 @@ let with_checks ~driver ~term_printer checks (value : value) =
               ( (check_id, t),
                 [%expr
                   if not [%e evar check_id] then
-                    [%e F.uncaught_checks ~register_name ~term:txt]],
-                [%expr
-                  if [%e evar check_id] then
-                    [%e F.unexpected_checks ~register_name]] ))
+                    [%e F.uncaught_checks ~register_name ~term:txt]] ))
             term
         in
         { txt; loc; translations })
