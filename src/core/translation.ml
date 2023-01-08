@@ -333,14 +333,17 @@ let with_checks ~driver ~term_printer checks (value : value) =
         let txt = term_printer t in
         let loc = t.Tterm.t_loc in
         let term = term ~driver (nonexec txt) t in
+        let check_id = gen_symbol ~prefix:"__check" () in
         let translations =
           Result.map
             (fun t ->
-              ( [%expr
-                  if not [%e t] then
+              ( (check_id, t),
+                [%expr
+                  if not [%e evar check_id] then
                     [%e F.uncaught_checks ~register_name ~term:txt]],
-                [%expr if [%e t] then [%e F.unexpected_checks ~register_name]]
-              ))
+                [%expr
+                  if [%e evar check_id] then
+                    [%e F.unexpected_checks ~register_name]] ))
             term
         in
         { txt; loc; translations })

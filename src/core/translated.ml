@@ -16,7 +16,7 @@ type term = {
 type check = {
   txt : string;
   loc : Location.t;
-  translations : (expression * expression, W.t) result;
+  translations : ((label * expression) * expression * expression, W.t) result;
       (** The first expression ensures the condition holds, the second one
           contains the negative test (used when [Invalid_argument] is raised) *)
 }

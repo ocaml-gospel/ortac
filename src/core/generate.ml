@@ -18,10 +18,19 @@ let term (t : Translated.term) next =
 
 let terms terms next = List.fold_left (fun acc t -> term t acc) next terms
 
+let compute_check (c : Translated.check) next =
+  match c.translations with
+  | Error _ -> next
+  | Ok ((x, e), _, _) ->
+      pexp_let Nonrecursive [ value_binding ~pat:(pvar x) ~expr:e ] next
+
+let compute_checks checks next =
+  List.fold_left (fun acc t -> compute_check t acc) next checks
+
 let check positive (c : Translated.check) next =
   match c.translations with
   | Error _ -> next
-  | Ok (p, n) -> pexp_sequence (if positive then p else n) next
+  | Ok (_, p, n) -> pexp_sequence (if positive then p else n) next
 
 let checks positive checks next =
   List.fold_left (fun acc t -> check positive t acc) next checks
@@ -133,6 +142,7 @@ let value (v : Translated.value) =
     setup v.name v.loc v.register_name
     @@ terms v.preconditions
     @@ vars_invariants ~register_name "Pre" false v.arguments
+    @@ compute_checks v.checks
     @@ report
     @@ pexp_let Nonrecursive [ value_binding ~pat:pret ~expr:try_call ]
     @@ terms v.postconditions
