@@ -27,7 +27,12 @@ let raise_std () =
 let valid_checks () =
   check_success "check true" (fun () -> check true |> ignore);
   check_raises "check false" (Invalid_argument "invalid") (fun () ->
-      check false |> ignore)
+      check false |> ignore);
+  check_raises "double_check 11" (Invalid_argument ">= 10") (fun () ->
+      double_check 11 |> ignore);
+  check_raises "double_check (-1)" (Invalid_argument "<= 0") (fun () ->
+      double_check (-1) |> ignore);
+  check_success "double_check 1" (fun () -> double_check 1 |> ignore)
 
 let bad_checks () =
   check_raises_ortac "bad_check_modifies (ref false)" (fun () ->

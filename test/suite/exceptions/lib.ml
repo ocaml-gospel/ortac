@@ -10,5 +10,10 @@ let bad_check_modifies b =
   b := true;
   !b
 
+let double_check x =
+  if x <= 0 then raise (Invalid_argument "<= 0");
+  if x >= 10 then raise (Invalid_argument ">= 10");
+  x
+
 let bad_check _ = invalid_arg "invalid"
 let bad_check2 b = b
