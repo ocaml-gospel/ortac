@@ -12,6 +12,6 @@
  (action
   (with-stderr-to
    errors
-   (run ortac -f monolith -o %{target} %{dep:lib.mli}))))
+   (run ortac monolith -o %{target} %{dep:lib.mli}))))
 
 (include ../dune.common)
