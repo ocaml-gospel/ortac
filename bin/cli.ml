@@ -1,3 +1,4 @@
+let () = Sites.Plugins.Plugins.load_all ()
 let get_channel = function None -> stdout | Some path -> open_out path
 
 open Cmdliner
@@ -65,9 +66,15 @@ end = struct
 end
 
 let group =
+  let cmds =
+    Registration.fold
+      (fun acc cmd -> cmd :: acc)
+      [ Default.cmd; Monolith.cmd ]
+      Registration.plugins
+  in
   let doc = "Run ORTAC." in
   let version = "ortac version %%VERSION%%" in
   let info = Cmd.info "ortac" ~doc ~version in
-  Cmd.group info [ Default.cmd; Monolith.cmd ]
+  Cmd.group info cmds
 
 let () = Stdlib.exit (Cmd.eval group)

@@ -1,8 +1,13 @@
 (executable
  (name cli)
  (public_name ortac)
+ (modules sites cli)
  (package ortac)
  (libraries
+  dune-site
+  dune-site.plugins
+  dune-private-libs.dune-section
+  registration
   cmdliner
   fmt
   fmt.cli
@@ -11,3 +16,14 @@
   ortac_default
   ortac_core
   ortac_monolith))
+
+(library
+ (public_name ortac.register)
+ (name registration)
+ (modules registration)
+ (libraries cmdliner))
+
+(generate_sites_module
+ (module sites)
+ (plugins
+  (ortac plugins)))
