@@ -10,6 +10,4 @@
   gospel
   ortac_default
   ortac_core
-  ortac_monolith
-  ppxlib
-  ppxlib.ast))
+  ortac_monolith))
