@@ -9,6 +9,3 @@
 
 (package
   (name ortac-runtime))
-
-(package
-  (name ortac-runtime-monolith))

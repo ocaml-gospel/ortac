@@ -141,3 +141,27 @@ let generate path output =
   standalone module_name (List.hd env) sigs
   |> Fmt.pf output "%a@." Ppxlib_ast.Pprintast.structure;
   W.report ()
+
+open Cmdliner
+
+module Plugin : sig
+  val cmd : unit Cmd.t
+end = struct
+  open Registration
+
+  let main input output () =
+    let channel = get_channel output in
+    try generate input channel
+    with Gospel.Warnings.Error e ->
+      Fmt.epr "%a@." Gospel.Warnings.pp e;
+      exit 1
+
+  let info =
+    Cmd.info "monolith"
+      ~doc:"Generates Monolith test file according to Gospel specifications."
+
+  let term = Term.(const main $ ocaml_file $ output_file $ setup_log)
+  let cmd = Cmd.v info term
+end
+
+let () = Registration.register Plugin.cmd

@@ -1,0 +1,19 @@
+(library
+ (public_name ortac-monolith.plugin)
+ (name ortac_monolith)
+ (preprocess
+  (pps ppxlib.metaquot))
+ (libraries
+  ortac.ortac_core
+  ortac.register
+  cmdliner
+  fmt
+  ppxlib
+  ppxlib.astlib))
+
+(plugin
+ (name ortac-monolith)
+ (package ortac-monolith)
+ (libraries ortac-monolith.plugin)
+ (site
+  (ortac plugins)))
