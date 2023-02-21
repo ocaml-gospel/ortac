@@ -4,7 +4,7 @@ description: "OCaml Runtime Assertion Checking based on Gospel"
 maintainer: ["Clément Pascutto <clement@pascutto.fr>"]
 authors: [
   "Clément Pascutto <clement@pascutto.fr>"
-  "Nicolas Osborne <nicolas.osborne@tarides.fr>"
+  "Nicolas Osborne <nicolas.osborne@tarides.com>"
 ]
 homepage: "https://github.com/ocaml-gospel/ortac"
 dev-repo: "git+https://github.com/ocaml-gospel/ortac.git"

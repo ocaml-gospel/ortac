@@ -158,7 +158,7 @@ end = struct
 
   let info =
     Cmd.info "monolith"
-      ~doc:"Generates Monolith test file according to Gospel specifications."
+      ~doc:"Generate Monolith test file according to Gospel specifications."
 
   let term = Term.(const main $ ocaml_file $ output_file $ setup_log)
   let cmd = Cmd.v info term

@@ -1,8 +1,8 @@
 opam-version: "2.0"
-synopsis: "Monolith plugin got Ortac"
-description: "Monolith plugin got Ortac"
-maintainer: ["Nicolas Osborne <nicolas.osborne@tarides.cmd>"]
-authors: ["Nicolas Osborne <nicolas.osborne@tarides.cmd>"]
+synopsis: "Monolith plugin for Ortac"
+description: "Monolith plugin for Ortac"
+maintainer: ["Nicolas Osborne <nicolas.osborne@tarides.com>"]
+authors: ["Nicolas Osborne <nicolas.osborne@tarides.com>"]
 homepage: "https://github.com/ocaml-gospel/ortac"
 dev-repo: "git+https://github.com/ocaml-gospel/ortac.git"
 doc: "https://ocaml-gospel.github.io/ortac/"

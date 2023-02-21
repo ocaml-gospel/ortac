@@ -22,8 +22,7 @@ let output_file =
     & opt (conv ~docv:"OUTPUT" (parse, Fmt.(option string))) None
     & info [ "o"; "output" ] ~absent:"stdout" ~docv:"OUTPUT"
         ~doc:
-          "Prints the generated code in OUTPUT. OUTPUT shouldn't be the name \
-           of a directory. Creates the file if it does not exists.")
+          "Print the generated code in OUTPUT. Overwrite the file if it exists.")
 
 let ocaml_file =
   let parse s =
