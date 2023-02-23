@@ -5,6 +5,7 @@
   (pps ppxlib.metaquot))
  (libraries
   ortac.ortac_core
+  ortac.ortac_default
   ortac.register
   cmdliner
   fmt

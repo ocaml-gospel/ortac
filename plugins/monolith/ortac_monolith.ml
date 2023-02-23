@@ -9,7 +9,7 @@ let unsupported msg loc = raise (W.Error (W.MonolithSpec msg, loc))
 
 let mk_reference module_name env s =
   let rtac =
-    Ortac_core.Ortac.signature ~runtime:"Ortac_runtime_monolith" ~module_name
+    Ortac_default.signature ~runtime:"Ortac_runtime_monolith" ~module_name
       env s
   in
   let module_r = A.pmod_structure ~loc rtac in
