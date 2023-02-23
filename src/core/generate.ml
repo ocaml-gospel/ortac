@@ -213,13 +213,13 @@ let axiom (a : Translated.axiom) =
   in
   [ [%stri let () = [%e body]] ]
 
-let structure runtime driver : structure =
-  (pmod_ident (lident (Drv.module_name driver)) |> include_infos |> pstr_include)
+let structure runtime context : structure =
+  (pmod_ident (lident (Context.module_name context)) |> include_infos |> pstr_include)
   :: pstr_module
        (module_binding
           ~name:{ txt = Some "Ortac_runtime"; loc }
           ~expr:(pmod_ident (lident runtime)))
-  :: (Drv.map_translation driver ~f:(function
+  :: (Context.map_translation context ~f:(function
         | Translated.Value v -> value v
         | Translated.Function f -> function_ f
         | Translated.Predicate f -> function_ f

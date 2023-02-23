@@ -4,8 +4,8 @@ let translate path =
   |> Ortac_core__Utils.type_check [] path
   |> fun (env, sigs) ->
   assert (List.length env = 1);
-  let driver = Ortac_core.Drv.init module_name (List.hd env) in
-  Ortac_core.Translate.signature ~driver sigs
+  let context = Ortac_core.Context.init module_name (List.hd env) in
+  Ortac_core.Translate.signature ~context sigs
 
 let mutability =
   let open Ortac_core.Translated in
@@ -54,7 +54,7 @@ let is_val (t : Ortac_core.Translated.structure_item) =
 
 let test_mutability path mut flag () =
   let translations = translate path in
-  Ortac_core.Drv.iter_translation
+  Ortac_core.Context.iter_translation
     ~f:(fun t ->
       if !flag then (
         print_endline (type_name t);
@@ -85,7 +85,7 @@ let type_dependant () =
 
 let val_pure () =
   let translations = translate "./translation/pure.mli" in
-  Ortac_core.Drv.iter_translation
+  Ortac_core.Context.iter_translation
     ~f:(fun v ->
       Alcotest.(check bool) (Fmt.str "%s is pure" (val_name v)) true (is_pure v))
     translations
