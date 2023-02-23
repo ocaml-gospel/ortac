@@ -50,8 +50,8 @@ let stdlib_types =
       type_ ~name:"list" ~loc
         ~mutable_:(Dependant (function [ m ] -> m | _ -> assert false))
         ~ghost );
-    ( [ "Gospelstdlib"; "seq" ],
-      type_ ~name:"seq" ~loc
+    ( [ "Gospelstdlib"; "sequence" ],
+      type_ ~name:"sequence" ~loc
         ~mutable_:(Dependant (function [ m ] -> m | _ -> assert false))
         ~ghost );
     ( [ "Gospelstdlib"; "bag" ],
