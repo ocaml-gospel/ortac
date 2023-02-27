@@ -1,1 +1,1 @@
-val signature : context:Context.t -> Gospel.Tast.signature -> Context.t
+val signature : context:Context.t -> Gospel.Tast.signature -> Translated.t

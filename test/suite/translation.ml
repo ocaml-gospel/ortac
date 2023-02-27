@@ -54,7 +54,7 @@ let is_val (t : Ortac_core.Translated.structure_item) =
 
 let test_mutability path mut flag () =
   let translations = translate path in
-  Ortac_core.Context.iter_translation
+  Ortac_core.Translated.iter_translation
     ~f:(fun t ->
       if !flag then (
         print_endline (type_name t);
@@ -85,7 +85,7 @@ let type_dependant () =
 
 let val_pure () =
   let translations = translate "./translation/pure.mli" in
-  Ortac_core.Context.iter_translation
+  Ortac_core.Translated.iter_translation
     ~f:(fun v ->
       Alcotest.(check bool) (Fmt.str "%s is pure" (val_name v)) true (is_pure v))
     translations

@@ -54,7 +54,7 @@ let predicate ppf (p : function_) =
 let axiom ppf (a : axiom) = term ppf a.definition
 
 let emit_warnings ppf context =
-  Context.iter_translation context ~f:(function
+  Translated.iter_translation context ~f:(function
     | Type t -> type_ ppf t
     | Value v -> value ppf v
     | Constant c -> constant ppf c

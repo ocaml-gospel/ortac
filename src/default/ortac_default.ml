@@ -215,13 +215,13 @@ let axiom (a : Translated.axiom) =
   in
   [ [%stri let () = [%e body]] ]
 
-let structure runtime context : structure =
-  (pmod_ident (lident (Context.module_name context)) |> include_infos |> pstr_include)
+let structure runtime module_name ir : Ppxlib.structure =
+  (pmod_ident (lident module_name) |> include_infos |> pstr_include)
   :: pstr_module
        (module_binding
           ~name:{ txt = Some "Ortac_runtime"; loc }
           ~expr:(pmod_ident (lident runtime)))
-  :: (Context.map_translation context ~f:(function
+  :: (Translated.map_translation ir ~f:(function
         | Translated.Value v -> value v
         | Translated.Function f -> function_ f
         | Translated.Predicate f -> function_ f
@@ -235,7 +235,7 @@ let signature ~runtime ~module_name namespace s =
   let context = Context.init module_name namespace in
   let translated = Translate.signature ~context s in
   Report.emit_warnings Fmt.stderr translated;
-  structure runtime translated
+  structure runtime (Context.module_name context) translated
 
 let generate path output =
   let module_name = Ortac_core.Utils.module_name_of_path path in
