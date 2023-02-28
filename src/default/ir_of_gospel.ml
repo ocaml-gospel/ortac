@@ -1,10 +1,11 @@
-module W = Ortac_core.Warnings
-open Ppxlib
+open Types
 open Gospel
-open Fmt
-open Ortac_core.Builder
-open Translated
+module W = Ortac_core.Warnings
 module F = Ortac_core.Failure
+open Fmt
+open Ir
+open Ppxlib
+open Ortac_core.Builder
 module Ident = Identifier.Ident
 
 let term ~context fail t =
@@ -127,7 +128,9 @@ let invariant ~context ~term_printer self (invariant : Tterm.term) =
   { txt; loc; translation }
 
 let with_invariants ~context ~term_printer (self, invariants) (type_ : type_) =
-  let invariants = List.map (invariant ~context ~term_printer self) invariants in
+  let invariants =
+    List.map (invariant ~context ~term_printer self) invariants
+  in
   { type_ with invariants }
 
 let with_consumes consumes (value : value) =
@@ -139,7 +142,7 @@ let with_consumes consumes (value : value) =
   let consumes = List.filter_map name consumes in
   let arguments =
     List.map (* not very efficient *)
-      (fun (a : Translated.ocaml_var) ->
+      (fun (a : Ir.ocaml_var) ->
         if List.exists (fun c -> a.name = c) consumes then
           { a with consumed = true }
         else a)
@@ -156,7 +159,7 @@ let with_modified modifies (value : value) =
   let modifies = List.filter_map name modifies in
   let arguments =
     List.map (* not very efficient *)
-      (fun (a : Translated.ocaml_var) ->
+      (fun (a : Ir.ocaml_var) ->
         if List.exists (fun c -> a.name = c) modifies then
           { a with modified = true }
         else a)
@@ -204,7 +207,8 @@ let with_posts ~context ~term_printer posts (value : value) =
   in
   { value with postconditions }
 
-let with_constant_checks ~context ~term_printer checks (constant : constant) =
+let with_constant_checks ~context ~term_printer checks (constant : Ir.constant)
+    =
   let register_name = evar constant.register_name in
   let violated term = F.violated `Pre ~term ~register_name in
   let nonexec term exn = F.spec_failure `Pre ~term ~exn ~register_name in
@@ -222,7 +226,8 @@ let rec xpost_pattern ~context exn = function
       ppat_alias
         (xpost_pattern ~context exn p.p_node)
         (noloc (str "%a" Tterm.Ident.pp s.vs_name))
-  | pn -> ppat_construct (lident exn) (Some (Ortac_core.Ocaml_of_gospel.pattern pn))
+  | pn ->
+      ppat_construct (lident exn) (Some (Ortac_core.Ocaml_of_gospel.pattern pn))
 
 let assert_false_case =
   case ~guard:None ~lhs:[%pat? _] ~rhs:[%expr assert false]
@@ -274,7 +279,8 @@ let function_definition ~context ls i t : term =
   let loc = t.t_loc in
   let translation =
     let context = Ortac_core.Context.add_function ls i context in
-    try Ok (Ortac_core.Ocaml_of_gospel.term ~context t) with W.Error t -> Error t
+    try Ok (Ortac_core.Ocaml_of_gospel.term ~context t)
+    with W.Error t -> Error t
   in
   { txt; loc; translation }
 
@@ -292,3 +298,180 @@ let axiom_definition ~context ~register_name t : term =
              [%e F.report ~register_name]])
   in
   { txt; loc; translation }
+
+module P = struct
+  type pack = { ir : Ir.t; context : Ortac_core.Context.t }
+
+  let pack ir context = { ir; context }
+  let unpack pack = (pack.ir, pack.context)
+end
+
+let register_name = gen_symbol ~prefix:"__error"
+
+let term_printer text global_loc (t : Tterm.term) =
+  try
+    String.sub text
+      (t.t_loc.loc_start.pos_cnum - global_loc.loc_start.pos_cnum)
+      (t.t_loc.loc_end.pos_cnum - t.t_loc.loc_start.pos_cnum)
+  with Invalid_argument _ -> Fmt.str "%a" Tterm_printer.print_term t
+
+let type_of_ty ~ir (ty : Ttypes.ty) =
+  match ty.ty_node with
+  | Tyvar a ->
+      Ir.type_ ~name:a.tv_name.id_str ~loc:a.tv_name.id_loc ~mutable_:Ir.Unknown
+        ~ghost:Tast.Nonghost
+  | Tyapp (ts, _tvs) -> (
+      match Ir.get_type ts ir with
+      | None ->
+          let mutable_ = Mutability.ty ~ir ty in
+          Ir.type_ ~name:ts.ts_ident.id_str ~loc:ts.ts_ident.id_loc ~mutable_
+            ~ghost:Tast.Nonghost
+      | Some type_ -> type_)
+
+let vsname (vs : Symbols.vsymbol) = Fmt.str "%a" Tast.Ident.pp vs.vs_name
+
+let var_of_vs ~ir (vs : Symbols.vsymbol) : Ir.ocaml_var =
+  let name = vsname vs in
+  let label = Nolabel in
+  let type_ = type_of_ty ~ir vs.vs_ty in
+  { name; label; type_; modified = false; consumed = false }
+
+let var_of_arg ~ir arg : Ir.ocaml_var =
+  let label, name =
+    match arg with
+    | Tast.Lunit -> (Nolabel, "()")
+    | Tast.Lnone vs | Tast.Lghost vs -> (Nolabel, vsname vs)
+    | Tast.Loptional vs ->
+        let name = vsname vs in
+        (Optional name, name)
+    | Tast.Lnamed vs ->
+        let name = vsname vs in
+        (Labelled name, name)
+  in
+  let type_ = type_of_ty ~ir (Tast_helper.ty_of_lb_arg arg) in
+  { name; label; type_; modified = false; consumed = false }
+
+let type_ ~pack ~ghost (td : Tast.type_declaration) =
+  let ir, context = P.unpack pack in
+  let name = td.td_ts.ts_ident.id_str in
+  let loc = td.td_loc in
+  let mutable_ = Mutability.type_declaration ~ir td in
+  let type_ = Ir.type_ ~name ~loc ~mutable_ ~ghost in
+  let process ~type_ (spec : Tast.type_spec) =
+    let term_printer = Fmt.str "%a" Tterm_printer.print_term in
+    let mutable_ = Mutability.(max type_.Ir.mutable_ (type_spec ~ir spec)) in
+    let type_ =
+      type_
+      |> with_models ~context spec.ty_fields
+      |> with_invariants ~context ~term_printer spec.ty_invariants
+    in
+    { type_ with mutable_ }
+  in
+  let type_ = Option.fold ~none:type_ ~some:(process ~type_) td.td_spec in
+  let type_item = Ir.Type type_ in
+  let ir = ir |> Ir.add_translation type_item |> Ir.add_type td.td_ts type_ in
+  P.pack ir context
+
+let types ~pack ~ghost = List.fold_left (fun pack -> type_ ~pack ~ghost) pack
+
+let value ~pack ~ghost (vd : Tast.val_description) =
+  let ir, context = P.unpack pack in
+  let name = vd.vd_name.id_str in
+  let loc = vd.vd_loc in
+  let register_name = register_name () in
+  let arguments = List.map (var_of_arg ~ir) vd.vd_args in
+  let returns = List.map (var_of_arg ~ir) vd.vd_ret in
+  let pure = false in
+  let value =
+    Ir.value ~name ~loc ~register_name ~arguments ~returns ~pure ~ghost
+  in
+  let process ~value (spec : Tast.val_spec) =
+    let term_printer = term_printer spec.sp_text spec.sp_loc in
+    let value =
+      value
+      |> with_checks ~context ~term_printer spec.sp_checks
+      |> with_pres ~context ~term_printer spec.sp_pre
+      |> with_posts ~context ~term_printer spec.sp_post
+      |> with_xposts ~context ~term_printer spec.sp_xpost
+      |> with_consumes spec.sp_cs
+      |> with_modified spec.sp_wr
+    in
+    { value with pure = spec.sp_pure }
+  in
+  let value = Option.fold ~none:value ~some:(process ~value) vd.vd_spec in
+  let value_item = Ir.Value value in
+  let context =
+    if value.pure then
+      let ls = Ortac_core.Context.get_ls context [ name ] in
+      Ortac_core.Context.add_function ls name context
+    else context
+  in
+  let ir = Ir.add_translation value_item ir in
+  P.pack ir context
+
+let constant ~pack ~ghost (vd : Tast.val_description) =
+  let ir, context = P.unpack pack in
+  let name = vd.vd_name.id_str in
+  let loc = vd.vd_loc in
+  let register_name = register_name () in
+  let type_ =
+    assert (List.length vd.vd_ret = 1);
+    type_of_ty ~ir (Tast_helper.ty_of_lb_arg (List.hd vd.vd_ret))
+  in
+  let constant = Ir.constant ~name ~loc ~register_name ~type_ ~ghost in
+  let process ~constant (spec : Tast.val_spec) =
+    let term_printer = term_printer spec.sp_text spec.sp_loc in
+    constant |> with_constant_checks ~context ~term_printer spec.sp_post
+  in
+  let c = Option.fold ~none:constant ~some:(process ~constant) vd.vd_spec in
+  let ir = Ir.add_translation (Constant c) ir in
+  P.pack ir context
+
+let function_of (kind : [ `Function | `Predicate ]) ~pack (f : Tast.function_) =
+  let ir, context = P.unpack pack in
+  let name = gen_symbol ~prefix:("__logical_" ^ f.fun_ls.ls_name.id_str) () in
+  let loc = f.fun_loc in
+  let rec_ = f.fun_rec in
+  let arguments = List.map (var_of_vs ~ir) f.fun_params in
+  let definition =
+    Option.map (function_definition ~context f.fun_ls name) f.fun_def
+  in
+  let translation =
+    match kind with
+    | `Function -> Ir.Function { name; loc; rec_; arguments; definition }
+    | `Predicate -> Ir.Predicate { name; loc; rec_; arguments; definition }
+  in
+  let ir = Ir.add_translation translation ir in
+  let context = Ortac_core.Context.add_function f.fun_ls name context in
+  P.pack ir context
+
+let function_ = function_of `Function
+let predicate = function_of `Predicate
+
+let axiom ~pack (ax : Tast.axiom) =
+  let ir, context = P.unpack pack in
+  let name = ax.ax_name.id_str in
+  let loc = ax.ax_loc in
+  let register_name = register_name () in
+  let definition = axiom_definition ~context ~register_name ax.ax_term in
+  let ir =
+    Ir.add_translation (Axiom { name; loc; register_name; definition }) ir
+  in
+  P.pack ir context
+
+let signature ~context s =
+  let pack = P.pack (Ir.init context) context in
+  List.fold_left
+    (fun pack (sig_item : Tast.signature_item) ->
+      match sig_item.sig_desc with
+      | Sig_val (vd, ghost) when vd.vd_args <> [] -> value ~pack ~ghost vd
+      | Sig_val (vd, ghost) -> constant ~pack ~ghost vd
+      | Sig_type (_rec, td, ghost) -> types ~pack ~ghost td
+      | Sig_function func when Option.is_none func.fun_ls.ls_value ->
+          predicate ~pack func
+      | Sig_function func -> function_ ~pack func
+      | Sig_axiom ax -> axiom ~pack ax
+      | _ -> pack)
+    pack s
+  |> P.unpack
+  |> fst

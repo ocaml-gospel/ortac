@@ -169,15 +169,13 @@ let stdlib_types =
     ([ "int" ], type_ ~name:"int" ~loc ~mutable_:Immutable ~ghost);
   ]
 
-
 type structure = structure_item list
 type types = type_ T.t
-
 type t = { structure : structure; types : types }
+
 let add_translation i t = { t with structure = i :: t.structure }
 let add_type ts i t = { t with types = T.add ts i t.types }
 let get_type ts t = T.find_opt ts t.types
-
 let map_translation ~f t = List.rev_map f t.structure
 let iter_translation ~f t = List.iter f (List.rev t.structure)
 

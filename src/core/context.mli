@@ -7,6 +7,7 @@ val module_name : t -> string
 val translate_stdlib : Symbols.lsymbol -> t -> string option
 val get_ls : t -> string list -> Symbols.lsymbol
 val get_ts : t -> string list -> Ttypes.tysymbol
+
 (* val get_type : Ttypes.tysymbol -> t -> Translated.type_ option *)
 (* val add_type : Ttypes.tysymbol -> Translated.type_ -> t -> t *)
 val is_function : Symbols.lsymbol -> t -> bool

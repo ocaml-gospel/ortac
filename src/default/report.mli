@@ -1,1 +1,1 @@
-val emit_warnings : Translated.t Fmt.t
+val emit_warnings : Ir.t Fmt.t

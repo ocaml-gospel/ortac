@@ -1,8 +1,8 @@
 module Mutability : sig
-  val ty : ir:Translated.t -> Gospel.Ttypes.ty -> Translated.mutability
+  val ty : ir:Ir.t -> Gospel.Ttypes.ty -> Ir.mutability
 
   val type_declaration :
-    ir:Translated.t -> Gospel.Tast.type_declaration -> Translated.mutability
+    ir:Ir.t -> Gospel.Tast.type_declaration -> Ir.mutability
 
-  val type_spec : ir:Translated.t -> Gospel.Tast.type_spec -> Translated.mutability
+  val type_spec : ir:Ir.t -> Gospel.Tast.type_spec -> Ir.mutability
 end

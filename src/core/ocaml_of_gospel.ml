@@ -157,5 +157,3 @@ and term ~context (t : Tterm.term) : expression =
   | Told _ -> unsupported "old operator"
   | Ttrue -> [%expr true]
   | Tfalse -> [%expr false]
-
-
