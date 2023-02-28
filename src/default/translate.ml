@@ -1,11 +1,11 @@
-module W = Warnings
+module W = Ortac_core.Warnings
 open Types
 open Ppxlib
 open Gospel
 module T = Translation
 
 module P = struct
-type pack = { ir : Translated.t; context : Context.t }
+type pack = { ir : Translated.t; context : Ortac_core.Context.t }
 let pack ir context = { ir; context }
 let unpack pack = (pack.ir, pack.context)
 end
@@ -107,8 +107,8 @@ let value ~pack ~ghost (vd : Tast.val_description) =
   let value_item = Translated.Value value in
   let context =
     if value.pure then
-      let ls = Context.get_ls context [ name ] in
-      Context.add_function ls name context
+      let ls = Ortac_core.Context.get_ls context [ name ] in
+      Ortac_core.Context.add_function ls name context
     else context
   in
   let ir = Translated.add_translation value_item ir in
@@ -148,7 +148,7 @@ let function_of (kind : [ `Function | `Predicate ]) ~pack (f : Tast.function_)
     | `Predicate -> Translated.Predicate { name; loc; rec_; arguments; definition }
   in
   let ir = Translated.add_translation translation ir in
-  let context = Context.add_function f.fun_ls name context in
+  let context = Ortac_core.Context.add_function f.fun_ls name context in
   P.pack ir context
 
 let function_ = function_of `Function

@@ -1,12 +1,15 @@
 module W = Ortac_core.Warnings
 open Ppxlib
 open Ortac_core.Builder
-open Ortac_core.Translated
+open Translated
 module F = Ortac_core.Failure
-module T = Ortac_core.Translation
+module T = Translation
 module M = Map.Make (String)
-module Translated = Ortac_core.Translated
 module Context = Ortac_core.Context
+
+module Translate = Translate
+module Translated = Translated
+
 
 let setup name loc register_name next =
   [%expr

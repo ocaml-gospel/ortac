@@ -1,4 +1,4 @@
-module W = Warnings
+module W = Ortac_core.Warnings
 open Ppxlib
 
 type mutability =
@@ -185,7 +185,7 @@ let init context =
   let types =
     List.fold_left
       (fun acc (path, type_) ->
-        let ls = Context.get_ts context path in
+        let ls = Ortac_core.Context.get_ts context path in
         T.add ls type_ acc)
       T.empty stdlib_types
   in

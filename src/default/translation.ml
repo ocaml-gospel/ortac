@@ -1,17 +1,17 @@
-module W = Warnings
+module W = Ortac_core.Warnings
 open Ppxlib
 open Gospel
 open Fmt
-open Builder
+open Ortac_core.Builder
 open Translated
-module F = Failure
+module F = Ortac_core.Failure
 module Ident = Identifier.Ident
 
 let term ~context fail t =
   try
     Ok
       [%expr
-        try [%e Ocaml_of_gospel.term ~context t]
+        try [%e Ortac_core.Ocaml_of_gospel.term ~context t]
         with e ->
           [%e fail (evar "e")];
           true]
@@ -222,7 +222,7 @@ let rec xpost_pattern ~context exn = function
       ppat_alias
         (xpost_pattern ~context exn p.p_node)
         (noloc (str "%a" Tterm.Ident.pp s.vs_name))
-  | pn -> ppat_construct (lident exn) (Some (Ocaml_of_gospel.pattern pn))
+  | pn -> ppat_construct (lident exn) (Some (Ortac_core.Ocaml_of_gospel.pattern pn))
 
 let assert_false_case =
   case ~guard:None ~lhs:[%pat? _] ~rhs:[%expr assert false]
@@ -273,8 +273,8 @@ let function_definition ~context ls i t : term =
   let txt = Fmt.str "%a" Tterm_printer.print_term t in
   let loc = t.t_loc in
   let translation =
-    let context = Context.add_function ls i context in
-    try Ok (Ocaml_of_gospel.term ~context t) with W.Error t -> Error t
+    let context = Ortac_core.Context.add_function ls i context in
+    try Ok (Ortac_core.Ocaml_of_gospel.term ~context t) with W.Error t -> Error t
   in
   { txt; loc; translation }
 

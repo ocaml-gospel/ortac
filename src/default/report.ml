@@ -1,4 +1,4 @@
-module W = Warnings
+module W = Ortac_core.Warnings
 open Translated
 
 let term ppf (t : term) = Result.iter_error (W.pp ppf) t.translation
