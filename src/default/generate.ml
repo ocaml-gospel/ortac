@@ -2,7 +2,7 @@ module W = Ortac_core.Warnings
 open Ppxlib
 open Ortac_core.Builder
 open Ir
-module F = Ortac_core.Failure
+module F = Failure
 module M = Map.Make (String)
 module Context = Ortac_core.Context
 

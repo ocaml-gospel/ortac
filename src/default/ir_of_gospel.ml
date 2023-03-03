@@ -1,7 +1,7 @@
 open Types
 open Gospel
 module W = Ortac_core.Warnings
-module F = Ortac_core.Failure
+module F = Failure
 open Fmt
 open Ir
 open Ppxlib
