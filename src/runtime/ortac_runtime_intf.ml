@@ -39,24 +39,42 @@ module type S = sig
     (** [report l] prints the content of [l] *)
   end
 
+  module Gospelstdlib : sig
+    val ( ~! ) : 'a ref -> 'a
+    val ( + ) : Z.t -> Z.t -> Z.t
+    val ( - ) : Z.t -> Z.t -> Z.t
+    val ( * ) : Z.t -> Z.t -> Z.t
+    val ( / ) : Z.t -> Z.t -> Z.t
+    val ( < ) : Z.t -> Z.t -> bool
+    val ( <= ) : Z.t -> Z.t -> bool
+    val ( > ) : Z.t -> Z.t -> bool
+    val ( >= ) : Z.t -> Z.t -> bool
+    val ( mod ) : Z.t -> Z.t -> Z.t
+    val ( ~- ) : Z.t -> Z.t
+    val abs : Z.t -> Z.t
+    val logand : Z.t -> Z.t -> Z.t
+    val max : Z.t -> Z.t -> Z.t
+    val min : Z.t -> Z.t -> Z.t
+    val pred : Z.t -> Z.t
+    val succ : Z.t -> Z.t
+    val pow : Z.t -> Z.t -> Z.t
+    val integer_of_int : int -> Z.t
+
+    module Array : sig
+      val make : Z.t -> 'a -> 'a array
+      val get : 'a array -> Z.t -> 'a
+      val length : 'a array -> Z.t
+      val for_all : ('a -> bool) -> 'a array -> bool
+    end
+  end
+
   module Z : sig
-    include module type of Z
-
-    val pow : t -> t -> t
-
-    val exists : t -> t -> (t -> bool) -> bool
+    val exists : Z.t -> Z.t -> (Z.t -> bool) -> bool
     (** [exists i j p] is [true] iff the predicate there exists [k] within [i]
         and [j], included, for which [p] holds. *)
 
-    val forall : t -> t -> (t -> bool) -> bool
+    val forall : Z.t -> Z.t -> (Z.t -> bool) -> bool
     (** [forall i j p] is [true] iff the predicate `p` holds forall [k] within
         [i] and [j], included. *)
-  end
-
-  module Array : sig
-    val make : Z.t -> 'a -> 'a array
-    val get : 'a array -> Z.t -> 'a
-    val length : 'a array -> Z.t
-    val for_all : ('a -> bool) -> 'a array -> bool
   end
 end

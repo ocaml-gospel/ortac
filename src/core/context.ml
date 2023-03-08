@@ -24,45 +24,69 @@ let is_function ls t = L.mem ls t.functions
 let get_ls t = get_ls_env t.env
 let get_ts t = get_env ns_find_ts t.env
 
-let stdlib =
+let builtins =
   [
     ([ "None" ], "None");
     ([ "Some" ], "Some");
     ([ "[]" ], "[]");
     ([ "infix ::" ], "(::)");
     ([ "infix =" ], "(=)");
-    ([ "prefix !" ], "!");
-    ([ "Gospelstdlib"; "infix +" ], "Ortac_runtime.Z.add");
-    ([ "Gospelstdlib"; "infix -" ], "Ortac_runtime.Z.sub");
-    ([ "Gospelstdlib"; "infix *" ], "Ortac_runtime.Z.mul");
-    ([ "Gospelstdlib"; "infix /" ], "Ortac_runtime.Z.div");
-    ([ "Gospelstdlib"; "mod" ], "Ortac_runtime.Z.rem");
-    ([ "Gospelstdlib"; "pow" ], "Ortac_runtime.Z.pow");
-    ([ "Gospelstdlib"; "logand" ], "Ortac_runtime.Z.logand");
-    ([ "Gospelstdlib"; "prefix -" ], "Ortac_runtime.Z.neg");
-    ([ "Gospelstdlib"; "infix >" ], "Ortac_runtime.Z.gt");
-    ([ "Gospelstdlib"; "infix >=" ], "Ortac_runtime.Z.geq");
-    ([ "Gospelstdlib"; "infix <" ], "Ortac_runtime.Z.lt");
-    ([ "Gospelstdlib"; "infix <=" ], "Ortac_runtime.Z.leq");
-    ([ "Gospelstdlib"; "integer_of_int" ], "Ortac_runtime.Z.of_int");
-    ([ "Gospelstdlib"; "abs" ], "Ortac_runtime.Z.abs");
-    ([ "Gospelstdlib"; "min" ], "Ortac_runtime.Z.min");
-    ([ "Gospelstdlib"; "max" ], "Ortac_runtime.Z.max");
-    ([ "Gospelstdlib"; "succ" ], "Ortac_runtime.Z.succ");
-    ([ "Gospelstdlib"; "pred" ], "Ortac_runtime.Z.pred");
-    ([ "Gospelstdlib"; "Array"; "make" ], "Ortac_runtime.Array.make");
-    ([ "Gospelstdlib"; "Array"; "length" ], "Ortac_runtime.Array.length");
-    ([ "Gospelstdlib"; "Array"; "get" ], "Ortac_runtime.Array.get");
-    ([ "Gospelstdlib"; "Array"; "for_all" ], "Ortac_runtime.Array.for_all");
   ]
 
+(** Map a name from the Gospel parser to an OCaml name when possible
+
+    The strategy is as follows, always dropping the "*fix " prefix of the
+    operator name:
+
+    - infix operators are kept as is
+    - prefix operators are prefixed with ~
+    - mixfix operators are dropped
+    - other names are kept as is
+
+    TODO? maybe, some filtering should be performed also on other names, such as
+    names containing "#" *)
+let process_name name =
+  let lname = String.length name in
+  let drop prefix =
+    let lp = String.length prefix in
+    String.sub name lp (lname - lp)
+  in
+  let starts prefix = String.starts_with ~prefix name in
+  let p_pre = "prefix " and p_in = "infix " and p_mix = "mixfix " in
+
+  (* Here we could wrap operators in parentheses but as we are just building a
+     string that will re-parsed soon enough into a proper identifier anyway, the
+     shorter the better *)
+  if starts p_pre then Some ("~" ^ drop p_pre)
+  else if starts p_in then Some (drop p_in)
+  else if starts p_mix then None
+  else Some name
+
+let fold_namespace f path ns v =
+  let rec aux path ns v =
+    let v = Gospel.Tmodule.Mstr.fold (f path) ns.ns_ls v in
+    Gospel.Tmodule.Mstr.fold (fun s -> aux (path @ [ s ])) ns.ns_ns v
+  in
+  aux path ns v
+
 let init module_name env =
+  let gostd = Gospel.Tmodule.Mstr.find "Gospelstdlib" env.ns_ns in
+  let process_gostd_entry path name ls lib =
+    match process_name name with
+    | None -> lib
+    | Some name ->
+        let fullpath = "Ortac_runtime" :: (path @ [ name ]) in
+        L.add ls (String.concat "." fullpath) lib
+  in
   let stdlib =
     List.fold_left
       (fun acc (path, ocaml) ->
         let ls = get_ls_env env path in
         L.add ls ocaml acc)
-      L.empty stdlib
+      L.empty builtins
+  in
+  let stdlib =
+    fold_namespace process_gostd_entry [ "Gospelstdlib" ] gostd stdlib
   in
   { module_name; stdlib; env; functions = L.empty }
 
