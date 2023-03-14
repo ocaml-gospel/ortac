@@ -9,6 +9,8 @@
 
 (rule
  (target wrapper.ml)
+ (deps
+  (package ortac-monolith))
  (action
   (with-stderr-to
    errors
