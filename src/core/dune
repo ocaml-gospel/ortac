@@ -4,3 +4,9 @@
  (preprocess
   (pps ppxlib.metaquot))
  (libraries fmt gospel ppxlib ppxlib.ast))
+
+(rule
+ (enabled_if
+  (< %{ocaml_version} 4.13))
+ (action
+  (copy string.pre413.ml string.ml)))
