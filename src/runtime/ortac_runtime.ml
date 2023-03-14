@@ -130,10 +130,10 @@ module Gospelstdlib = struct
   let ( - ) = Z.( - )
   let ( * ) = Z.( * )
   let ( / ) = Z.( / )
-  let ( < ) = Z.Compare.( < )
-  let ( <= ) = Z.Compare.( <= )
-  let ( > ) = Z.Compare.( > )
-  let ( >= ) = Z.Compare.( >= )
+  let ( < ) = Z.lt
+  let ( <= ) = Z.leq
+  let ( > ) = Z.gt
+  let ( >= ) = Z.geq
   let ( mod ) = Z.( mod )
   let ( ~- ) = Z.( ~- )
   let abs = Z.abs
