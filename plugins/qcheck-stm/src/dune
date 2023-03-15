@@ -1,0 +1,11 @@
+(library
+ (public_name ortac-qcheck-stm.plugin)
+ (name ortac_qcheck_stm)
+ (libraries cmdliner ortac.register))
+
+(plugin
+ (name ortac-qcheck-stm)
+ (package ortac-qcheck-stm)
+ (libraries ortac-qcheck-stm.plugin)
+ (site
+  (ortac plugins)))
