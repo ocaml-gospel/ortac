@@ -1,7 +1,7 @@
 (library
  (public_name ortac-qcheck-stm.plugin)
  (name ortac_qcheck_stm)
- (libraries cmdliner ortac.register))
+ (libraries cmdliner ortac.register ortac.ortac_core gospel))
 
 (plugin
  (name ortac-qcheck-stm)
