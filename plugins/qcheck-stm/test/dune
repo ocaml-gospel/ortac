@@ -1,0 +1,6 @@
+(test
+ (package ortac-qcheck-stm)
+ (modules_without_implementation lib)
+ (deps lib.mli)
+ (name expect_stm)
+ (libraries ortac_qcheck_stm))
