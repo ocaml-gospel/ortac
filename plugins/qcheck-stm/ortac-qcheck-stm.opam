@@ -1,0 +1,35 @@
+opam-version: "2.0"
+synopsis: "QCheck-stm plugin for Ortac"
+description: "QCheck-stm plugin for Ortac"
+maintainer: ["Nicolas Osborne <nicolas.osborne@tarides.com>"]
+authors: ["Nicolas Osborne"]
+homepage: "https://github.com/ocaml-gospel/ortac"
+dev-repo: "git+https://github.com/ocaml-gospel/ortac.git"
+doc: "https://ocaml-gospel.github.io/ortac/"
+bug-reports: "https://github.com/ocaml-gospel/ortac/issues"
+build: [
+  ["dune" "subst"] {dev}
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
+]
+
+depends: [
+  "ocaml" {>= "4.11.0"}
+  "dune" {>= "3.0"}
+  "cmdliner" {>= "1.1.0"}
+  "fmt"
+  "ppxlib" {>= "0.26.0"}
+  "gospel"
+  "ortac"
+]
+
+
