@@ -1,0 +1,5 @@
+test with existing sut type:
+This will generate qcheck-stm tests using `sut' as principal type
+
+test with non-existing sut type:
+Can't find sut
