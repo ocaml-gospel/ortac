@@ -4,7 +4,7 @@
  (action
   (with-stdout-to
     %{target}
-   (run ortac %{dep:lib.mli}))))
+   (run ortac default %{dep:lib.mli}))))
 
 (rule
  (target lib_rtac.mli)

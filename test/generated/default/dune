@@ -9,6 +9,6 @@
  (action
   (with-stderr-to
    errors
-   (run ortac -o %{target} %{dep:lib.mli}))))
+   (run ortac default -o %{target} %{dep:lib.mli}))))
 
 (include ../dune.common)

@@ -9,9 +9,11 @@
 
 (rule
  (target wrapper.ml)
+ (deps
+  (package ortac-monolith))
  (action
   (with-stderr-to
    errors
-   (run ortac -f monolith -o %{target} %{dep:lib.mli}))))
+   (run ortac monolith -o %{target} %{dep:lib.mli}))))
 
 (include ../dune.common)
