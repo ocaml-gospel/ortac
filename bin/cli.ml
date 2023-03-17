@@ -8,7 +8,7 @@ module Default : sig
 end = struct
   let main input output () =
     let channel = get_channel output in
-    try Ortac_default.generate input channel
+    try Ortac_default.Generate.generate input channel
     with Gospel.Warnings.Error e ->
       Fmt.epr "%a@." Gospel.Warnings.pp e;
       exit 1

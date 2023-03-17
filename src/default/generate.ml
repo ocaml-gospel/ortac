@@ -1,10 +1,10 @@
-module W = Warnings
+module W = Ortac_core.Warnings
 open Ppxlib
-open Builder
-open Translated
+open Ortac_core.Builder
+open Ir
 module F = Failure
-module T = Translation
 module M = Map.Make (String)
+module Context = Ortac_core.Context
 
 let setup name loc register_name next =
   [%expr
@@ -13,12 +13,12 @@ let setup name loc register_name next =
     in
     [%e next]]
 
-let term (t : Translated.term) next =
+let term (t : Ir.term) next =
   match t.translation with Error _ -> next | Ok c -> pexp_sequence c next
 
 let terms terms next = List.fold_left (fun acc t -> term t acc) next terms
 
-let compute_check (c : Translated.check) next =
+let compute_check (c : Ir.check) next =
   match c.translations with
   | Error _ -> next
   | Ok ((x, e), _) ->
@@ -27,7 +27,7 @@ let compute_check (c : Translated.check) next =
 let compute_checks checks next =
   List.fold_left (fun acc t -> compute_check t acc) next checks
 
-let check_positive (c : Translated.check) next =
+let check_positive (c : Ir.check) next =
   match c.translations with
   | Error _ -> next
   | Ok (_, p) -> pexp_sequence p next
@@ -68,7 +68,7 @@ let vars_invariants ~register_name pos ignore_consumes vl next =
     (fun acc t -> var_invariants ~register_name pos ignore_consumes t acc)
     next vl
 
-let group_xpost (v : Translated.value) =
+let group_xpost (v : Ir.value) =
   let register_name = evar v.register_name in
   let invariants = vars_invariants ~register_name "XPost" true v.arguments in
   let default_cases =
@@ -154,7 +154,7 @@ let rets (returns : ocaml_var list) =
         ret ([], [])
       |> fun (e, p) -> (pexp_tuple e, ppat_tuple p)
 
-let value (v : Translated.value) =
+let value (v : Ir.value) =
   let register_name = evar v.register_name in
   let report = pexp_sequence (F.report ~register_name) in
   let eargs = args evar v.arguments in
@@ -178,7 +178,7 @@ let value (v : Translated.value) =
   in
   [ [%stri let [%p pvar v.name] = [%e efun pargs body]] ]
 
-let function_ (f : Translated.function_) =
+let function_ (f : Ir.function_) =
   match f.definition with
   | Some { translation = Ok def; _ } ->
       let pat = pvar f.name in
@@ -188,7 +188,7 @@ let function_ (f : Translated.function_) =
       [ pstr_value rec_flag [ value_binding ~pat ~expr ] ]
   | _ -> []
 
-let constant (c : Translated.constant) =
+let constant (c : Ir.constant) =
   let register_name = evar c.register_name in
   let report = pexp_sequence (F.report ~register_name) in
   let body =
@@ -200,12 +200,12 @@ let constant (c : Translated.constant) =
   in
   [ [%stri let [%p pvar c.name] = [%e body]] ]
 
-let type_ (t : Translated.type_) =
+let type_ (t : Ir.type_) =
   List.filter_map
     (fun (i : invariant) -> Result.to_option i.translation |> Option.map snd)
     t.invariants
 
-let axiom (a : Translated.axiom) =
+let axiom (a : Ir.axiom) =
   let register_name = evar a.register_name in
   let report = pexp_sequence (F.report ~register_name) in
   let body =
@@ -213,17 +213,34 @@ let axiom (a : Translated.axiom) =
   in
   [ [%stri let () = [%e body]] ]
 
-let structure runtime driver : structure =
-  (pmod_ident (lident (Drv.module_name driver)) |> include_infos |> pstr_include)
+let structure runtime module_name ir : Ppxlib.structure =
+  (pmod_ident (lident module_name) |> include_infos |> pstr_include)
   :: pstr_module
        (module_binding
           ~name:{ txt = Some "Ortac_runtime"; loc }
           ~expr:(pmod_ident (lident runtime)))
-  :: (Drv.map_translation driver ~f:(function
-        | Translated.Value v -> value v
-        | Translated.Function f -> function_ f
-        | Translated.Predicate f -> function_ f
-        | Translated.Constant c -> constant c
-        | Translated.Type t -> type_ t
-        | Translated.Axiom a -> axiom a)
+  :: (Ir.map_translation ir ~f:(function
+        | Ir.Value v -> value v
+        | Ir.Function f -> function_ f
+        | Ir.Predicate f -> function_ f
+        | Ir.Constant c -> constant c
+        | Ir.Type t -> type_ t
+        | Ir.Axiom a -> axiom a)
      |> List.flatten)
+
+let signature ~runtime ~module_name namespace s =
+  let open Ortac_core in
+  let context = Context.init module_name namespace in
+  let ir = Ir_of_gospel.signature ~context s in
+  Report.emit_warnings Fmt.stderr ir;
+  structure runtime (Context.module_name context) ir
+
+let generate path output =
+  let module_name = Ortac_core.Utils.module_name_of_path path in
+  let output = Format.formatter_of_out_channel output in
+  Gospel.Parser_frontend.parse_ocaml_gospel path
+  |> Ortac_core.Utils.type_check [] path
+  |> fun (env, sigs) ->
+  assert (List.length env = 1);
+  signature ~runtime:"Ortac_runtime" ~module_name (List.hd env) sigs
+  |> Fmt.pf output "%a@." Ppxlib_ast.Pprintast.structure

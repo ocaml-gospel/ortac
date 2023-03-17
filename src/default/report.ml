@@ -1,5 +1,5 @@
-module W = Warnings
-open Translated
+module W = Ortac_core.Warnings
+open Ir
 
 let term ppf (t : term) = Result.iter_error (W.pp ppf) t.translation
 let terms ppf = List.iter (term ppf)
@@ -53,8 +53,8 @@ let predicate ppf (p : function_) =
 
 let axiom ppf (a : axiom) = term ppf a.definition
 
-let emit_warnings ppf driver =
-  Drv.iter_translation driver ~f:(function
+let emit_warnings ppf context =
+  Ir.iter_translation context ~f:(function
     | Type t -> type_ ppf t
     | Value v -> value ppf v
     | Constant c -> constant ppf c
