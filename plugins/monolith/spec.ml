@@ -23,6 +23,7 @@ let spec_constructor (type_decl : Tast.type_declaration) =
 let spec_dispatch (type_decl : Tast.type_declaration) =
   match type_decl.td_kind with
   | Pty_abstract -> Some (spec_abstract type_decl)
+  | _ when type_decl.td_private = Tast.Private -> Some (spec_abstract type_decl)
   | Pty_variant _ | Pty_record _ -> Some (spec_constructor type_decl)
 
 let spec_option (sig_item : Tast.signature_item) =

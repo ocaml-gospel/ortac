@@ -89,9 +89,11 @@ let generator_expr drv (ty_kind : Tast.type_kind) =
 
 let generator_definition drv (type_decl : Tast.type_declaration) =
   let id = B.pvar type_decl.td_ts.ts_ident.id_str in
-  match generator_expr drv type_decl.td_kind with
-  | None -> None
-  | Some generator -> Some [%stri let [%p id] = [%e generator]]
+  if type_decl.td_private = Tast.Private then None
+  else
+    match generator_expr drv type_decl.td_kind with
+    | None -> None
+    | Some generator -> Some [%stri let [%p id] = [%e generator]]
 
 let generator_option drv (sig_item : Tast.signature_item) =
   match sig_item.sig_desc with
