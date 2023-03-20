@@ -1,5 +1,11 @@
 test with existing sut type:
-This will generate qcheck-stm tests using `sut' as principal type
+This will generate qcheck-stm tests using `sut' as principal type and `good_init' as init function.
 
 test with non-existing sut type:
 Can't find sut
+
+test with a wrong type for init function
+Can't find init function
+
+test with an absent init function
+Can't find init function

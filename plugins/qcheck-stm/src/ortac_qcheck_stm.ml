@@ -5,7 +5,9 @@ let main path init sut =
       let msg =
         "This will generate qcheck-stm tests using `"
         ^ config.sut.ts_ident.id_str
-        ^ "' as principal type"
+        ^ "' as principal type and `"
+        ^ config.init.id_str
+        ^ "' as init function."
       in
       print_endline msg
   | Error err -> print_endline err
