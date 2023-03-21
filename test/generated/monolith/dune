@@ -1,11 +1,9 @@
-; (executable
-;  (name wrapper)
-;  (libraries pprint ortac-runtime-monolith monolith))
-
-; (rule
-;  (alias runtest)
-;  (deps wrapper.exe)
-;  (action (progn)))
+(test
+ (name wrapper)
+ (libraries pprint ortac-runtime-monolith monolith)
+ (action
+  (echo
+   "\n%{dep:wrapper.exe} has been generated with the ortac-monolith plugin.\n")))
 
 (rule
  (target wrapper.ml)

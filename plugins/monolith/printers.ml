@@ -101,7 +101,9 @@ let printer_definition drv (type_decl : Tast.type_declaration) =
 
 let printer_option drv (sig_item : Tast.signature_item) =
   match sig_item.sig_desc with
-  | Tast.Sig_type (_, [ type_decl ], _) -> printer_definition drv type_decl
+  | Tast.Sig_type (_, [ type_decl ], _) when type_decl.td_private = Tast.Public
+    ->
+      printer_definition drv type_decl
   | _ -> None
 
 let printers drv s =

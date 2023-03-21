@@ -329,24 +329,9 @@ module R =
        b)
   end
 module C = Lib
-module G =
-  struct
-    let set () =
-      { R.size = (Gen.int Int.max_int ()); R.mask = (Gen.int Int.max_int ())
-      }
-  end
-module P =
-  struct
-    let set { R.size; R.mask } =
-      M.print_record ""
-        [("size", (Print.int size)); ("mask", (Print.int mask))]
-  end
-module S =
-  struct
-    let set =
-      let neg = easily_constructible G.set P.set in
-      let pos = deconstructible P.set in ifpol neg pos
-  end
+module G = struct  end
+module P = struct  end
+module S = struct let set = declare_abstract_type ~var:"set" () end
 let () =
   ((let spec = M.int ^!> S.set in
     declare "create is Ok" spec R.create C.create);
