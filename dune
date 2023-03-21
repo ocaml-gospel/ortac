@@ -1,0 +1,15 @@
+(alias
+ (name default)
+ (deps
+  (alias_rec src/default)
+  (alias_rec bin/default)
+  (alias_rec plugins/default)))
+
+(alias
+ (name runtest)
+ (deps
+  (alias_rec src/runtest)
+  (alias_rec bin/runtest)
+  (alias_rec plugins/runtest)
+  (alias_rec test/all)
+  (alias_rec test/runtest)))
