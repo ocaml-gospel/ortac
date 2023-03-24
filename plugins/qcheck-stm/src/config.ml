@@ -50,6 +50,6 @@ let init path init sut =
   match get_sut_ts_from_signature sut sigs with
   | Some sut -> (
       match get_init_id_from_signature sut init sigs with
-      | Some init -> Ok { context; init; sut }
+      | Some init -> Ok (sigs, { context; init; sut })
       | None -> Error "Can't find init function")
   | None -> Error "Can't find sut"
