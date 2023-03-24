@@ -1,6 +1,6 @@
 let main path init sut =
   match Config.init path init sut with
-  | Ok config ->
+  | Ok (_sigs, config) ->
       let open Gospel.Identifier.Ident in
       let msg =
         "This will generate qcheck-stm tests using `"
