@@ -25,4 +25,15 @@ type value = {
   precond : Tterm.term list;
 }
 
+let value =
+  {
+    id = Ident.create ~loc:Location.none "dummy_id";
+    ty = Ppxlib.Ast_helper.Typ.any ();
+    sut_var = Ident.create ~loc:Location.none "dummy_sut_var";
+    args = [];
+    next_state = { formulae = []; modifies = []; checks = [] };
+    postcond = { normal = []; exceptional = []; checks = [] };
+    precond = [];
+  }
+
 type t = value list
