@@ -25,9 +25,9 @@ type value = {
   precond : Tterm.term list;
 }
 
-let value =
+let value id =
   {
-    id = Ident.create ~loc:Location.none "dummy_id";
+    id;
     ty = Ppxlib.Ast_helper.Typ.any ();
     sut_var = Ident.create ~loc:Location.none "dummy_sut_var";
     args = [];
@@ -35,5 +35,9 @@ let value =
     postcond = { normal = []; exceptional = []; checks = [] };
     precond = [];
   }
+
+module Pp = struct
+  let value v = "id : " ^ v.id.Ident.id_str
+end
 
 type t = value list
