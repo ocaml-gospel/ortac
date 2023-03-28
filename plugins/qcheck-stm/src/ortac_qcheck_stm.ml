@@ -1,3 +1,7 @@
+module Ir = Ir
+module Ir_of_gospel = Ir_of_gospel
+module Reserr = Reserr
+
 let main path init sut =
   match Config.init path init sut with
   | Ok (_sigs, config) ->

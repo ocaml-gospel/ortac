@@ -1,0 +1,11 @@
+Value `good_init' have no sut argument
+Value `good_init' returns a sut.
+Value `bad_init' is a constant.
+Value `bad_init' have no sut argument
+Value `bad_init' returns a sut.
+Value `no_sut' have no sut argument
+Value `constant' is a constant.
+Value `constant' have no sut argument
+Value `multiple_sut' have multiple sut arguments.
+id : f
+id : g

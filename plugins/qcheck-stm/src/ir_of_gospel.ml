@@ -49,8 +49,7 @@ let sig_item config s =
   | Sig_val (vd, Nonghost) -> Some (val_desc config vd)
   | _ -> None
 
-let signature config =
-  List.filter_map (sig_item config)
+let signature config = List.filter_map (sig_item config)
 
 let run path init sut =
   (* temporary implementation until Config uses the new Reserr *)
