@@ -3,6 +3,7 @@ open Tast
 open Reserr
 open Config
 
+(* XXX TODO should check the compatibility of the argument type too *)
 let lb_arg_is_of_type ts lb =
   match lb with
   | Lunit -> false
