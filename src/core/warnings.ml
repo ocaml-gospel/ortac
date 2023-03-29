@@ -1,8 +1,9 @@
 open Ppxlib
 
 type level = Warning | Error
+type kind = ..
 
-type kind =
+type kind +=
   | Unsupported of string
   | Ghost_value of string
   | Ghost_type of string
@@ -10,12 +11,15 @@ type kind =
   | Function_without_definition of string
   | Predicate_without_definition of string
 
+exception Unkown_kind
+
 type t = kind * Location.t
 
 let level = function
   | Unsupported _ | Ghost_value _ | Ghost_type _ | Unsupported_model _
   | Function_without_definition _ | Predicate_without_definition _ ->
       Warning
+  | _ -> raise Unkown_kind
 
 exception Error of t
 
@@ -45,8 +49,11 @@ let pp_kind ppf = function
   | Predicate_without_definition name ->
       pf ppf "The predicate %a has no definition. It was not translated." quoted
         name
+  | _ -> raise Unkown_kind
 
-let pp ppf (k, loc) =
+let pp_param pp_kind level ppf (k, loc) =
   pf ppf "%a@\n%a@[%a@]@\n"
     (styled `Bold Location.print)
     loc pp_level (level k) pp_kind k
+
+let pp = pp_param pp_kind level

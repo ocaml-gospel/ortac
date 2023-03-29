@@ -28,7 +28,7 @@ type bound = Inf of expression | Sup of expression
 let rec bounds ~context ~loc (var : Symbols.vsymbol) (t1 : Tterm.term)
     (t2 : Tterm.term) =
   let unsupported () =
-    raise (W.Error (Unsupported "ill formed quantification", loc))
+    raise W.(Error (Unsupported "ill formed quantification", loc))
   in
   (* [comb] extracts a bound from an the operator [f] and expression [e].
      [right] indicates if [e] is on the right side of the operator. *)
