@@ -1,11 +1,26 @@
-Value `good_init' have no sut argument
-Value `good_init' returns a sut.
-Value `bad_init' is a constant.
-Value `bad_init' have no sut argument
-Value `bad_init' returns a sut.
-Value `no_sut' have no sut argument
-Value `constant' is a constant.
-Value `constant' have no sut argument
-Value `multiple_sut' have multiple sut arguments.
-id : f
-id : g
+File "lib.mli", line 3, characters 0-27:
+Warning: `good_init' have no sut argument.
+File "lib.mli", line 3, characters 0-27:
+Warning: `good_init' returns a sut.
+File "lib.mli", line 4, characters 0-18:
+Warning: `bad_init' is a constant.
+
+File "lib.mli", line 4, characters 0-18:
+Warning: `bad_init' have no sut argument.
+File "lib.mli", line 4, characters 0-18:
+Warning: `bad_init' returns a sut.
+
+File "lib.mli", line 5, characters 0-23:
+Warning: `no_sut' have no sut argument.
+File "lib.mli", line 6, characters 0-18:
+Warning: `constant' is a constant.
+
+File "lib.mli", line 6, characters 0-18:
+Warning: `constant' have no sut argument.
+
+File "lib.mli", line 7, characters 0-36:
+Warning: `multiple_sut' have multiple sut arguments.
+
+id = f
+
+id = g

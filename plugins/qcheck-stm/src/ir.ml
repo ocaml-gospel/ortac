@@ -36,8 +36,4 @@ let value id =
     precond = [];
   }
 
-module Pp = struct
-  let value v = "id : " ^ v.id.Ident.id_str
-end
-
-type t = value list
+let pp_value ppf v = Fmt.(pf ppf "id = %a@." Ident.pp v.id)

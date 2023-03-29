@@ -1,20 +1,19 @@
-module Ident = Gospel.Identifier.Ident
+module W = Ortac_core.Warnings
 
-type error =
-  | Value_is_a_constant of (Ppxlib.location * Ident.t)
-  | Value_return_sut of (Ppxlib.location * Ident.t)
-  | Value_have_no_sut_argument of (Ppxlib.location * Ident.t)
-  | Value_have_multiple_sut_arguments of (Ppxlib.location * Ident.t)
+type W.kind +=
+  | Value_is_a_constant of string
+  | Value_return_sut of string
+  | Value_have_no_sut_argument of string
+  | Value_have_multiple_sut_arguments of string
 
-let error_to_string = function
-  | Value_is_a_constant (_loc, id) -> "Value `" ^ id.id_str ^ "' is a constant."
-  | Value_return_sut (_loc, id) -> "Value `" ^ id.id_str ^ "' returns a sut."
-  | Value_have_no_sut_argument (_loc, id) ->
-      "Value `" ^ id.id_str ^ "' have no sut argument"
-  | Value_have_multiple_sut_arguments (_loc, id) ->
-      "Value `" ^ id.id_str ^ "' have multiple sut arguments."
+let level kind =
+    match kind with
+    | Value_is_a_constant _ | Value_return_sut _ | Value_have_no_sut_argument _
+    | Value_have_multiple_sut_arguments _ ->
+        W.Warning
+    | _ -> W.level kind
 
-type 'a reserr = ('a, error list) result
+type 'a reserr = ('a, W.t list) result
 
 let ok = Result.ok
 let error e = Result.error [ e ]
@@ -26,6 +25,17 @@ let ( and* ) a b =
   | Error e, _ | _, Error e -> Error e
   | Ok a, Ok b -> Ok (a, b)
 
-let to_string pp = function
-  | Ok a -> pp a
-  | Error e -> String.concat "\n" (List.map error_to_string e)
+open Fmt
+
+let pp_kind ppf kind =
+    match kind with
+    | Value_is_a_constant id -> pf ppf "%a is a constant." W.quoted id
+    | Value_return_sut id -> pf ppf "%a returns a sut." W.quoted id
+    | Value_have_no_sut_argument id ->
+        pf ppf "%a have no sut argument." W.quoted id
+    | Value_have_multiple_sut_arguments id ->
+        pf ppf "%a have multiple sut arguments." W.quoted id
+    | _ -> W.pp_kind ppf kind
+
+let pp_errors = W.pp_param pp_kind level |> list
+let pp pp_ok = Fmt.result ~ok:pp_ok ~error:pp_errors

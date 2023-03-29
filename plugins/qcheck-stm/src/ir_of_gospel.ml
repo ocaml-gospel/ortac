@@ -16,16 +16,17 @@ let lb_arg_is_not_of_type ty lb_arg = not (lb_arg_is_of_type ty lb_arg)
 
 let constant_test vd =
   match vd.vd_args with
-  | [] -> Value_is_a_constant (vd.vd_loc, vd.vd_name) |> error
+  | [] -> (Value_is_a_constant vd.vd_name.id_str, vd.vd_loc) |> error
   | _ -> ok vd
 
 let argument_test ty vd =
   let p = lb_arg_is_of_type ty in
   let rec exactly_one = function
-    | [] -> Value_have_no_sut_argument (vd.vd_loc, vd.vd_name) |> error
+    | [] -> (Value_have_no_sut_argument vd.vd_name.id_str, vd.vd_loc) |> error
     | x :: xs when p x ->
         if List.exists p xs then
-          Value_have_multiple_sut_arguments (vd.vd_loc, vd.vd_name) |> error
+          (Value_have_multiple_sut_arguments vd.vd_name.id_str, vd.vd_loc)
+          |> error
         else ok vd
     | _ :: xs -> exactly_one xs
   in
@@ -33,7 +34,7 @@ let argument_test ty vd =
 
 let return_test ty vd =
   if List.for_all (lb_arg_is_not_of_type ty) vd.vd_ret then ok vd
-  else Value_return_sut (vd.vd_loc, vd.vd_name) |> error
+  else (Value_return_sut vd.vd_name.id_str, vd.vd_loc) |> error
 
 let value_id config vd =
   let* _ = constant_test vd
