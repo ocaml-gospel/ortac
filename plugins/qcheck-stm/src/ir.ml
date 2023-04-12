@@ -18,6 +18,7 @@ type postcond = {
 type value = {
   id : Ident.t;
   ty : Ppxlib.core_type;
+  inst : (string * Ppxlib.core_type) list;
   sut_var : Ident.t;
   args : Ident.t list;
   next_state : next_state;
@@ -25,10 +26,11 @@ type value = {
   precond : Tterm.term list;
 }
 
-let value id =
+let value id ty inst =
   {
     id;
-    ty = Ppxlib.Ast_helper.Typ.any ();
+    ty;
+    inst;
     sut_var = Ident.create ~loc:Location.none "dummy_sut_var";
     args = [];
     next_state = { formulae = []; modifies = []; checks = [] };
