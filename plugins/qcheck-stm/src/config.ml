@@ -4,7 +4,7 @@ open Ortac_core
 
 type t = {
   context : Context.t;
-  init : Identifier.Ident.t;
+  init_sut : Ppxlib.expression;
   sut : Ttypes.tysymbol;
 }
 
@@ -40,7 +40,12 @@ let get_init_id_from_signature init sut =
   in
   List.find_map f
 
+let init_sut_from_string str =
+  try Ppxlib.Parse.expression (Lexing.from_string str) |> Reserr.ok
+  with _ -> Reserr.(error (Syntax_error_in_init_sut str, Location.none))
+
 let init path init sut =
+  let open Reserr in
   let module_name = Utils.module_name_of_path path in
   Parser_frontend.parse_ocaml_gospel path |> Utils.type_check [] path
   |> fun (env, sigs) ->
@@ -48,8 +53,7 @@ let init path init sut =
   let namespace = List.hd env in
   let context = Context.init module_name namespace in
   match get_sut_ts_from_signature sut sigs with
-  | Some sut -> (
-      match get_init_id_from_signature sut init sigs with
-      | Some init -> Ok (sigs, { context; init; sut })
-      | None -> Error "Can't find init function")
-  | None -> Error "Can't find sut"
+  | Some sut ->
+      let* init_sut = init_sut_from_string init in
+      ok (sigs, { context; init_sut; sut })
+  | None -> error (No_sut_type sut, Location.none)
