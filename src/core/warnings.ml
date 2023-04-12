@@ -51,9 +51,13 @@ let pp_kind ppf = function
         name
   | _ -> raise Unkown_kind
 
+let is_fake_loc loc = loc.loc_start.pos_fname = "_none_"
+
 let pp_param pp_kind level ppf (k, loc) =
-  pf ppf "%a@\n%a@[%a@]@\n"
-    (styled `Bold Location.print)
-    loc pp_level (level k) pp_kind k
+  if is_fake_loc loc then pf ppf "%a@[%a@]@\n" pp_level (level k) pp_kind k
+  else
+    pf ppf "%a@\n%a@[%a@]@\n"
+      (styled `Bold Location.print)
+      loc pp_level (level k) pp_kind k
 
 let pp = pp_param pp_kind level
