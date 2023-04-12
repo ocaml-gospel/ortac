@@ -1,9 +1,9 @@
+module Config = Config
 module Ir = Ir
 module Ir_of_gospel = Ir_of_gospel
 module Reserr = Reserr
 
-let main _path _init _sut =
-  failwith "niy"
+let main _path _init _sut = ()
 
 open Cmdliner
 

@@ -1,59 +1,72 @@
 open Gospel
-open Tast
 open Ortac_core
 
 type t = {
   context : Context.t;
+  sut_core_type : Ppxlib.core_type;
   init_sut : Ppxlib.expression;
-  sut : Ttypes.tysymbol;
 }
 
-let get_sut_ts_from_td sut td =
-  let open Identifier.Ident in
-  if td.td_ts.ts_ident.id_str = sut then Some td.td_ts else None
+let get_sut_type_name config =
+  let open Ppxlib in
+  match config.sut_core_type.ptyp_desc with
+  | Ppxlib.Ptyp_constr (lid, _) -> lid.txt
+  | _ -> failwith "unreachable case in get_sut_type_name"
 
-let get_sut_ts_from_sig_desc sut = function
-  | Sig_type (_, tds, Nonghost) -> List.find_map (get_sut_ts_from_td sut) tds
-  | _ -> None
+let dump ppf t =
+  Fmt.(
+    pf ppf "sut_core_type: %a; init_sut: %a@." Ppxlib_ast.Pprintast.expression
+      t.init_sut Ppxlib_ast.Pprintast.core_type t.sut_core_type)
 
-let get_sut_ts_from_signature sut =
-  let f signature_item = get_sut_ts_from_sig_desc sut signature_item.sig_desc in
-  List.find_map f
+let core_type_of_string t =
+  let open Reserr in
+  try Ppxlib.Parse.core_type (Lexing.from_string t) |> ok
+  with _ -> error (Syntax_error_in_type t, Location.none)
 
-let check_init_value_type sut vd =
-  match (vd.vd_args, vd.vd_ret) with
-  | [ Lunit ], [ Lnone vs ] -> (
-      match vs.vs_ty.ty_node with
-      | Tyapp (ts, _) ->
-          if Ttypes.ts_equal ts sut then Some vd.vd_name else None
-      | _ -> None)
-  | _, _ -> None
+let rec acceptable_type_parameter param =
+  let open Ppxlib in
+  let open Reserr in
+  let str = Fmt.str "%a" Ppxlib_ast.Pprintast.core_type param in
+  match param.ptyp_desc with
+  | Ptyp_constr (_, cts) ->
+      let* _ = map acceptable_type_parameter cts in
+      ok ()
+  | Ptyp_tuple args ->
+      let* _ = map acceptable_type_parameter args in
+      ok ()
+  | Ptyp_var _ | Ptyp_any ->
+      error (Type_parameter_not_instantiated str, Location.none)
+  | _ -> error (Type_not_supported_for_sut_parameter str, Location.none)
 
-let get_init_from_sig_desc sut init = function
-  | Sig_val (vd, Nonghost) ->
-      if vd.vd_name.id_str = init then check_init_value_type sut vd else None
-  | _ -> None
+let core_type_is_a_well_formed_sut (core_type : Ppxlib.core_type) =
+  let open Ppxlib in
+  let open Reserr in
+  match core_type.ptyp_desc with
+  | Ptyp_constr (lid, cts) ->
+      let* _ = map acceptable_type_parameter cts in
+      ok (lid, cts)
+  | _ ->
+      let str = Fmt.str "%a" Ppxlib_ast.Pprintast.core_type core_type in
+      error (Sut_type_not_supported str, Location.none)
 
-let get_init_id_from_signature init sut =
-  let f signature_item =
-    get_init_from_sig_desc init sut signature_item.sig_desc
-  in
-  List.find_map f
+let sut_core_type str =
+  let open Reserr in
+  let* sut_core_type = core_type_of_string str in
+  let* _ = core_type_is_a_well_formed_sut sut_core_type in
+  ok sut_core_type
 
 let init_sut_from_string str =
   try Ppxlib.Parse.expression (Lexing.from_string str) |> Reserr.ok
   with _ -> Reserr.(error (Syntax_error_in_init_sut str, Location.none))
 
-let init path init sut =
-  let open Reserr in
+let init path init_sut sut_str =
   let module_name = Utils.module_name_of_path path in
   Parser_frontend.parse_ocaml_gospel path |> Utils.type_check [] path
   |> fun (env, sigs) ->
   assert (List.length env = 1);
   let namespace = List.hd env in
   let context = Context.init module_name namespace in
-  match get_sut_ts_from_signature sut sigs with
-  | Some sut ->
-      let* init_sut = init_sut_from_string init in
-      ok (sigs, { context; init_sut; sut })
-  | None -> error (No_sut_type sut, Location.none)
+  let open Reserr in
+  let* sut_core_type = sut_core_type sut_str
+  and* init_sut = init_sut_from_string init_sut in
+  ok (sigs, { context; sut_core_type; init_sut })

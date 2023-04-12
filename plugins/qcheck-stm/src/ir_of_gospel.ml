@@ -1,53 +1,19 @@
 open Gospel
 open Tast
 open Reserr
-open Config
-
-(* XXX TODO should check the compatibility of the argument type too *)
-let lb_arg_is_of_type ts lb =
-  match lb with
-  | Lunit -> false
-  | Lnone vs | Loptional vs | Lnamed vs | Lghost vs -> (
-      match vs.vs_ty.ty_node with
-      | Tyapp (ts', _) -> Ttypes.ts_equal ts ts'
-      | _ -> false)
-
-let lb_arg_is_not_of_type ty lb_arg = not (lb_arg_is_of_type ty lb_arg)
 
 let constant_test vd =
   match vd.vd_args with
   | [] -> (Constant_value vd.vd_name.id_str, vd.vd_loc) |> error
-  | _ -> ok vd
+  | _ -> ok ()
 
-let argument_test ty vd =
-  let p = lb_arg_is_of_type ty in
-  let rec exactly_one = function
-    | [] -> (No_sut_argument vd.vd_name.id_str, vd.vd_loc) |> error
-    | x :: xs when p x ->
-        if List.exists p xs then
-          (Multiple_sut_arguments vd.vd_name.id_str, vd.vd_loc) |> error
-        else ok vd
-    | _ :: xs -> exactly_one xs
-  in
-  exactly_one vd.vd_args
+let val_desc vd =
+  let* () = constant_test vd in
+  Ir.value vd.vd_name |> ok
 
-let return_test ty vd =
-  if List.for_all (lb_arg_is_not_of_type ty) vd.vd_ret then ok vd
-  else (Returning_sut vd.vd_name.id_str, vd.vd_loc) |> error
-
-let value_id config vd =
-  let* _ = constant_test vd
-  and* _ = argument_test config.sut vd
-  and* _ = return_test config.sut vd in
-  ok vd.vd_name
-
-let val_desc config vd =
-  let* id = value_id config vd in
-  Ir.value id |> ok
-
-let sig_item config s =
+let sig_item _config s =
   match s.sig_desc with
-  | Sig_val (vd, Nonghost) -> Some (val_desc config vd)
+  | Sig_val (vd, Nonghost) -> Some (val_desc vd)
   | _ -> None
 
 let signature config = List.filter_map (sig_item config)
