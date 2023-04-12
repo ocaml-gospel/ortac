@@ -5,12 +5,26 @@ type W.kind +=
   | Returning_sut of string
   | No_sut_argument of string
   | Multiple_sut_arguments of string
+  | No_sut_type of string
+  | No_init_function of string
+  | Syntax_error_in_type of string
+  | Syntax_error_in_init_sut of string
+  | Sut_type_not_supported of string
+  | Init_sut_not_supported of string
+  | Type_parameter_not_instantiated of string
+  | Type_not_supported_for_sut_parameter of string
+  | Incompatible_type of string
 
 let level kind =
   match kind with
   | Constant_value _ | Returning_sut _ | No_sut_argument _
-  | Multiple_sut_arguments _ ->
+  | Multiple_sut_arguments _ | Incompatible_type _ ->
       W.Warning
+  | No_sut_type _ | No_init_function _ | Syntax_error_in_type _
+  | Sut_type_not_supported _ | Type_not_supported_for_sut_parameter _
+  | Init_sut_not_supported _ | Syntax_error_in_init_sut _
+  | Type_parameter_not_instantiated _ ->
+      W.Error
   | _ -> W.level kind
 
 type 'a reserr = ('a, W.t list) result * W.t list
@@ -44,6 +58,31 @@ let pp_kind ppf kind =
   | No_sut_argument id -> pf ppf "%a have no sut argument." W.quoted id
   | Multiple_sut_arguments id ->
       pf ppf "%a have multiple sut arguments." W.quoted id
+  | No_sut_type ty ->
+      pf ppf "Type %a is not declared in the module." W.quoted ty
+  | No_init_function f ->
+      pf ppf "Function %a is not declared in the module." W.quoted f
+  | Syntax_error_in_type t ->
+      pf ppf "%a is not a well formed type expression." W.quoted t
+  | Syntax_error_in_init_sut s ->
+      pf ppf "%a is not a well formed OCaml expression." W.quoted s
+  | Sut_type_not_supported ty ->
+      pf ppf "The type %a given for the system under test is not supported."
+        W.quoted ty
+  | Init_sut_not_supported e ->
+      pf ppf "The expression %a given for init_sut in not supported." W.quoted e
+  | Type_parameter_not_instantiated ty ->
+      pf ppf "Type parameter %a should be instantiated." W.quoted ty
+  | Type_not_supported_for_sut_parameter ty ->
+      pf ppf
+        "Type parameter in %a are not supported as type argument for the \
+         system under test."
+        W.quoted ty
+  | Incompatible_type v ->
+      pf ppf
+        "Type of system under test in %a is incompatible with command line \
+         argument."
+        W.quoted v
   | _ -> W.pp_kind ppf kind
 
 let pp_errors = W.pp_param pp_kind level |> Fmt.list
