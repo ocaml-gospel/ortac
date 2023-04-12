@@ -2,19 +2,8 @@ module Ir = Ir
 module Ir_of_gospel = Ir_of_gospel
 module Reserr = Reserr
 
-let main path init sut =
-  match Config.init path init sut with
-  | Ok (_sigs, config) ->
-      let open Gospel.Identifier.Ident in
-      let msg =
-        "This will generate qcheck-stm tests using `"
-        ^ config.sut.ts_ident.id_str
-        ^ "' as principal type and `"
-        ^ config.init.id_str
-        ^ "' as init function."
-      in
-      print_endline msg
-  | Error err -> print_endline err
+let main _path _init _sut =
+  failwith "niy"
 
 open Cmdliner
 
