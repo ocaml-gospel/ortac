@@ -1,0 +1,26 @@
+test with correct cli arguments:
+================================
+
+sut_core_type: make 'a' 1; init_sut: (char, int) t
+
+test with non-existing sut type:
+================================
+
+sut_core_type: make 'a' 1; init_sut: absent
+
+test with ill-formed init_sut expression:
+=========================================
+Error: `make (' is not a well formed OCaml expression.
+
+test with ill-formed type expression:
+=====================================
+Error: `a-t' is not a well formed type expression.
+
+test with non instantiated sut type parameter:
+==============================================
+Error: Type parameter `'a' should be instantiated.
+
+test with arrow type as sut:
+============================
+Error: The type `int -> int' given for the system under test is not supported.
+

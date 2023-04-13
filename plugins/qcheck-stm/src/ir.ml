@@ -38,4 +38,14 @@ let value id ty inst =
     precond = [];
   }
 
-let pp_value ppf v = Fmt.(pf ppf "id = %a@." Ident.pp v.id)
+let pp_inst ppf inst =
+  let open Fmt in
+  let pp_binding ppf (v, t) =
+    pf ppf "%a/%a" string v Ppxlib_ast.Pprintast.core_type t
+  in
+  pf ppf "[%a]" (list ~sep:(any ", ") pp_binding) inst
+
+let pp_value ppf v =
+  let open Fmt in
+  pf ppf "id = %a; ty = %a; inst = %a@." Ident.pp v.id
+    Ppxlib_ast.Pprintast.core_type v.ty pp_inst v.inst
