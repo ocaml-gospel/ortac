@@ -14,3 +14,9 @@
  (name expect_ir)
  (modules expect_ir)
  (libraries ortac_qcheck_stm lib))
+
+(test
+ (package ortac-qcheck-stm)
+ (name expect_stm)
+ (modules expect_stm)
+ (libraries ortac_qcheck_stm))

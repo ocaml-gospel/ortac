@@ -1,0 +1,4 @@
+type nonrec cmd =
+  | F of char 
+  | G of int 
+  | J of char 
