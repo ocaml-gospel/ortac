@@ -2,6 +2,7 @@ module Config = Config
 module Ir = Ir
 module Ir_of_gospel = Ir_of_gospel
 module Reserr = Reserr
+module Stm_of_ir = Stm_of_ir
 
 let main _path _init _sut = ()
 
