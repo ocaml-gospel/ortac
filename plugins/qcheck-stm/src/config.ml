@@ -13,6 +13,13 @@ let get_sut_type_name config =
   | Ppxlib.Ptyp_constr (lid, _) -> lid.txt
   | _ -> failwith "unreachable case in get_sut_type_name"
 
+let is_sut config ty =
+  let sut_type_name = get_sut_type_name config in
+  let open Ppxlib in
+  match ty.ptyp_desc with
+  | Ptyp_constr (lid, _) -> lid.txt = sut_type_name
+  | _ -> false
+
 let dump ppf t =
   Fmt.(
     pf ppf "sut_core_type: %a; init_sut: %a@." Ppxlib_ast.Pprintast.expression
