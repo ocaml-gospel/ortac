@@ -1,14 +1,5 @@
-open Gospel
-open Tast
-
-let type_is_sut_type config ty =
-  let sut_type_name = Config.get_sut_type_name config in
-  let open Ppxlib in
-  match ty.ptyp_desc with
-  | Ptyp_constr (lid, _) -> lid.txt = sut_type_name
-  | _ -> false
-
-let type_is_not_sut_type config ty = not (type_is_sut_type config ty)
+open Gospel.Tast
+module Cfg = Config
 
 let constant_test vd =
   let open Reserr in
@@ -60,7 +51,7 @@ let ty_var_substitution config (vd : val_description) =
     match ty.ptyp_desc with
     | Ptyp_any | Ptyp_var _ -> ret seen
     | Ptyp_arrow (_, l, r) ->
-        if type_is_sut_type config l then
+        if Cfg.is_sut config l then
           match seen with
           | None ->
               let open Reserr in
@@ -71,10 +62,10 @@ let ty_var_substitution config (vd : val_description) =
                 error (Multiple_sut_arguments value_name, value_type.ptyp_loc))
         else aux seen r
     | Ptyp_tuple elems ->
-        if List.for_all (type_is_not_sut_type config) elems then ret seen
+        if List.for_all (fun t -> not (Cfg.is_sut config t)) elems then ret seen
         else Reserr.(error (Returning_sut value_name, ty.ptyp_loc))
     | Ptyp_constr (_, _) ->
-        if type_is_not_sut_type config ty then ret seen
+        if not (Cfg.is_sut config ty) then ret seen
         else Reserr.(error (Returning_sut value_name, ty.ptyp_loc))
     (* not supported *)
     | Ptyp_object (_, _)
@@ -97,9 +88,10 @@ let sig_item config s =
   | Sig_val (vd, Nonghost) -> Some (val_desc config vd)
   | _ -> None
 
-let signature config = List.filter_map (sig_item config)
+let signature config sigs =
+  List.filter_map (sig_item config) sigs |> Reserr.promote
 
 let run path init sut =
   let open Reserr in
   let* sigs, config = Config.init path init sut in
-  signature config sigs |> promote
+  signature config sigs
