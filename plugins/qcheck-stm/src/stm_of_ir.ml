@@ -5,6 +5,13 @@ open Ortac_core.Builder
 
 let ty_default = Ptyp_constr (noloc (Lident "char"), [])
 
+let show_attribute : attribute =
+  {
+    attr_name = noloc "deriving";
+    attr_payload = PStr [ [%stri show { with_path = false }] ];
+    attr_loc = Location.none;
+  }
+
 let subst inst ty =
   let rec aux ty =
     {
@@ -58,4 +65,4 @@ let cmd_type config ir =
     type_declaration ~name:(noloc "cmd") ~params:[] ~cstrs:[]
       ~kind:(Ptype_variant constructors) ~private_:Public ~manifest:None
   in
-  pstr_type Nonrecursive [ td ]
+  pstr_type Nonrecursive [ { td with ptype_attributes = [ show_attribute ] } ]
