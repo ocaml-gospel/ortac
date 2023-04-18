@@ -1,10 +1,13 @@
-open Gospel.Tast
+open Gospel
+open Tast
 module Cfg = Config
+module Ident = Identifier.Ident
 
 let constant_test vd =
   let open Reserr in
   match vd.vd_args with
-  | [] -> (Constant_value vd.vd_name.id_str, vd.vd_loc) |> error
+  | [] ->
+      (Constant_value (Fmt.str "%a" Ident.pp vd.vd_name), vd.vd_loc) |> error
   | _ -> ok ()
 
 let is_a_function ty =
@@ -88,10 +91,55 @@ let sig_item config s =
   | Sig_val (vd, Nonghost) -> Some (val_desc config vd)
   | _ -> None
 
+let state config sigs =
+  let sut_name = Cfg.get_sut_type_name_str config in
+  let is_sut_decl s =
+    let p t = t.td_ts.ts_ident.id_str = sut_name in
+    match s.sig_desc with
+    | Sig_type (_, ts, _) -> (
+        List.filter p ts |> function
+        | [] -> None
+        | [ t ] -> Some t
+        (* As multiple type declarations with the same name is illegal, last
+           case can't happen *)
+        | _ -> assert false)
+    | _ -> None
+  in
+  let open Reserr in
+  let* ty =
+    match List.filter_map is_sut_decl sigs with
+    | [] -> error (No_sut_type sut_name, Location.none)
+    | [ ty ] -> ok ty
+    (* As multiple type declarations with the same name is illegal, last
+       case can't happen *)
+    | _ -> assert false
+  in
+  let open Ortac_core in
+  let* subst =
+    Fun.flip List.assoc_opt
+    <$> (Ocaml_of_gospel.core_type_of_tysymbol ty.td_ts
+        |> unify sut_name config.sut_core_type)
+  and* spec =
+    match ty.td_spec with
+    | None -> error (Sut_type_not_specified sut_name, ty.td_loc)
+    | Some spec -> ok spec
+  in
+  let process_model (ls, _) =
+    let open Symbols in
+    ( ls.ls_name,
+      Option.get ls.ls_value |> Ocaml_of_gospel.core_type_of_ty_with_subst subst
+    )
+  in
+  match spec.ty_fields with
+  | [] -> error (No_models sut_name, spec.ty_loc)
+  | xs -> List.map process_model xs |> ok
+
 let signature config sigs =
   List.filter_map (sig_item config) sigs |> Reserr.promote
 
 let run path init sut =
   let open Reserr in
+  let open Ir in
   let* sigs, config = Config.init path init sut in
-  signature config sigs
+  let* values = signature config sigs and* state = state config sigs in
+  ok { state; values }
