@@ -14,6 +14,8 @@ type W.kind +=
   | Type_parameter_not_instantiated of string
   | Type_not_supported_for_sut_parameter of string
   | Incompatible_type of string
+  | Sut_type_not_specified of string
+  | No_models of string
 
 type 'a reserr
 

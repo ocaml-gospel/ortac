@@ -14,6 +14,8 @@ type W.kind +=
   | Type_parameter_not_instantiated of string
   | Type_not_supported_for_sut_parameter of string
   | Incompatible_type of string
+  | Sut_type_not_specified of string
+  | No_models of string
 
 let level kind =
   match kind with
@@ -23,7 +25,8 @@ let level kind =
   | No_sut_type _ | No_init_function _ | Syntax_error_in_type _
   | Sut_type_not_supported _ | Type_not_supported_for_sut_parameter _
   | Init_sut_not_supported _ | Syntax_error_in_init_sut _
-  | Type_parameter_not_instantiated _ ->
+  | Type_parameter_not_instantiated _ | Sut_type_not_specified _ | No_models _
+    ->
       W.Error
   | _ -> W.level kind
 
@@ -83,6 +86,12 @@ let pp_kind ppf kind =
         "Type of system under test in %a is incompatible with command line \
          argument."
         W.quoted v
+  | Sut_type_not_specified ty ->
+      pf ppf "The type %a given for the system under test is not specified."
+        W.quoted ty
+  | No_models ty ->
+      pf ppf "The type %a given for the system under test has no models."
+        W.quoted ty
   | _ -> W.pp_kind ppf kind
 
 let pp_errors = W.pp_param pp_kind level |> Fmt.list
