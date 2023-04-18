@@ -53,6 +53,12 @@ let ( and* ) (a, aw) (b, bw) =
   in
   (r, aw @ bw)
 
+let fmap f r =
+  let* r = r in
+  ok (f r)
+
+let ( <$> ) = fmap
+
 let pp_kind ppf kind =
   let open Fmt in
   match kind with

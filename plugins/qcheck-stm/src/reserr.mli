@@ -27,4 +27,6 @@ val ( let* ) : 'a reserr -> ('a -> 'b reserr) -> 'b reserr
 val ( and* ) : 'a reserr -> 'b reserr -> ('a * 'b) reserr
 val promote : 'a reserr list -> 'a list reserr
 val map : ('a -> 'b reserr) -> 'a list -> 'b list reserr
+val fmap : ('a -> 'b) -> 'a reserr -> 'b reserr
+val ( <$> ) : ('a -> 'b) -> 'a reserr -> 'b reserr
 val pp : 'a Fmt.t -> 'a reserr Fmt.t
