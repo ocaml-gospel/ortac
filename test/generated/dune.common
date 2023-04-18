@@ -1,9 +1,4 @@
 (rule
- (target wrapper.mli)
- (action
-  (copy ../lib.mli %{target})))
-
-(rule
  (target lib.mli)
  (action
   (copy ../lib.mli %{target})))

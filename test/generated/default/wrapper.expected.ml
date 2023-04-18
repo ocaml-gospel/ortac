@@ -5,11 +5,13 @@ let __invariant___001_ __error___002_ __position___003_ t =
     not
       (try
          let __t1__004_ =
-           Ortac_runtime.Z.leq (Ortac_runtime.Z.of_int 0)
-             (Ortac_runtime.Z.of_int t.size) in
+           Ortac_runtime.Gospelstdlib.(<=)
+             (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+             (Ortac_runtime.Gospelstdlib.integer_of_int t.size) in
          let __t2__005_ =
-           Ortac_runtime.Z.leq (Ortac_runtime.Z.of_int t.size)
-             (Ortac_runtime.Z.of_int 32) in
+           Ortac_runtime.Gospelstdlib.(<=)
+             (Ortac_runtime.Gospelstdlib.integer_of_int t.size)
+             (Ortac_runtime.Gospelstdlib.integer_of_int 32) in
          __t1__004_ && __t2__005_
        with
        | e ->
@@ -35,12 +37,15 @@ let __invariant___006_ __error___007_ __position___008_ t =
     not
       (try
          let __t1__009_ =
-           Ortac_runtime.Z.leq (Ortac_runtime.Z.of_int 0)
-             (Ortac_runtime.Z.of_int t.mask) in
+           Ortac_runtime.Gospelstdlib.(<=)
+             (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+             (Ortac_runtime.Gospelstdlib.integer_of_int t.mask) in
          let __t2__010_ =
-           Ortac_runtime.Z.lt (Ortac_runtime.Z.of_int t.mask)
-             (Ortac_runtime.Z.pow (Ortac_runtime.Z.of_int 2)
-                (Ortac_runtime.Z.of_int t.size)) in
+           Ortac_runtime.Gospelstdlib.(<)
+             (Ortac_runtime.Gospelstdlib.integer_of_int t.mask)
+             (Ortac_runtime.Gospelstdlib.pow
+                (Ortac_runtime.Gospelstdlib.integer_of_int 2)
+                (Ortac_runtime.Gospelstdlib.integer_of_int t.size)) in
          __t1__009_ && __t2__010_
        with
        | e ->
@@ -63,9 +68,11 @@ let __invariant___006_ __error___007_ __position___008_ t =
       |> (Ortac_runtime.Errors.register __error___007_)
 let __logical_mem__011_ i bv =
   not
-    ((Ortac_runtime.Z.logand (Ortac_runtime.Z.of_int bv.mask)
-        (Ortac_runtime.Z.pow (Ortac_runtime.Z.of_int 2) i))
-       = (Ortac_runtime.Z.of_int 0))
+    ((Ortac_runtime.Gospelstdlib.logand
+        (Ortac_runtime.Gospelstdlib.integer_of_int bv.mask)
+        (Ortac_runtime.Gospelstdlib.pow
+           (Ortac_runtime.Gospelstdlib.integer_of_int 2) i))
+       = (Ortac_runtime.Gospelstdlib.integer_of_int 0))
 let create n =
   let __error__012_ =
     Ortac_runtime.Errors.create
@@ -89,11 +96,13 @@ let create n =
     not
       (try
          let __t1__013_ =
-           Ortac_runtime.Z.leq (Ortac_runtime.Z.of_int 0)
-             (Ortac_runtime.Z.of_int n) in
+           Ortac_runtime.Gospelstdlib.(<=)
+             (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+             (Ortac_runtime.Gospelstdlib.integer_of_int n) in
          let __t2__014_ =
-           Ortac_runtime.Z.leq (Ortac_runtime.Z.of_int n)
-             (Ortac_runtime.Z.of_int 32) in
+           Ortac_runtime.Gospelstdlib.(<=)
+             (Ortac_runtime.Gospelstdlib.integer_of_int n)
+             (Ortac_runtime.Gospelstdlib.integer_of_int 32) in
          __t1__013_ && __t2__014_
        with
        | e ->
@@ -119,8 +128,10 @@ let create n =
    if
      not
        (try
-          Ortac_runtime.Z.forall (Ortac_runtime.Z.of_int 0)
-            (Ortac_runtime.Z.pred (Ortac_runtime.Z.of_int n))
+          Ortac_runtime.Z.forall
+            (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+            (Ortac_runtime.Gospelstdlib.pred
+               (Ortac_runtime.Gospelstdlib.integer_of_int n))
             (fun i_1 -> not (__logical_mem__011_ i_1 bv_1))
         with
         | e ->
@@ -181,11 +192,13 @@ let add i_2 bv_2 =
     not
       (try
          let __t1__016_ =
-           Ortac_runtime.Z.leq (Ortac_runtime.Z.of_int 0)
-             (Ortac_runtime.Z.of_int i_2) in
+           Ortac_runtime.Gospelstdlib.(<=)
+             (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+             (Ortac_runtime.Gospelstdlib.integer_of_int i_2) in
          let __t2__017_ =
-           Ortac_runtime.Z.lt (Ortac_runtime.Z.of_int i_2)
-             (Ortac_runtime.Z.of_int bv_2.size) in
+           Ortac_runtime.Gospelstdlib.(<)
+             (Ortac_runtime.Gospelstdlib.integer_of_int i_2)
+             (Ortac_runtime.Gospelstdlib.integer_of_int bv_2.size) in
          __t1__016_ && __t2__017_
        with
        | e ->
@@ -242,11 +255,13 @@ let mem i_3 bv_3 =
     not
       (try
          let __t1__021_ =
-           Ortac_runtime.Z.leq (Ortac_runtime.Z.of_int 0)
-             (Ortac_runtime.Z.of_int i_3) in
+           Ortac_runtime.Gospelstdlib.(<=)
+             (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+             (Ortac_runtime.Gospelstdlib.integer_of_int i_3) in
          let __t2__022_ =
-           Ortac_runtime.Z.lt (Ortac_runtime.Z.of_int i_3)
-             (Ortac_runtime.Z.of_int bv_3.size) in
+           Ortac_runtime.Gospelstdlib.(<)
+             (Ortac_runtime.Gospelstdlib.integer_of_int i_3)
+             (Ortac_runtime.Gospelstdlib.integer_of_int bv_3.size) in
          __t1__021_ && __t2__022_
        with
        | e ->
@@ -280,7 +295,8 @@ let mem i_3 bv_3 =
      not
        (try
           (b = true) =
-            (__logical_mem__011_ (Ortac_runtime.Z.of_int i_3) bv_3)
+            (__logical_mem__011_
+               (Ortac_runtime.Gospelstdlib.integer_of_int i_3) bv_3)
         with
         | e ->
             ((Ortac_runtime.Specification_failure

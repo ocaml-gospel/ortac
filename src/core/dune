@@ -1,6 +1,12 @@
 (library
  (name ortac_core)
+ (public_name ortac.ortac_core)
  (preprocess
   (pps ppxlib.metaquot))
- (package ortac)
  (libraries fmt gospel ppxlib ppxlib.ast))
+
+(rule
+ (enabled_if
+  (< %{ocaml_version} 4.13))
+ (action
+  (copy string.pre413.ml string.ml)))

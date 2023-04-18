@@ -1,11 +1,8 @@
 opam-version: "2.0"
-synopsis: "OCaml Runtime Assertion Checking based on Gospel"
-description: "OCaml Runtime Assertion Checking based on Gospel"
-maintainer: ["Clément Pascutto <clement@pascutto.fr>"]
-authors: [
-  "Clément Pascutto <clement@pascutto.fr>"
-  "Nicolas Osborne <nicolas.osborne@tarides.com>"
-]
+synopsis: "Monolith plugin for Ortac"
+description: "Monolith plugin for Ortac"
+maintainer: ["Nicolas Osborne <nicolas.osborne@tarides.com>"]
+authors: ["Nicolas Osborne <nicolas.osborne@tarides.com>"]
 homepage: "https://github.com/ocaml-gospel/ortac"
 dev-repo: "git+https://github.com/ocaml-gospel/ortac.git"
 doc: "https://ocaml-gospel.github.io/ortac/"
@@ -23,21 +20,18 @@ build: [
     "@runtest" {with-test}
     "@doc" {with-doc}
   ]
-  ["dune" "install" "-p" name "--create-install-files" name]
 ]
 
 depends: [
   "ocaml" {>= "4.11.0"}
   "dune" {>= "3.0"}
-  "dune-site"
   "cmdliner" {>= "1.1.0"}
   "fmt"
   "ppxlib" {>= "0.26.0"}
   "gospel"
-  "alcotest" {>= "0.8.1" with-test}
+  "ortac"
+  "alcotest" {with-test}
   "pprint" {with-test}
-  "ortac-monolith" {with-test}
-  "ortac-runtime" {with-test}
   "ortac-runtime-monolith" {with-test}
   "monolith" {>= "20201026"}
 ]

@@ -9,11 +9,13 @@ module R =
         not
           (try
              let __t1__004_ =
-               Ortac_runtime.Z.leq (Ortac_runtime.Z.of_int 0)
-                 (Ortac_runtime.Z.of_int t.size) in
+               Ortac_runtime.Gospelstdlib.(<=)
+                 (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+                 (Ortac_runtime.Gospelstdlib.integer_of_int t.size) in
              let __t2__005_ =
-               Ortac_runtime.Z.leq (Ortac_runtime.Z.of_int t.size)
-                 (Ortac_runtime.Z.of_int 32) in
+               Ortac_runtime.Gospelstdlib.(<=)
+                 (Ortac_runtime.Gospelstdlib.integer_of_int t.size)
+                 (Ortac_runtime.Gospelstdlib.integer_of_int 32) in
              __t1__004_ && __t2__005_
            with
            | e ->
@@ -39,12 +41,15 @@ module R =
         not
           (try
              let __t1__009_ =
-               Ortac_runtime.Z.leq (Ortac_runtime.Z.of_int 0)
-                 (Ortac_runtime.Z.of_int t.mask) in
+               Ortac_runtime.Gospelstdlib.(<=)
+                 (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+                 (Ortac_runtime.Gospelstdlib.integer_of_int t.mask) in
              let __t2__010_ =
-               Ortac_runtime.Z.lt (Ortac_runtime.Z.of_int t.mask)
-                 (Ortac_runtime.Z.pow (Ortac_runtime.Z.of_int 2)
-                    (Ortac_runtime.Z.of_int t.size)) in
+               Ortac_runtime.Gospelstdlib.(<)
+                 (Ortac_runtime.Gospelstdlib.integer_of_int t.mask)
+                 (Ortac_runtime.Gospelstdlib.pow
+                    (Ortac_runtime.Gospelstdlib.integer_of_int 2)
+                    (Ortac_runtime.Gospelstdlib.integer_of_int t.size)) in
              __t1__009_ && __t2__010_
            with
            | e ->
@@ -67,9 +72,11 @@ module R =
           |> (Ortac_runtime.Errors.register __error___007_)
     let __logical_mem__011_ i bv =
       not
-        ((Ortac_runtime.Z.logand (Ortac_runtime.Z.of_int bv.mask)
-            (Ortac_runtime.Z.pow (Ortac_runtime.Z.of_int 2) i))
-           = (Ortac_runtime.Z.of_int 0))
+        ((Ortac_runtime.Gospelstdlib.logand
+            (Ortac_runtime.Gospelstdlib.integer_of_int bv.mask)
+            (Ortac_runtime.Gospelstdlib.pow
+               (Ortac_runtime.Gospelstdlib.integer_of_int 2) i))
+           = (Ortac_runtime.Gospelstdlib.integer_of_int 0))
     let create n =
       let __error__012_ =
         Ortac_runtime.Errors.create
@@ -93,11 +100,13 @@ module R =
         not
           (try
              let __t1__013_ =
-               Ortac_runtime.Z.leq (Ortac_runtime.Z.of_int 0)
-                 (Ortac_runtime.Z.of_int n) in
+               Ortac_runtime.Gospelstdlib.(<=)
+                 (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+                 (Ortac_runtime.Gospelstdlib.integer_of_int n) in
              let __t2__014_ =
-               Ortac_runtime.Z.leq (Ortac_runtime.Z.of_int n)
-                 (Ortac_runtime.Z.of_int 32) in
+               Ortac_runtime.Gospelstdlib.(<=)
+                 (Ortac_runtime.Gospelstdlib.integer_of_int n)
+                 (Ortac_runtime.Gospelstdlib.integer_of_int 32) in
              __t1__013_ && __t2__014_
            with
            | e ->
@@ -124,8 +133,10 @@ module R =
        if
          not
            (try
-              Ortac_runtime.Z.forall (Ortac_runtime.Z.of_int 0)
-                (Ortac_runtime.Z.pred (Ortac_runtime.Z.of_int n))
+              Ortac_runtime.Z.forall
+                (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+                (Ortac_runtime.Gospelstdlib.pred
+                   (Ortac_runtime.Gospelstdlib.integer_of_int n))
                 (fun i_1 -> not (__logical_mem__011_ i_1 bv_1))
             with
             | e ->
@@ -186,11 +197,13 @@ module R =
         not
           (try
              let __t1__016_ =
-               Ortac_runtime.Z.leq (Ortac_runtime.Z.of_int 0)
-                 (Ortac_runtime.Z.of_int i_2) in
+               Ortac_runtime.Gospelstdlib.(<=)
+                 (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+                 (Ortac_runtime.Gospelstdlib.integer_of_int i_2) in
              let __t2__017_ =
-               Ortac_runtime.Z.lt (Ortac_runtime.Z.of_int i_2)
-                 (Ortac_runtime.Z.of_int bv_2.size) in
+               Ortac_runtime.Gospelstdlib.(<)
+                 (Ortac_runtime.Gospelstdlib.integer_of_int i_2)
+                 (Ortac_runtime.Gospelstdlib.integer_of_int bv_2.size) in
              __t1__016_ && __t2__017_
            with
            | e ->
@@ -248,11 +261,13 @@ module R =
         not
           (try
              let __t1__021_ =
-               Ortac_runtime.Z.leq (Ortac_runtime.Z.of_int 0)
-                 (Ortac_runtime.Z.of_int i_3) in
+               Ortac_runtime.Gospelstdlib.(<=)
+                 (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+                 (Ortac_runtime.Gospelstdlib.integer_of_int i_3) in
              let __t2__022_ =
-               Ortac_runtime.Z.lt (Ortac_runtime.Z.of_int i_3)
-                 (Ortac_runtime.Z.of_int bv_3.size) in
+               Ortac_runtime.Gospelstdlib.(<)
+                 (Ortac_runtime.Gospelstdlib.integer_of_int i_3)
+                 (Ortac_runtime.Gospelstdlib.integer_of_int bv_3.size) in
              __t1__021_ && __t2__022_
            with
            | e ->
@@ -287,7 +302,8 @@ module R =
          not
            (try
               (b = true) =
-                (__logical_mem__011_ (Ortac_runtime.Z.of_int i_3) bv_3)
+                (__logical_mem__011_
+                   (Ortac_runtime.Gospelstdlib.integer_of_int i_3) bv_3)
             with
             | e ->
                 ((Ortac_runtime.Specification_failure
@@ -313,24 +329,9 @@ module R =
        b)
   end
 module C = Lib
-module G =
-  struct
-    let set () =
-      { R.size = (Gen.int Int.max_int ()); R.mask = (Gen.int Int.max_int ())
-      }
-  end
-module P =
-  struct
-    let set { R.size; R.mask } =
-      M.print_record ""
-        [("size", (Print.int size)); ("mask", (Print.int mask))]
-  end
-module S =
-  struct
-    let set =
-      let neg = easily_constructible G.set P.set in
-      let pos = deconstructible P.set in ifpol neg pos
-  end
+module G = struct  end
+module P = struct  end
+module S = struct let set = declare_abstract_type ~var:"set" () end
 let () =
   ((let spec = M.int ^!> S.set in
     declare "create is Ok" spec R.create C.create);

@@ -9,8 +9,8 @@ let unsupported msg loc = raise (W.Error (W.MonolithSpec msg, loc))
 
 let mk_reference module_name env s =
   let rtac =
-    Ortac_core.Ortac.signature ~runtime:"Ortac_runtime_monolith" ~module_name
-      env s
+    Ortac_default.Generate.signature ~runtime:"Ortac_runtime_monolith"
+      ~module_name env s
   in
   let module_r = A.pmod_structure ~loc rtac in
   let module_bind =
@@ -115,13 +115,13 @@ let mk_specs drv s =
   [ mk_declarations drv s; main ]
 
 let standalone module_name env s =
-  let driver = Ortac_core.Drv.init module_name env in
+  let context = Ortac_core.Context.init module_name env in
   let module_r = mk_reference module_name env s in
   let module_c = mk_candidate module_name in
-  let module_g = Generators.generators driver s in
-  let module_p = Printers.printers driver s in
+  let module_g = Generators.generators context s in
+  let module_p = Printers.printers context s in
   let module_s = Spec.specs s in
-  let specs = mk_specs driver s in
+  let specs = mk_specs context s in
   [%stri open Monolith]
   :: [%stri module M = Ortac_runtime_monolith]
   :: module_r
@@ -141,3 +141,27 @@ let generate path output =
   standalone module_name (List.hd env) sigs
   |> Fmt.pf output "%a@." Ppxlib_ast.Pprintast.structure;
   W.report ()
+
+open Cmdliner
+
+module Plugin : sig
+  val cmd : unit Cmd.t
+end = struct
+  open Registration
+
+  let main input output () =
+    let channel = get_channel output in
+    try generate input channel
+    with Gospel.Warnings.Error e ->
+      Fmt.epr "%a@." Gospel.Warnings.pp e;
+      exit 1
+
+  let info =
+    Cmd.info "monolith"
+      ~doc:"Generate Monolith test file according to Gospel specifications."
+
+  let term = Term.(const main $ ocaml_file $ output_file $ setup_log)
+  let cmd = Cmd.v info term
+end
+
+let () = Registration.register Plugin.cmd

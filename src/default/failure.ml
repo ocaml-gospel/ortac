@@ -1,5 +1,5 @@
 open Ppxlib
-open Builder
+open Ortac_core.Builder
 
 let eterm t = estring t
 
