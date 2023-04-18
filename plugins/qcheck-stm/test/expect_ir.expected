@@ -1,6 +1,6 @@
-id = f; ty = 'a -> ('a, 'b) t -> bool; inst = [b/char, a/int]
+id = f; ty = 'a -> ('a, 'b) t -> bool; inst = [b/int, a/char]
 
-id = g; ty = 'a -> ('b, 'a) t -> int; inst = [a/char, b/int]
+id = g; ty = 'a -> ('b, 'a) t -> int; inst = [a/int, b/char]
 File "lib.mli", line 3, characters 23-33:
 Warning: `make' returns a sut.
 
