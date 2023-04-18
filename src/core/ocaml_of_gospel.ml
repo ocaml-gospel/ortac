@@ -157,3 +157,33 @@ and term ~context (t : Tterm.term) : expression =
   | Told _ -> unsupported "old operator"
   | Ttrue -> [%expr true]
   | Tfalse -> [%expr false]
+
+let core_type_of_ty_with_subst subst ty =
+  let open Ttypes in
+  let lident_of_tysymbol ts =
+    (if ty_equal ty_integer ty then "int"
+    else Fmt.str "%a" Ident.pp ts.ts_ident)
+    |> Builder.lident
+  in
+  let rec aux ty =
+    match ty.ty_node with
+    | Tyvar v ->
+        let v = Fmt.str "%a" Ident.pp v.tv_name in
+        Option.value ~default:(Builder.ptyp_var v) (subst v)
+    | Tyapp (ts, args) ->
+        let args = List.map aux args in
+        if is_ts_tuple ts then Builder.ptyp_tuple args
+        else Builder.ptyp_constr (lident_of_tysymbol ts) args
+  in
+  aux ty
+
+let core_type_of_tysymbol (ts : Ttypes.tysymbol) : Ppxlib.core_type =
+  let lid = Fmt.str "%a" Ident.pp ts.ts_ident |> Builder.lident in
+  let args =
+    List.map
+      (fun tv ->
+        let open Ttypes in
+        Builder.ptyp_var (Fmt.str "%a" Ident.pp tv.tv_name))
+      ts.ts_args
+  in
+  Builder.ptyp_constr lid args
