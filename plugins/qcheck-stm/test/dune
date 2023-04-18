@@ -19,4 +19,4 @@
  (package ortac-qcheck-stm)
  (name expect_stm)
  (modules expect_stm)
- (libraries ortac_qcheck_stm))
+ (libraries ortac_qcheck_stm lib))
