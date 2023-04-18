@@ -13,6 +13,11 @@ let get_sut_type_name config =
   | Ppxlib.Ptyp_constr (lid, _) -> lid.txt
   | _ -> failwith "unreachable case in get_sut_type_name"
 
+let get_sut_type_name_str config =
+  match get_sut_type_name config with
+  | Longident.Lident s | Longident.Ldot (_, s) -> s
+  | Longident.Lapply (_, _) -> failwith "not supported"
+
 let is_sut config ty =
   let sut_type_name = get_sut_type_name config in
   let open Ppxlib in
