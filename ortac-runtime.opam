@@ -13,10 +13,7 @@ depends: [
   "ocaml" {>= "4.11.0"}
   "dune" {>= "3.0"}
   "fmt"
-  "ppxlib" {>= "0.20.0"}
   "zarith"
-  "monolith" {>= "20201026" & with-test}
-  "pprint" {>= "20220103" & with-test}
 ]
 build: [
   ["dune" "subst"] {dev}
