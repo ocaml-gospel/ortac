@@ -137,9 +137,8 @@ let state config sigs =
 let signature config sigs =
   List.filter_map (sig_item config) sigs |> Reserr.promote
 
-let run path init sut =
+let run sigs config =
   let open Reserr in
   let open Ir in
-  let* sigs, config = Config.init path init sut in
   let* values = signature config sigs and* state = state config sigs in
   ok { state; values }
