@@ -1,14 +1,16 @@
-id = f; ty = 'a -> ('a, 'b) t -> bool; inst = [b/int, a/char]
+state = fst: char; snd: int
+values = id = f; ty = 'a -> ('a, 'b) t -> bool; inst = [b/int, a/char]
 
 id = g; ty = 'a -> ('b, 'a) t -> int; inst = [a/int, b/char]
-File "lib.mli", line 3, characters 23-33:
+
+File "lib.mli", line 5, characters 23-33:
 Warning: `make' returns a sut.
 
-File "lib.mli", line 6, characters 8-40:
+File "lib.mli", line 8, characters 8-40:
 Warning: `h' have multiple sut arguments.
 
-File "lib.mli", line 7, characters 8-20:
+File "lib.mli", line 9, characters 8-20:
 Warning: Type of system under test in `i' is incompatible with command line argument.
 
-File "lib.mli", line 8, characters 8-21:
+File "lib.mli", line 10, characters 8-21:
 Warning: Type of system under test in `j' is incompatible with command line argument.
