@@ -1,3 +1,6 @@
 type nonrec cmd =
   | F of char 
   | G of int [@@deriving show { with_path = false }]
+type nonrec state = {
+  fst: char ;
+  snd: int }

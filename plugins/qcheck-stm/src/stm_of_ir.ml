@@ -59,8 +59,24 @@ let cmd_constructor config value =
   let args = aux value.ty in
   constructor_declaration ~name ~args:(Pcstr_tuple args) ~res:None
 
+let state_type ir =
+  let lds =
+    List.map
+      (fun (id, ty) ->
+        label_declaration
+          ~name:(Fmt.str "%a" Gospel.Tast.Ident.pp id |> noloc)
+          ~mutable_:Immutable ~type_:ty)
+      ir.state
+  in
+  let kind = Ptype_record lds in
+  let td =
+    type_declaration ~name:(noloc "state") ~params:[] ~cstrs:[] ~kind
+      ~private_:Public ~manifest:None
+  in
+  pstr_type Nonrecursive [ td ]
+
 let cmd_type config ir =
-  let constructors = List.map (cmd_constructor config) ir in
+  let constructors = List.map (cmd_constructor config) ir.values in
   let td =
     type_declaration ~name:(noloc "cmd") ~params:[] ~cstrs:[]
       ~kind:(Ptype_variant constructors) ~private_:Public ~manifest:None

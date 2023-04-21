@@ -1,4 +1,6 @@
 type ('a, 'b) t
+(*@ model fst : 'a
+    model snd : 'b *)
 
 val make : 'a -> 'b -> ('a, 'b) t
 val f : 'a -> ('a, 'b) t -> bool
