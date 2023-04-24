@@ -30,10 +30,9 @@ depends: [
   "ppxlib" {>= "0.26.0"}
   "gospel"
   "ortac"
-  "alcotest" {with-test}
   "pprint" {with-test}
   "ortac-runtime-monolith" {with-test}
-  "monolith" {>= "20201026"}
+  "monolith" {>= "20201026" with-test}
 ]
 
 pin-depends: [
