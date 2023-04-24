@@ -1,2 +1,23 @@
-(library
- (name lib))
+(test
+ (name wrapper)
+ (package ortac)
+ (libraries ortac-runtime))
+
+(rule
+ (copy lib.mli wrapper.mli))
+
+(rule
+ (target wrapper.ml)
+ (package ortac)
+ (action
+  (with-stderr-to
+   errors
+   (run ortac default -o %{target} %{dep:lib.mli}))))
+
+(rule
+ (alias runtest)
+ (package ortac)
+ (action
+  (progn
+   (diff errors.expected errors)
+   (diff wrapper.expected.ml wrapper.ml))))
