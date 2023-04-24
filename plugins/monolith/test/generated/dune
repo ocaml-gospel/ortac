@@ -1,5 +1,6 @@
 (test
  (name wrapper)
+ (package ortac-monolith)
  (libraries pprint ortac-runtime-monolith monolith)
  (action
   (echo
@@ -7,6 +8,7 @@
 
 (rule
  (target wrapper.ml)
+ (package ortac-monolith)
  (deps
   (package ortac-monolith))
  (action
@@ -14,4 +16,16 @@
    errors
    (run ortac monolith -o %{target} %{dep:lib.mli}))))
 
-(include ../dune.common)
+(rule
+ (copy ../../../../test/generated/lib.mli lib.mli))
+
+(rule
+ (copy ../../../../test/generated/lib.ml lib.ml))
+
+(rule
+ (alias runtest)
+ (package ortac-monolith)
+ (action
+  (progn
+   (diff errors.expected errors)
+   (diff wrapper.expected.ml wrapper.ml))))

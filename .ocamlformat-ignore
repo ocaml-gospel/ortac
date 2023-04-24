@@ -1,1 +1,2 @@
-test/generated/*/wrapper.expected.ml
+plugins/monolith/test/generated/wrapper.expected.ml
+test/generated/default/wrapper.expected.ml
