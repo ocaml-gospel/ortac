@@ -9,3 +9,10 @@
 
 (package
   (name ortac-runtime))
+
+; Monolith plugin
+(package
+  (name ortac-monolith))
+
+(package
+  (name ortac-runtime-monolith))
