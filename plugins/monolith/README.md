@@ -1,70 +1,125 @@
-<div align="center">
-  <h1>Ortac's frontend for Monolith</h1>
-</div>
+# Monolith plugin for Ortac
+
+This directory contains a plugin for [Ortac] that can generate a
+standalone executable using [Monolith] to try to falsify the Gospel
+specifications of a module by stress-testing the code.
+
+[Ortac]: ../../README.md
+[Monolith]: https://gitlab.inria.fr/fpottier/monolith
+
+## Installation
+
+Follow the global [installation instructions] in the main README of
+this repository. The Monolith plugin is split into two OPAM packages:
+
+- `ortac-monolith.opam` which provides the Monolith plugin for the
+  `ortac` command-line tool,
+- `ortac-runtime-monolith.opam` which provides the support library for
+  the code generated with the Monolith plugin.
+
+[installation instructions]: ../../README.md#installation
 
 
-<div align="center">
+## Quick start
 
-  :warning: **Disclamer:** This project is still experimental. 
-  No support will be provided at this point, and its behaviour is still unstable.
+The Monolith plugin can be used to generate a program using the
+[Monolith] library that will try to invalidate the Gospel
+specifications using random testing or fuzzing.
 
-</div>
+Let’s start with a module `lib.ml` containing some Gospel
+specifications, borrowed from Gospel documentation:
 
-## About
-
-This frontend makes Ortac generate a [Monolith](https://gitlab.inria.fr/fpottier/monolith) program ready to be fuzzed.
-
-There are some limitations the user should know about:
-
-- as Monolith does not support tuple greater than pairs, this frontend does not either
-- the generated data generators are not very smart, so if you have strict preconditions or invariants, Monolith of afl-fuzz will generate a lot of uninformative inputs.
-
-## Getting Started
-
-### Installation
-
-This is part of the `ortac` package. So, you just have to follow the instructions 
-[here](https://github.com/ocaml-gospel/ortac#installation). 
-
-This frontend depends on a special runtime that should be installed with `ortac`.
-
-It also depends on Monolith. You can find the installation process 
-[here](https://gitlab.inria.fr/fpottier/monolith#installation).
-
-### Usage
-
-In order to generate the Monolith program, call `ortac` with the frontend option set to `monolith`
-and redirect the result to a file of your choosing:
-
-```shell
-$ ortac --frontend=monolith <file.mli> > main.ml
+```ocaml
+val euclidean_division: int -> int -> int * int
+(*@ q, r = euclidean_division x y
+    requires y > 0
+    ensures  x = q * y + r
+    ensures  0 <= r < y *)
 ```
 
-In order to compile this Monolith program, you'll need some depedencies. The easiest way to go is to
-use a Dune file:
+Given that interface, `ortac monolith lib.mli` will display a program
+equivalent to:
+
+```ocaml
+open Monolith
+module M = Ortac_runtime_monolith
+
+module R = struct
+  include Lib
+  module Ortac_runtime = Ortac_runtime_monolith
+
+  let euclidean_division x y =
+    (* check that y > 0 *)
+    (* raise an error if the previous check failed *)
+    let q, r =
+      try euclidean_division x y
+      with e ->
+        (* raise an error as the specification do not mention exceptions *)
+        raise e
+    in
+    (* check that x = q * y + r *)
+    (* check that 0 <= r < y *)
+    (* raise an error if one of the previous checks failed *)
+    (q, r)
+end
+
+module C = Lib
+
+let () =
+  let spec = M.int ^> M.int ^!> (M.int *** M.int) in
+  declare "euclidean_division is Ok" spec R.euclidean_division
+    C.euclidean_division
+
+let () = main 100
+```
+
+You can then save this module into a file:
+
+```shell
+$ ortac monolith lib.mli -o main.ml
+```
+
+and compile this into an executable using:
+
+- the library `Lib` itself, obviously,
+- the libraries `monolith` and `ortac-runtime-monolith`.
+
+With `dune`, the configuration would then look something like:
 
 ```dune
 (executable
-  (name main)
-  (libraries ortac_runtime_monolith monolith))
+ (name main)
+ (libraries monolith ortac-runtime-monolith))
 ```
 
-Then you can compile the Monolith program:
-
-```shell
-$ dune build
-```
-
-From there, you can either use the program for random testing:
+From there, you can either run the program directly for random
+testing:
 
 ```shell
 $ ./path/to/main.exe
 ```
-or, if you have compiled with afl instrumentation, you can use afl-fuzz:
+
+or, if you are using a compiler with AFL instrumentation, such as the
+one installed by
 
 ```shell
-$ mkdir outputs
-$ mkdir intputs
-$ echo "some intput" > inputs/input
-$ afl-fuzz -i inputs/ -o outputs/ -- ./path/to/main.exe @@
+$ opam switch create 5.0+afl --packages ocaml-variants.5.0.0+options,ocaml-option-afl
 ```
+
+you can run `afl-fuzz` on the generated program:
+
+```shell
+$ mkdir inputs outputs
+$ head -c 16 /dev/urandom > inputs/input
+$ afl-fuzz -i inputs -o outputs -- ./path/to/main.exe @@
+```
+
+## Know limitations
+
+There are some limitations the user should know about:
+
+- as Monolith does not support tuple greater than pairs, this plugin
+  does not either,
+- the generated data generators are not very smart, so if you have
+  strict preconditions or invariants, you will obtain a lot of
+  uninformative inputs.
