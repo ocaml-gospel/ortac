@@ -123,3 +123,11 @@ There are some limitations the user should know about:
 - the generated data generators are not very smart, so if you have
   strict preconditions or invariants, you will obtain a lot of
   uninformative inputs.
+
+
+## Supported Gospel
+
+The monolith plugin has currently some limitations on what Gospel
+specifications are supported. They are listed in the [main README].
+
+[main README]: ../../README.md#supported-gospel
