@@ -1,0 +1,31 @@
+(test
+ (name wrapper)
+ (package ortac-monolith)
+ (libraries ortac-runtime-monolith monolith)
+ (action
+  (echo
+   "\n%{dep:wrapper.exe} has been generated with the ortac-monolith plugin.\n")))
+
+(rule
+ (target wrapper.ml)
+ (package ortac-monolith)
+ (deps
+  (package ortac-monolith))
+ (action
+  (with-stderr-to
+   errors
+   (run ortac monolith -o %{target} %{dep:lib.mli}))))
+
+(rule
+ (copy ../../../../test/generated/lib.mli lib.mli))
+
+(rule
+ (copy ../../../../test/generated/lib.ml lib.ml))
+
+(rule
+ (alias runtest)
+ (package ortac-monolith)
+ (action
+  (progn
+   (diff errors.expected errors)
+   (diff wrapper.expected.ml wrapper.ml))))

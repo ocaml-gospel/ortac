@@ -7,6 +7,7 @@
   ortac.ortac_core
   ortac.ortac_default
   ortac.register
+  gospel
   cmdliner
   fmt
   ppxlib
