@@ -108,7 +108,7 @@ let state config sigs =
   let open Reserr in
   let* ty =
     match List.filter_map is_sut_decl sigs with
-    | [] -> error (No_sut_type sut_name, Location.none)
+    | [] -> error (No_sut_type sut_name, Ppxlib.Location.none)
     | [ ty ] -> ok ty
     (* As multiple type declarations with the same name is illegal, last
        case can't happen *)

@@ -31,7 +31,7 @@ let value id ty inst =
     id;
     ty;
     inst;
-    sut_var = Ident.create ~loc:Location.none "dummy_sut_var";
+    sut_var = Ident.create ~loc:Ppxlib.Location.none "dummy_sut_var";
     args = [];
     next_state = { formulae = []; modifies = []; checks = [] };
     postcond = { normal = []; exceptional = []; checks = [] };
