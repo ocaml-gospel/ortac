@@ -16,3 +16,7 @@
 
 (package
   (name ortac-runtime-monolith))
+
+; QCheck-STM plugin
+(package
+  (name ortac-qcheck-stm))

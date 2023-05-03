@@ -1,5 +1,6 @@
 open Gospel
 open Ortac_core
+open Ppxlib
 
 type t = {
   context : Context.t;
@@ -14,6 +15,7 @@ let get_sut_type_name config =
   | _ -> failwith "unreachable case in get_sut_type_name"
 
 let get_sut_type_name_str config =
+  let open Ppxlib in
   match get_sut_type_name config with
   | Longident.Lident s | Longident.Ldot (_, s) -> s
   | Longident.Lapply (_, _) -> failwith "not supported"
@@ -68,7 +70,8 @@ let sut_core_type str =
   ok sut_core_type
 
 let init_sut_from_string str =
-  try Ppxlib.Parse.expression (Lexing.from_string str) |> Reserr.ok
+  let open Ppxlib in
+  try Parse.expression (Lexing.from_string str) |> Reserr.ok
   with _ -> Reserr.(error (Syntax_error_in_init_sut str, Location.none))
 
 let init path init_sut sut_str =

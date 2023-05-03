@@ -1,7 +1,14 @@
 (library
  (public_name ortac-qcheck-stm.plugin)
  (name ortac_qcheck_stm)
- (libraries cmdliner ppxlib ortac.register ortac.ortac_core gospel)
+ (libraries
+  cmdliner
+  fmt
+  ppxlib
+  ppxlib.astlib
+  ortac.register
+  ortac.ortac_core
+  gospel)
  (preprocess
   (pps ppxlib.metaquot)))
 
