@@ -1,5 +1,8 @@
 # `ortac` — OCaml RunTime Assertion Checking
 
+:warning: This project is still under heavy development, with no
+stable release yet. Expect rough edges!
+
 `ortac` is a tool to convert an OCaml module interface with [Gospel]
 specifications into code to check those specifications.
 
@@ -22,9 +25,7 @@ There are various ways to check specifications:
 
 ## Installation
 
-This project is still under development (standard warnings apply...),
-with no stable release yet.
-Consequently the easiest way to try it out is to `opam pin` it:
+The easiest way to try `ortac` out is to `opam pin` it:
 
 ```
 opam pin add -y https://github.com/ocaml-gospel/ortac.git

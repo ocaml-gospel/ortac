@@ -1,5 +1,8 @@
 # Monolith plugin for Ortac
 
+:warning: This project is still under heavy development, with no
+stable release yet. Expect rough edges!
+
 This directory contains a plugin for [Ortac] that can generate a
 standalone executable using [Monolith] to try to falsify the Gospel
 specifications of a module by stress-testing the code.
