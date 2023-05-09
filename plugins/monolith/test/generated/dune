@@ -7,6 +7,22 @@
    "\n%{dep:wrapper.exe} has been generated with the ortac-monolith plugin.\n")))
 
 (rule
+ (alias monolith_demo_random)
+ (package ortac-monolith)
+ (action
+  (run %{dep:wrapper.exe})))
+
+(rule
+ (alias monolith_demo_afl)
+ (package ortac-monolith)
+ (action
+  (progn
+   (run mkdir inputs outputs)
+   (no-infer
+    (write-file inputs/input "some initial input"))
+   (run afl-fuzz -i inputs -o outputs -- ./%{dep:wrapper.exe} @@))))
+
+(rule
  (target wrapper.ml)
  (package ortac-monolith)
  (deps
