@@ -162,6 +162,29 @@ module Gospelstdlib = struct
     let length arr = Array.length arr |> Z.of_int
     let for_all = Array.for_all
   end
+
+  module List = struct
+    let length l = List.length l |> Z.of_int
+    let hd = List.hd
+    let tl = List.tl
+    let nth l i = List.nth l (Z.to_int i)
+    let rev = List.rev
+
+    let init i f =
+      let i = Z.to_int i in
+      let f i = f (Z.of_int i) in
+      List.init i f
+
+    let map = List.map
+
+    let mapi f =
+      let f i = f (Z.of_int i) in
+      List.mapi f
+
+    let fold_left = List.fold_left
+    let fold_right = List.fold_right
+    let mem = List.mem
+  end
 end
 
 module Z = struct
