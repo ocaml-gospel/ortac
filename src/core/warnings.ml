@@ -57,3 +57,8 @@ let pp_param pp_kind level ppf (k, loc) =
     loc pp_level (level k) pp_kind k
 
 let pp = pp_param pp_kind level
+
+let () =
+  Printexc.register_printer (function
+    | Error t -> Some (Fmt.str "%a" pp t)
+    | _ -> None)
