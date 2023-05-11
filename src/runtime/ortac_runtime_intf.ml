@@ -66,6 +66,20 @@ module type S = sig
       val length : 'a array -> Z.t
       val for_all : ('a -> bool) -> 'a array -> bool
     end
+
+    module List : sig
+      val length : 'a list -> Z.t
+      val hd : 'a list -> 'a
+      val tl : 'a list -> 'a list
+      val nth : 'a list -> Z.t -> 'a
+      val rev : 'a list -> 'a list
+      val init : Z.t -> (Z.t -> 'a) -> 'a list
+      val map : ('a -> 'b) -> 'a list -> 'b list
+      val mapi : (Z.t -> 'a -> 'b) -> 'a list -> 'b list
+      val fold_left : ('a -> 'b -> 'a) -> 'a -> 'b list -> 'a
+      val fold_right : ('b -> 'a -> 'a) -> 'b list -> 'a -> 'a
+      val mem : 'a -> 'a list -> bool
+    end
   end
 
   module Z : sig

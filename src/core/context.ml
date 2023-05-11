@@ -58,6 +58,17 @@ let supported_stdlib =
     ([ "Array" ], "length");
     ([ "Array" ], "get");
     ([ "Array" ], "for_all");
+    ([ "List" ], "length");
+    ([ "List" ], "hd");
+    ([ "List" ], "tl");
+    ([ "List" ], "nth");
+    ([ "List" ], "rev");
+    ([ "List" ], "init");
+    ([ "List" ], "map");
+    ([ "List" ], "mapi");
+    ([ "List" ], "fold_left");
+    ([ "List" ], "fold_right");
+    ([ "List" ], "mem");
   ]
 
 (** Map a name from the Gospel parser to an OCaml name when possible
