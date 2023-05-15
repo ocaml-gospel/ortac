@@ -16,11 +16,17 @@ type W.kind +=
   | Incompatible_type of string
   | Sut_type_not_specified of string
   | No_models of string
+  | No_spec of string
+  | Impossible_term_substitution of (string * [ `New | `Old ])
+  | Ignored_modifies of string
+  | Ensures_not_found_for_next_state of string
 
 let level kind =
   match kind with
   | Constant_value _ | Returning_sut _ | No_sut_argument _
-  | Multiple_sut_arguments _ | Incompatible_type _ ->
+  | Multiple_sut_arguments _ | Incompatible_type _ | No_spec _
+  | Impossible_term_substitution _ | Ignored_modifies _
+  | Ensures_not_found_for_next_state _ ->
       W.Warning
   | No_sut_type _ | No_init_function _ | Syntax_error_in_type _
   | Sut_type_not_supported _ | Type_not_supported_for_sut_parameter _
@@ -43,6 +49,8 @@ let ( let* ) x f =
       let res, warns2 = f v in
       (res, warns1 @ warns2)
   | (Error _, _) as x -> x
+
+let ( >>= ) = ( let* )
 
 let ( and* ) (a, aw) (b, bw) =
   let r =
@@ -98,6 +106,18 @@ let pp_kind ppf kind =
   | No_models ty ->
       pf ppf "The type %a given for the system under test has no models."
         W.quoted ty
+  | No_spec fct -> pf ppf "The function %a is not specified." W.quoted fct
+  | Impossible_term_substitution (t, no) ->
+      let s = match no with `Old -> "under" | `New -> "above" in
+      pf ppf
+        "The term %a can not be substituted (supported only %s `old` operator)."
+        W.quoted t s
+  | Ignored_modifies m -> pf ppf "Skipping `modifies` %a." W.quoted m
+  | Ensures_not_found_for_next_state m ->
+      pf ppf
+        "No translatable `ensures` clause found to generate `next_state` for \
+         model %a."
+        W.quoted m
   | _ -> W.pp_kind ppf kind
 
 let pp_errors = W.pp_param pp_kind level |> Fmt.list
@@ -123,4 +143,8 @@ let promote r =
   in
   aux r
 
+let of_option ~default = Option.fold ~none:(error default) ~some:ok
+let to_option = function Ok x, _ -> Some x | _ -> None
 let map f l = List.map f l |> promote
+let concat_map f l = fmap List.concat (map f l)
+let filter_map f = List.filter_map (fun x -> to_option (f x))
