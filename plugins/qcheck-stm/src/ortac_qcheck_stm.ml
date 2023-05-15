@@ -4,7 +4,15 @@ module Ir_of_gospel = Ir_of_gospel
 module Reserr = Reserr
 module Stm_of_ir = Stm_of_ir
 
-let main _path _init _sut = ()
+let main path init sut =
+  let open Reserr in
+  let pp = Fmt.((pp Ppxlib_ast.Pprintast.structure) stdout) in
+  let _ =
+    let* sigs, config = Config.init path init sut in
+    let* ir = Ir_of_gospel.run sigs config in
+    Stm_of_ir.stm config ir |> pp |> ok
+  in
+  ()
 
 open Cmdliner
 
