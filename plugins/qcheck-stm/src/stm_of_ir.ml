@@ -43,16 +43,33 @@ let subst_core_type inst ty =
   in
   aux ty
 
-let subst_term ~gos_t ~old_t ~new_t term =
+let lazy_force =
+  let open Gospel in
+  let open Tterm_helper in
+  let vs_name = Ident.create ~loc:Location.none "Lazy.force"
+  and vs_ty = Ttypes.fresh_ty_var "a" in
+  let lazy_force = mk_term (Tvar { vs_name; vs_ty }) None Location.none in
+  fun t ->
+    Tterm_helper.(
+      mk_term (Tapp (Symbols.fs_apply, [ lazy_force; t ])) None Location.none)
+
+let ocaml_of_term cfg t =
+  let open Ortac_core.Ocaml_of_gospel in
+  let open Reserr in
+  try term ~context:cfg.Cfg.context t |> ok with W.Error e -> error e
+
+let subst_term ~gos_t ?(old_lz = false) ~old_t ?(new_lz = false) ~new_t term =
   let exception ImpossibleSubst of (Gospel.Tterm.term * [ `New | `Old ]) in
-  let rec aux cur_t term =
+  let rec aux cur_lz cur_t term =
     let open Gospel.Tterm in
-    let next = aux cur_t in
+    let next = aux cur_lz cur_t in
     match term.t_node with
     | Tconst _ -> term
     | Tvar { vs_name; vs_ty } when vs_name = gos_t -> (
         match cur_t with
-        | Some cur_t -> { term with t_node = Tvar { vs_name = cur_t; vs_ty } }
+        | Some cur_t ->
+            let t = { term with t_node = Tvar { vs_name = cur_t; vs_ty } } in
+            if cur_lz then lazy_force t else t
         | None ->
             raise (ImpossibleSubst (term, if cur_t = new_t then `New else `Old))
         )
@@ -75,40 +92,38 @@ let subst_term ~gos_t ~old_t ~new_t term =
     | Tquant (q, vs, t) -> { term with t_node = Tquant (q, vs, next t) }
     | Tbinop (o, l, r) -> { term with t_node = Tbinop (o, next l, next r) }
     | Tnot t -> { term with t_node = Tnot (next t) }
-    | Told t -> aux old_t t
+    | Told t -> aux old_lz old_t t
     | Ttrue -> term
     | Tfalse -> term
   in
   let open Reserr in
-  try ok (aux new_t term)
+  try ok (aux new_lz new_t term)
   with ImpossibleSubst (t, b) ->
     error
       ( Impossible_term_substitution
           (Fmt.str "%a" Gospel.Tterm_printer.print_term t, b),
         t.t_loc )
 
+let str_of_ident = Fmt.str "%a" Gospel.Identifier.Ident.pp
+
+let mk_cmd_pattern value =
+  let pat_args = function
+    | None -> punit
+    | Some x -> ppat_var (noloc (str_of_ident x))
+  in
+  let args =
+    match value.args with
+    | [] -> None
+    | [ x ] -> Some (pat_args x)
+    | xs -> List.map pat_args xs |> ppat_tuple |> Option.some
+  in
+  let name = String.capitalize_ascii (str_of_ident value.id) |> lident in
+  ppat_construct name args
+
 let next_state_case config state_ident value =
-  let str_of_ident = Fmt.str "%a" Gospel.Identifier.Ident.pp in
   let state_var = str_of_ident state_ident |> evar in
-  let lhs =
-    let pat_args = function
-      | None -> punit
-      | Some x -> ppat_var (noloc (str_of_ident x))
-    in
-    let args =
-      match value.args with
-      | [] -> None
-      | [ x ] -> Some (pat_args x)
-      | xs -> List.map pat_args xs |> ppat_tuple |> Option.some
-    in
-    let name = String.capitalize_ascii (str_of_ident value.id) |> lident in
-    ppat_construct name args
-  in
+  let lhs = mk_cmd_pattern value in
   let open Reserr in
-  let term t =
-    let open Ortac_core.Ocaml_of_gospel in
-    try term ~context:config.Cfg.context t |> ok with W.Error e -> error e
-  in
   let* idx, rhs =
     (* substitute state variable when under `old` operator and translate description into ocaml *)
     let descriptions =
@@ -116,7 +131,7 @@ let next_state_case config state_ident value =
         (fun (i, { model; description }) ->
           subst_term ~gos_t:value.sut_var ~old_t:(Some state_ident) ~new_t:None
             description
-          >>= term
+          >>= ocaml_of_term config
           |> to_option
           |> Option.map (fun description -> (i, model, description)))
         value.next_state.formulae
@@ -166,6 +181,148 @@ let next_state config ir =
   in
   (idx, pstr_value Nonrecursive [ value_binding ~pat ~expr ]) |> ok
 
+let pat_char = ppat_construct (lident "Char") None
+
+let munge_longident ty lid =
+  let open Reserr in
+  match lid.txt with
+  | Lident i | Ldot (Lident i, "t") | Ldot (Ldot (_, i), "t") | Ldot (_, i) ->
+      ok (String.capitalize_ascii i)
+  | Lapply (_, _) ->
+      error
+        ( Return_type_not_supported (Fmt.str "%a" Pprintast.core_type ty),
+          ty.ptyp_loc )
+
+let mk_pat_ret_ty inst ret_ty =
+  let rec aux ty =
+    let open Reserr in
+    match ty.ptyp_desc with
+    | Ptyp_var v -> (
+        match List.assoc_opt v inst with None -> ok pat_char | Some t -> aux t)
+    | Ptyp_constr (c, xs) ->
+        let* constr_str = munge_longident ty c and* pat_xs = map aux xs in
+        let pat_arg =
+          match pat_xs with [] -> None | xs -> Some (ppat_tuple xs)
+        in
+        ppat_construct (lident constr_str) pat_arg |> ok
+    | _ ->
+        error
+          ( Return_type_not_supported (Fmt.str "%a" Pprintast.core_type ret_ty),
+            ret_ty.ptyp_loc )
+  in
+  aux ret_ty
+
+let may_raise_exception v =
+  match (v.postcond.exceptional, v.postcond.checks) with
+  | [], [] -> false
+  | _, _ -> true
+
+let postcond_case config idx state_ident new_state_ident value =
+  let idx = List.sort Int.compare idx in
+  let lhs0 = mk_cmd_pattern value in
+  let open Reserr in
+  let* lhs1 =
+    let ret_ty = Ir.get_return_type value in
+    let* ret_ty =
+      let open Ppxlib in
+      match ret_ty.ptyp_desc with
+      | Ptyp_var _ | Ptyp_constr _ -> ok ret_ty
+      | _ ->
+          error
+            ( Return_type_not_supported (Fmt.str "%a" Pprintast.core_type ret_ty),
+              ret_ty.ptyp_loc )
+    in
+    let* pat_ty = mk_pat_ret_ty value.inst ret_ty in
+    let pat_ret =
+      (* FIXME ? *)
+      match value.ret with
+      | None -> ppat_any
+      | Some id -> pvar (str_of_ident id)
+    in
+    ok
+      (ppat_construct (lident "Res")
+         (Some (ppat_tuple [ ppat_tuple [ pat_ty; ppat_any ]; pat_ret ])))
+  in
+  let lhs = ppat_tuple [ lhs0; lhs1 ] in
+  let* rhs =
+    let normal =
+      let rec aux idx postcond =
+        match (idx, postcond) with
+        | [], ps -> List.map snd ps
+        | i :: idx, (j, _) :: ps when i = j -> aux idx ps
+        | i :: _, (j, p) :: ps ->
+            assert (j < i);
+            p :: aux idx ps
+        | _, _ -> assert false
+      in
+      aux idx value.postcond.normal
+    in
+    let* normal =
+      map
+        (fun t ->
+          subst_term ~gos_t:value.sut_var ~old_t:(Some state_ident) ~new_lz:true
+            ~new_t:(Some new_state_ident) t
+          >>= ocaml_of_term config)
+        normal
+    in
+    ok
+      (pexp_apply
+         (pexp_ident (noloc (Ldot (Lident "List", "fold_left"))))
+         [
+           (Nolabel, pexp_ident (lident "&&"));
+           (Nolabel, pexp_construct (lident "true") None);
+           (Nolabel, elist normal);
+         ])
+  in
+  (* if checks then r = Error Invalid_arg else match res with Error _ -> xpost | Ok _ -> postcond *)
+  ok (case ~lhs ~guard:None ~rhs)
+
+let postcond config idx ir =
+  let cmd_name = gen_symbol ~prefix:"cmd" () in
+  let state_name = gen_symbol ~prefix:"state" () in
+  let res_name = gen_symbol ~prefix:"res" () in
+  let new_state_name = gen_symbol ~prefix:"new_state" () in
+  let new_state_let =
+    pexp_let Nonrecursive
+      [
+        value_binding ~pat:(pvar new_state_name)
+          ~expr:
+            (pexp_lazy
+               (pexp_apply
+                  (pexp_ident (lident "next_state"))
+                  [
+                    (Nolabel, pexp_ident (lident cmd_name));
+                    (Nolabel, pexp_ident (lident state_name));
+                  ]));
+      ]
+  in
+  let state_ident = Gospel.Tast.Ident.create ~loc:Location.none state_name in
+  let new_state_ident =
+    Gospel.Tast.Ident.create ~loc:Location.none new_state_name
+  in
+  let open Reserr in
+  let* cases =
+    map
+      (fun v ->
+        postcond_case config (List.assoc v.id idx) state_ident new_state_ident v)
+      ir.values
+  in
+  let body =
+    pexp_match (pexp_tuple [ evar cmd_name; evar res_name ]) cases
+    |> new_state_let
+  in
+  let pat = pvar "postcond" in
+  let expr =
+    efun
+      [
+        (Nolabel, pvar cmd_name);
+        (Nolabel, pvar state_name);
+        (Nolabel, pvar res_name);
+      ]
+      body
+  in
+  pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
+
 let cmd_constructor config value =
   let rec aux ty : Ppxlib.core_type list =
     match ty.ptyp_desc with
@@ -210,5 +367,6 @@ let stm config ir =
   let cmd = cmd_type config ir in
   let state = state_type ir in
   let open Reserr in
-  let* _idx, next_state = next_state config ir in
-  ok [ cmd; state; next_state ]
+  let* idx, next_state = next_state config ir in
+  let* postcond = postcond config idx ir in
+  ok [ cmd; state; next_state; postcond ]
