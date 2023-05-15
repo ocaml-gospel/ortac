@@ -1,6 +1,34 @@
 type nonrec cmd =
-  | F of char 
-  | G of int [@@deriving show { with_path = false }]
+  | Length 
+  | Pop 
+  | Push of char 
+  | Extend [@@deriving show { with_path = false }]
 type nonrec state = {
-  fst: char ;
-  snd: int }
+  size: int ;
+  contents: char list }
+let next_state cmd__001_ state__002_ =
+  match cmd__001_ with
+  | Length -> state__002_
+  | Pop ->
+      {
+        state__002_ with
+        contents = (Ortac_runtime.Gospelstdlib.List.tl state__002_.contents)
+      }
+  | Push a_1 ->
+      {
+        state__002_ with
+        contents =
+          (if
+             (Ortac_runtime.Gospelstdlib.List.length state__002_.contents) =
+               state__002_.size
+           then state__002_.contents
+           else a_1 :: state__002_.contents)
+      }
+  | Extend ->
+      {
+        state__002_ with
+        size =
+          (Ortac_runtime.Gospelstdlib.( * )
+             (Ortac_runtime.Gospelstdlib.integer_of_int 2) state__002_.size);
+        contents = []
+      }
