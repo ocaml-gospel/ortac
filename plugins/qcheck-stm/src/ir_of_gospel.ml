@@ -130,6 +130,15 @@ let next_state sut state spec =
   let modifies = List.sort_uniq Ident.compare modifies in
   ok { formulae; modifies }
 
+let postcond spec =
+  let normal = List.mapi (fun i x -> (i, x)) spec.sp_post
+  and exceptional =
+    List.concat_map
+      (fun (x, l) -> List.rev_map (fun (p, t) -> (x, p, t)) l)
+      spec.sp_xpost
+  in
+  Ir.{ normal; exceptional; checks = spec.sp_checks }
+
 let val_desc config state vd =
   let open Reserr in
   let* () = constant_test vd
@@ -138,8 +147,17 @@ let val_desc config state vd =
     of_option ~default:(No_spec vd.vd_name.id_str, vd.vd_loc) vd.vd_spec
   in
   let sut, args = split_args config vd.vd_type spec.sp_args in
+  let ret =
+    List.filter_map
+      (function Lnone vs -> Some vs.vs_name | _ -> None)
+      spec.sp_ret
+    |> function
+    | [] -> None
+    | x :: _ -> Some x
+  in
   let* next_state = next_state sut state spec in
-  Ir.value vd.vd_name vd.vd_type inst sut args next_state |> ok
+  let postcond = postcond spec in
+  Ir.value vd.vd_name vd.vd_type inst sut args ret next_state postcond |> ok
 
 let sig_item config state s =
   match s.sig_desc with
