@@ -81,14 +81,70 @@ let ty_var_substitution config (vd : val_description) =
   in
   aux None value_type
 
-let val_desc config vd =
-  let open Reserr in
-  let* () = constant_test vd and* inst = ty_var_substitution config vd in
-  Ir.value vd.vd_name vd.vd_type inst |> ok
+let split_args config ty args =
+  let open Ppxlib in
+  let open Gospel.Tterm in
+  let rec aux sut acc ty args =
+    match (ty.ptyp_desc, args) with
+    | _, Lghost _ :: xs -> aux sut acc ty xs
+    | Ptyp_arrow (_, l, r), Lnone vs :: xs
+    | Ptyp_arrow (_, l, r), Loptional vs :: xs
+    | Ptyp_arrow (_, l, r), Lnamed vs :: xs ->
+        if Cfg.is_sut config l then aux (Some vs.vs_name) acc r xs
+        else aux sut (Some vs.vs_name :: acc) r xs
+    | Ptyp_arrow (_, _, r), Lunit :: xs -> aux sut (None :: acc) r xs
+    | _, [] -> (sut, List.rev acc)
+    | _, _ -> failwith "shouldn't happen (too few parameters)"
+  in
+  match aux None [] ty args with
+  | None, _ -> failwith "shouldn't happen (sut type not found)"
+  | Some sut, args -> (sut, args)
 
-let sig_item config s =
+let next_state config sut state vd spec =
+  let open Tterm in
+  let is_t vs =
+    let open Symbols in
+    Ident.equal sut vs.vs_name
+  in
+  let open Ir in
+  let pred i t =
+    match t.t_node with
+    | Tapp (ls, [ { t_node = Tfield ({ t_node = Tvar vs; _ }, m); _ }; right ])
+      when Symbols.(ls_equal ps_equ ls) && is_t vs ->
+        if List.exists (fun (id, _) -> Ident.equal id m.ls_name) state then
+          Some (i, { model = m.ls_name; description = right })
+        else None
+    | _ -> None
+  in
+  let formulae = List.mapi pred spec.sp_post |> List.filter_map Fun.id in
+  let open Reserr in
+  let check_modify = function
+    | { t_node = Tvar vs; _ } when is_t vs -> List.map fst state |> ok
+    | { t_node = Tfield ({ t_node = Tvar vs; _ }, m); _ } when is_t vs ->
+        ok [ m.ls_name ]
+    | t ->
+        error
+          ( Ignored_modifies (Fmt.str "%a" Gospel.Tterm_printer.print_term t),
+            t.t_loc )
+  in
+  let* modifies = concat_map check_modify spec.sp_wr in
+  let modifies = List.sort_uniq Ident.compare modifies in
+  ok { formulae; modifies }
+
+let val_desc config state vd =
+  let open Reserr in
+  let* () = constant_test vd
+  and* inst = ty_var_substitution config vd
+  and* spec =
+    of_option ~default:(No_spec vd.vd_name.id_str, vd.vd_loc) vd.vd_spec
+  in
+  let sut, args = split_args config vd.vd_type spec.sp_args in
+  let* next_state = next_state config sut state vd spec in
+  Ir.value vd.vd_name vd.vd_type inst sut args next_state |> ok
+
+let sig_item config state s =
   match s.sig_desc with
-  | Sig_val (vd, Nonghost) -> Some (val_desc config vd)
+  | Sig_val (vd, Nonghost) -> Some (val_desc config state vd)
   | _ -> None
 
 let state config sigs =
@@ -134,11 +190,12 @@ let state config sigs =
   | [] -> error (No_models sut_name, spec.ty_loc)
   | xs -> List.map process_model xs |> ok
 
-let signature config sigs =
-  List.filter_map (sig_item config) sigs |> Reserr.promote
+let signature config state sigs =
+  List.filter_map (sig_item config state) sigs |> Reserr.promote
 
 let run sigs config =
   let open Reserr in
   let open Ir in
-  let* values = signature config sigs and* state = state config sigs in
+  let* state = state config sigs in
+  let* values = signature config state sigs in
   ok { state; values }
