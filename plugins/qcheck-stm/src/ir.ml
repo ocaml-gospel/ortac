@@ -3,14 +3,24 @@ module Ident = Identifier.Ident
 
 type xpost = Ttypes.xsymbol * (Tterm.pattern * Tterm.term) list
 
+type next_state_formulae = {
+  model : Ident.t; (* the name of the model's field *)
+  description : Tterm.term; (* the new value for the model's field *)
+}
+
+type term = int * Tterm.term
+
+(* XXX TODO decide whether we need checks here (if checks is true, state does
+   not change) *)
 type next_state = {
-  formulae : Tterm.term list;
-  modifies : Tterm.term list;
-  checks : Tterm.term list;
+  (* description of the new values are stored with the index of the
+     postcondition they come from *)
+  formulae : (int * next_state_formulae) list;
+  modifies : Ident.t list;
 }
 
 type postcond = {
-  normal : Tterm.term list;
+  normal : term list;
   exceptional : xpost list;
   checks : Tterm.term list;
 }
@@ -20,20 +30,20 @@ type value = {
   ty : Ppxlib.core_type;
   inst : (string * Ppxlib.core_type) list;
   sut_var : Ident.t;
-  args : Ident.t list;
+  args : Ident.t option list;
   next_state : next_state;
   postcond : postcond;
   precond : Tterm.term list;
 }
 
-let value id ty inst =
+let value id ty inst sut_var args next_state =
   {
     id;
     ty;
     inst;
-    sut_var = Ident.create ~loc:Ppxlib.Location.none "dummy_sut_var";
-    args = [];
-    next_state = { formulae = []; modifies = []; checks = [] };
+    sut_var;
+    args;
+    next_state;
     postcond = { normal = []; exceptional = []; checks = [] };
     precond = [];
   }
