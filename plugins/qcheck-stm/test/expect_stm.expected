@@ -32,3 +32,16 @@ let next_state cmd__001_ state__002_ =
              (Ortac_runtime.Gospelstdlib.integer_of_int 2) state__002_.size);
         contents = []
       }
+let postcond cmd__003_ state__004_ res__005_ =
+  let new_state__006_ = lazy (next_state cmd__003_ state__004_) in
+  match (cmd__003_, res__005_) with
+  | (Length, Res ((Int, _), i)) ->
+      List.fold_left (&&) true
+        [(Ortac_runtime.Gospelstdlib.integer_of_int i) =
+           (Ortac_runtime.Gospelstdlib.List.length
+              (Lazy.force new_state__006_).contents)]
+  | (Pop, Res ((Char, _), a_2)) ->
+      List.fold_left (&&) true
+        [a_2 = (Ortac_runtime.Gospelstdlib.List.hd state__004_.contents)]
+  | (Push a_1, Res ((Unit, _), _)) -> List.fold_left (&&) true []
+  | (Extend, Res ((Unit, _), _)) -> List.fold_left (&&) true []
