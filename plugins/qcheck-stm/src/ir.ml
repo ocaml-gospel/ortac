@@ -1,7 +1,7 @@
 open Gospel
 module Ident = Identifier.Ident
 
-type xpost = Ttypes.xsymbol * (Tterm.pattern * Tterm.term) list
+type xpost = Ttypes.xsymbol * Tterm.pattern * Tterm.term
 
 type next_state_formulae = {
   model : Ident.t; (* the name of the model's field *)
@@ -31,22 +31,21 @@ type value = {
   inst : (string * Ppxlib.core_type) list;
   sut_var : Ident.t;
   args : Ident.t option list; (* arguments of unit types are nameless *)
+  ret : Ident.t option;
   next_state : next_state;
   postcond : postcond;
   precond : Tterm.term list;
 }
 
-let value id ty inst sut_var args next_state =
-  {
-    id;
-    ty;
-    inst;
-    sut_var;
-    args;
-    next_state;
-    postcond = { normal = []; exceptional = []; checks = [] };
-    precond = [];
-  }
+let get_return_type value =
+  let open Ppxlib in
+  let rec aux ty =
+    match ty.ptyp_desc with Ptyp_arrow (_, _, r) -> aux r | _ -> ty
+  in
+  aux value.ty
+
+let value id ty inst sut_var args ret next_state postcond =
+  { id; ty; inst; sut_var; args; ret; next_state; postcond; precond = [] }
 
 type t = { state : (Ident.t * Ppxlib.core_type) list; values : value list }
 
