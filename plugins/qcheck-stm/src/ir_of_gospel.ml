@@ -83,7 +83,6 @@ let ty_var_substitution config (vd : val_description) =
 
 let split_args config ty args =
   let open Ppxlib in
-  let open Gospel.Tterm in
   let rec aux sut acc ty args =
     match (ty.ptyp_desc, args) with
     | _, Lghost _ :: xs -> aux sut acc ty xs
@@ -100,7 +99,7 @@ let split_args config ty args =
   | None, _ -> failwith "shouldn't happen (sut type not found)"
   | Some sut, args -> (sut, args)
 
-let next_state config sut state vd spec =
+let next_state sut state spec =
   let open Tterm in
   let is_t vs =
     let open Symbols in
@@ -139,7 +138,7 @@ let val_desc config state vd =
     of_option ~default:(No_spec vd.vd_name.id_str, vd.vd_loc) vd.vd_spec
   in
   let sut, args = split_args config vd.vd_type spec.sp_args in
-  let* next_state = next_state config sut state vd spec in
+  let* next_state = next_state sut state spec in
   Ir.value vd.vd_name vd.vd_type inst sut args next_state |> ok
 
 let sig_item config state s =

@@ -1,4 +1,3 @@
-open Fmt
 open Ortac_qcheck_stm
 
 let _ = main "lib2.mli" "make 16 'a'" "char t"

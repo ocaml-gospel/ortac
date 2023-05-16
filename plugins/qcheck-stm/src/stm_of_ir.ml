@@ -211,5 +211,5 @@ let stm config ir =
   let cmd = cmd_type config ir in
   let state = state_type ir in
   let open Reserr in
-  let* idx, next_state = next_state config ir in
+  let* _idx, next_state = next_state config ir in
   ok [ cmd; state; next_state ]
