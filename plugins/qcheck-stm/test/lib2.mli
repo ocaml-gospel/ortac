@@ -32,3 +32,7 @@ val extend : 'a t -> unit
     modifies t.contents
     ensures t.contents = []
     ensures t.size = 2 * old t.size *)
+
+val to_list : 'a t -> 'a list
+(*@ l = to_list t
+    ensures l = t.contents *)
