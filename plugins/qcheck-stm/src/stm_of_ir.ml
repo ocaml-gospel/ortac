@@ -120,6 +120,66 @@ let mk_cmd_pattern value =
   let name = String.capitalize_ascii (str_of_ident value.id) |> lident in
   ppat_construct name args
 
+let ty_show_of_core_type inst ty =
+  let rec aux ty =
+    let open Ppxlib in
+    match ty.ptyp_desc with
+    | Ptyp_var v -> (
+        match List.assoc_opt v inst with None -> evar "char" | Some t -> aux t)
+    | Ptyp_constr (id, []) -> pexp_ident id
+    | Ptyp_constr (id, tys) ->
+        let args =
+          List.map
+            (fun t ->
+              let e = aux t in
+              (Nolabel, e))
+            tys
+        in
+        pexp_apply (pexp_ident id) args
+    | _ ->
+        failwith "shouldn't happen (unsupported types should be caught before)"
+  in
+  aux ty
+
+let exp_of_ident id = pexp_ident (lident (str_of_ident id))
+
+let run_case config sut_name value =
+  let lhs = mk_cmd_pattern value in
+  let rhs =
+    let res = lident "Res" in
+    let ty_show = ty_show_of_core_type value.inst (Ir.get_return_type value) in
+    (* XXX TODO protect iff there are exceptional postconditions or checks *)
+    (* let call = function_call_exp (evar sut_name) value in *)
+    let call =
+      let efun = exp_of_ident value.id in
+      let mk_arg = Option.fold ~none:eunit ~some:exp_of_ident in
+      let rec aux ty args =
+        match (ty.ptyp_desc, args) with
+        | Ptyp_arrow (lb, l, r), xs when Cfg.is_sut config l ->
+            (lb, evar sut_name) :: aux r xs
+        | Ptyp_arrow (lb, _, r), x :: xs -> (lb, mk_arg x) :: aux r xs
+        | _, [] -> []
+        | _, _ ->
+            failwith
+              "shouldn't happen (list of arguments should be consistent with \
+               type)"
+      in
+      pexp_apply efun (aux value.ty value.args)
+    in
+    let args = Some (pexp_tuple [ ty_show; call ]) in
+    pexp_construct res args
+  in
+  case ~lhs ~guard:None ~rhs
+
+let run config ir =
+  let cmd_name = gen_symbol ~prefix:"cmd" () in
+  let sut_name = gen_symbol ~prefix:"sut" () in
+  let cases = List.map (run_case config sut_name) ir.values in
+  let body = pexp_match (evar cmd_name) cases in
+  let pat = pvar "run" in
+  let expr = efun [ (Nolabel, pvar cmd_name); (Nolabel, pvar sut_name) ] body in
+  pstr_value Nonrecursive [ value_binding ~pat ~expr ]
+
 let next_state_case config state_ident value =
   let state_var = str_of_ident state_ident |> evar in
   let lhs = mk_cmd_pattern value in
@@ -369,4 +429,5 @@ let stm config ir =
   let open Reserr in
   let* idx, next_state = next_state config ir in
   let* postcond = postcond config idx ir in
-  ok [ cmd; state; next_state; postcond ]
+  let run = run config ir in
+  ok [ cmd; state; next_state; postcond; run ]

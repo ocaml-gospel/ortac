@@ -2,7 +2,8 @@ type nonrec cmd =
   | Length 
   | Pop 
   | Push of char 
-  | Extend [@@deriving show { with_path = false }]
+  | Extend 
+  | To_list [@@deriving show { with_path = false }]
 type nonrec state = {
   size: int ;
   contents: char list }
@@ -32,6 +33,7 @@ let next_state cmd__001_ state__002_ =
              (Ortac_runtime.Gospelstdlib.integer_of_int 2) state__002_.size);
         contents = []
       }
+  | To_list -> state__002_
 let postcond cmd__003_ state__004_ res__005_ =
   let new_state__006_ = lazy (next_state cmd__003_ state__004_) in
   match (cmd__003_, res__005_) with
@@ -45,3 +47,12 @@ let postcond cmd__003_ state__004_ res__005_ =
         [a_2 = (Ortac_runtime.Gospelstdlib.List.hd state__004_.contents)]
   | (Push a_1, Res ((Unit, _), _)) -> List.fold_left (&&) true []
   | (Extend, Res ((Unit, _), _)) -> List.fold_left (&&) true []
+  | (To_list, Res ((List (Char), _), l)) ->
+      List.fold_left (&&) true [l = (Lazy.force new_state__006_).contents]
+let run cmd__007_ sut__008_ =
+  match cmd__007_ with
+  | Length -> Res (int, (length sut__008_))
+  | Pop -> Res (char, (pop sut__008_))
+  | Push a_1 -> Res (unit, (push a_1 sut__008_))
+  | Extend -> Res (unit, (extend sut__008_))
+  | To_list -> Res ((list char), (to_list sut__008_))
