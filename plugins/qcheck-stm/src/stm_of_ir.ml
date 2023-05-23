@@ -335,6 +335,47 @@ let may_raise_exception v =
   | [], [] -> false
   | _, _ -> true
 
+let list_fold_right1 op v xs =
+  let rec aux = function
+    | [ x ] -> x
+    | x :: xs -> op x (aux xs)
+    | _ -> failwith "The impossible happened in list_fold_right1"
+  in
+  match xs with [] -> v | _ -> aux xs
+
+let list_and xs =
+  let ( &&& ) e1 e2 =
+    pexp_apply (pexp_ident (lident "&&")) [ (Nolabel, e1); (Nolabel, e2) ]
+  and etrue = pexp_construct (lident "true") None in
+  list_fold_right1 ( &&& ) etrue xs
+
+let precond_case config state_ident value =
+  let lhs = mk_cmd_pattern value in
+  let open Reserr in
+  let* rhs =
+    list_and
+    <$> map
+          (fun t ->
+            subst_term ~gos_t:value.sut_var ~old_t:None
+              ~new_t:(Some state_ident) t
+            >>= ocaml_of_term config)
+          value.precond
+  in
+  ok (case ~lhs ~guard:None ~rhs)
+
+let precond config ir =
+  let cmd_name = gen_symbol ~prefix:"cmd" () in
+  let state_name = gen_symbol ~prefix:"state" () in
+  let state_ident = Gospel.Tast.Ident.create ~loc:Location.none state_name in
+  let open Reserr in
+  let* cases = map (precond_case config state_ident) ir.values in
+  let body = pexp_match (evar cmd_name) cases in
+  let pat = pvar "precond" in
+  let expr =
+    efun [ (Nolabel, pvar cmd_name); (Nolabel, pvar state_name) ] body
+  in
+  pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
+
 let postcond_case config idx state_ident new_state_ident value =
   let idx = List.sort Int.compare idx in
   let lhs0 = mk_cmd_pattern value in
@@ -374,22 +415,13 @@ let postcond_case config idx state_ident new_state_ident value =
       in
       aux idx value.postcond.normal
     in
-    let* normal =
-      map
-        (fun t ->
-          subst_term ~gos_t:value.sut_var ~old_t:(Some state_ident) ~new_lz:true
-            ~new_t:(Some new_state_ident) t
-          >>= ocaml_of_term config)
-        normal
-    in
-    ok
-      (pexp_apply
-         (pexp_ident (noloc (Ldot (Lident "List", "fold_left"))))
-         [
-           (Nolabel, pexp_ident (lident "&&"));
-           (Nolabel, pexp_construct (lident "true") None);
-           (Nolabel, elist normal);
-         ])
+    list_and
+    <$> map
+          (fun t ->
+            subst_term ~gos_t:value.sut_var ~old_t:(Some state_ident)
+              ~new_lz:true ~new_t:(Some new_state_ident) t
+            >>= ocaml_of_term config)
+          normal
   in
   (* if checks then r = Error Invalid_arg else match res with Error _ -> xpost | Ok _ -> postcond *)
   ok (case ~lhs ~guard:None ~rhs)
@@ -479,6 +511,7 @@ let stm config ir =
   let open Reserr in
   let* idx, next_state = next_state config ir in
   let* postcond = postcond config idx ir in
+  let* precond = precond config ir in
   let* run = run config ir in
   let* arb_cmd = arb_cmd ir in
-  ok [ cmd; state; arb_cmd; next_state; postcond; run ]
+  ok [ cmd; state; arb_cmd; next_state; precond; postcond; run ]

@@ -14,6 +14,7 @@ val length : 'a t -> int
 
 val pop : 'a t -> 'a
 (*@ a = pop t
+    requires List.length t.contents > 0
     ensures a = List.hd (old t.contents)
     modifies t.contents
     modifies t.contents

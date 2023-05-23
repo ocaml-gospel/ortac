@@ -43,25 +43,33 @@ let next_state cmd__001_ state__002_ =
         contents = []
       }
   | To_list -> state__002_
+let precond cmd__007_ state__008_ =
+  match cmd__007_ with
+  | Length -> true
+  | Pop ->
+      Ortac_runtime.Gospelstdlib.(>)
+        (Ortac_runtime.Gospelstdlib.List.length state__008_.contents)
+        (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+  | Push a_1 -> true
+  | Extend -> true
+  | To_list -> true
 let postcond cmd__003_ state__004_ res__005_ =
   let new_state__006_ = lazy (next_state cmd__003_ state__004_) in
   match (cmd__003_, res__005_) with
   | (Length, Res ((Int, _), i)) ->
-      List.fold_left (&&) true
-        [(Ortac_runtime.Gospelstdlib.integer_of_int i) =
-           (Ortac_runtime.Gospelstdlib.List.length
-              (Lazy.force new_state__006_).contents)]
+      (Ortac_runtime.Gospelstdlib.integer_of_int i) =
+        (Ortac_runtime.Gospelstdlib.List.length
+           (Lazy.force new_state__006_).contents)
   | (Pop, Res ((Char, _), a_2)) ->
-      List.fold_left (&&) true
-        [a_2 = (Ortac_runtime.Gospelstdlib.List.hd state__004_.contents)]
-  | (Push a_1, Res ((Unit, _), _)) -> List.fold_left (&&) true []
-  | (Extend, Res ((Unit, _), _)) -> List.fold_left (&&) true []
+      a_2 = (Ortac_runtime.Gospelstdlib.List.hd state__004_.contents)
+  | (Push a_1, Res ((Unit, _), _)) -> true
+  | (Extend, Res ((Unit, _), _)) -> true
   | (To_list, Res ((List (Char), _), l)) ->
-      List.fold_left (&&) true [l = (Lazy.force new_state__006_).contents]
-let run cmd__007_ sut__008_ =
-  match cmd__007_ with
-  | Length -> Res (int, (length sut__008_))
-  | Pop -> Res (char, (pop sut__008_))
-  | Push a_1 -> Res (unit, (push a_1 sut__008_))
-  | Extend -> Res (unit, (extend sut__008_))
-  | To_list -> Res ((list char), (to_list sut__008_))
+      l = (Lazy.force new_state__006_).contents
+let run cmd__009_ sut__010_ =
+  match cmd__009_ with
+  | Length -> Res (int, (length sut__010_))
+  | Pop -> Res (char, (pop sut__010_))
+  | Push a_1 -> Res (unit, (push a_1 sut__010_))
+  | Extend -> Res (unit, (extend sut__010_))
+  | To_list -> Res ((list char), (to_list sut__010_))
