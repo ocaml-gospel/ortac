@@ -157,7 +157,9 @@ let val_desc config state vd =
   in
   let* next_state = next_state sut state spec in
   let postcond = postcond spec in
-  Ir.value vd.vd_name vd.vd_type inst sut args ret next_state postcond |> ok
+  Ir.value vd.vd_name vd.vd_type inst sut args ret next_state spec.sp_pre
+    postcond
+  |> ok
 
 let sig_item config state s =
   match s.sig_desc with
