@@ -143,6 +143,67 @@ let ty_show_of_core_type inst ty =
 
 let exp_of_ident id = pexp_ident (lident (str_of_ident id))
 
+(** This function should be specialized `flatten_arrow (Cfg.is_sut config)`
+    [when_sut] returns an [option] in order to notify the function whether we
+    keep the value or not *)
+let flatten_arrow is_sut when_sut when_not core_type =
+  let open Ppxlib in
+  let rec aux ty =
+    match ty.ptyp_desc with
+    | Ptyp_arrow (_, l, r) when is_sut l -> (
+        match when_sut l with None -> aux r | Some x -> x :: aux r)
+    | Ptyp_arrow (_, l, r) -> when_not l :: aux r
+    | _ -> []
+  in
+  aux core_type
+
+let gen_cmd config value =
+  (* for now we reuse the function for [ty_show], but we should at least look
+     at preconditions on [int] arguments to handle ranges *)
+  let gen_of_ty = ty_show_of_core_type in
+  let epure = pexp_ident (lident "pure") in
+  let pure e = pexp_apply epure [ (Nolabel, e) ] in
+  let fun_cstr =
+    let args =
+      List.map
+        (Option.fold ~none:(Nolabel, punit) ~some:(fun id ->
+             (Nolabel, ppat_var (noloc (str_of_ident id)))))
+        value.args
+    in
+    let name = String.capitalize_ascii (str_of_ident value.id) |> lident in
+    let body =
+      pexp_construct name
+        (pexp_tuple_opt
+           (List.map
+              (Option.fold ~none:eunit ~some:(fun id -> evar (str_of_ident id)))
+              value.args))
+    in
+    efun args body |> pure
+  in
+  let gen_args =
+    flatten_arrow (Cfg.is_sut config)
+      (fun _ -> None)
+      (gen_of_ty value.inst) value.ty
+  in
+  let app l r = pexp_apply (evar "( <*> )") [ (Nolabel, l); (Nolabel, r) ] in
+  List.fold_left app fun_cstr gen_args
+
+let arb_gen config ir =
+  let cmds = List.map (gen_cmd config) ir.values |> elist in
+  let open Ppxlib in
+  let let_open str e =
+    pexp_open Ast_helper.(Opn.mk (Mod.ident (lident str |> noloc))) e
+  in
+  let oneof = let_open "Gen" cmds in
+  let body =
+    let_open "QCheck"
+      (pexp_apply (evar "make")
+         [ (Labelled "print", evar "show_cmd"); (Nolabel, oneof) ])
+  in
+  let pat = pvar "arg_gen" in
+  let expr = efun [ (Nolabel, ppat_any (* for now we don't use it *)) ] body in
+  pstr_value Nonrecursive [ value_binding ~pat ~expr ]
+
 let call config esut value =
   let efun = exp_of_ident value.id in
   let mk_arg = Option.fold ~none:eunit ~some:exp_of_ident in
@@ -430,4 +491,5 @@ let stm config ir =
   let* idx, next_state = next_state config ir in
   let* postcond = postcond config idx ir in
   let run = run config ir in
-  ok [ cmd; state; next_state; postcond; run ]
+  let arb_gen = arb_gen config ir in
+  ok [ cmd; state; arb_gen; next_state; postcond; run ]
