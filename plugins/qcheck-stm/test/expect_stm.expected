@@ -7,6 +7,15 @@ type nonrec cmd =
 type nonrec state = {
   size: int ;
   contents: char list }
+let arb_cmd _ =
+  let open QCheck in
+    make ~print:show_cmd
+      (let open Gen in
+         [pure Length;
+         pure Pop;
+         (pure (fun a_1 -> Push a_1)) <*> char;
+         pure Extend;
+         pure To_list])
 let next_state cmd__001_ state__002_ =
   match cmd__001_ with
   | Length -> state__002_

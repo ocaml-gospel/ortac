@@ -179,6 +179,53 @@ let exp_of_core_type inst typ =
 
 let exp_of_ident id = pexp_ident (lident (str_of_ident id))
 
+let arb_cmd_case value =
+  let open Reserr in
+  let epure = pexp_ident (lident "pure") in
+  let pure e = pexp_apply epure [ (Nolabel, e) ] in
+  let fun_cstr =
+    let args =
+      List.map
+        (function
+          | _, None -> (Nolabel, punit)
+          | _, Some id -> (Nolabel, ppat_var (noloc (str_of_ident id))))
+        value.args
+    in
+    let name = String.capitalize_ascii (str_of_ident value.id) |> lident in
+    let body =
+      pexp_construct name
+        (pexp_tuple_opt
+           (List.map
+              (function
+                | _, None -> eunit | _, Some id -> evar (str_of_ident id))
+              value.args))
+    in
+    efun args body |> pure
+  in
+  let* gen_args =
+    (* XXX TODO: use `requires` clauses to build smarter generators *)
+    map (fun (ty, _) -> exp_of_core_type value.inst ty) value.args
+  in
+  let app l r = pexp_apply (evar "( <*> )") [ (Nolabel, l); (Nolabel, r) ] in
+  List.fold_left app fun_cstr gen_args |> ok
+
+let arb_cmd ir =
+  let open Reserr in
+  let* cmds = elist <$> map arb_cmd_case ir.values in
+  let open Ppxlib in
+  let let_open str e =
+    pexp_open Ast_helper.(Opn.mk (Mod.ident (lident str |> noloc))) e
+  in
+  let oneof = let_open "Gen" cmds in
+  let body =
+    let_open "QCheck"
+      (pexp_apply (evar "make")
+         [ (Labelled "print", evar "show_cmd"); (Nolabel, oneof) ])
+  in
+  let pat = pvar "arb_cmd" in
+  let expr = efun [ (Nolabel, ppat_any (* for now we don't use it *)) ] body in
+  pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
+
 let run_case config sut_name value =
   let lhs = mk_cmd_pattern value in
   let open Reserr in
@@ -437,4 +484,5 @@ let stm config ir =
   let* idx, next_state = next_state config ir in
   let* postcond = postcond config idx ir in
   let* run = run config ir in
-  ok [ cmd; state; next_state; postcond; run ]
+  let* arb_cmd = arb_cmd ir in
+  ok [ cmd; state; arb_cmd; next_state; postcond; run ]
