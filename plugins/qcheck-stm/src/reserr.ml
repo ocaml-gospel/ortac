@@ -1,5 +1,12 @@
 module W = Ortac_core.Warnings
 
+type init_state_error =
+  | Not_a_function_call of string
+  | No_appropriate_specifications of string
+  | Not_returning_sut of string
+  | Qualified_name of string
+  | Mismatch_number_of_arguments of string
+
 type W.kind +=
   | Constant_value of string
   | Returning_sut of string
@@ -21,6 +28,7 @@ type W.kind +=
   | Ignored_modifies of string
   | Ensures_not_found_for_next_state of string
   | Type_not_supported of string
+  | Impossible_init_state_generation of init_state_error
 
 let level kind =
   match kind with
@@ -33,7 +41,7 @@ let level kind =
   | Sut_type_not_supported _ | Type_not_supported_for_sut_parameter _
   | Init_sut_not_supported _ | Syntax_error_in_init_sut _
   | Type_parameter_not_instantiated _ | Sut_type_not_specified _ | No_models _
-    ->
+  | Impossible_init_state_generation _ ->
       W.Error
   | _ -> W.level kind
 
@@ -126,6 +134,25 @@ let pp_kind ppf kind =
          model %a."
         W.quoted m
   | Type_not_supported ty -> pf ppf "Type not supported %a." W.quoted ty
+  | Impossible_init_state_generation (Not_a_function_call f) ->
+      pf ppf "The expression %a given for `init_state` is not a function call."
+        W.quoted f
+  | Impossible_init_state_generation (No_appropriate_specifications fct) ->
+      pf ppf
+        "The function %a used for `init_state` is not approriately specified."
+        W.quoted fct
+  | Impossible_init_state_generation (Not_returning_sut fct) ->
+      pf ppf "The function %a used for `init_state` does not return `sut`."
+        W.quoted fct
+  | Impossible_init_state_generation (Qualified_name fct) ->
+      pf ppf
+        "Qualified name (%a) is not supported yet for generating `init_state`."
+        W.quoted fct
+  | Impossible_init_state_generation (Mismatch_number_of_arguments fct) ->
+      pf ppf
+        "Mismatch number of arguments between %a and the function \
+         specification."
+        W.quoted fct
   | _ -> W.pp_kind ppf kind
 
 let pp_errors = W.pp_param pp_kind level |> Fmt.list
