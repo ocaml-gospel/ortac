@@ -107,6 +107,7 @@ let subst_term ~gos_t ?(old_lz = false) ~old_t ?(new_lz = false) ~new_t term =
         t.t_loc )
 
 let str_of_ident = Fmt.str "%a" Gospel.Identifier.Ident.pp
+let longident_loc_of_ident id = str_of_ident id |> lident
 
 let mk_cmd_pattern value =
   let pat_args = function
@@ -505,6 +506,52 @@ let cmd_type ir =
   in
   pstr_type Nonrecursive [ { td with ptype_attributes = [ show_attribute ] } ]
 
+(* This function generates an expression of the form
+   ```
+   let a = expr0 in
+   let b = expr1 in
+   { field0 = (translation of a gospel term using a and/or b; ... }
+   ```
+*)
+let init_state config ir =
+  let module Ident = Gospel.Identifier.Ident in
+  let pat_of_lb_arg = function
+    (* here we don't need the labels as we'll use them in the body of the function *)
+    | Gospel.Tast.Lunit -> punit
+    | Gospel.Tast.Lnone vs
+    | Gospel.Tast.Loptional vs
+    | Gospel.Tast.Lnamed vs
+    | Gospel.Tast.Lghost vs ->
+        pvar (Fmt.str "%a" Ident.pp vs.vs_name)
+  in
+  let bindings =
+    pexp_let Nonrecursive
+      (List.map
+         (fun (lb_arg, expr) -> value_binding ~pat:(pat_of_lb_arg lb_arg) ~expr)
+         ir.Ir.init_state.arguments)
+  in
+  let open Reserr in
+  let translate_field_desc Ir.{ model; description } =
+    let* desc = ocaml_of_term config description in
+    ok (model, desc)
+  in
+  let* fields = map translate_field_desc ir.Ir.init_state.descriptions in
+  let* fields =
+    map
+      (fun (id, _) ->
+        (fun d -> (longident_loc_of_ident id, d))
+        <$> (List.assoc_opt id fields
+            |> of_option
+                 ~default:
+                   ( Impossible_init_state_generation
+                       (No_appropriate_specifications (Fmt.str "%a" Ident.pp id)),
+                     Ppxlib.Location.none )))
+      ir.state
+  in
+  let expr = pexp_record fields None |> bindings in
+  let pat = pvar "init_state" in
+  pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
+
 let stm config ir =
   let cmd = cmd_type ir in
   let state = state_type ir in
@@ -514,4 +561,5 @@ let stm config ir =
   let* precond = precond config ir in
   let* run = run config ir in
   let* arb_cmd = arb_cmd ir in
-  ok [ cmd; state; arb_cmd; next_state; precond; postcond; run ]
+  let* init_state = init_state config ir in
+  ok [ cmd; state; init_state; arb_cmd; next_state; precond; postcond; run ]
