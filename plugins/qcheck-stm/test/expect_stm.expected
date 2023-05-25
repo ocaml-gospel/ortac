@@ -7,6 +7,15 @@ type nonrec cmd =
 type nonrec state = {
   size: int ;
   contents: char list }
+let init_state =
+  let i_1 = 16
+  and a_3 = 'a' in
+  {
+    size = (Ortac_runtime.Gospelstdlib.integer_of_int i_1);
+    contents =
+      (Ortac_runtime.Gospelstdlib.List.init
+         (Ortac_runtime.Gospelstdlib.integer_of_int i_1) (fun i_2 -> a_3))
+  }
 let arb_cmd _ =
   let open QCheck in
     make ~print:show_cmd
