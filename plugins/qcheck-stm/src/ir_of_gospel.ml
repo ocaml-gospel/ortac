@@ -99,23 +99,26 @@ let split_args config ty args =
   | None, _ -> failwith "shouldn't happen (sut type not found)"
   | Some sut, args -> (sut, args)
 
+let get_state_description_with_index is_t state spec =
+  let open Tterm in
+  let pred i t =
+    match t.t_node with
+    | Tapp (ls, [ { t_node = Tfield ({ t_node = Tvar vs; _ }, m); _ }; right ])
+      when Symbols.(ls_equal ps_equ ls) && is_t vs ->
+        if List.exists (fun (id, _) -> Ident.equal id m.ls_name) state then
+          Some (i, Ir.{ model = m.ls_name; description = right })
+        else None
+    | _ -> None
+  in
+  List.mapi pred spec.sp_post |> List.filter_map Fun.id
+
 let next_state sut state spec =
   let open Tterm in
   let is_t vs =
     let open Symbols in
     Ident.equal sut vs.vs_name
   in
-  let open Ir in
-  let pred i t =
-    match t.t_node with
-    | Tapp (ls, [ { t_node = Tfield ({ t_node = Tvar vs; _ }, m); _ }; right ])
-      when Symbols.(ls_equal ps_equ ls) && is_t vs ->
-        if List.exists (fun (id, _) -> Ident.equal id m.ls_name) state then
-          Some (i, { model = m.ls_name; description = right })
-        else None
-    | _ -> None
-  in
-  let formulae = List.mapi pred spec.sp_post |> List.filter_map Fun.id in
+  let formulae = get_state_description_with_index is_t state spec in
   let open Reserr in
   let check_modify = function
     | { t_node = Tvar vs; _ } when is_t vs -> List.map fst state |> ok
@@ -128,7 +131,7 @@ let next_state sut state spec =
   in
   let* modifies = concat_map check_modify spec.sp_wr in
   let modifies = List.sort_uniq Ident.compare modifies in
-  ok { formulae; modifies }
+  ok Ir.{ formulae; modifies }
 
 let postcond spec =
   let normal = List.mapi (fun i x -> (i, x)) spec.sp_post
@@ -209,6 +212,104 @@ let state config sigs =
   | [] -> error (No_models sut_name, spec.ty_loc)
   | xs -> List.map process_model xs |> ok
 
+let init_state config state sigs =
+  let open Cfg in
+  let open Reserr in
+  let open Ppxlib in
+  let* fct, args =
+    match config.init_sut with
+    | {
+     pexp_desc =
+       Pexp_apply ({ pexp_desc = Pexp_ident { txt = lid; _ }; _ }, args);
+     _;
+    } ->
+        ok (lid, List.map snd args)
+    | expr ->
+        error
+          ( Impossible_init_state_generation
+              (Not_a_function_call (Fmt.str "%a@." Pprintast.expression expr)),
+            Location.none )
+  in
+  let* fct_str =
+    match fct with
+    | Lident s -> ok s
+    | Ldot (_, _) | Lapply (_, _) ->
+        let name =
+          match config.init_sut with
+          | { pexp_desc = Pexp_apply (id, _); _ } -> id
+          | _ -> assert false
+        in
+        error
+          ( Impossible_init_state_generation
+              (Qualified_name Fmt.(str "%a@." Pprintast.expression name)),
+            Location.none )
+  in
+  let is_init_declaration = function
+    | { sig_desc = Sig_val (v, _); _ }
+      when Fmt.str "%a" Gospel.Identifier.Ident.pp v.vd_name = fct_str ->
+        Some v
+    | _ -> None
+  in
+  let* value =
+    List.rev sigs
+    (* we want the last definition *)
+    |> List.find_map is_init_declaration
+    |> of_option ~default:(No_init_function fct_str, Location.none)
+  in
+  let* spec =
+    of_option
+      ~default:
+        ( Impossible_init_state_generation
+            (No_appropriate_specifications
+               (Fmt.str "%a" Gospel.Identifier.Ident.pp value.Tast.vd_name)),
+          value.vd_loc )
+      value.vd_spec
+  in
+  let* arguments =
+    let is_not_ghost = function Lghost _ -> false | _ -> true in
+    let sp_args = List.filter is_not_ghost spec.sp_args in
+    try List.combine sp_args args |> ok
+    with Invalid_argument _ ->
+      error
+        ( Impossible_init_state_generation
+            (Mismatch_number_of_arguments
+               (Fmt.str "%a@." Pprintast.expression config.init_sut)),
+          Location.none )
+  in
+  let open Gospel.Symbols in
+  let* sut =
+    List.find_map
+      (function
+        | Lnone vs when Cfg.is_sut_gospel_ty config vs.vs_ty -> Some vs.vs_name
+        | _ -> None)
+      spec.sp_ret
+    |> of_option
+         ~default:
+           ( Impossible_init_state_generation
+               (Not_returning_sut
+                  (Fmt.str "%a" Gospel.Identifier.Ident.pp value.Tast.vd_name)),
+             value.vd_loc )
+  in
+  let is_t vs = Ident.equal sut vs.vs_name in
+  let descriptions =
+    get_state_description_with_index is_t state spec |> List.map snd
+  in
+  let* () =
+    if
+      (* at least one description per model in state, choice is made when translating *)
+      List.for_all
+        (fun (id, _) ->
+          List.exists (fun Ir.{ model; _ } -> Ident.equal model id) descriptions)
+        state
+    then ok ()
+    else
+      error
+        ( Impossible_init_state_generation
+            (No_appropriate_specifications spec.sp_text),
+          spec.sp_loc )
+  in
+  ok Ir.{ arguments; descriptions }
+
 let signature config state sigs =
   List.filter_map (sig_item config state) sigs |> Reserr.promote
 
@@ -216,5 +317,6 @@ let run sigs config =
   let open Reserr in
   let open Ir in
   let* state = state config sigs in
+  let* init_state = init_state config state sigs in
   let* values = signature config state sigs in
-  ok { state; values }
+  ok { state; init_state; values }
