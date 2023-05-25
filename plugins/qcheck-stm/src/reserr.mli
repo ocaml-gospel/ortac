@@ -1,5 +1,10 @@
 module W = Ortac_core.Warnings
 
+type init_state_error =
+  | Not_a_function_call of string
+  | No_appropriate_specifications of string
+  | Not_returning_sut of string
+
 type W.kind +=
   | Constant_value of string
   | Returning_sut of string
@@ -21,6 +26,7 @@ type W.kind +=
   | Ignored_modifies of string
   | Ensures_not_found_for_next_state of string
   | Return_type_not_supported of string
+  | Impossible_init_state_generation of init_state_error
 
 type 'a reserr
 
