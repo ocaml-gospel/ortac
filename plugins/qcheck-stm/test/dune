@@ -3,26 +3,9 @@
  (modules lib)
  (modules_without_implementation lib))
 
-(library
- (name lib2)
- (modules lib2)
- (modules_without_implementation lib2))
-
-(test
- (package ortac-qcheck-stm)
- (name expect_config)
- (modules expect_config)
- (libraries ortac_qcheck_stm fmt gospel lib))
-
-(test
- (package ortac-qcheck-stm)
- (name expect_ir)
- (modules expect_ir)
- (libraries ortac_qcheck_stm fmt gospel lib))
-
 (test
  (package ortac-qcheck-stm)
  (name expect_stm)
- (deps lib2.mli)
+ (deps lib.mli)
  (modules expect_stm)
- (libraries ortac_qcheck_stm fmt gospel ppxlib ppxlib.astlib lib2))
+ (libraries ortac_qcheck_stm fmt gospel ppxlib ppxlib.astlib lib))
