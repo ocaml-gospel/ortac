@@ -105,6 +105,7 @@ let subst_term ~gos_t ?(old_lz = false) ~old_t ?(new_lz = false) ~new_t term =
         t.t_loc )
 
 let str_of_ident = Fmt.str "%a" Gospel.Identifier.Ident.pp
+let longident_loc_of_ident id = str_of_ident id |> lident
 
 let mk_cmd_pattern value =
   let pat_args = function
@@ -511,6 +512,41 @@ let cmd_type config ir =
   in
   pstr_type Nonrecursive [ { td with ptype_attributes = [ show_attribute ] } ]
 
+let init_state config ir =
+  let pat_of_lb_arg = function
+    (* here we don't need the labels as we'll use them in the body of the function *)
+    | Gospel.Tast.Lunit -> punit
+    | Gospel.Tast.Lnone vs
+    | Gospel.Tast.Loptional vs
+    | Gospel.Tast.Lnamed vs
+    | Gospel.Tast.Lghost vs ->
+        pvar (Fmt.str "%a" Gospel.Identifier.Ident.pp vs.vs_name)
+  in
+  let bindings =
+    pexp_let Nonrecursive
+      (List.map
+         (fun (lb_arg, expr) -> value_binding ~pat:(pat_of_lb_arg lb_arg) ~expr)
+         ir.Ir.init_state.arguments)
+  in
+  let open Reserr in
+  let translate_field_desc Ir.{ model; description } =
+    let* desc = ocaml_of_term config description in
+    ok (model, desc)
+  in
+  let* fields =
+    (* XXX TODO this should be done with a fold keeping track of the identifier
+       for which we already have a translated description *)
+    (fun xs ->
+      List.sort_uniq
+        (fun (m0, _) (m1, _) -> Gospel.Identifier.Ident.compare m0 m1)
+        xs
+      |> List.map (fun (m, d) -> (longident_loc_of_ident m, d)))
+    <$> map translate_field_desc ir.Ir.init_state.descriptions
+  in
+  let expr = pexp_record fields None |> bindings in
+  let pat = pvar "init_state" in
+  pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
+
 let stm config ir =
   let cmd = cmd_type config ir in
   let state = state_type ir in
@@ -520,4 +556,5 @@ let stm config ir =
   let* precond = precond config ir in
   let run = run config ir in
   let arb_gen = arb_gen config ir in
-  ok [ cmd; state; arb_gen; next_state; precond; postcond; run ]
+  let* init_state = init_state config ir in
+  ok [ cmd; state; init_state; arb_gen; next_state; precond; postcond; run ]
