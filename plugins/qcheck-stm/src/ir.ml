@@ -3,7 +3,7 @@ module Ident = Identifier.Ident
 
 type xpost = Ttypes.xsymbol * Tterm.pattern * Tterm.term
 
-type next_state_formulae = {
+type new_state_formulae = {
   model : Ident.t; (* the name of the model's field *)
   description : Tterm.term; (* the new value for the model's field *)
 }
@@ -15,7 +15,7 @@ type term = int * Tterm.term
 type next_state = {
   (* description of the new values are stored with the index of the
      postcondition they come from *)
-  formulae : (int * next_state_formulae) list;
+  formulae : (int * new_state_formulae) list;
   modifies : Ident.t list;
 }
 
@@ -38,6 +38,11 @@ type value = {
   postcond : postcond;
 }
 
+type init_state = {
+  arguments : (Tast.lb_arg * Ppxlib.expression) list;
+  descriptions : new_state_formulae list;
+}
+
 let get_return_type value =
   let open Ppxlib in
   let rec aux ty =
@@ -48,7 +53,11 @@ let get_return_type value =
 let value id ty inst sut_var args ret next_state precond postcond =
   { id; ty; inst; sut_var; args; ret; next_state; precond; postcond }
 
-type t = { state : (Ident.t * Ppxlib.core_type) list; values : value list }
+type t = {
+  state : (Ident.t * Ppxlib.core_type) list;
+  init_state : init_state;
+  values : value list;
+}
 
 let pp_state ppf state =
   let open Fmt in
