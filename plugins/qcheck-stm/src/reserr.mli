@@ -38,4 +38,6 @@ val map : ('a -> 'b reserr) -> 'a list -> 'b list reserr
 val concat_map : ('a -> 'b list reserr) -> 'a list -> 'b list reserr
 val fmap : ('a -> 'b) -> 'a reserr -> 'b reserr
 val ( <$> ) : ('a -> 'b) -> 'a reserr -> 'b reserr
+val app : ('a -> 'b) reserr -> 'a reserr -> 'b reserr
+val ( <*> ) : ('a -> 'b) reserr -> 'a reserr -> 'b reserr
 val pp : 'a Fmt.t -> 'a reserr Fmt.t

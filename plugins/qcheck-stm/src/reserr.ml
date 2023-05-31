@@ -68,6 +68,12 @@ let fmap f r =
 
 let ( <$> ) = fmap
 
+let app f r =
+  let* f = f and* r = r in
+  ok (f r)
+
+let ( <*> ) = app
+
 let pp_kind ppf kind =
   let open Fmt in
   match kind with
