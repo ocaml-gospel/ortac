@@ -151,6 +151,7 @@ let next_state_case config state_ident value =
             (pick id))
         value.next_state.modifies
     in
+    (* [idx], like [descriptions], is in the order of the modifies clauses *)
     let idx = List.map (fun (i, _, _) -> i) descriptions in
     match
       List.map (fun (_, m, e) -> (lident (str_of_ident m), e)) descriptions
@@ -234,7 +235,6 @@ let postcond_case config idx state_ident new_state_ident value =
     in
     let* pat_ty = mk_pat_ret_ty value.inst ret_ty in
     let pat_ret =
-      (* FIXME ? *)
       match value.ret with
       | None -> ppat_any
       | Some id -> pvar (str_of_ident id)
