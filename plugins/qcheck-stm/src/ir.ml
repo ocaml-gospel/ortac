@@ -10,7 +10,7 @@ type next_state_formulae = {
 
 type term = int * Tterm.term
 
-(* XXX TODO decide whether we need checks here (if checks is true, state does
+(* XXX TODO decide whether we need checks here (if checks is false, state does
    not change) *)
 type next_state = {
   (* description of the new values are stored with the index of the
@@ -30,7 +30,7 @@ type value = {
   ty : Ppxlib.core_type;
   inst : (string * Ppxlib.core_type) list;
   sut_var : Ident.t;
-  args : Ident.t option list;
+  args : Ident.t option list; (* arguments of unit types are nameless *)
   next_state : next_state;
   postcond : postcond;
   precond : Tterm.term list;

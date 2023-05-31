@@ -112,14 +112,13 @@ let next_state_case config state_ident value =
   let* idx, rhs =
     (* substitute state variable when under `old` operator and translate description into ocaml *)
     let descriptions =
-      filter_map
+      List.filter_map
         (fun (i, { model; description }) ->
-          let* description =
-            subst_term ~gos_t:value.sut_var ~old_t:(Some state_ident)
-              ~new_t:None description
-            >>= term
-          in
-          ok (i, model, description))
+          subst_term ~gos_t:value.sut_var ~old_t:(Some state_ident) ~new_t:None
+            description
+          >>= term
+          |> to_option
+          |> Option.map (fun description -> (i, model, description)))
         value.next_state.formulae
     in
     (* choose one and only one description per modified model *)

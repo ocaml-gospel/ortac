@@ -35,7 +35,6 @@ val of_option : default:W.t -> 'a option -> 'a reserr
 val to_option : 'a reserr -> 'a option
 val map : ('a -> 'b reserr) -> 'a list -> 'b list reserr
 val concat_map : ('a -> 'b list reserr) -> 'a list -> 'b list reserr
-val filter_map : ('a -> 'b reserr) -> 'a list -> 'b list
 val fmap : ('a -> 'b) -> 'a reserr -> 'b reserr
 val ( <$> ) : ('a -> 'b) -> 'a reserr -> 'b reserr
 val pp : 'a Fmt.t -> 'a reserr Fmt.t

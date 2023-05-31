@@ -147,4 +147,3 @@ let of_option ~default = Option.fold ~none:(error default) ~some:ok
 let to_option = function Ok x, _ -> Some x | _ -> None
 let map f l = List.map f l |> promote
 let concat_map f l = fmap List.concat (map f l)
-let filter_map f = List.filter_map (fun x -> to_option (f x))
