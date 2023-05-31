@@ -20,14 +20,14 @@ type W.kind +=
   | Impossible_term_substitution of (string * [ `New | `Old ])
   | Ignored_modifies of string
   | Ensures_not_found_for_next_state of string
-  | Return_type_not_supported of string
+  | Type_not_supported of string
 
 let level kind =
   match kind with
   | Constant_value _ | Returning_sut _ | No_sut_argument _
   | Multiple_sut_arguments _ | Incompatible_type _ | No_spec _
   | Impossible_term_substitution _ | Ignored_modifies _
-  | Ensures_not_found_for_next_state _ | Return_type_not_supported _ ->
+  | Ensures_not_found_for_next_state _ | Type_not_supported _ ->
       W.Warning
   | No_sut_type _ | No_init_function _ | Syntax_error_in_type _
   | Sut_type_not_supported _ | Type_not_supported_for_sut_parameter _
@@ -125,8 +125,7 @@ let pp_kind ppf kind =
         "No translatable `ensures` clause found to generate `next_state` for \
          model %a."
         W.quoted m
-  | Return_type_not_supported ty ->
-      pf ppf "Return type not supported %a." W.quoted ty
+  | Type_not_supported ty -> pf ppf "Type not supported %a." W.quoted ty
   | _ -> W.pp_kind ppf kind
 
 let pp_errors = W.pp_param pp_kind level |> Fmt.list
