@@ -4,6 +4,8 @@ open Ppxlib
 open Ortac_core.Builder
 
 let ty_default = Ptyp_constr (noloc (Lident "char"), [])
+let pat_default = ppat_construct (lident "Char") None
+let exp_default = evar "char"
 
 let show_attribute : attribute =
   {
@@ -132,15 +134,14 @@ let munge_longident cap ty lid =
       error
         (Type_not_supported (Fmt.str "%a" Pprintast.core_type ty), ty.ptyp_loc)
 
-let pat_char = ppat_construct (lident "Char") None
-let exp_char = evar "char"
-
 let pat_of_core_type inst typ =
   let rec aux ty =
     let open Reserr in
     match ty.ptyp_desc with
     | Ptyp_var v -> (
-        match List.assoc_opt v inst with None -> ok pat_char | Some t -> aux t)
+        match List.assoc_opt v inst with
+        | None -> ok pat_default
+        | Some t -> aux t)
     | Ptyp_constr (c, xs) ->
         let constr_str = lident <$> munge_longident true ty c
         and pat_arg =
@@ -161,7 +162,9 @@ let exp_of_core_type inst typ =
     let open Reserr in
     match ty.ptyp_desc with
     | Ptyp_var v -> (
-        match List.assoc_opt v inst with None -> ok exp_char | Some t -> aux t)
+        match List.assoc_opt v inst with
+        | None -> ok exp_default
+        | Some t -> aux t)
     | Ptyp_constr (c, xs) -> (
         let constr_str = evar <$> munge_longident false ty c in
         match xs with
@@ -437,20 +440,13 @@ let postcond config idx ir =
   in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
-let cmd_constructor config value =
-  let rec aux ty : Ppxlib.core_type list =
-    match ty.ptyp_desc with
-    | Ptyp_arrow (_, l, r) ->
-        if Cfg.is_sut config l then aux r
-        else
-          let x = subst_core_type value.inst l and xs = aux r in
-          x :: xs
-    | _ -> []
-  in
+let cmd_constructor value =
   let name =
     String.capitalize_ascii value.id.Gospel.Tast.Ident.id_str |> noloc
   in
-  let args = aux value.ty in
+  let args =
+    List.map (fun (ty, _) -> subst_core_type value.inst ty) value.args
+  in
   constructor_declaration ~name ~args:(Pcstr_tuple args) ~res:None
 
 let state_type ir =
@@ -469,8 +465,8 @@ let state_type ir =
   in
   pstr_type Nonrecursive [ td ]
 
-let cmd_type config ir =
-  let constructors = List.map (cmd_constructor config) ir.values in
+let cmd_type ir =
+  let constructors = List.map cmd_constructor ir.values in
   let td =
     type_declaration ~name:(noloc "cmd") ~params:[] ~cstrs:[]
       ~kind:(Ptype_variant constructors) ~private_:Public ~manifest:None
@@ -478,7 +474,7 @@ let cmd_type config ir =
   pstr_type Nonrecursive [ { td with ptype_attributes = [ show_attribute ] } ]
 
 let stm config ir =
-  let cmd = cmd_type config ir in
+  let cmd = cmd_type ir in
   let state = state_type ir in
   let open Reserr in
   let* idx, next_state = next_state config ir in
