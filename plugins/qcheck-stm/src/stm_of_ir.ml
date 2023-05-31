@@ -108,8 +108,8 @@ let str_of_ident = Fmt.str "%a" Gospel.Identifier.Ident.pp
 
 let mk_cmd_pattern value =
   let pat_args = function
-    | None -> punit
-    | Some x -> ppat_var (noloc (str_of_ident x))
+    | _, None -> punit
+    | _, Some x -> ppat_var (noloc (str_of_ident x))
   in
   let args =
     match value.args with
@@ -201,7 +201,7 @@ let run_case config sut_name value =
               "shouldn't happen (list of arguments should be consistent with \
                type)"
       in
-      pexp_apply efun (aux value.ty value.args)
+      pexp_apply efun (aux value.ty (List.map snd value.args))
     in
     let args = Some (pexp_tuple [ ty_show; call ]) in
     pexp_construct res args |> ok

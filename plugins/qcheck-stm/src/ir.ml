@@ -30,7 +30,8 @@ type value = {
   ty : Ppxlib.core_type;
   inst : (string * Ppxlib.core_type) list;
   sut_var : Ident.t;
-  args : Ident.t option list; (* arguments of unit types are nameless *)
+  args : (Ppxlib.core_type * Ident.t option) list;
+      (* arguments of unit types can be nameless *)
   ret : Ident.t option;
   next_state : next_state;
   postcond : postcond;

@@ -90,8 +90,8 @@ let split_args config ty args =
     | Ptyp_arrow (_, l, r), Loptional vs :: xs
     | Ptyp_arrow (_, l, r), Lnamed vs :: xs ->
         if Cfg.is_sut config l then aux (Some vs.vs_name) acc r xs
-        else aux sut (Some vs.vs_name :: acc) r xs
-    | Ptyp_arrow (_, _, r), Lunit :: xs -> aux sut (None :: acc) r xs
+        else aux sut ((l, Some vs.vs_name) :: acc) r xs
+    | Ptyp_arrow (_, l, r), Lunit :: xs -> aux sut ((l, None) :: acc) r xs
     | _, [] -> (sut, List.rev acc)
     | _, _ -> failwith "shouldn't happen (too few parameters)"
   in
