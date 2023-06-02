@@ -16,11 +16,11 @@ There are various ways to check specifications:
   exceptional,
 - the _monolith_ mode, provided as a plugin, generates a program using
   [Monolith] that will test the module by comparing it against an
-  instrumented version of the module; see the [dedicated README] for
-  details.
+  instrumented version of the module; see the [dedicated
+  README][monolith README] for details.
 
 [Monolith]: https://gitlab.inria.fr/fpottier/monolith
-[dedicated README]: plugins/monolith/README.md
+[monolith README]: plugins/monolith/README.md
 
 At its core, Ortac provides a way to convert the executable fragment
 of Gospel into OCaml code. This core functionality is used by all
@@ -78,8 +78,8 @@ start with.
 
 The Monolith plugin can generate a standalone executable that will try
 to falsify the Gospel specifications of a module by stress-testing the
-code. Look in the [dedicated README] for the Monolith plugin to see
-how it can be used.
+code. Look in the [dedicated README][monolith README] for the Monolith
+plugin to see how it can be used.
 
 
 ### Default mode
