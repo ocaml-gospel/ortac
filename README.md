@@ -89,7 +89,7 @@ will expose the same interface as the original module but
 instrumenting all function calls with assertions corresponding to the
 Gospel specifications.
 
-Let’s start with a module `lib.ml` containing some Gospel
+Let’s start with a module interface `lib.mli` containing some Gospel
 specifications, borrowed from Gospel documentation:
 
 ```ocaml

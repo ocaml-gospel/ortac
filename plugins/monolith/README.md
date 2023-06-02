@@ -29,7 +29,7 @@ The Monolith plugin can be used to generate a program using the
 [Monolith] library that will try to invalidate the Gospel
 specifications using random testing or fuzzing.
 
-Let’s start with a module `lib.ml` containing some Gospel
+Let’s start with a module interface `lib.mli` containing some Gospel
 specifications, borrowed from Gospel documentation:
 
 ```ocaml
@@ -117,7 +117,7 @@ $ head -c 16 /dev/urandom > inputs/input
 $ afl-fuzz -i inputs -o outputs -- ./path/to/main.exe @@
 ```
 
-## Know limitations
+## Known limitations
 
 There are some limitations the user should know about:
 
