@@ -17,10 +17,17 @@ There are various ways to check specifications:
 - the _monolith_ mode, provided as a plugin, generates a program using
   [Monolith] that will test the module by comparing it against an
   instrumented version of the module; see the [dedicated
-  README][monolith README] for details.
+  README][monolith README] for details,
+- the _QCheck-STM_ mode, provided as a plugin, generates a program
+  using [QCheck-STM] that will test the module by running random
+  functions calls and checking they give consistent results with the
+  model provided in the Gospel specification; see the [dedicated
+  README][QCheck-STM README] for details.
 
 [Monolith]: https://gitlab.inria.fr/fpottier/monolith
 [monolith README]: plugins/monolith/README.md
+[QCheck-STM]: https://ocaml-multicore.github.io/multicoretests/
+[QCheck-STM README]: plugins/qcheck-stm/README.md
 
 At its core, Ortac provides a way to convert the executable fragment
 of Gospel into OCaml code. This core functionality is used by all
@@ -47,7 +54,9 @@ This repository contains the following OPAM packages:
 - `ortac-monolith.opam` which provides the Monolith plugin for the
   `ortac` command-line tool,
 - `ortac-runtime-monolith.opam` which provides the support library for
-  the code generated with the Monolith plugin.
+  the code generated with the Monolith plugin,
+- `ortac-qcheck-stm.opam` which provides the QCheck-STM plugin for the
+  `ortac` command-line tool.
 
 You can install only some of those packages by explicitly mentionning
 which package you want to install, for instance:
@@ -61,7 +70,7 @@ installed all packages, you should get:
 
 ```
 $ ortac
-ortac: required COMMAND name is missing, must be either 'default' or 'monolith'.
+ortac: required COMMAND name is missing, must be one of 'default', 'monolith' or 'qcheck-stm'.
 Usage: ortac COMMAND …
 Try 'ortac --help' for more information.
 ```
@@ -70,7 +79,7 @@ Try 'ortac --help' for more information.
 ## Quick start
 
 or: How to use Ortac to test whether the specifications of a module
-hold. Using the Monolith plugin is probably the easiest option to
+hold. Using one of the plugins is probably the easiest option to
 start with.
 
 
@@ -80,6 +89,15 @@ The Monolith plugin can generate a standalone executable that will try
 to falsify the Gospel specifications of a module by stress-testing the
 code. Look in the [dedicated README][monolith README] for the Monolith
 plugin to see how it can be used.
+
+
+### QCheck-STM plugin
+
+The QCheck-STM plugin can generate a standalone executable that will
+test the consistency between the behaviour of the functions of the
+module and their model, as provided by the Gospel specifications. Look
+at the [dedicated README][QCheck-STM README] for the QCheck-STM plugin
+to see how it can be used.
 
 
 ### Default mode
@@ -144,9 +162,9 @@ module Lib = LibAsserts
 
 ## Supported Gospel
 
-The default mode and the monolith plugin have currently some
-limitations on what Gospel specifications are supported. They all
-inherit limitations from the core translation from Gospel into OCaml:
+The various modes currently have some limitations on what Gospel
+specifications are supported. They all inherit limitations from the
+core translation from Gospel into OCaml:
 
 1. The first general rule is the fact that it can only translate the
    executable fragment of the language.
@@ -159,7 +177,11 @@ inherit limitations from the core translation from Gospel into OCaml:
 [runtime]: src/runtime/ortac_runtime.ml
 [`context.ml`]: src/core/context.ml
 
-Additionally, they do not support yet:
+Additionally, the default mode and the Monolith plugin do not support
+yet:
 
 - `model`s,
 - the `old` operator.
+
+The QCheck-STM plugin also has its own set of constraints on what it
+can handle, see its [dedicated README][QCheck-STM README] for details.
