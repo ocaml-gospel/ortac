@@ -30,6 +30,9 @@ depends: [
   "ppxlib" {>= "0.26.0"}
   "gospel"
   "ortac"
+  "ortac-runtime"
+  "qcheck-stm"
+  "qcheck-core"
 ]
 
 
