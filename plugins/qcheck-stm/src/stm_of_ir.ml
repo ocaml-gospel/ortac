@@ -452,10 +452,12 @@ let postcond config idx ir =
   in
   let open Reserr in
   let* cases =
-    map
-      (fun v ->
-        postcond_case config (List.assoc v.id idx) state_ident new_state_ident v)
-      ir.values
+    (Fun.flip ( @ )) [ case ~lhs:ppat_any ~guard:None ~rhs:(ebool true) ]
+    <$> map
+          (fun v ->
+            postcond_case config (List.assoc v.id idx) state_ident
+              new_state_ident v)
+          ir.values
   in
   let body =
     pexp_match (pexp_tuple [ evar cmd_name; evar res_name ]) cases
