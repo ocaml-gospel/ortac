@@ -2,7 +2,10 @@ opam-version: "2.0"
 synopsis: "QCheck-stm plugin for Ortac"
 description: "QCheck-stm plugin for Ortac"
 maintainer: ["Nicolas Osborne <nicolas.osborne@tarides.com>"]
-authors: ["Nicolas Osborne"]
+authors: [
+  "Nicolas Osborne <nicolas.osborne@tarides.com>"
+  "Samuel Hym <samuel.hym@rustyne.lautre.net>"
+]
 homepage: "https://github.com/ocaml-gospel/ortac"
 dev-repo: "git+https://github.com/ocaml-gospel/ortac.git"
 doc: "https://ocaml-gospel.github.io/ortac/"
