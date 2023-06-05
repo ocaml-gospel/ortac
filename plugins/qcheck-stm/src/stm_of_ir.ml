@@ -220,7 +220,7 @@ let arb_cmd ir =
   let let_open str e =
     pexp_open Ast_helper.(Opn.mk (Mod.ident (lident str |> noloc))) e
   in
-  let oneof = let_open "Gen" cmds in
+  let oneof = let_open "Gen" (pexp_apply (evar "oneof") [ (Nolabel, cmds) ]) in
   let body =
     let_open "QCheck"
       (pexp_apply (evar "make")
@@ -504,7 +504,7 @@ let cmd_type ir =
     type_declaration ~name:(noloc "cmd") ~params:[] ~cstrs:[]
       ~kind:(Ptype_variant constructors) ~private_:Public ~manifest:None
   in
-  pstr_type Nonrecursive [ { td with ptype_attributes = [ show_attribute ] } ]
+  pstr_type Recursive [ { td with ptype_attributes = [ show_attribute ] } ]
 
 (* This function generates an expression of the form
    ```
