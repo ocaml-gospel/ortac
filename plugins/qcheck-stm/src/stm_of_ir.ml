@@ -508,6 +508,14 @@ let cmd_type ir =
   in
   pstr_type Recursive [ { td with ptype_attributes = [ show_attribute ] } ]
 
+let sut_type cfg =
+  let td =
+    type_declaration ~name:(noloc "sut") ~params:[] ~cstrs:[]
+      ~kind:Ptype_abstract ~private_:Public
+      ~manifest:(Some cfg.Cfg.sut_core_type)
+  in
+  pstr_type Recursive [ td ]
+
 (* This function generates an expression of the form
    ```
    let a = expr0 in
@@ -555,6 +563,7 @@ let init_state config ir =
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
 let stm config ir =
+  let sut = sut_type config in
   let cmd = cmd_type ir in
   let state = state_type ir in
   let open Reserr in
@@ -564,4 +573,57 @@ let stm config ir =
   let* run = run config ir in
   let* arb_cmd = arb_cmd ir in
   let* init_state = init_state config ir in
-  ok [ cmd; state; init_state; arb_cmd; next_state; precond; postcond; run ]
+  let cleanup =
+    let pat = pvar "cleanup" in
+    let expr = efun [ (Nolabel, ppat_any) ] eunit in
+    pstr_value Nonrecursive [ value_binding ~pat ~expr ]
+  in
+  let init_sut =
+    let pat = pvar "init_sut" in
+    let expr = efun [ (Nolabel, punit) ] config.Cfg.init_sut in
+    pstr_value Nonrecursive [ value_binding ~pat ~expr ]
+  in
+  let open_mod m = pstr_open Ast_helper.(Opn.mk (Mod.ident (lident m))) in
+  let spec_expr =
+    pmod_structure
+      [
+        open_mod "STM";
+        sut;
+        cmd;
+        state;
+        init_state;
+        init_sut;
+        cleanup;
+        arb_cmd;
+        next_state;
+        precond;
+        postcond;
+        run;
+      ]
+  in
+  let stm_spec =
+    pstr_module (module_binding ~name:(noloc (Some "Spec")) ~expr:spec_expr)
+  in
+  let tests =
+    pstr_module
+      (module_binding ~name:(noloc (Some "STMTests"))
+         ~expr:
+           (pmod_apply
+              (pmod_ident (Ldot (Lident "STM_sequential", "Make") |> noloc))
+              (pmod_ident (lident "Spec"))))
+  in
+  let call_tests =
+    let loc = Location.none in
+    [%stri
+      let _ =
+        QCheck_base_runner.run_tests_main
+          (let count = 1000 in
+           [ STMTests.agree_test ~count ~name:"STM Lib test sequential" ])]
+  in
+  ok
+    [
+      open_mod (Ortac_core.Context.module_name config.context);
+      stm_spec;
+      tests;
+      call_tests;
+    ]
