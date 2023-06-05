@@ -1,11 +1,40 @@
 (library
- (name lib)
- (modules lib)
- (modules_without_implementation lib))
+ (name array)
+ (modules array))
 
 (test
+ (name stm_tests)
  (package ortac-qcheck-stm)
- (name expect_stm)
- (deps lib.mli)
- (modules expect_stm)
- (libraries ortac_qcheck_stm fmt gospel ppxlib ppxlib.astlib lib))
+ (modules stm_tests)
+ (libraries
+  qcheck-core
+  qcheck-core.runner
+  qcheck-stm.stm
+  qcheck-stm.sequential
+  ortac-runtime)
+ (flags :standard -w -26-27-32-33)
+ (preprocess
+  (pps ppx_deriving.show))
+ (action
+  (echo
+   "\n%{dep:stm_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))
+
+(rule
+ (target stm_tests.ml)
+ (package ortac-qcheck-stm)
+ (deps
+  (package ortac-qcheck-stm))
+ (action
+  (with-stderr-to
+   errors
+   (with-stdout-to
+    %{target}
+    (run ortac qcheck-stm %{dep:array.mli} "make 16 'a'" "char t")))))
+
+(rule
+ (alias runtest)
+ (package ortac-qcheck-stm)
+ (action
+  (progn
+   (diff errors.expected errors)
+   (diff stm_tests.expected.ml stm_tests.ml))))
