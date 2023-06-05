@@ -26,13 +26,13 @@ end = struct
   let sut =
     Arg.(
       required
-      & pos 1 (some string) None
+      & pos 2 (some string) None
       & info [] ~doc:"Build the qcheck-stm tests with SUT." ~docv:"SUT")
 
   let init =
     Arg.(
       required
-      & pos 2 (some string) None
+      & pos 1 (some string) None
       & info []
           ~doc:
             "Build the qcheck-stm tests using INIT function to initialize the \
