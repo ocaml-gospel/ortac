@@ -2,10 +2,12 @@ module Cfg = Config
 open Ir
 open Ppxlib
 open Ortac_core.Builder
+module Ident = Gospel.Identifier.Ident
 
 let ty_default = Ptyp_constr (noloc (Lident "char"), [])
 let pat_default = ppat_construct (lident "Char") None
 let exp_default = evar "char"
+let res_default = Ident.create ~loc:Location.none "res"
 
 let show_attribute : attribute =
   {
@@ -111,7 +113,7 @@ let subst_term ~gos_t ?(old_lz = false) ~old_t ?(new_lz = false) ~new_t term =
           (Fmt.str "%a" Gospel.Tterm_printer.print_term t, b),
         t.t_loc )
 
-let str_of_ident = Fmt.str "%a" Gospel.Identifier.Ident.pp
+let str_of_ident = Fmt.str "%a" Ident.pp
 let longident_loc_of_ident id = str_of_ident id |> lident
 
 let mk_cmd_pattern value =
@@ -303,9 +305,7 @@ let next_state_case config state_ident value =
     in
     (* choose one and only one description per modified model *)
     let pick id =
-      List.find_opt
-        (fun (_, m, _) -> Gospel.Identifier.Ident.equal id m)
-        descriptions
+      List.find_opt (fun (_, m, _) -> Ident.equal id m) descriptions
     in
     let* descriptions =
       map
@@ -330,7 +330,7 @@ let next_state_case config state_ident value =
 let next_state config ir =
   let cmd_name = gen_symbol ~prefix:"cmd" () in
   let state_name = gen_symbol ~prefix:"state" () in
-  let state_ident = Gospel.Tast.Ident.create ~loc:Location.none state_name in
+  let state_ident = Ident.create ~loc:Location.none state_name in
   let open Reserr in
   let* idx_cases =
     map
@@ -378,7 +378,7 @@ let precond_case config state_ident value =
 let precond config ir =
   let cmd_name = gen_symbol ~prefix:"cmd" () in
   let state_name = gen_symbol ~prefix:"state" () in
-  let state_ident = Gospel.Tast.Ident.create ~loc:Location.none state_name in
+  let state_ident = Ident.create ~loc:Location.none state_name in
   let open Reserr in
   let* cases = map (precond_case config state_ident) ir.values in
   let body = pexp_match (evar cmd_name) cases in
@@ -404,9 +404,17 @@ let postcond_case config idx state_ident new_state_ident value =
               ret_ty.ptyp_loc )
     in
     let* pat_ty = pat_of_core_type value.inst ret_ty in
+    let pat_ty =
+      if may_raise_exception value then
+        ppat_construct (lident "Result")
+          (Some (ppat_tuple [ pat_ty; ppat_construct (lident "Exn") None ]))
+      else pat_ty
+    in
     let pat_ret =
       match value.ret with
-      | None -> ppat_any
+      | None ->
+          if may_raise_exception value then pvar (str_of_ident res_default)
+          else ppat_any
       | Some id -> pvar (str_of_ident id)
     in
     ok
@@ -435,6 +443,35 @@ let postcond_case config idx state_ident new_state_ident value =
             >>= ocaml_of_term config)
           normal
   in
+  let* rhs =
+    if may_raise_exception value then
+      let res, pat_ret =
+        match value.ret with
+        | None -> (evar (str_of_ident res_default), ppat_any)
+        | Some id ->
+            let id = str_of_ident id in
+            (evar id, pvar id)
+      in
+      let case_ok =
+        case ~lhs:(ppat_construct (lident "Ok") (Some pat_ret)) ~guard:None ~rhs
+      in
+      let* cases_error =
+        Fun.flip ( @ ) [ case ~lhs:ppat_any ~guard:None ~rhs:(ebool false) ]
+        <$> map
+              (fun (x, p, t) ->
+                let lhs =
+                  ppat_construct
+                    (Fmt.str "%a" Ident.pp x.Gospel.Ttypes.xs_ident |> lident)
+                    (Option.map Ortac_core.Ocaml_of_gospel.pattern p)
+                in
+                let lhs = ppat_construct (lident "Error") (Some lhs) in
+                let* rhs = ocaml_of_term config t in
+                case ~lhs ~guard:None ~rhs |> ok)
+              value.postcond.exceptional
+      in
+      pexp_match res (case_ok :: cases_error) |> ok
+    else ok rhs
+  in
   (* if checks then r = Error Invalid_arg else match res with Error _ -> xpost | Ok _ -> postcond *)
   ok (case ~lhs ~guard:None ~rhs)
 
@@ -457,10 +494,8 @@ let postcond config idx ir =
                   ]));
       ]
   in
-  let state_ident = Gospel.Tast.Ident.create ~loc:Location.none state_name in
-  let new_state_ident =
-    Gospel.Tast.Ident.create ~loc:Location.none new_state_name
-  in
+  let state_ident = Ident.create ~loc:Location.none state_name in
+  let new_state_ident = Ident.create ~loc:Location.none new_state_name in
   let open Reserr in
   let* cases =
     (Fun.flip ( @ )) [ case ~lhs:ppat_any ~guard:None ~rhs:(ebool true) ]
@@ -487,9 +522,7 @@ let postcond config idx ir =
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
 let cmd_constructor value =
-  let name =
-    String.capitalize_ascii value.id.Gospel.Tast.Ident.id_str |> noloc
-  in
+  let name = String.capitalize_ascii value.id.Ident.id_str |> noloc in
   let args =
     List.map (fun (ty, _) -> subst_core_type value.inst ty) value.args
   in
@@ -500,7 +533,7 @@ let state_type ir =
     List.map
       (fun (id, ty) ->
         label_declaration
-          ~name:(Fmt.str "%a" Gospel.Tast.Ident.pp id |> noloc)
+          ~name:(Fmt.str "%a" Ident.pp id |> noloc)
           ~mutable_:Immutable ~type_:ty)
       ir.state
   in
@@ -535,7 +568,6 @@ let sut_type cfg =
    ```
 *)
 let init_state config ir =
-  let module Ident = Gospel.Identifier.Ident in
   let pat_of_lb_arg = function
     (* here we don't need the labels as we'll use them in the body of the function *)
     | Gospel.Tast.Lunit -> punit

@@ -90,13 +90,18 @@ module Spec =
       match (cmd__005_, res__007_) with
       | (Length, Res ((Int, _), i_3)) ->
           i_3 = (Lazy.force new_state__008_).size
-      | (Get i, Res ((Char, _), a_4)) ->
-          a_4 =
-            (Ortac_runtime.Gospelstdlib.List.nth
-               (Lazy.force new_state__008_).contents
-               (Ortac_runtime.Gospelstdlib.integer_of_int i))
-      | (Set (i_1, a_1), Res ((Unit, _), _)) -> true
-      | (Fill (i_2, j_1, a_2), Res ((Unit, _), _)) -> true
+      | (Get i, Res ((Result (Char, Exn), _), a_4)) ->
+          (match a_4 with
+           | Ok a_4 ->
+               a_4 =
+                 (Ortac_runtime.Gospelstdlib.List.nth
+                    (Lazy.force new_state__008_).contents
+                    (Ortac_runtime.Gospelstdlib.integer_of_int i))
+           | _ -> false)
+      | (Set (i_1, a_1), Res ((Result (Unit, Exn), _), res)) ->
+          (match res with | Ok _ -> true | _ -> false)
+      | (Fill (i_2, j_1, a_2), Res ((Result (Unit, Exn), _), res)) ->
+          (match res with | Ok _ -> true | _ -> false)
       | (To_list, Res ((List (Char), _), l)) ->
           l = (Lazy.force new_state__008_).contents
       | (Mem a_3, Res ((Bool, _), b)) ->
