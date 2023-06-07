@@ -14,6 +14,11 @@ let show_attribute : attribute =
     attr_loc = Location.none;
   }
 
+let may_raise_exception v =
+  match (v.postcond.exceptional, v.postcond.checks) with
+  | [], [] -> false
+  | _, _ -> true
+
 let subst_core_type inst ty =
   let rec aux ty =
     {
@@ -236,6 +241,11 @@ let run_case config sut_name value =
   let* rhs =
     let res = lident "Res" in
     let* ty_show = exp_of_core_type value.inst (Ir.get_return_type value) in
+    let ty_show =
+      if may_raise_exception value then
+        pexp_apply (evar "result") [ (Nolabel, ty_show); (Nolabel, evar "exn") ]
+      else ty_show
+    in
     (* XXX TODO protect iff there are exceptional postconditions or checks *)
     (* let call = function_call_exp (evar sut_name) value in *)
     let call =
@@ -253,6 +263,12 @@ let run_case config sut_name value =
                type)"
       in
       pexp_apply efun (aux value.ty (List.map snd value.args))
+    in
+    let call =
+      if may_raise_exception value then
+        let lazy_call = efun [ (Nolabel, punit) ] call in
+        pexp_apply (evar "protect") [ (Nolabel, lazy_call); (Nolabel, eunit) ]
+      else call
     in
     let args = Some (pexp_tuple [ ty_show; call ]) in
     pexp_construct res args |> ok
@@ -330,11 +346,6 @@ let next_state config ir =
     efun [ (Nolabel, pvar cmd_name); (Nolabel, pvar state_name) ] body
   in
   (idx, pstr_value Nonrecursive [ value_binding ~pat ~expr ]) |> ok
-
-let may_raise_exception v =
-  match (v.postcond.exceptional, v.postcond.checks) with
-  | [], [] -> false
-  | _, _ -> true
 
 let list_fold_right1 op v xs =
   let rec aux = function

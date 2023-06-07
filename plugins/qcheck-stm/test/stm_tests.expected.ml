@@ -107,9 +107,16 @@ module Spec =
     let run cmd__011_ sut__012_ =
       match cmd__011_ with
       | Length -> Res (int, (length sut__012_))
-      | Get i -> Res (char, (get sut__012_ i))
-      | Set (i_1, a_1) -> Res (unit, (set sut__012_ i_1 a_1))
-      | Fill (i_2, j_1, a_2) -> Res (unit, (fill sut__012_ i_2 j_1 a_2))
+      | Get i ->
+          Res ((result char exn), (protect (fun () -> get sut__012_ i) ()))
+      | Set (i_1, a_1) ->
+          Res
+            ((result unit exn),
+              (protect (fun () -> set sut__012_ i_1 a_1) ()))
+      | Fill (i_2, j_1, a_2) ->
+          Res
+            ((result unit exn),
+              (protect (fun () -> fill sut__012_ i_2 j_1 a_2) ()))
       | To_list -> Res ((list char), (to_list sut__012_))
       | Mem a_3 -> Res (bool, (mem a_3 sut__012_))
   end
