@@ -137,7 +137,18 @@ let postcond spec =
   let normal = List.mapi (fun i x -> (i, x)) spec.sp_post
   and exceptional =
     List.concat_map
-      (fun (x, l) -> List.rev_map (fun (p, t) -> (x, p, t)) l)
+      (fun (x, l) ->
+        match l with
+        | [] -> [ (x, None, Tterm_helper.t_true Ppxlib.Location.none) ]
+        | _ ->
+            List.rev_map
+              (fun (p, t) ->
+                let open Tterm in
+                match p.p_node with
+                | Papp (ls, []) when Symbols.(ls_equal ls (fs_tuple 0)) ->
+                    (x, None, t)
+                | _ -> (x, Some p, t))
+              l)
       spec.sp_xpost
   in
   Ir.{ normal; exceptional; checks = spec.sp_checks }
