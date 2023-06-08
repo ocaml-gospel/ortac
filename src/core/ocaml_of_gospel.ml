@@ -5,23 +5,21 @@ open Fmt
 open Builder
 module Ident = Identifier.Ident
 
-let rec pattern pn =
-  let pattern' (p : Tterm.pattern) = pattern p.p_node in
-  match pn with
-  | Tterm.Pwild -> ppat_any
-  | Tterm.Pvar v -> pvar (str "%a" Ident.pp v.vs_name)
-  | Tterm.Papp (l, pl) when Symbols.is_fs_tuple l ->
-      ppat_tuple (List.map pattern' pl)
-  | Tterm.Papp (l, pl) ->
+let rec pattern p =
+  let open Tterm in
+  match p.p_node with
+  | Pwild -> ppat_any
+  | Pvar v -> pvar (str "%a" Ident.pp v.vs_name)
+  | Papp (l, pl) when Symbols.is_fs_tuple l -> ppat_tuple (List.map pattern pl)
+  | Papp (l, pl) ->
       let args =
-        if pl = [] then None else Some (ppat_tuple (List.map pattern' pl))
+        if pl = [] then None else Some (ppat_tuple (List.map pattern pl))
       in
       ppat_construct (lident l.ls_name.id_str) args
-  | Tterm.Por (p1, p2) -> ppat_or (pattern' p1) (pattern' p2)
-  | Tterm.Pas (p, v) ->
-      ppat_alias (pattern' p) (noloc (str "%a" Ident.pp v.vs_name))
-  | Tterm.Pinterval (c1, c2) -> ppat_interval (Pconst_char c1) (Pconst_char c2)
-  | Tterm.Pconst c -> ppat_constant c
+  | Por (p1, p2) -> ppat_or (pattern p1) (pattern p2)
+  | Pas (p, v) -> ppat_alias (pattern p) (noloc (str "%a" Ident.pp v.vs_name))
+  | Pinterval (c1, c2) -> ppat_interval (Pconst_char c1) (Pconst_char c2)
+  | Pconst c -> ppat_constant c
 
 type bound = Inf of expression | Sup of expression
 
@@ -94,8 +92,7 @@ and term ~context (t : Tterm.term) : expression =
   | Tcase (t, ptl) ->
       List.map
         (fun (p, g, t) ->
-          case ~guard:(Option.map term g) ~lhs:(pattern p.Tterm.p_node)
-            ~rhs:(term t))
+          case ~guard:(Option.map term g) ~lhs:(pattern p) ~rhs:(term t))
         ptl
       |> pexp_match (term t)
   | Tquant (Tterm.Tlambda, args, t) ->

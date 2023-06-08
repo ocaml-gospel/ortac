@@ -215,19 +215,18 @@ let with_constant_checks ~context ~term_printer checks (constant : Ir.constant)
   let checks = conditions ~context ~term_printer violated nonexec checks in
   { constant with checks }
 
-let rec xpost_pattern ~context exn = function
+let rec xpost_pattern ~context exn p =
+  match p.Tterm.p_node with
   | Tterm.Papp (ls, []) when Symbols.(ls_equal ls (fs_tuple 0)) -> pvar exn
   | Tterm.Papp (ls, _l) when not (Symbols.is_fs_tuple ls) -> assert false
   | Tterm.Por (p1, p2) ->
-      ppat_or
-        (xpost_pattern ~context exn p1.p_node)
-        (xpost_pattern ~context exn p2.p_node)
+      ppat_or (xpost_pattern ~context exn p1) (xpost_pattern ~context exn p2)
   | Tterm.Pas (p, s) ->
       ppat_alias
-        (xpost_pattern ~context exn p.p_node)
+        (xpost_pattern ~context exn p)
         (noloc (str "%a" Tterm.Ident.pp s.vs_name))
-  | pn ->
-      ppat_construct (lident exn) (Some (Ortac_core.Ocaml_of_gospel.pattern pn))
+  | _ ->
+      ppat_construct (lident exn) (Some (Ortac_core.Ocaml_of_gospel.pattern p))
 
 let assert_false_case =
   case ~guard:None ~lhs:[%pat? _] ~rhs:[%expr assert false]
@@ -244,7 +243,7 @@ let with_xposts ~context ~term_printer xposts (value : value) =
           term ~context nonexec t
           |> Result.map (fun t ->
                  case ~guard:None
-                   ~lhs:(xpost_pattern ~context name p.Tterm.p_node)
+                   ~lhs:(xpost_pattern ~context name p)
                    ~rhs:
                      [%expr
                        if not [%e t] then
