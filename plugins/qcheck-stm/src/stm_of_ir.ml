@@ -248,8 +248,6 @@ let run_case config sut_name value =
         pexp_apply (evar "result") [ (Nolabel, ty_show); (Nolabel, evar "exn") ]
       else ty_show
     in
-    (* XXX TODO protect iff there are exceptional postconditions or checks *)
-    (* let call = function_call_exp (evar sut_name) value in *)
     let call =
       let efun = exp_of_ident value.id in
       let mk_arg = Option.fold ~none:eunit ~some:exp_of_ident in
@@ -389,9 +387,19 @@ let precond config ir =
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
 let postcond_case config idx state_ident new_state_ident value =
+  let open Reserr in
+  let translate_postcond t =
+    subst_term ~gos_t:value.sut_var ~old_t:(Some state_ident) ~new_lz:true
+      ~new_t:(Some new_state_ident) t
+    >>= ocaml_of_term config
+  in
+  let translate_checks t =
+    subst_term ~gos_t:value.sut_var ~old_t:(Some state_ident)
+      ~new_t:(Some state_ident) t
+    >>= ocaml_of_term config
+  in
   let idx = List.sort Int.compare idx in
   let lhs0 = mk_cmd_pattern value in
-  let open Reserr in
   let* lhs1 =
     let ret_ty = Ir.get_return_type value in
     let* ret_ty =
@@ -435,23 +443,17 @@ let postcond_case config idx state_ident new_state_ident value =
       in
       aux idx value.postcond.normal
     in
-    list_and
-    <$> map
-          (fun t ->
-            subst_term ~gos_t:value.sut_var ~old_t:(Some state_ident)
-              ~new_lz:true ~new_t:(Some new_state_ident) t
-            >>= ocaml_of_term config)
-          normal
+    list_and <$> map translate_postcond normal
+  in
+  let res, pat_ret =
+    match value.ret with
+    | None -> (evar (str_of_ident res_default), ppat_any)
+    | Some id ->
+        let id = str_of_ident id in
+        (evar id, pvar id)
   in
   let* rhs =
     if may_raise_exception value then
-      let res, pat_ret =
-        match value.ret with
-        | None -> (evar (str_of_ident res_default), ppat_any)
-        | Some id ->
-            let id = str_of_ident id in
-            (evar id, pvar id)
-      in
       let case_ok =
         case ~lhs:(ppat_construct (lident "Ok") (Some pat_ret)) ~guard:None ~rhs
       in
@@ -472,7 +474,25 @@ let postcond_case config idx state_ident new_state_ident value =
       pexp_match res (case_ok :: cases_error) |> ok
     else ok rhs
   in
-  (* if checks then r = Error Invalid_arg else match res with Error _ -> xpost | Ok _ -> postcond *)
+  let* rhs =
+    let* checks = map translate_checks value.postcond.checks in
+    match checks with
+    | [] -> ok rhs
+    | _ ->
+        let inv_arg =
+          ppat_construct (lident "Invalid_argument") (Some ppat_any)
+        in
+        pexp_ifthenelse (list_and checks) rhs
+          (Some
+             (pexp_match res
+                [
+                  case
+                    ~lhs:(ppat_construct (lident "Error") (Some inv_arg))
+                    ~guard:None ~rhs:(ebool true);
+                  case ~lhs:ppat_any ~guard:None ~rhs:(ebool false);
+                ]))
+        |> ok
+  in
   ok (case ~lhs ~guard:None ~rhs)
 
 let postcond config idx ir =
