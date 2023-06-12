@@ -38,3 +38,8 @@
   (progn
    (diff errors.expected errors)
    (diff stm_tests.expected.ml stm_tests.ml))))
+
+(rule
+ (alias launchtests)
+ (action
+  (run %{dep:stm_tests.exe} -v)))
