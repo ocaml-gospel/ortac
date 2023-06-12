@@ -133,3 +133,7 @@ expectations:
   every field of the model so that the initial state can be computed.
 
 [`QCheck.Gen`]: https://ocaml.org/p/qcheck-core/latest/doc/QCheck/Gen/index.html
+
+## Acknowledgment
+
+This plugin is based on an early proof of concept written by Naomi Spargo.
