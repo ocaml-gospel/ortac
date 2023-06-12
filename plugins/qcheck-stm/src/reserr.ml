@@ -156,7 +156,14 @@ let pp_kind ppf kind =
   | _ -> W.pp_kind ppf kind
 
 let pp_errors = W.pp_param pp_kind level |> Fmt.list
-let pp pp_ok = Fmt.(pair (result ~ok:pp_ok ~error:pp_errors) pp_errors)
+
+let pp pp_ok ppf r =
+  let open Fmt in
+  match r with
+  | Ok a, warns -> (
+      pf ppf "%a@." pp_ok a;
+      match warns with [] -> () | warns -> pf stderr "%a@." pp_errors warns)
+  | Error errs, warns -> pf stderr "%a@." pp_errors (errs @ warns)
 
 let promote r =
   let rec aux = function
