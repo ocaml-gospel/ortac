@@ -1,0 +1,5 @@
+(alias
+ (name default)
+ (deps
+  (alias monolith/default)
+  (alias qcheck-stm/default)))

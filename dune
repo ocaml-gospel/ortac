@@ -3,7 +3,7 @@
  (deps
   (alias_rec src/default)
   (alias_rec bin/default)
-  (alias_rec plugins/default)))
+  (alias plugins/default)))
 
 (alias
  (name runtest)
