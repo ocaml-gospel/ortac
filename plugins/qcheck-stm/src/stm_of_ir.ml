@@ -21,6 +21,20 @@ let may_raise_exception v =
   | [], [] -> false
   | _, _ -> true
 
+let list_fold_right1 op v xs =
+  let rec aux = function
+    | [ x ] -> x
+    | x :: xs -> op x (aux xs)
+    | _ -> failwith "The impossible happened in list_fold_right1"
+  in
+  match xs with [] -> v | _ -> aux xs
+
+let list_and xs =
+  let ( &&& ) e1 e2 =
+    pexp_apply (pexp_ident (lident "&&")) [ (Nolabel, e1); (Nolabel, e2) ]
+  and etrue = pexp_construct (lident "true") None in
+  list_fold_right1 ( &&& ) etrue xs
+
 let subst_core_type inst ty =
   let rec aux ty =
     {
@@ -112,6 +126,12 @@ let subst_term ~gos_t ?(old_lz = false) ~old_t ?(new_lz = false) ~new_t term =
       ( Impossible_term_substitution
           (Fmt.str "%a" Gospel.Tterm_printer.print_term t, b),
         t.t_loc )
+
+let translate_checks config value state_ident t =
+  let open Reserr in
+  subst_term ~gos_t:value.sut_var ~old_t:(Some state_ident)
+    ~new_t:(Some state_ident) t
+  >>= ocaml_of_term config
 
 let str_of_ident = Fmt.str "%a" Ident.pp
 let longident_loc_of_ident id = str_of_ident id |> lident
@@ -320,8 +340,18 @@ let next_state_case config state_ident value =
       List.map (fun (_, m, e) -> (lident (str_of_ident m), e)) descriptions
     with
     | [] -> ok (idx, state_var)
-    | fields ->
-        (idx, pexp_record fields (Some (evar (str_of_ident state_ident)))) |> ok
+    | fields -> (
+        let new_state =
+          pexp_record fields (Some (evar (str_of_ident state_ident)))
+        in
+        let translate_checks = translate_checks config value state_ident in
+        let* checks = map translate_checks value.postcond.checks in
+        match checks with
+        | [] -> ok (idx, new_state)
+        | _ ->
+            ok
+              (idx, pexp_ifthenelse (list_and checks) new_state (Some state_var))
+        )
   in
   (idx, case ~lhs ~guard:None ~rhs) |> ok
 
@@ -344,20 +374,6 @@ let next_state config ir =
     efun [ (Nolabel, pvar cmd_name); (Nolabel, pvar state_name) ] body
   in
   (idx, pstr_value Nonrecursive [ value_binding ~pat ~expr ]) |> ok
-
-let list_fold_right1 op v xs =
-  let rec aux = function
-    | [ x ] -> x
-    | x :: xs -> op x (aux xs)
-    | _ -> failwith "The impossible happened in list_fold_right1"
-  in
-  match xs with [] -> v | _ -> aux xs
-
-let list_and xs =
-  let ( &&& ) e1 e2 =
-    pexp_apply (pexp_ident (lident "&&")) [ (Nolabel, e1); (Nolabel, e2) ]
-  and etrue = pexp_construct (lident "true") None in
-  list_fold_right1 ( &&& ) etrue xs
 
 let precond_case config state_ident value =
   let lhs = mk_cmd_pattern value in
@@ -391,11 +407,6 @@ let postcond_case config idx state_ident new_state_ident value =
   let translate_postcond t =
     subst_term ~gos_t:value.sut_var ~old_t:(Some state_ident) ~new_lz:true
       ~new_t:(Some new_state_ident) t
-    >>= ocaml_of_term config
-  in
-  let translate_checks t =
-    subst_term ~gos_t:value.sut_var ~old_t:(Some state_ident)
-      ~new_t:(Some state_ident) t
     >>= ocaml_of_term config
   in
   let idx = List.sort Int.compare idx in
@@ -475,6 +486,7 @@ let postcond_case config idx state_ident new_state_ident value =
     else ok rhs
   in
   let* rhs =
+    let translate_checks = translate_checks config value state_ident in
     let* checks = map translate_checks value.postcond.checks in
     match checks with
     | [] -> ok rhs
