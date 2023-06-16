@@ -233,12 +233,12 @@ let arb_cmd_case value =
     in
     efun args body |> pure
   in
-  let* gen_args =
+  let gen_args =
     (* XXX TODO: use `requires` clauses to build smarter generators *)
-    map (fun (ty, _) -> exp_of_core_type value.inst ty) value.args
+    List.map (fun (ty, _) -> exp_of_core_type value.inst ty) value.args
   in
   let app l r = pexp_apply (evar "( <*> )") [ (Nolabel, l); (Nolabel, r) ] in
-  List.fold_left app fun_cstr gen_args |> ok
+  List.fold_left app fun_cstr <$> sequence gen_args
 
 let arb_cmd ir =
   let open Reserr in
