@@ -125,45 +125,28 @@ type integer = Z.t
 module Gospelstdlib = struct
   (** Implementation of the Gospel Stdlib *)
 
-  (* TODO: This should follow the same order than in gospelstdlib.mli *)
-
-  let ( ~! ) = ( ! )
+  let succ = Z.succ
+  let pred = Z.pred
+  let ( ~- ) = Z.( ~- )
   let ( + ) = Z.( + )
   let ( - ) = Z.( - )
   let ( * ) = Z.( * )
   let ( / ) = Z.( / )
-  let ( < ) = Z.lt
-  let ( <= ) = Z.leq
-  let ( > ) = Z.gt
-  let ( >= ) = Z.geq
   let ( mod ) = Z.( mod )
-  let ( ~- ) = Z.( ~- )
-  let abs = Z.abs
-  let logand = Z.logand
-  let max = Z.max
-  let min = Z.min
-  let pred = Z.pred
-  let succ = Z.succ
 
   let pow x n =
     try Z.pow x (Z.to_int n) with Z.Overflow -> invalid_arg "Exponent too big"
 
+  let abs = Z.abs
+  let min = Z.min
+  let max = Z.max
+  let ( > ) = Z.gt
+  let ( >= ) = Z.geq
+  let ( < ) = Z.lt
+  let ( <= ) = Z.leq
+  let logand = Z.logand
   let integer_of_int = Z.of_int
-
-  module Array = struct
-    let make z =
-      if Z.(z > of_int Sys.max_array_length) then
-        raise (Invalid_argument "Array length too big")
-      else Array.make (Z.to_int z)
-
-    let get arr z =
-      if Z.(z < zero || z >= of_int (Array.length arr)) then
-        raise (Invalid_argument "Out of array bounds")
-      else Array.unsafe_get arr (Z.to_int z)
-
-    let length arr = Array.length arr |> Z.of_int
-    let for_all = Array.for_all
-  end
+  let ( ~! ) = ( ! )
 
   module List = struct
     let length l = List.length l |> Z.of_int
@@ -186,6 +169,22 @@ module Gospelstdlib = struct
     let fold_left = List.fold_left
     let fold_right = List.fold_right
     let mem = List.mem
+  end
+
+  module Array = struct
+    let length arr = Array.length arr |> Z.of_int
+
+    let get arr z =
+      if Z.(z < zero || z >= of_int (Array.length arr)) then
+        raise (Invalid_argument "Out of array bounds")
+      else Array.unsafe_get arr (Z.to_int z)
+
+    let make z =
+      if Z.(z > of_int Sys.max_array_length) then
+        raise (Invalid_argument "Array length too big")
+      else Array.make (Z.to_int z)
+
+    let for_all = Array.for_all
   end
 end
 
