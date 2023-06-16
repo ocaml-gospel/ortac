@@ -164,9 +164,11 @@ let val_desc config state vd =
     postcond
   |> ok
 
-let sig_item config state s =
+let sig_item config init_fct state s =
   match s.sig_desc with
-  | Sig_val (vd, Nonghost) -> Some (val_desc config state vd)
+  | Sig_val (vd, Nonghost) ->
+      if Fmt.str "%a" Ident.pp vd.vd_name = init_fct then None
+      else Some (val_desc config state vd)
   | _ -> None
 
 let state config sigs =
@@ -308,15 +310,15 @@ let init_state config state sigs =
             (No_appropriate_specifications spec.sp_text),
           spec.sp_loc )
   in
-  ok Ir.{ arguments; descriptions }
+  ok (fct_str, Ir.{ arguments; descriptions })
 
-let signature config state sigs =
-  List.filter_map (sig_item config state) sigs |> Reserr.promote
+let signature config init_fct state sigs =
+  List.filter_map (sig_item config init_fct state) sigs |> Reserr.promote
 
 let run sigs config =
   let open Reserr in
   let open Ir in
   let* state = state config sigs in
-  let* init_state = init_state config state sigs in
-  let* values = signature config state sigs in
+  let* init_fct, init_state = init_state config state sigs in
+  let* values = signature config init_fct state sigs in
   ok { state; init_state; values }
