@@ -39,43 +39,45 @@ module type S = sig
     (** [report l] prints the content of [l] *)
   end
 
+  type integer
+
   module Gospelstdlib : sig
     val ( ~! ) : 'a ref -> 'a
-    val ( + ) : Z.t -> Z.t -> Z.t
-    val ( - ) : Z.t -> Z.t -> Z.t
-    val ( * ) : Z.t -> Z.t -> Z.t
-    val ( / ) : Z.t -> Z.t -> Z.t
-    val ( < ) : Z.t -> Z.t -> bool
-    val ( <= ) : Z.t -> Z.t -> bool
-    val ( > ) : Z.t -> Z.t -> bool
-    val ( >= ) : Z.t -> Z.t -> bool
-    val ( mod ) : Z.t -> Z.t -> Z.t
-    val ( ~- ) : Z.t -> Z.t
-    val abs : Z.t -> Z.t
-    val logand : Z.t -> Z.t -> Z.t
-    val max : Z.t -> Z.t -> Z.t
-    val min : Z.t -> Z.t -> Z.t
-    val pred : Z.t -> Z.t
-    val succ : Z.t -> Z.t
-    val pow : Z.t -> Z.t -> Z.t
-    val integer_of_int : int -> Z.t
+    val ( + ) : integer -> integer -> integer
+    val ( - ) : integer -> integer -> integer
+    val ( * ) : integer -> integer -> integer
+    val ( / ) : integer -> integer -> integer
+    val ( < ) : integer -> integer -> bool
+    val ( <= ) : integer -> integer -> bool
+    val ( > ) : integer -> integer -> bool
+    val ( >= ) : integer -> integer -> bool
+    val ( mod ) : integer -> integer -> integer
+    val ( ~- ) : integer -> integer
+    val abs : integer -> integer
+    val logand : integer -> integer -> integer
+    val max : integer -> integer -> integer
+    val min : integer -> integer -> integer
+    val pred : integer -> integer
+    val succ : integer -> integer
+    val pow : integer -> integer -> integer
+    val integer_of_int : int -> integer
 
     module Array : sig
-      val make : Z.t -> 'a -> 'a array
-      val get : 'a array -> Z.t -> 'a
-      val length : 'a array -> Z.t
+      val make : integer -> 'a -> 'a array
+      val get : 'a array -> integer -> 'a
+      val length : 'a array -> integer
       val for_all : ('a -> bool) -> 'a array -> bool
     end
 
     module List : sig
-      val length : 'a list -> Z.t
+      val length : 'a list -> integer
       val hd : 'a list -> 'a
       val tl : 'a list -> 'a list
-      val nth : 'a list -> Z.t -> 'a
+      val nth : 'a list -> integer -> 'a
       val rev : 'a list -> 'a list
-      val init : Z.t -> (Z.t -> 'a) -> 'a list
+      val init : integer -> (integer -> 'a) -> 'a list
       val map : ('a -> 'b) -> 'a list -> 'b list
-      val mapi : (Z.t -> 'a -> 'b) -> 'a list -> 'b list
+      val mapi : (integer -> 'a -> 'b) -> 'a list -> 'b list
       val fold_left : ('a -> 'b -> 'a) -> 'a -> 'b list -> 'a
       val fold_right : ('b -> 'a -> 'a) -> 'b list -> 'a -> 'a
       val mem : 'a -> 'a list -> bool
@@ -83,11 +85,11 @@ module type S = sig
   end
 
   module Z : sig
-    val exists : Z.t -> Z.t -> (Z.t -> bool) -> bool
+    val exists : integer -> integer -> (integer -> bool) -> bool
     (** [exists i j p] is [true] iff the predicate there exists [k] within [i]
         and [j], included, for which [p] holds. *)
 
-    val forall : Z.t -> Z.t -> (Z.t -> bool) -> bool
+    val forall : integer -> integer -> (integer -> bool) -> bool
     (** [forall i j p] is [true] iff the predicate `p` holds forall [k] within
         [i] and [j], included. *)
   end

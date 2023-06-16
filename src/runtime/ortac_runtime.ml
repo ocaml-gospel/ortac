@@ -120,6 +120,8 @@ module Errors = struct
         raise (Error t)
 end
 
+type integer = Z.t
+
 module Gospelstdlib = struct
   (** Implementation of the Gospel Stdlib *)
 
