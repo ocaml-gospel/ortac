@@ -33,44 +33,6 @@ let builtins =
     ([ "infix =" ], "(=)");
   ]
 
-let supported_stdlib =
-  [
-    ([], "prefix !");
-    ([], "infix +");
-    ([], "infix -");
-    ([], "infix *");
-    ([], "infix /");
-    ([], "mod");
-    ([], "pow");
-    ([], "logand");
-    ([], "prefix -");
-    ([], "infix >");
-    ([], "infix >=");
-    ([], "infix <");
-    ([], "infix <=");
-    ([], "integer_of_int");
-    ([], "abs");
-    ([], "min");
-    ([], "max");
-    ([], "succ");
-    ([], "pred");
-    ([ "Array" ], "make");
-    ([ "Array" ], "length");
-    ([ "Array" ], "get");
-    ([ "Array" ], "for_all");
-    ([ "List" ], "length");
-    ([ "List" ], "hd");
-    ([ "List" ], "tl");
-    ([ "List" ], "nth");
-    ([ "List" ], "rev");
-    ([ "List" ], "init");
-    ([ "List" ], "map");
-    ([ "List" ], "mapi");
-    ([ "List" ], "fold_left");
-    ([ "List" ], "fold_right");
-    ([ "List" ], "mem");
-  ]
-
 (** Map a name from the Gospel parser to an OCaml name when possible
 
     The strategy is as follows, always dropping the "*fix " prefix of the
@@ -100,7 +62,15 @@ let process_name name =
   else if starts p_mix then None
   else Some name
 
+let fold_namespace f path ns v =
+  let rec aux path ns v =
+    let v = Gospel.Tmodule.Mstr.fold (f path) ns.ns_ls v in
+    Gospel.Tmodule.Mstr.fold (fun s -> aux (path @ [ s ])) ns.ns_ns v
+  in
+  aux path ns v
+
 let init module_name env =
+  let gostd = Gospel.Tmodule.Mstr.find "Gospelstdlib" env.ns_ns in
   let process_gostd_entry path name ls lib =
     match process_name name with
     | None -> lib
@@ -116,12 +86,7 @@ let init module_name env =
       L.empty builtins
   in
   let stdlib =
-    List.fold_left
-      (fun lib (path, name) ->
-        let fullpath = "Gospelstdlib" :: path in
-        let ls = get_ls_env env (fullpath @ [ name ]) in
-        process_gostd_entry fullpath name ls lib)
-      stdlib supported_stdlib
+    fold_namespace process_gostd_entry [ "Gospelstdlib" ] gostd stdlib
   in
   { module_name; stdlib; env; functions = L.empty }
 
