@@ -40,12 +40,26 @@ let builtins =
 
     - infix operators are kept as is
     - prefix operators are prefixed with ~
-    - mixfix operators are dropped
+    - mixfix operators are prefixed with __mix_ and encoded to ascii
     - other names are kept as is
 
     TODO? maybe, some filtering should be performed also on other names, such as
-    names containing "#" *)
+    names containing "#" and return [None] on those *)
 let process_name name =
+  let convert_mix_symbol = function
+    | '-' -> 'm' (* minus *)
+    | '.' -> 'd' (* dot *)
+    | '>' -> 'g' (* greater *)
+    | '[' -> 'B' (* bracket (open) *)
+    | ']' -> 'b' (* bracket (close) *)
+    | '_' -> 'u' (* underscore *)
+    | '{' -> 'C' (* curly (open) *)
+    | '}' -> 'c' (* curly (close) *)
+    | c -> failwith (Printf.sprintf "Cannot convert mixfix symbol '%c'" c)
+    (* this should not happen: all the symbols used in the Stdlib
+       should be covered *)
+  in
+
   let lname = String.length name in
   let drop prefix =
     let lp = String.length prefix in
@@ -59,7 +73,8 @@ let process_name name =
      shorter the better *)
   if starts p_pre then Some ("~" ^ drop p_pre)
   else if starts p_in then Some (drop p_in)
-  else if starts p_mix then None
+  else if starts p_mix then
+    Some ("__mix_" ^ String.map convert_mix_symbol (drop p_mix))
   else Some name
 
 let fold_namespace f path ns v =
