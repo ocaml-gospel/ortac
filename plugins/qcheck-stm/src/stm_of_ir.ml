@@ -2,10 +2,12 @@ module Cfg = Config
 open Ir
 open Ppxlib
 open Ortac_core.Builder
+module Ident = Gospel.Identifier.Ident
 
 let ty_default = Ptyp_constr (noloc (Lident "char"), [])
 let pat_default = ppat_construct (lident "Char") None
 let exp_default = evar "char"
+let res_default = Ident.create ~loc:Location.none "res"
 
 let show_attribute : attribute =
   {
@@ -13,6 +15,25 @@ let show_attribute : attribute =
     attr_payload = PStr [ [%stri show { with_path = false }] ];
     attr_loc = Location.none;
   }
+
+let may_raise_exception v =
+  match (v.postcond.exceptional, v.postcond.checks) with
+  | [], [] -> false
+  | _, _ -> true
+
+let list_fold_right1 op v xs =
+  let rec aux = function
+    | [ x ] -> x
+    | x :: xs -> op x (aux xs)
+    | _ -> failwith "The impossible happened in list_fold_right1"
+  in
+  match xs with [] -> v | _ -> aux xs
+
+let list_and xs =
+  let ( &&& ) e1 e2 =
+    pexp_apply (pexp_ident (lident "&&")) [ (Nolabel, e1); (Nolabel, e2) ]
+  and etrue = pexp_construct (lident "true") None in
+  list_fold_right1 ( &&& ) etrue xs
 
 let subst_core_type inst ty =
   let rec aux ty =
@@ -106,7 +127,13 @@ let subst_term ~gos_t ?(old_lz = false) ~old_t ?(new_lz = false) ~new_t term =
           (Fmt.str "%a" Gospel.Tterm_printer.print_term t, b),
         t.t_loc )
 
-let str_of_ident = Fmt.str "%a" Gospel.Identifier.Ident.pp
+let translate_checks config value state_ident t =
+  let open Reserr in
+  subst_term ~gos_t:value.sut_var ~old_t:(Some state_ident)
+    ~new_t:(Some state_ident) t
+  >>= ocaml_of_term config
+
+let str_of_ident = Fmt.str "%a" Ident.pp
 let longident_loc_of_ident id = str_of_ident id |> lident
 
 let mk_cmd_pattern value =
@@ -236,8 +263,11 @@ let run_case config sut_name value =
   let* rhs =
     let res = lident "Res" in
     let* ty_show = exp_of_core_type value.inst (Ir.get_return_type value) in
-    (* XXX TODO protect iff there are exceptional postconditions or checks *)
-    (* let call = function_call_exp (evar sut_name) value in *)
+    let ty_show =
+      if may_raise_exception value then
+        pexp_apply (evar "result") [ (Nolabel, ty_show); (Nolabel, evar "exn") ]
+      else ty_show
+    in
     let call =
       let efun = exp_of_ident value.id in
       let mk_arg = Option.fold ~none:eunit ~some:exp_of_ident in
@@ -253,6 +283,12 @@ let run_case config sut_name value =
                type)"
       in
       pexp_apply efun (aux value.ty (List.map snd value.args))
+    in
+    let call =
+      if may_raise_exception value then
+        let lazy_call = efun [ (Nolabel, punit) ] call in
+        pexp_apply (evar "protect") [ (Nolabel, lazy_call); (Nolabel, eunit) ]
+      else call
     in
     let args = Some (pexp_tuple [ ty_show; call ]) in
     pexp_construct res args |> ok
@@ -287,9 +323,7 @@ let next_state_case config state_ident value =
     in
     (* choose one and only one description per modified model *)
     let pick id =
-      List.find_opt
-        (fun (_, m, _) -> Gospel.Identifier.Ident.equal id m)
-        descriptions
+      List.find_opt (fun (_, m, _) -> Ident.equal id m) descriptions
     in
     let* descriptions =
       map
@@ -306,15 +340,25 @@ let next_state_case config state_ident value =
       List.map (fun (_, m, e) -> (lident (str_of_ident m), e)) descriptions
     with
     | [] -> ok (idx, state_var)
-    | fields ->
-        (idx, pexp_record fields (Some (evar (str_of_ident state_ident)))) |> ok
+    | fields -> (
+        let new_state =
+          pexp_record fields (Some (evar (str_of_ident state_ident)))
+        in
+        let translate_checks = translate_checks config value state_ident in
+        let* checks = map translate_checks value.postcond.checks in
+        match checks with
+        | [] -> ok (idx, new_state)
+        | _ ->
+            ok
+              (idx, pexp_ifthenelse (list_and checks) new_state (Some state_var))
+        )
   in
   (idx, case ~lhs ~guard:None ~rhs) |> ok
 
 let next_state config ir =
   let cmd_name = gen_symbol ~prefix:"cmd" () in
   let state_name = gen_symbol ~prefix:"state" () in
-  let state_ident = Gospel.Tast.Ident.create ~loc:Location.none state_name in
+  let state_ident = Ident.create ~loc:Location.none state_name in
   let open Reserr in
   let* idx_cases =
     map
@@ -330,25 +374,6 @@ let next_state config ir =
     efun [ (Nolabel, pvar cmd_name); (Nolabel, pvar state_name) ] body
   in
   (idx, pstr_value Nonrecursive [ value_binding ~pat ~expr ]) |> ok
-
-let may_raise_exception v =
-  match (v.postcond.exceptional, v.postcond.checks) with
-  | [], [] -> false
-  | _, _ -> true
-
-let list_fold_right1 op v xs =
-  let rec aux = function
-    | [ x ] -> x
-    | x :: xs -> op x (aux xs)
-    | _ -> failwith "The impossible happened in list_fold_right1"
-  in
-  match xs with [] -> v | _ -> aux xs
-
-let list_and xs =
-  let ( &&& ) e1 e2 =
-    pexp_apply (pexp_ident (lident "&&")) [ (Nolabel, e1); (Nolabel, e2) ]
-  and etrue = pexp_construct (lident "true") None in
-  list_fold_right1 ( &&& ) etrue xs
 
 let precond_case config state_ident value =
   let lhs = mk_cmd_pattern value in
@@ -367,7 +392,7 @@ let precond_case config state_ident value =
 let precond config ir =
   let cmd_name = gen_symbol ~prefix:"cmd" () in
   let state_name = gen_symbol ~prefix:"state" () in
-  let state_ident = Gospel.Tast.Ident.create ~loc:Location.none state_name in
+  let state_ident = Ident.create ~loc:Location.none state_name in
   let open Reserr in
   let* cases = map (precond_case config state_ident) ir.values in
   let body = pexp_match (evar cmd_name) cases in
@@ -378,9 +403,14 @@ let precond config ir =
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
 let postcond_case config idx state_ident new_state_ident value =
+  let open Reserr in
+  let translate_postcond t =
+    subst_term ~gos_t:value.sut_var ~old_t:(Some state_ident) ~new_lz:true
+      ~new_t:(Some new_state_ident) t
+    >>= ocaml_of_term config
+  in
   let idx = List.sort Int.compare idx in
   let lhs0 = mk_cmd_pattern value in
-  let open Reserr in
   let* lhs1 =
     let ret_ty = Ir.get_return_type value in
     let* ret_ty =
@@ -393,9 +423,17 @@ let postcond_case config idx state_ident new_state_ident value =
               ret_ty.ptyp_loc )
     in
     let* pat_ty = pat_of_core_type value.inst ret_ty in
+    let pat_ty =
+      if may_raise_exception value then
+        ppat_construct (lident "Result")
+          (Some (ppat_tuple [ pat_ty; ppat_construct (lident "Exn") None ]))
+      else pat_ty
+    in
     let pat_ret =
       match value.ret with
-      | None -> ppat_any
+      | None ->
+          if may_raise_exception value then pvar (str_of_ident res_default)
+          else ppat_any
       | Some id -> pvar (str_of_ident id)
     in
     ok
@@ -416,15 +454,57 @@ let postcond_case config idx state_ident new_state_ident value =
       in
       aux idx value.postcond.normal
     in
-    list_and
-    <$> map
-          (fun t ->
-            subst_term ~gos_t:value.sut_var ~old_t:(Some state_ident)
-              ~new_lz:true ~new_t:(Some new_state_ident) t
-            >>= ocaml_of_term config)
-          normal
+    list_and <$> map translate_postcond normal
   in
-  (* if checks then r = Error Invalid_arg else match res with Error _ -> xpost | Ok _ -> postcond *)
+  let res, pat_ret =
+    match value.ret with
+    | None -> (evar (str_of_ident res_default), ppat_any)
+    | Some id ->
+        let id = str_of_ident id in
+        (evar id, pvar id)
+  in
+  let* rhs =
+    if may_raise_exception value then
+      let case_ok =
+        case ~lhs:(ppat_construct (lident "Ok") (Some pat_ret)) ~guard:None ~rhs
+      in
+      let* cases_error =
+        Fun.flip ( @ ) [ case ~lhs:ppat_any ~guard:None ~rhs:(ebool false) ]
+        <$> map
+              (fun (x, p, t) ->
+                let lhs =
+                  ppat_construct
+                    (Fmt.str "%a" Ident.pp x.Gospel.Ttypes.xs_ident |> lident)
+                    (Option.map Ortac_core.Ocaml_of_gospel.pattern p)
+                in
+                let lhs = ppat_construct (lident "Error") (Some lhs) in
+                let* rhs = ocaml_of_term config t in
+                case ~lhs ~guard:None ~rhs |> ok)
+              value.postcond.exceptional
+      in
+      pexp_match res (case_ok :: cases_error) |> ok
+    else ok rhs
+  in
+  let* rhs =
+    let translate_checks = translate_checks config value state_ident in
+    let* checks = map translate_checks value.postcond.checks in
+    match checks with
+    | [] -> ok rhs
+    | _ ->
+        let inv_arg =
+          ppat_construct (lident "Invalid_argument") (Some ppat_any)
+        in
+        pexp_ifthenelse (list_and checks) rhs
+          (Some
+             (pexp_match res
+                [
+                  case
+                    ~lhs:(ppat_construct (lident "Error") (Some inv_arg))
+                    ~guard:None ~rhs:(ebool true);
+                  case ~lhs:ppat_any ~guard:None ~rhs:(ebool false);
+                ]))
+        |> ok
+  in
   ok (case ~lhs ~guard:None ~rhs)
 
 let postcond config idx ir =
@@ -446,10 +526,8 @@ let postcond config idx ir =
                   ]));
       ]
   in
-  let state_ident = Gospel.Tast.Ident.create ~loc:Location.none state_name in
-  let new_state_ident =
-    Gospel.Tast.Ident.create ~loc:Location.none new_state_name
-  in
+  let state_ident = Ident.create ~loc:Location.none state_name in
+  let new_state_ident = Ident.create ~loc:Location.none new_state_name in
   let open Reserr in
   let* cases =
     (Fun.flip ( @ )) [ case ~lhs:ppat_any ~guard:None ~rhs:(ebool true) ]
@@ -476,9 +554,7 @@ let postcond config idx ir =
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
 let cmd_constructor value =
-  let name =
-    String.capitalize_ascii value.id.Gospel.Tast.Ident.id_str |> noloc
-  in
+  let name = String.capitalize_ascii value.id.Ident.id_str |> noloc in
   let args =
     List.map (fun (ty, _) -> subst_core_type value.inst ty) value.args
   in
@@ -489,7 +565,7 @@ let state_type ir =
     List.map
       (fun (id, ty) ->
         label_declaration
-          ~name:(Fmt.str "%a" Gospel.Tast.Ident.pp id |> noloc)
+          ~name:(Fmt.str "%a" Ident.pp id |> noloc)
           ~mutable_:Immutable ~type_:ty)
       ir.state
   in
@@ -524,7 +600,6 @@ let sut_type cfg =
    ```
 *)
 let init_state config ir =
-  let module Ident = Gospel.Identifier.Ident in
   let pat_of_lb_arg = function
     (* here we don't need the labels as we'll use them in the body of the function *)
     | Gospel.Tast.Lunit -> punit

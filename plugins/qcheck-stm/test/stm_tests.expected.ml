@@ -45,73 +45,160 @@ module Spec =
       | Length -> state__002_
       | Get i -> state__002_
       | Set (i_1, a_1) ->
-          {
-            state__002_ with
-            contents =
-              (Ortac_runtime.Gospelstdlib.List.mapi
-                 (fun j ->
-                    fun x ->
-                      if j = (Ortac_runtime.Gospelstdlib.integer_of_int i_1)
-                      then a_1
-                      else x) state__002_.contents)
-          }
+          if
+            let __t1__003_ =
+              Ortac_runtime.Gospelstdlib.(<=)
+                (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+                (Ortac_runtime.Gospelstdlib.integer_of_int i_1) in
+            let __t2__004_ =
+              Ortac_runtime.Gospelstdlib.(<)
+                (Ortac_runtime.Gospelstdlib.integer_of_int i_1)
+                (Ortac_runtime.Gospelstdlib.integer_of_int state__002_.size) in
+            __t1__003_ && __t2__004_
+          then
+            {
+              state__002_ with
+              contents =
+                (Ortac_runtime.Gospelstdlib.List.mapi
+                   (fun j ->
+                      fun x ->
+                        if
+                          j = (Ortac_runtime.Gospelstdlib.integer_of_int i_1)
+                        then a_1
+                        else x) state__002_.contents)
+            }
+          else state__002_
       | Fill (i_2, j_1, a_2) ->
-          {
-            state__002_ with
-            contents =
-              (Ortac_runtime.Gospelstdlib.List.mapi
-                 (fun k ->
-                    fun x_1 ->
-                      if
-                        let __t1__003_ =
-                          Ortac_runtime.Gospelstdlib.(<=)
-                            (Ortac_runtime.Gospelstdlib.integer_of_int i_2) k in
-                        let __t2__004_ =
-                          Ortac_runtime.Gospelstdlib.(<) k
-                            (Ortac_runtime.Gospelstdlib.(+)
-                               (Ortac_runtime.Gospelstdlib.integer_of_int i_2)
-                               (Ortac_runtime.Gospelstdlib.integer_of_int j_1)) in
-                        __t1__003_ && __t2__004_
-                      then a_2
-                      else x_1) state__002_.contents)
-          }
+          if
+            (Ortac_runtime.Gospelstdlib.(<=)
+               (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+               (Ortac_runtime.Gospelstdlib.integer_of_int i_2))
+              &&
+              ((Ortac_runtime.Gospelstdlib.(<=)
+                  (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+                  (Ortac_runtime.Gospelstdlib.integer_of_int j_1))
+                 &&
+                 (Ortac_runtime.Gospelstdlib.(<=)
+                    (Ortac_runtime.Gospelstdlib.(+)
+                       (Ortac_runtime.Gospelstdlib.integer_of_int i_2)
+                       (Ortac_runtime.Gospelstdlib.integer_of_int j_1))
+                    (Ortac_runtime.Gospelstdlib.integer_of_int
+                       state__002_.size)))
+          then
+            {
+              state__002_ with
+              contents =
+                (Ortac_runtime.Gospelstdlib.List.mapi
+                   (fun k ->
+                      fun x_1 ->
+                        if
+                          let __t1__005_ =
+                            Ortac_runtime.Gospelstdlib.(<=)
+                              (Ortac_runtime.Gospelstdlib.integer_of_int i_2)
+                              k in
+                          let __t2__006_ =
+                            Ortac_runtime.Gospelstdlib.(<) k
+                              (Ortac_runtime.Gospelstdlib.(+)
+                                 (Ortac_runtime.Gospelstdlib.integer_of_int
+                                    i_2)
+                                 (Ortac_runtime.Gospelstdlib.integer_of_int
+                                    j_1)) in
+                          __t1__005_ && __t2__006_
+                        then a_2
+                        else x_1) state__002_.contents)
+            }
+          else state__002_
       | To_list -> state__002_
       | Mem a_3 -> state__002_
-    let precond cmd__009_ state__010_ =
-      match cmd__009_ with
+    let precond cmd__015_ state__016_ =
+      match cmd__015_ with
       | Length -> true
       | Get i -> true
       | Set (i_1, a_1) -> true
       | Fill (i_2, j_1, a_2) -> true
       | To_list -> true
       | Mem a_3 -> true
-    let postcond cmd__005_ state__006_ res__007_ =
-      let new_state__008_ = lazy (next_state cmd__005_ state__006_) in
-      match (cmd__005_, res__007_) with
+    let postcond cmd__007_ state__008_ res__009_ =
+      let new_state__010_ = lazy (next_state cmd__007_ state__008_) in
+      match (cmd__007_, res__009_) with
       | (Length, Res ((Int, _), i_3)) ->
-          i_3 = (Lazy.force new_state__008_).size
-      | (Get i, Res ((Char, _), a_4)) ->
-          a_4 =
-            (Ortac_runtime.Gospelstdlib.List.nth
-               (Lazy.force new_state__008_).contents
-               (Ortac_runtime.Gospelstdlib.integer_of_int i))
-      | (Set (i_1, a_1), Res ((Unit, _), _)) -> true
-      | (Fill (i_2, j_1, a_2), Res ((Unit, _), _)) -> true
+          i_3 = (Lazy.force new_state__010_).size
+      | (Get i, Res ((Result (Char, Exn), _), a_4)) ->
+          if
+            let __t1__011_ =
+              Ortac_runtime.Gospelstdlib.(<=)
+                (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+                (Ortac_runtime.Gospelstdlib.integer_of_int i) in
+            let __t2__012_ =
+              Ortac_runtime.Gospelstdlib.(<)
+                (Ortac_runtime.Gospelstdlib.integer_of_int i)
+                (Ortac_runtime.Gospelstdlib.integer_of_int state__008_.size) in
+            __t1__011_ && __t2__012_
+          then
+            (match a_4 with
+             | Ok a_4 ->
+                 a_4 =
+                   (Ortac_runtime.Gospelstdlib.List.nth
+                      (Lazy.force new_state__010_).contents
+                      (Ortac_runtime.Gospelstdlib.integer_of_int i))
+             | _ -> false)
+          else
+            (match a_4 with | Error (Invalid_argument _) -> true | _ -> false)
+      | (Set (i_1, a_1), Res ((Result (Unit, Exn), _), res)) ->
+          if
+            let __t1__013_ =
+              Ortac_runtime.Gospelstdlib.(<=)
+                (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+                (Ortac_runtime.Gospelstdlib.integer_of_int i_1) in
+            let __t2__014_ =
+              Ortac_runtime.Gospelstdlib.(<)
+                (Ortac_runtime.Gospelstdlib.integer_of_int i_1)
+                (Ortac_runtime.Gospelstdlib.integer_of_int state__008_.size) in
+            __t1__013_ && __t2__014_
+          then (match res with | Ok _ -> true | _ -> false)
+          else
+            (match res with | Error (Invalid_argument _) -> true | _ -> false)
+      | (Fill (i_2, j_1, a_2), Res ((Result (Unit, Exn), _), res)) ->
+          if
+            (Ortac_runtime.Gospelstdlib.(<=)
+               (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+               (Ortac_runtime.Gospelstdlib.integer_of_int i_2))
+              &&
+              ((Ortac_runtime.Gospelstdlib.(<=)
+                  (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+                  (Ortac_runtime.Gospelstdlib.integer_of_int j_1))
+                 &&
+                 (Ortac_runtime.Gospelstdlib.(<=)
+                    (Ortac_runtime.Gospelstdlib.(+)
+                       (Ortac_runtime.Gospelstdlib.integer_of_int i_2)
+                       (Ortac_runtime.Gospelstdlib.integer_of_int j_1))
+                    (Ortac_runtime.Gospelstdlib.integer_of_int
+                       state__008_.size)))
+          then (match res with | Ok _ -> true | _ -> false)
+          else
+            (match res with | Error (Invalid_argument _) -> true | _ -> false)
       | (To_list, Res ((List (Char), _), l)) ->
-          l = (Lazy.force new_state__008_).contents
+          l = (Lazy.force new_state__010_).contents
       | (Mem a_3, Res ((Bool, _), b)) ->
           (b = true) =
             (Ortac_runtime.Gospelstdlib.List.mem a_3
-               (Lazy.force new_state__008_).contents)
+               (Lazy.force new_state__010_).contents)
       | _ -> true
-    let run cmd__011_ sut__012_ =
-      match cmd__011_ with
-      | Length -> Res (int, (length sut__012_))
-      | Get i -> Res (char, (get sut__012_ i))
-      | Set (i_1, a_1) -> Res (unit, (set sut__012_ i_1 a_1))
-      | Fill (i_2, j_1, a_2) -> Res (unit, (fill sut__012_ i_2 j_1 a_2))
-      | To_list -> Res ((list char), (to_list sut__012_))
-      | Mem a_3 -> Res (bool, (mem a_3 sut__012_))
+    let run cmd__017_ sut__018_ =
+      match cmd__017_ with
+      | Length -> Res (int, (length sut__018_))
+      | Get i ->
+          Res ((result char exn), (protect (fun () -> get sut__018_ i) ()))
+      | Set (i_1, a_1) ->
+          Res
+            ((result unit exn),
+              (protect (fun () -> set sut__018_ i_1 a_1) ()))
+      | Fill (i_2, j_1, a_2) ->
+          Res
+            ((result unit exn),
+              (protect (fun () -> fill sut__018_ i_2 j_1 a_2) ()))
+      | To_list -> Res ((list char), (to_list sut__018_))
+      | Mem a_3 -> Res (bool, (mem a_3 sut__018_))
   end
 module STMTests = (STM_sequential.Make)(Spec)
 let _ =

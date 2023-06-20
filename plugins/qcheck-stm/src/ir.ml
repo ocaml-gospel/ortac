@@ -1,7 +1,7 @@
 open Gospel
 module Ident = Identifier.Ident
 
-type xpost = Ttypes.xsymbol * Tterm.pattern * Tterm.term
+type xpost = Ttypes.xsymbol * Tterm.pattern option * Tterm.term
 
 type new_state_formulae = {
   model : Ident.t; (* the name of the model's field *)

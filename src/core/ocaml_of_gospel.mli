@@ -1,5 +1,5 @@
-val pattern : Gospel.Tterm.pattern_node -> Ppxlib.pattern
-(** [pattern pn] translates a Gospel pattern into the matching OCaml pattern *)
+val pattern : Gospel.Tterm.pattern -> Ppxlib.pattern
+(** [pattern p] translates a Gospel pattern into the matching OCaml pattern *)
 
 val term : context:Context.t -> Gospel.Tterm.term -> Ppxlib.expression
 (** [term ~context t] translates a Gospel typed term into the corresponding
