@@ -80,7 +80,7 @@ and term ~context (t : Tterm.term) : expression =
           let func = ls.ls_name.id_str in
           if ls.ls_constr then
             (if tlist = [] then None
-            else Some (List.map term tlist |> pexp_tuple))
+             else Some (List.map term tlist |> pexp_tuple))
             |> pexp_construct (lident func)
           else kstr unsupported "function application `%s`" func)
   | Tif (i, t, e) -> [%expr if [%e term i] then [%e term t] else [%e term e]]
@@ -124,7 +124,7 @@ and term ~context (t : Tterm.term) : expression =
       let quant =
         evar
           (if quant = Tforall then "Ortac_runtime.Z.forall"
-          else "Ortac_runtime.Z.exists")
+           else "Ortac_runtime.Z.exists")
       in
       let x = str "%a" Ident.pp var.vs_name in
       let func = pexp_fun Nolabel None (pvar x) p in
@@ -158,8 +158,7 @@ and term ~context (t : Tterm.term) : expression =
 let core_type_of_ty_with_subst subst ty =
   let open Ttypes in
   let lident_of_tysymbol ts =
-    (if ty_equal ty_integer ty then "int"
-    else Fmt.str "%a" Ident.pp ts.ts_ident)
+    (if ty_equal ty_integer ty then "int" else Fmt.str "%a" Ident.pp ts.ts_ident)
     |> Builder.lident
   in
   let rec aux ty =
