@@ -33,6 +33,15 @@ let builtins =
     ([ "infix =" ], "(=)");
   ]
 
+(** [unsupported_stdlib] contains all the entries of the Gospel Stdlib that
+    cannot be translated *)
+let unsupported_stdlib =
+  let t = Hashtbl.create 1 in
+  List.iter
+    (fun f -> Hashtbl.add t ("Gospelstdlib" :: f) ())
+    [ [ "Order"; "is_pre_order" ] ];
+  t
+
 (** Map a name from the Gospel parser to an OCaml name when possible
 
     The strategy is as follows, always dropping the "*fix " prefix of the
@@ -90,8 +99,11 @@ let init module_name env =
     match process_name name with
     | None -> lib
     | Some name ->
-        let fullpath = "Ortac_runtime" :: (path @ [ name ]) in
-        L.add ls (String.concat "." fullpath) lib
+        let fullpath = path @ [ name ] in
+        if Hashtbl.mem unsupported_stdlib fullpath then lib
+        else
+          let fullpath = "Ortac_runtime" :: fullpath in
+          L.add ls (String.concat "." fullpath) lib
   in
   let stdlib =
     List.fold_left
