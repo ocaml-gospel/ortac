@@ -478,7 +478,7 @@ let postcond_case config idx state_ident new_state_ident value =
                     (Option.map Ortac_core.Ocaml_of_gospel.pattern p)
                 in
                 let lhs = ppat_construct (lident "Error") (Some lhs) in
-                let* rhs = ocaml_of_term config t in
+                let* rhs = translate_postcond t in
                 case ~lhs ~guard:None ~rhs |> ok)
               value.postcond.exceptional
       in

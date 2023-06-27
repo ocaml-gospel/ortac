@@ -28,6 +28,7 @@ let unify value_name sut_ty ty =
     | x :: xs, y :: ys ->
         let* i =
           match (x.ptyp_desc, y.ptyp_desc) with
+          | _, Ptyp_any -> ok i
           | _, Ptyp_var a -> add_if_needed a x i
           | Ptyp_tuple xs, Ptyp_tuple ys -> aux i (xs, ys)
           | Ptyp_constr (c, xs), Ptyp_constr (d, ys) when c.txt = d.txt ->
