@@ -56,6 +56,7 @@ let value id ty inst sut_var args ret next_state precond postcond =
 type t = {
   state : (Ident.t * Ppxlib.core_type) list;
   init_state : init_state;
+  ghost_functions : Tast.function_ list;
   values : value list;
 }
 
