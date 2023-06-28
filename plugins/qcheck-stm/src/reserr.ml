@@ -175,25 +175,32 @@ let sequence r =
   in
   aux r
 
-let promote r =
-  let rec aux = function
-    | [] -> ok []
-    | ((Ok _, _) as x) :: xs ->
-        let* y = x and* ys = aux xs in
-        ok (y :: ys)
-    | (Error errs, ws) :: xs ->
-        let* _ = warns ws and* _ = auxes errs in
-        aux xs
-  and auxes = function
-    | [] -> ok ()
-    | ((k, _) as e) :: es -> (
-        match level k with
-        | W.Warning ->
-            let* _ = warn e in
-            auxes es
-        | W.Error -> error e)
-  in
-  aux r
+let rec filter_errs = function
+  | [] -> ok ()
+  | ((k, _) as e) :: es -> (
+      match level k with
+      | W.Warning ->
+          let* _ = warn e in
+          filter_errs es
+      | W.Error -> error e)
+
+let rec promote = function
+  | [] -> ok []
+  | ((Ok _, _) as x) :: xs ->
+      let* y = x and* ys = promote xs in
+      ok (y :: ys)
+  | (Error errs, ws) :: xs ->
+      let* _ = warns ws and* _ = filter_errs errs in
+      promote xs
+
+let promote_opt r =
+  match r with
+  | (Ok _, _) as x ->
+      let* y = x in
+      ok (Some y)
+  | Error errs, ws ->
+      let* _ = warns ws and* _ = filter_errs errs in
+      ok None
 
 let of_option ~default = Option.fold ~none:(error default) ~some:ok
 let to_option = function Ok x, _ -> Some x | _ -> None
