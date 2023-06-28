@@ -637,11 +637,53 @@ let init_state config ir =
   let pat = pvar "init_state" in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
+let ghost_function config fct =
+  let open Gospel in
+  let open Tast in
+  let open Reserr in
+  match fct.fun_def with
+  | None -> failwith "impossible"
+  | Some t ->
+      let name = str_of_ident fct.fun_ls.ls_name in
+      let config' =
+        Cfg.
+          {
+            config with
+            context =
+              Ortac_core.Context.add_function fct.fun_ls name config.context;
+          }
+      in
+      let* body = ocaml_of_term (if fct.fun_rec then config' else config) t in
+      let body =
+        efun
+          (List.map
+             (fun vs -> (Nolabel, pvar (str_of_ident vs.Symbols.vs_name)))
+             fct.fun_params)
+          body
+      in
+      let bindings = [ value_binding ~pat:(pvar name) ~expr:body ] in
+      ( config',
+        pstr_value (if fct.fun_rec then Recursive else Nonrecursive) bindings )
+      |> ok
+
+let ghost_functions config =
+  let open Reserr in
+  let rec aux config (acc : structure) = function
+    | [] -> ok (config, List.rev acc)
+    | fct :: xs -> (
+        let* f = promote_opt (ghost_function config fct) in
+        match f with
+        | None -> aux config acc xs
+        | Some (config, f) -> aux config (f :: acc) xs)
+  in
+  aux config []
+
 let stm config ir =
+  let open Reserr in
+  let* config, ghost_functions = ghost_functions config ir.ghost_functions in
   let sut = sut_type config in
   let cmd = cmd_type ir in
   let state = state_type ir in
-  let open Reserr in
   let* idx, next_state = next_state config ir in
   let* postcond = postcond config idx ir in
   let* precond = precond config ir in
@@ -696,9 +738,6 @@ let stm config ir =
            [ STMTests.agree_test ~count ~name:"STM Lib test sequential" ])]
   in
   ok
-    [
-      open_mod (Ortac_core.Context.module_name config.context);
-      stm_spec;
-      tests;
-      call_tests;
-    ]
+    ([ open_mod (Ortac_core.Context.module_name config.context) ]
+    @ ghost_functions
+    @ [ stm_spec; tests; call_tests ])
