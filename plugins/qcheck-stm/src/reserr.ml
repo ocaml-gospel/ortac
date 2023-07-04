@@ -165,6 +165,16 @@ let pp pp_ok ppf r =
       match warns with [] -> () | warns -> pf stderr "%a@." pp_errors warns)
   | Error errs, warns -> pf stderr "%a@." pp_errors (errs @ warns)
 
+let sequence r =
+  let rec aux = function
+    | [] -> ok []
+    | ((Ok _, _) as x) :: xs ->
+        let* y = x and* ys = aux xs in
+        ok (y :: ys)
+    | ((Error _, _) as x) :: _ -> x
+  in
+  aux r
+
 let promote r =
   let rec aux = function
     | [] -> ok []
