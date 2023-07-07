@@ -327,10 +327,18 @@ let init_state config state sigs =
 let signature config init_fct state sigs =
   List.filter_map (sig_item config init_fct state) sigs |> Reserr.promote
 
+let ghost_functions =
+  let open Tast in
+  List.filter_map (fun s ->
+      match s.sig_desc with
+      | Sig_function f when Option.is_some f.fun_def -> Some f
+      | _ -> None)
+
 let run sigs config =
   let open Reserr in
   let open Ir in
   let* state = state config sigs in
   let* init_fct, init_state = init_state config state sigs in
+  let ghost_functions = ghost_functions sigs in
   let* values = signature config init_fct state sigs in
-  ok { state; init_state; values }
+  ok { state; init_state; ghost_functions; values }

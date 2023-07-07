@@ -13,9 +13,16 @@ let rec pattern p =
   | Papp (l, pl) when Symbols.is_fs_tuple l -> ppat_tuple (List.map pattern pl)
   | Papp (l, pl) ->
       let args =
-        if pl = [] then None else Some (ppat_tuple (List.map pattern pl))
+        match pl with
+        | [] -> None
+        | [ x ] -> Some (pattern x)
+        | _ -> Some (ppat_tuple (List.map pattern pl))
       in
-      ppat_construct (lident l.ls_name.id_str) args
+      let name =
+        if Ident.equal Identifier.cons l.ls_name then "::"
+        else Fmt.str "%a" Ident.pp l.ls_name
+      in
+      ppat_construct (lident name) args
   | Por (p1, p2) -> ppat_or (pattern p1) (pattern p2)
   | Pas (p, v) -> ppat_alias (pattern p) (noloc (str "%a" Ident.pp v.vs_name))
   | Pinterval (c1, c2) -> ppat_interval (Pconst_char c1) (Pconst_char c2)

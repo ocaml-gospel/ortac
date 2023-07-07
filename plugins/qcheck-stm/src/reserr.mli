@@ -49,6 +49,9 @@ val promote : 'a reserr list -> 'a list reserr
     no [errors] of level [Error] in [rs] and store the [errors] of level
     [Warning] in the warnings list *)
 
+val promote_opt : 'a reserr -> 'a option reserr
+(** [promote_opt r] is [promote] for a unique value *)
+
 val of_option : default:W.t -> 'a option -> 'a reserr
 val to_option : 'a reserr -> 'a option
 val map : ('a -> 'b reserr) -> 'a list -> 'b list reserr
