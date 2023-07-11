@@ -21,8 +21,7 @@ module R =
            | e ->
                ((Ortac_runtime.Specification_failure
                    {
-                     term =
-                       "(0:integer <= (integer_of_int \n(t:set).size):integer):prop /\\ ((integer_of_int \n(t:set).size):integer <= 32:integer):prop";
+                     term = "0 <= t.size <= 32";
                      term_kind = __position___003_;
                      exn = e
                    })
@@ -30,11 +29,7 @@ module R =
                 true))
       then
         (Ortac_runtime.Violated_invariant
-           {
-             term =
-               "(0:integer <= (integer_of_int \n(t:set).size):integer):prop /\\ ((integer_of_int \n(t:set).size):integer <= 32:integer):prop";
-             position = __position___003_
-           })
+           { term = "0 <= t.size <= 32"; position = __position___003_ })
           |> (Ortac_runtime.Errors.register __error___002_)
     let __invariant___006_ __error___007_ __position___008_ t =
       if
@@ -55,8 +50,7 @@ module R =
            | e ->
                ((Ortac_runtime.Specification_failure
                    {
-                     term =
-                       "(0:integer <= (integer_of_int \n(t:set).mask):integer):prop /\\ ((integer_of_int \n(t:set).mask):integer < (pow \n2:integer (integer_of_int  (t:set).size):integer):integer):prop";
+                     term = "0 <= t.mask < pow 2 t.size";
                      term_kind = __position___008_;
                      exn = e
                    })
@@ -65,8 +59,7 @@ module R =
       then
         (Ortac_runtime.Violated_invariant
            {
-             term =
-               "(0:integer <= (integer_of_int \n(t:set).mask):integer):prop /\\ ((integer_of_int \n(t:set).mask):integer < (pow \n2:integer (integer_of_int  (t:set).size):integer):integer):prop";
+             term = "0 <= t.mask < pow 2 t.size";
              position = __position___008_
            })
           |> (Ortac_runtime.Errors.register __error___007_)
