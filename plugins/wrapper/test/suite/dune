@@ -1,13 +1,13 @@
 (test
  (name test)
- (package ortac)
+ (package ortac-wrapper)
  (deps
   (source_tree translation/))
  (libraries
   alcotest
   ortac-runtime
-  ortac_core
-  ortac_default
+  ortac-core
+  ortac-wrapper.plugin
   gospel
   fmt
   arrays

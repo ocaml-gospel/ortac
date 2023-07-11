@@ -29,7 +29,8 @@ depends: [
   "fmt"
   "ppxlib" {>= "0.26.0"}
   "gospel"
-  "ortac"
+  "ortac-core"
+  "ortac-wrapper"
   "pprint" {with-test}
   "ortac-runtime-monolith" {with-test}
   "monolith" {>= "20201026" with-test}

@@ -1,6 +1,0 @@
-(library
- (name ortac_default)
- (public_name ortac.ortac_default)
- (preprocess
-  (pps ppxlib.metaquot))
- (libraries ortac_core fmt gospel ppxlib ppxlib.astlib))

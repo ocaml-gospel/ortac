@@ -33,10 +33,10 @@
    (run ortac monolith -o %{target} %{dep:lib.mli}))))
 
 (rule
- (copy ../../../../test/generated/lib.mli lib.mli))
+ (copy ../../../wrapper/test/generated/lib.mli lib.mli))
 
 (rule
- (copy ../../../../test/generated/lib.ml lib.ml))
+ (copy ../../../wrapper/test/generated/lib.ml lib.ml))
 
 (rule
  (alias runtest)

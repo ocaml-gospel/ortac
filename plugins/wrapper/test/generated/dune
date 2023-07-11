@@ -1,6 +1,6 @@
 (test
  (name wrapper)
- (package ortac)
+ (package ortac-wrapper)
  (libraries ortac-runtime))
 
 (rule
@@ -8,15 +8,15 @@
 
 (rule
  (target wrapper.ml)
- (package ortac)
+ (package ortac-wrapper)
  (action
   (with-stderr-to
    errors
-   (run ortac default -o %{target} %{dep:lib.mli}))))
+   (run ortac wrapper -o %{target} %{dep:lib.mli}))))
 
 (rule
  (alias runtest)
- (package ortac)
+ (package ortac-wrapper)
  (action
   (progn
    (diff errors.expected errors)
