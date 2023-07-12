@@ -122,6 +122,25 @@ end
 
 type integer = Z.t
 
+module Aux = struct
+  let take n xs =
+    let rec aux n acc xs =
+      match (n, xs) with
+      | _, [] | 0, _ -> Stdlib.List.rev acc
+      | _, x :: xs -> aux (n - 1) (x :: acc) xs
+    in
+    if n < 0 then invalid_arg "take" else aux n [] xs
+
+  let take n xs = take (Z.to_int n) xs
+
+  let rec drop n = function
+    | [] -> []
+    | xs when n <= 0 -> xs
+    | _ :: xs -> drop (n - 1) xs
+
+  let drop n xs = drop (Z.to_int n) xs
+end
+
 module Gospelstdlib = struct
   (** Implementation of the Gospel Stdlib *)
 
@@ -238,10 +257,13 @@ module Gospelstdlib = struct
   end
 
   let ( ++ ) = Sequence.append
-  let __mix_Bub = Sequence.get
-  let __mix_Buddub _ = niy "__mix_Buddub (* [_.._] *)"
-  let __mix_Buddb _ = niy "__mix_Buddb (* [_..] *)"
-  let __mix_Bddub _ = niy "__mix_Bddub (* [.._] *)"
+  let __mix_Bub = (* [_] *) Sequence.get
+  let __mix_Buddb xs b = (* [_..] *) Aux.drop b xs
+  let __mix_Bddub xs e = (* [.._] *) Aux.take (succ e) xs
+
+  let __mix_Buddub xs b e =
+    (* [_.._] *)
+    if e < b then [] else Aux.take (succ (e - b)) (Aux.drop b xs)
 
   module Array = struct
     type 'a t = 'a array
@@ -346,7 +368,7 @@ module Gospelstdlib = struct
     let of_seq _ = niy "of_seq"
   end
 
-  let __mix_Bmgb _ = niy "__mix_Bmgb (* [->] *)"
+  let __mix_Bmgb m x v y = if y = x then v else m y
 
   module Map = struct end
 

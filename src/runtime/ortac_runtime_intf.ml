@@ -100,19 +100,13 @@ module type S = sig
     (** {1 Sequences} *)
 
     val ( ++ ) : 'a sequence -> 'a sequence -> 'a sequence
-
     val __mix_Bub (* [_] *) : 'a sequence -> integer -> 'a
-      [@@alert not_implemented "This function is not implemented yet"]
 
     val __mix_Buddub (* [_.._] *) :
       'a sequence -> integer -> integer -> 'a sequence
-      [@@alert not_implemented "This function is not implemented yet"]
 
     val __mix_Buddb (* [_..] *) : 'a sequence -> integer -> 'a sequence
-      [@@alert not_implemented "This function is not implemented yet"]
-
     val __mix_Bddub (* [.._] *) : 'a sequence -> integer -> 'a sequence
-      [@@alert not_implemented "This function is not implemented yet"]
 
     module Sequence : sig
       type 'a t = 'a sequence
@@ -375,8 +369,6 @@ module type S = sig
     end
 
     val __mix_Bmgb (* [->] *) : ('a -> 'b) -> 'a -> 'b -> 'a -> 'b
-      [@@alert not_implemented "This function is not implemented yet"]
-    (* and it is not clear how it should be implemented in Ortac *)
 
     module Map : sig end
 
