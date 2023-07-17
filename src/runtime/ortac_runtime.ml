@@ -162,8 +162,6 @@ module Gospelstdlib = struct
         (according to the polymorphic comparison) on sets and bags is more
         natural. *)
 
-  let niy x = failwith "%s is not implemented yet" x
-
   type 'a sequence = 'a list
   type 'a bag = ('a * Z.t) list
   type 'a set = 'a list
