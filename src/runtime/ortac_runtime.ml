@@ -279,44 +279,6 @@ module Gospelstdlib = struct
     (* [_.._] *)
     if e < b then [] else Aux.take (succ (e - b)) (Aux.drop b xs)
 
-  module Array = struct
-    type 'a t = 'a array
-
-    let length arr = Array.length arr |> Z.of_int
-
-    let get arr z =
-      if Z.(z < zero || z >= of_int (Array.length arr)) then
-        raise (Invalid_argument "Out of array bounds")
-      else Array.unsafe_get arr (Z.to_int z)
-
-    let make z =
-      if Z.(z > of_int Sys.max_array_length) then
-        raise (Invalid_argument "Array length too big")
-      else Array.make (Z.to_int z)
-
-    let init n f = Array.init (Z.to_int n) (fun i -> f (Z.of_int i))
-    let append = Array.append
-    let concat = Array.concat
-    let sub xs i j = Array.sub xs (Z.to_int i) (Z.to_int j)
-    let map = Array.map
-    let mapi f xs = Array.mapi (fun i x -> f (Z.of_int i) x) xs
-    let fold_left = Array.fold_left
-    let fold_right = Array.fold_right
-    let map2 = Array.map2
-    let for_all = Array.for_all
-    let _exists = Array.exists
-    let for_all2 = Array.for_all2
-    let _exists2 = Array.exists2
-    let mem = Array.mem
-    let to_list = Array.to_list
-    let of_list = Array.of_list
-    let to_seq = Array.to_list
-    let of_seq = Array.of_list
-    let to_bag _ = niy "to_bag"
-    let permut _ = niy "permut"
-    let permut_sub _ = niy "permut_sub"
-  end
-
   module BagSet = struct
     module type BagSetType = sig
       type 'a elem
@@ -534,6 +496,58 @@ module Gospelstdlib = struct
       with Exit -> false
 
     let cardinal = List.length
+  end
+
+  module Array = struct
+    type 'a t = 'a array
+
+    let length arr = Array.length arr |> Z.of_int
+
+    let get arr z =
+      if Z.(z < zero || z >= of_int (Array.length arr)) then
+        raise (Invalid_argument "Out of array bounds")
+      else Array.unsafe_get arr (Z.to_int z)
+
+    let make z =
+      if Z.(z > of_int Sys.max_array_length) then
+        raise (Invalid_argument "Array length too big")
+      else Array.make (Z.to_int z)
+
+    let init n f = Array.init (Z.to_int n) (fun i -> f (Z.of_int i))
+    let append = Array.append
+    let concat = Array.concat
+    let sub xs i j = Array.sub xs (Z.to_int i) (Z.to_int j)
+    let map = Array.map
+    let mapi f xs = Array.mapi (fun i x -> f (Z.of_int i) x) xs
+    let fold_left = Array.fold_left
+    let fold_right = Array.fold_right
+    let map2 = Array.map2
+    let for_all = Array.for_all
+    let _exists = Array.exists
+    let for_all2 = Array.for_all2
+    let _exists2 = Array.exists2
+    let mem = Array.mem
+    let to_list = Array.to_list
+    let of_list = Array.of_list
+    let to_seq = Array.to_list
+    let of_seq = Array.of_list
+    let to_bag a = Bag.of_list (to_list a)
+    let permut a1 a2 = to_bag a1 = to_bag a2
+
+    let permut_sub a1 a2 lo hi =
+      let open Stdlib in
+      let l = Array.length a1 and lo = Z.to_int lo and hi = Z.to_int hi in
+      if l <> Array.length a2 || lo < 0 || hi > l || hi < lo then
+        invalid_arg "permut_sub";
+      try
+        for i = 0 to lo - 1 do
+          if a1.(i) <> a2.(i) then raise Exit
+        done;
+        for i = hi to l - 1 do
+          if a1.(i) <> a2.(i) then raise Exit
+        done;
+        permut (Array.sub a1 lo (hi - lo + 1)) (Array.sub a2 lo (hi - lo + 1))
+      with Exit -> false
   end
 
   let __mix_Bmgb m x v y = if y = x then v else m y

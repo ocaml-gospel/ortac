@@ -179,15 +179,9 @@ module type S = sig
       val of_list : 'a list -> 'a t
       val to_seq : 'a t -> 'a sequence
       val of_seq : 'a sequence -> 'a t
-
-      val to_bag : ('a t -> 'a bag[@alert "-not_implemented"])
-        [@@alert not_implemented "This function is not implemented yet"]
-
+      val to_bag : 'a t -> 'a bag
       val permut : 'a t -> 'a t -> bool
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val permut_sub : 'a t -> 'a t -> integer -> integer -> bool
-        [@@alert not_implemented "This function is not implemented yet"]
     end
 
     (** {1 Bags} *)
