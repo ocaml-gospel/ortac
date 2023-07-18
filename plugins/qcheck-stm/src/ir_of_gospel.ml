@@ -10,6 +10,29 @@ let constant_test vd =
       (Constant_value (Fmt.str "%a" Ident.pp vd.vd_name), vd.vd_loc) |> error
   | _ -> ok ()
 
+let higher_order_test vd =
+  let open Reserr in
+  let open Ppxlib in
+  let rec contains_arrow ty =
+    match ty.ptyp_desc with
+    | Ptyp_arrow (_, _, _) ->
+        error
+          ( Functional_argument (Fmt.str "%a" Pprintast.core_type ty),
+            ty.ptyp_loc )
+    | Ptyp_tuple xs | Ptyp_constr (_, xs) ->
+        let* _ = List.map contains_arrow xs |> sequence in
+        ok ()
+    | _ -> ok ()
+  in
+  let rec aux ty =
+    match ty.ptyp_desc with
+    | Ptyp_arrow (_, l, r) ->
+        let* _ = contains_arrow l in
+        aux r
+    | _ -> ok ()
+  in
+  aux vd.vd_type
+
 let is_a_function ty =
   let open Ppxlib in
   match ty.ptyp_desc with Ptyp_arrow (_, _, _) -> true | _ -> false
@@ -157,6 +180,7 @@ let postcond spec =
 let val_desc config state vd =
   let open Reserr in
   let* () = constant_test vd
+  and* () = higher_order_test vd
   and* inst = ty_var_substitution config vd
   and* spec =
     of_option ~default:(No_spec vd.vd_name.id_str, vd.vd_loc) vd.vd_spec
