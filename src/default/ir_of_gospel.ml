@@ -357,7 +357,7 @@ let type_ ~pack ~ghost (td : Tast.type_declaration) =
   let mutable_ = Mutability.type_declaration ~ir td in
   let type_ = Ir.type_ ~name ~loc ~mutable_ ~ghost in
   let process ~type_ (spec : Tast.type_spec) =
-    let term_printer = Fmt.str "%a" Tterm_printer.print_term in
+    let term_printer = term_printer spec.ty_text spec.ty_loc in
     let mutable_ = Mutability.(max type_.Ir.mutable_ (type_spec ~ir spec)) in
     let type_ =
       type_

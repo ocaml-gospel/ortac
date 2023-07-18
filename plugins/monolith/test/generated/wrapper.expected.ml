@@ -21,8 +21,7 @@ module R =
            | e ->
                ((Ortac_runtime.Specification_failure
                    {
-                     term =
-                       "(0:integer <= (integer_of_int \n(t:set).size):integer):prop /\\ ((integer_of_int \n(t:set).size):integer <= 32:integer):prop";
+                     term = "0 <= t.size <= 32";
                      term_kind = __position___003_;
                      exn = e
                    })
@@ -30,11 +29,7 @@ module R =
                 true))
       then
         (Ortac_runtime.Violated_invariant
-           {
-             term =
-               "(0:integer <= (integer_of_int \n(t:set).size):integer):prop /\\ ((integer_of_int \n(t:set).size):integer <= 32:integer):prop";
-             position = __position___003_
-           })
+           { term = "0 <= t.size <= 32"; position = __position___003_ })
           |> (Ortac_runtime.Errors.register __error___002_)
     let __invariant___006_ __error___007_ __position___008_ t =
       if
@@ -55,8 +50,7 @@ module R =
            | e ->
                ((Ortac_runtime.Specification_failure
                    {
-                     term =
-                       "(0:integer <= (integer_of_int \n(t:set).mask):integer):prop /\\ ((integer_of_int \n(t:set).mask):integer < (pow \n2:integer (integer_of_int  (t:set).size):integer):integer):prop";
+                     term = "0 <= t.mask < pow 2 t.size";
                      term_kind = __position___008_;
                      exn = e
                    })
@@ -65,8 +59,7 @@ module R =
       then
         (Ortac_runtime.Violated_invariant
            {
-             term =
-               "(0:integer <= (integer_of_int \n(t:set).mask):integer):prop /\\ ((integer_of_int \n(t:set).mask):integer < (pow \n2:integer (integer_of_int  (t:set).size):integer):integer):prop";
+             term = "0 <= t.mask < pow 2 t.size";
              position = __position___008_
            })
           |> (Ortac_runtime.Errors.register __error___007_)
@@ -111,12 +104,12 @@ module R =
            with
            | e ->
                ((Ortac_runtime.Specification_failure
-                   { term = "size = n\n   "; term_kind = Pre; exn = e })
+                   { term = "0 <= n <= 32"; term_kind = Pre; exn = e })
                   |> (Ortac_runtime.Errors.register __error__012_);
                 true))
       then
         (Ortac_runtime.Violated_invariant
-           { term = "size = n\n   "; position = Pre })
+           { term = "0 <= n <= 32"; position = Pre })
           |> (Ortac_runtime.Errors.register __error__012_);
       Ortac_runtime.Errors.report __error__012_;
       (let bv_1 =
@@ -142,8 +135,7 @@ module R =
             | e ->
                 ((Ortac_runtime.Specification_failure
                     {
-                      term =
-                        "forall i_1:integer. (0:integer <= i_1:integer):prop /\\ (i_1:integer < (integer_of_int \nn:int):integer):prop -> not (mem \ni_1:integer bv_1:set):prop";
+                      term = "forall i. 0 <= i < n -> not (mem i bv)";
                       term_kind = Post;
                       exn = e
                     })
@@ -152,8 +144,7 @@ module R =
        then
          (Ortac_runtime.Violated_invariant
             {
-              term =
-                "forall i_1:integer. (0:integer <= i_1:integer):prop /\\ (i_1:integer < (integer_of_int \nn:int):integer):prop -> not (mem \ni_1:integer bv_1:set):prop";
+              term = "forall i. 0 <= i < n -> not (mem i bv)";
               position = Post
             })
            |> (Ortac_runtime.Errors.register __error__012_);
@@ -163,12 +154,12 @@ module R =
             with
             | e ->
                 ((Ortac_runtime.Specification_failure
-                    { term = "ll i. 0 <= "; term_kind = Post; exn = e })
+                    { term = "bv.size = n"; term_kind = Post; exn = e })
                    |> (Ortac_runtime.Errors.register __error__012_);
                  true))
        then
          (Ortac_runtime.Violated_invariant
-            { term = "ll i. 0 <= "; position = Post })
+            { term = "bv.size = n"; position = Post })
            |> (Ortac_runtime.Errors.register __error__012_);
        __invariant___006_ __error__012_ Post bv_1;
        __invariant___001_ __error__012_ Post bv_1;
@@ -208,12 +199,12 @@ module R =
            with
            | e ->
                ((Ortac_runtime.Specification_failure
-                   { term = "s bv.mask\n    en"; term_kind = Pre; exn = e })
+                   { term = "0 <= i < bv.size"; term_kind = Pre; exn = e })
                   |> (Ortac_runtime.Errors.register __error__015_);
                 true))
       then
         (Ortac_runtime.Violated_invariant
-           { term = "s bv.mask\n    en"; position = Pre })
+           { term = "0 <= i < bv.size"; position = Pre })
           |> (Ortac_runtime.Errors.register __error__015_);
       __invariant___006_ __error__015_ Pre bv_2;
       __invariant___001_ __error__015_ Pre bv_2;
@@ -272,12 +263,12 @@ module R =
            with
            | e ->
                ((Ortac_runtime.Specification_failure
-                   { term = " b <-> mem i bv "; term_kind = Pre; exn = e })
+                   { term = "0 <= i < bv.size"; term_kind = Pre; exn = e })
                   |> (Ortac_runtime.Errors.register __error__020_);
                 true))
       then
         (Ortac_runtime.Violated_invariant
-           { term = " b <-> mem i bv "; position = Pre })
+           { term = "0 <= i < bv.size"; position = Pre })
           |> (Ortac_runtime.Errors.register __error__020_);
       __invariant___006_ __error__020_ Pre bv_3;
       __invariant___001_ __error__020_ Pre bv_3;
@@ -307,21 +298,12 @@ module R =
             with
             | e ->
                 ((Ortac_runtime.Specification_failure
-                    {
-                      term =
-                        "(b:bool = (True ):bool):prop <-> (mem \n(integer_of_int  i_3:int):integer bv_3:set):prop";
-                      term_kind = Post;
-                      exn = e
-                    })
+                    { term = "b <-> mem i bv"; term_kind = Post; exn = e })
                    |> (Ortac_runtime.Errors.register __error__020_);
                  true))
        then
          (Ortac_runtime.Violated_invariant
-            {
-              term =
-                "(b:bool = (True ):bool):prop <-> (mem \n(integer_of_int  i_3:int):integer bv_3:set):prop";
-              position = Post
-            })
+            { term = "b <-> mem i bv"; position = Post })
            |> (Ortac_runtime.Errors.register __error__020_);
        __invariant___006_ __error__020_ Post bv_3;
        __invariant___001_ __error__020_ Post bv_3;
