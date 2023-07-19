@@ -2,24 +2,13 @@ open Ppxlib
 
 type level = Warning | Error
 type kind = ..
-
-type kind +=
-  | Unsupported of string
-  | Ghost_value of string
-  | Ghost_type of string
-  | Unsupported_model of string * string
-  | Function_without_definition of string
-  | Predicate_without_definition of string
+type kind += Unsupported of string
 
 exception Unkown_kind
 
 type t = kind * Location.t
 
-let level = function
-  | Unsupported _ | Ghost_value _ | Ghost_type _ | Unsupported_model _
-  | Function_without_definition _ | Predicate_without_definition _ ->
-      Warning
-  | _ -> raise Unkown_kind
+let level = function Unsupported _ -> Warning | _ -> raise Unkown_kind
 
 exception Error of t
 
@@ -36,19 +25,6 @@ let quoted ppf = pf ppf "`%s'"
 let pp_kind ppf = function
   | Unsupported msg ->
       pf ppf "unsupported %s. The clause has not been translated" msg
-  | Ghost_value name ->
-      pf ppf "%a is a ghost value. It was not translated." quoted name
-  | Ghost_type name ->
-      pf ppf "%a is a ghost type. It was not translated." quoted name
-  | Unsupported_model (type_, name) ->
-      pf ppf "Model %a of type %a is not supported. It was not translated."
-        quoted name quoted type_
-  | Function_without_definition name ->
-      pf ppf "The function %a has no definition. It was not translated." quoted
-        name
-  | Predicate_without_definition name ->
-      pf ppf "The predicate %a has no definition. It was not translated." quoted
-        name
   | _ -> raise Unkown_kind
 
 let is_fake_loc loc = loc.loc_start.pos_fname = "_none_"
