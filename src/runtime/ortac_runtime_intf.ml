@@ -43,12 +43,8 @@ module type S = sig
 
   module Gospelstdlib : sig
     type 'a sequence
-
     type 'a bag
-    [@@alert not_implemented "The type [bag] is not implemented yet"]
-
     type 'a set
-    [@@alert not_implemented "The type [set] is not implemented yet"]
 
     (** {1 Arithmetic} *)
 
@@ -100,19 +96,13 @@ module type S = sig
     (** {1 Sequences} *)
 
     val ( ++ ) : 'a sequence -> 'a sequence -> 'a sequence
-
     val __mix_Bub (* [_] *) : 'a sequence -> integer -> 'a
-      [@@alert not_implemented "This function is not implemented yet"]
 
     val __mix_Buddub (* [_.._] *) :
       'a sequence -> integer -> integer -> 'a sequence
-      [@@alert not_implemented "This function is not implemented yet"]
 
     val __mix_Buddb (* [_..] *) : 'a sequence -> integer -> 'a sequence
-      [@@alert not_implemented "This function is not implemented yet"]
-
     val __mix_Bddub (* [.._] *) : 'a sequence -> integer -> 'a sequence
-      [@@alert not_implemented "This function is not implemented yet"]
 
     module Sequence : sig
       type 'a t = 'a sequence
@@ -189,194 +179,81 @@ module type S = sig
       val of_list : 'a list -> 'a t
       val to_seq : 'a t -> 'a sequence
       val of_seq : 'a sequence -> 'a t
-
-      val to_bag : ('a t -> 'a bag[@alert "-not_implemented"])
-        [@@alert not_implemented "This function is not implemented yet"]
-
+      val to_bag : 'a t -> 'a bag
       val permut : 'a t -> 'a t -> bool
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val permut_sub : 'a t -> 'a t -> integer -> integer -> bool
-        [@@alert not_implemented "This function is not implemented yet"]
     end
 
     (** {1 Bags} *)
 
     module Bag : sig
-      type 'a t = ('a bag[@alert "-not_implemented"])
+      type 'a t = 'a bag
 
       val occurrences : 'a -> 'a t -> integer
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val empty : 'a t
-        [@@alert not_implemented "This value is not implemented yet"]
-
       val is_empty : 'a t -> bool
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val mem : 'a -> 'a t -> bool
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val add : 'a -> 'a t -> 'a t
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val singleton : 'a -> 'a t
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val remove : 'a -> 'a t -> 'a t
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val union : 'a t -> 'a t -> 'a t
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val sum : 'a t -> 'a t -> 'a t
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val inter : 'a t -> 'a t -> 'a t
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val disjoint : 'a t -> 'a t -> bool
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val diff : 'a t -> 'a t -> 'a t
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val subset : 'a t -> 'a t -> bool
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val choose : 'a t -> 'a
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val choose_opt : 'a t -> 'a option
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val map : ('a -> 'b) -> 'a t -> 'b t
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val fold : ('b -> 'a -> 'a) -> 'b t -> 'a -> 'a
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val for_all : ('a -> bool) -> 'a t -> bool
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val _exists : ('a -> bool) -> 'a t -> bool
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val filter : ('a -> bool) -> 'a t -> 'a t
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val filter_map : ('a -> 'b option) -> 'a t -> 'b t
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val partition : ('a -> bool) -> 'a t -> 'a t * 'a t
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val cardinal : 'a t -> integer
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val to_list : 'a t -> 'a list
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val of_list : 'a list -> 'a t
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val to_seq : 'a t -> 'a sequence
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val of_seq : 'a sequence -> 'a t
-        [@@alert not_implemented "This function is not implemented yet"]
     end
 
     (** {1 Sets} *)
 
-    val __mix_Cc (* {} *) : ('a set[@alert "-not_implemented"])
-      [@@alert not_implemented "This value is not implemented yet"]
+    val __mix_Cc (* {} *) : 'a set
 
     module Set : sig
-      type 'a t = ('a set[@alert "-not_implemented"])
+      type 'a t = 'a set
 
-      val compare : 'a t -> 'a t -> int
-        [@@alert not_implemented "This function is not implemented yet"]
-
+      val compare : 'a t -> 'a t -> integer
       val empty : 'a t
-        [@@alert not_implemented "This value is not implemented yet"]
-
       val is_empty : 'a t -> bool
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val mem : 'a -> 'a t -> bool
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val add : 'a -> 'a t -> 'a t
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val singleton : 'a -> 'a t
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val remove : 'a -> 'a t -> 'a t
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val union : 'a t -> 'a t -> 'a t
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val inter : 'a t -> 'a t -> 'a t
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val disjoint : 'a t -> 'a t -> bool
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val diff : 'a t -> 'a t -> 'a t
-        [@@alert not_implemented "This function is not implemented yet"]
-
-      val subt : 'a t -> 'a t -> bool
-        [@@alert not_implemented "This function is not implemented yet"]
-
-      val cardinal : 'a t -> int
-        [@@alert not_implemented "This function is not implemented yet"]
-
-      val choose : 'a t -> int
-        [@@alert not_implemented "This function is not implemented yet"]
-
+      val subset : 'a t -> 'a t -> bool
+      val cardinal : 'a t -> integer
+      val choose : 'a t -> 'a
       val choose_opt : 'a t -> 'a option
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val map : ('a -> 'b) -> 'a t -> 'b t
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val fold : ('b -> 'a -> 'a) -> 'b t -> 'a -> 'a
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val for_all : ('a -> bool) -> 'a t -> bool
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val _exists : ('a -> bool) -> 'a t -> bool
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val filter : ('a -> bool) -> 'a t -> 'a t
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val filter_map : ('a -> 'b option) -> 'a t -> 'b t
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val partition : ('a -> bool) -> 'a t -> 'a t * 'a t
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val to_list : 'a t -> 'a list
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val of_list : 'a list -> 'a t
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val to_seq : 'a t -> 'a sequence
-        [@@alert not_implemented "This function is not implemented yet"]
-
       val of_seq : 'a sequence -> 'a t
-        [@@alert not_implemented "This function is not implemented yet"]
     end
 
     val __mix_Bmgb (* [->] *) : ('a -> 'b) -> 'a -> 'b -> 'a -> 'b
-      [@@alert not_implemented "This function is not implemented yet"]
-    (* and it is not clear how it should be implemented in Ortac *)
 
     module Map : sig end
 

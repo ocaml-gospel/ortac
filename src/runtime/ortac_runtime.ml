@@ -122,18 +122,49 @@ end
 
 type integer = Z.t
 
-module Gospelstdlib = struct
-  (** Implementation of the Gospel Stdlib *)
+module Aux = struct
+  let take n xs =
+    let rec aux n acc xs =
+      match (n, xs) with
+      | _, [] | 0, _ -> Stdlib.List.rev acc
+      | _, x :: xs -> aux (n - 1) (x :: acc) xs
+    in
+    if n < 0 then invalid_arg "take" else aux n [] xs
 
-  let niy x = failwith "%s is not implemented yet" x
+  let take n xs = take (Z.to_int n) xs
+
+  let rec drop n = function
+    | [] -> []
+    | xs when n <= 0 -> xs
+    | _ :: xs -> drop (n - 1) xs
+
+  let drop n xs = drop (Z.to_int n) xs
+end
+
+module Gospelstdlib = struct
+  (** Implementation of the Gospel Stdlib
+
+      Note: [bag] and [set] are implemented as decreasing sorted lists where
+      each element appears at most once, using the polymorphic comparison.
+
+      For [bag]s, the list contains pairs, where [snd x] is the number of
+      occurrences of [fst x], with [snd x > 0].
+
+      Rationale: obviously, the time complexity of these implementations is not
+      ideal, but:
+
+      - it is a purely functional implementation (so it can be used with
+        QCheck-STM),
+      - it is compatible with the polymorphic equality: Ortac uses OCaml's [(=)]
+        to implement Gospel's [(=)], this ensures that [set]s and [bag]s can be
+        tested for equality in the generated code,
+      - they are sorted in decreasing order so that the resulting order
+        (according to the polymorphic comparison) on sets and bags is more
+        natural. *)
 
   type 'a sequence = 'a list
-
-  type 'a bag = unit
-  (** dummy placeholder *)
-
-  type 'a set = unit
-  (** dummy placeholder *)
+  type 'a bag = ('a * Z.t) list
+  type 'a set = 'a list
 
   let succ = Z.succ
   let pred = Z.pred
@@ -238,10 +269,232 @@ module Gospelstdlib = struct
   end
 
   let ( ++ ) = Sequence.append
-  let __mix_Bub = Sequence.get
-  let __mix_Buddub _ = niy "__mix_Buddub (* [_.._] *)"
-  let __mix_Buddb _ = niy "__mix_Buddb (* [_..] *)"
-  let __mix_Bddub _ = niy "__mix_Bddub (* [.._] *)"
+  let __mix_Bub = (* [_] *) Sequence.get
+  let __mix_Buddb xs b = (* [_..] *) Aux.drop b xs
+  let __mix_Bddub xs e = (* [.._] *) Aux.take (succ e) xs
+
+  let __mix_Buddub xs b e =
+    (* [_.._] *)
+    if e < b then [] else Aux.take (succ (e - b)) (Aux.drop b xs)
+
+  module BagSet = struct
+    module type BagSetType = sig
+      type 'a elem
+      (** type of the list items in a ['a bag] or ['a set] *)
+
+      val proj : 'a elem -> 'a
+      (** [proj x] is the projection of a list item into the actual value *)
+
+      val plusone : 'a -> 'a elem option -> 'a elem
+      (** [plusone x y]
+
+          Precondition: [y] is either [Some z] with [proj z = x] or [None] *)
+
+      val minusone : 'a elem -> 'a elem option
+
+      val of_list : 'a list -> 'a elem list
+      (** ['a elem list] is really ['a set] or ['a bag] *)
+    end
+
+    module Make (T : BagSetType) = struct
+      open Stdlib
+      (* To recover standard operators, rather than Z ones *)
+
+      (* [focus] and [unfocus] factor out much of the code of all the functions
+         doing a search for an element, following the standard principle of
+         zippers *)
+      let focus x xs =
+        let rec aux l = function
+          | [] -> (l, None, [])
+          | y :: r as r' ->
+              let o = compare (T.proj y) x in
+              if o > 0 then aux (y :: l) r
+              else if o = 0 then (l, Some y, r)
+              else (* o < 0 *) (l, None, r')
+        in
+        aux [] xs
+
+      let unfocus (l, m, r) =
+        List.rev_append l (match m with None -> r | Some x -> x :: r)
+
+      let empty = []
+      let is_empty = function [] -> true | _ -> false
+
+      let mem x b =
+        match focus x b with _, None, _ -> false | _, Some _, _ -> true
+
+      let add x b =
+        let l, y, r = focus x b in
+        unfocus (l, Some (T.plusone x y), r)
+
+      let singleton x = [ T.plusone x None ]
+
+      let remove x b =
+        match focus x b with
+        | l, Some y, r -> unfocus (l, T.minusone y, r)
+        | _, None, _ -> b
+
+      type side = Left | Right
+      type 'a oneortwo = One of 'a * side | Two of 'a * 'a
+
+      let combine f xs ys =
+        let cs opt q = match opt with Some v -> v :: q | None -> q in
+        let rec aux xs ys =
+          match (xs, ys) with
+          | [], _ -> List.filter_map (fun y -> f (One (y, Right))) ys
+          | _, [] -> List.filter_map (fun x -> f (One (x, Left))) xs
+          | x :: xs', y :: ys' ->
+              let o = compare (T.proj x) (T.proj y) in
+              if o > 0 (* x > y *) then cs (f (One (x, Left))) (aux xs' ys)
+              else if o = 0 (* x = y *) then cs (f (Two (x, y))) (aux xs' ys')
+              else (* x < y *) cs (f (One (y, Right))) (aux xs ys')
+        in
+        aux xs ys
+
+      let disjoint xs ys =
+        let join = function Two _ -> raise Exit | One _ -> None in
+        try
+          ignore (combine join xs ys);
+          true
+        with Exit -> false
+
+      let choose = function [] -> invalid_arg "choose" | x :: _ -> T.proj x
+      let choose_opt = function [] -> None | x :: _ -> Some (T.proj x)
+      let of_list = T.of_list
+      let to_list xs = List.map T.proj xs
+      let to_seq = to_list
+      let of_seq = of_list
+      let map f xs = of_list (List.map (fun x -> f (T.proj x)) xs)
+      let fold f b v = List.fold_left (fun v x -> f (T.proj x) v) v b
+      let for_all p b = List.for_all (fun x -> p (T.proj x)) b
+      let _exists p b = List.exists (fun x -> p (T.proj x)) b
+      let filter p b = List.filter (fun x -> p (T.proj x)) b
+      let filter_map f b = of_list (List.filter_map (fun x -> f (T.proj x)) b)
+      let partition f b = List.partition (fun x -> f (T.proj x)) b
+      let compare x y = Z.of_int (compare x y)
+    end
+  end
+
+  module Bag = struct
+    type 'a t = 'a bag
+
+    module BagType = struct
+      type 'a elem = 'a * Z.t
+
+      let proj = fst
+
+      let plusone x = function
+        | None -> (x, Z.one)
+        | Some (y, o) -> (y, Z.succ o)
+
+      let minusone = function
+        | _, o when Z.equal o Z.one -> None
+        | x, o -> Some (x, Z.pred o)
+
+      let of_list xs =
+        let rec rev_group acc x o = function
+          | [] -> (x, o) :: acc
+          | y :: ys ->
+              if x = y then rev_group acc x (Z.succ o) ys
+              else rev_group ((x, o) :: acc) y Z.one ys
+        in
+        match Stdlib.List.fast_sort compare xs with
+        | [] -> []
+        | x :: xs -> rev_group [] x Z.one xs
+    end
+
+    include BagSet.Make (BagType)
+
+    let occurrences x b =
+      match focus x b with _, None, _ -> Z.zero | _, Some (_, o), _ -> o
+
+    let union b1 b2 =
+      let join = function
+        | One (x, _) -> Some x
+        | Two ((x, ox), (_, oy)) -> Some (x, Z.max ox oy)
+      in
+      combine join b1 b2
+
+    let sum b1 b2 =
+      let join = function
+        | One (x, _) -> Some x
+        | Two ((x, ox), (_, oy)) -> Some (x, Z.add ox oy)
+      in
+      combine join b1 b2
+
+    let inter b1 b2 =
+      let join = function
+        | One (x, _) -> Some x
+        | Two ((x, ox), (_, oy)) -> Some (x, Z.min ox oy)
+      in
+      combine join b1 b2
+
+    let diff b1 b2 =
+      let join = function
+        | One (x, Left) -> Some x
+        | One (_, Right) -> None
+        | Two ((x, xo), (_, yo)) ->
+            if Z.gt xo yo then Some (x, Z.sub xo yo) else None
+      in
+      combine join b1 b2
+
+    let subset b1 b2 =
+      let join = function
+        | One (_, Left) -> raise Exit
+        | Two ((_, xo), (_, yo)) -> if Z.gt xo yo then raise Exit else None
+        | _ -> None
+      in
+      try
+        ignore (combine join b1 b2);
+        true
+      with Exit -> false
+
+    let cardinal b = List.fold_left (fun c (_, o) -> Z.add c o) Z.zero b
+  end
+
+  let __mix_Cc = []
+
+  module Set = struct
+    type 'a t = 'a set
+
+    module SetType = struct
+      type 'a elem = 'a
+
+      let proj = Fun.id
+      let plusone x = function None -> x | Some y -> y
+      (* We should have x = y here, but we'd rather keep the value
+         already in the set *)
+
+      let minusone _ = None
+
+      let of_list xs =
+        let rev_compare x y = compare y x in
+        Stdlib.List.sort_uniq rev_compare xs
+    end
+
+    include BagSet.Make (SetType)
+
+    let union s1 s2 =
+      let join = function One (x, _) | Two (x, _) -> Some x in
+      combine join s1 s2
+
+    let inter s1 s2 =
+      let join = function One _ -> None | Two (x, _) -> Some x in
+      combine join s1 s2
+
+    let diff s1 s2 =
+      let join = function One (x, Left) -> Some x | _ -> None in
+      combine join s1 s2
+
+    let subset s1 s2 =
+      let join = function One (_, Left) -> raise Exit | _ -> None in
+      try
+        ignore (combine join s1 s2);
+        true
+      with Exit -> false
+
+    let cardinal = List.length
+  end
 
   module Array = struct
     type 'a t = 'a array
@@ -276,77 +529,26 @@ module Gospelstdlib = struct
     let of_list = Array.of_list
     let to_seq = Array.to_list
     let of_seq = Array.of_list
-    let to_bag _ = niy "to_bag"
-    let permut _ = niy "permut"
-    let permut_sub _ = niy "permut_sub"
+    let to_bag a = Bag.of_list (to_list a)
+    let permut a1 a2 = to_bag a1 = to_bag a2
+
+    let permut_sub a1 a2 lo hi =
+      let open Stdlib in
+      let l = Array.length a1 and lo = Z.to_int lo and hi = Z.to_int hi in
+      if l <> Array.length a2 || lo < 0 || hi > l || hi < lo then
+        invalid_arg "permut_sub";
+      try
+        for i = 0 to lo - 1 do
+          if a1.(i) <> a2.(i) then raise Exit
+        done;
+        for i = hi to l - 1 do
+          if a1.(i) <> a2.(i) then raise Exit
+        done;
+        permut (Array.sub a1 lo (hi - lo + 1)) (Array.sub a2 lo (hi - lo + 1))
+      with Exit -> false
   end
 
-  module Bag = struct
-    type 'a t = ('a bag[@alert "-not_implemented"])
-
-    let occurrences _ = niy "occurrences"
-    let empty = ()
-    let is_empty _ = niy "is_empty"
-    let mem _ = niy "mem"
-    let add _ = niy "add"
-    let singleton _ = niy "singleton"
-    let remove _ = niy "remove"
-    let union _ = niy "union"
-    let sum _ = niy "sum"
-    let inter _ = niy "inter"
-    let disjoint _ = niy "disjoint"
-    let diff _ = niy "diff"
-    let subset _ = niy "subset"
-    let choose _ = niy "choose"
-    let choose_opt _ = niy "choose_opt"
-    let map _ = niy "map"
-    let fold _ = niy "fold"
-    let for_all _ = niy "for_all"
-    let _exists _ = niy "_exists"
-    let filter _ = niy "filter"
-    let filter_map _ = niy "filter_map"
-    let partition _ = niy "partition"
-    let cardinal _ = niy "cardinal"
-    let to_list _ = niy "to_list"
-    let of_list _ = niy "of_list"
-    let to_seq _ = niy "to_seq"
-    let of_seq _ = niy "of_seq"
-  end
-
-  let __mix_Cc = ()
-
-  module Set = struct
-    type 'a t = ('a set[@alert "-not_implemented"])
-
-    let compare _ = niy "compare"
-    let empty = ()
-    let is_empty _ = niy "is_empty"
-    let mem _ = niy "mem"
-    let add _ = niy "add"
-    let singleton _ = niy "singleton"
-    let remove _ = niy "remove"
-    let union _ = niy "union"
-    let inter _ = niy "inter"
-    let disjoint _ = niy "disjoint"
-    let diff _ = niy "diff"
-    let subt _ = niy "subt"
-    let cardinal _ = niy "cardinal"
-    let choose _ = niy "choose"
-    let choose_opt _ = niy "choose_opt"
-    let map _ = niy "map"
-    let fold _ = niy "fold"
-    let for_all _ = niy "for_all"
-    let _exists _ = niy "_exists"
-    let filter _ = niy "filter"
-    let filter_map _ = niy "filter_map"
-    let partition _ = niy "partition"
-    let to_list _ = niy "to_list"
-    let of_list _ = niy "of_list"
-    let to_seq _ = niy "to_seq"
-    let of_seq _ = niy "of_seq"
-  end
-
-  let __mix_Bmgb _ = niy "__mix_Bmgb (* [->] *)"
+  let __mix_Bmgb m x v y = if y = x then v else m y
 
   module Map = struct end
 
