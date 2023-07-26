@@ -9,13 +9,6 @@ let pat_default = ppat_construct (lident "Char") None
 let exp_default = evar "char"
 let res_default = Ident.create ~loc:Location.none "res"
 
-let show_attribute : attribute =
-  {
-    attr_name = noloc "deriving";
-    attr_payload = PStr [ [%stri show { with_path = false }] ];
-    attr_loc = Location.none;
-  }
-
 let may_raise_exception v =
   match (v.postcond.exceptional, v.postcond.checks) with
   | [], [] -> false
@@ -34,6 +27,16 @@ let list_and xs =
     pexp_apply (pexp_ident (lident "&&")) [ (Nolabel, e1); (Nolabel, e2) ]
   and etrue = pexp_construct (lident "true") None in
   list_fold_right1 ( &&& ) etrue xs
+
+let qualify ms v =
+  let lid =
+    match ms with
+    | [] -> Lident v
+    | m :: ms ->
+        let pref = List.fold_left (fun acc x -> Ldot (acc, x)) (Lident m) ms in
+        Ldot (pref, v)
+  in
+  Ast_helper.Exp.ident (noloc lid)
 
 let subst_core_type inst ty =
   let rec aux ty =
@@ -582,7 +585,60 @@ let cmd_type ir =
     type_declaration ~name:(noloc "cmd") ~params:[] ~cstrs:[]
       ~kind:(Ptype_variant constructors) ~private_:Public ~manifest:None
   in
-  pstr_type Recursive [ { td with ptype_attributes = [ show_attribute ] } ]
+  pstr_type Recursive [ td ]
+
+let pp_cmd_case value =
+  let lhs = mk_cmd_pattern value in
+  let qualify_pp = qualify [ "Util"; "Pp" ] in
+  let get_name =
+    Option.fold ~none:eunit ~some:(fun id -> str_of_ident id |> evar)
+  in
+  let open Reserr in
+  let rec pp_of_ty ty : expression reserr =
+    match ty.ptyp_desc with
+    | Ptyp_tuple [ ty0; ty1 ] ->
+        let* pp0 = pp_of_ty ty0 and* pp1 = pp_of_ty ty1 in
+        ok (pexp_apply (evar "pp_pair") [ (Nolabel, pp0); (Nolabel, pp1) ])
+    | Ptyp_constr (lid, xs) ->
+        let* xs = map pp_of_ty xs and* s = munge_longident false ty lid in
+        let pp = qualify_pp ("pp_" ^ s) in
+        ok
+          (match xs with
+          | [] -> pp
+          | _ -> pexp_apply pp (List.map (fun x -> (Nolabel, x)) xs))
+    | _ ->
+        error
+          (Type_not_supported (Fmt.str "%a" Pprintast.core_type ty), ty.ptyp_loc)
+  in
+  let* rhs =
+    let name = str_of_ident value.id in
+    let* pp_args =
+      concat_map
+        (fun (ty, id) ->
+          let ty = subst_core_type value.inst ty in
+          let* pp = pp_of_ty ty in
+          ok [ pexp_apply pp [ (Nolabel, ebool true) ]; get_name id ])
+        value.args
+    in
+    let fmt =
+      String.concat " " ("%s" :: List.map (Fun.const "%a") value.args)
+      |> estring
+    in
+    let args =
+      List.map (fun x -> (Nolabel, x)) (fmt :: estring name :: pp_args)
+    in
+    pexp_apply (qualify [ "Format" ] "asprintf") args |> ok
+  in
+  case ~lhs ~guard:None ~rhs |> ok
+
+let cmd_show ir =
+  let cmd_name = gen_symbol ~prefix:"cmd" () in
+  let open Reserr in
+  let* cases = map pp_cmd_case ir.values in
+  let body = pexp_match (evar cmd_name) cases in
+  let pat = pvar "show_cmd" in
+  let expr = efun [ (Nolabel, pvar cmd_name) ] body in
+  pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
 let sut_type cfg =
   let td =
@@ -683,6 +739,7 @@ let stm config ir =
   let* config, ghost_functions = ghost_functions config ir.ghost_functions in
   let sut = sut_type config in
   let cmd = cmd_type ir in
+  let* cmd_show = cmd_show ir in
   let state = state_type ir in
   let* idx, next_state = next_state config ir in
   let* postcond = postcond config idx ir in
@@ -707,6 +764,7 @@ let stm config ir =
         open_mod "STM";
         sut;
         cmd;
+        cmd_show;
         state;
         init_state;
         init_sut;

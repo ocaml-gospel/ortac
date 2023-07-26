@@ -29,13 +29,15 @@ type W.kind +=
   | Ensures_not_found_for_next_state of string
   | Type_not_supported of string
   | Impossible_init_state_generation of init_state_error
+  | Functional_argument of string
 
 let level kind =
   match kind with
   | Constant_value _ | Returning_sut _ | No_sut_argument _
   | Multiple_sut_arguments _ | Incompatible_type _ | No_spec _
   | Impossible_term_substitution _ | Ignored_modifies _
-  | Ensures_not_found_for_next_state _ | Type_not_supported _ ->
+  | Ensures_not_found_for_next_state _ | Type_not_supported _
+  | Functional_argument _ ->
       W.Warning
   | No_sut_type _ | No_init_function _ | Syntax_error_in_type _
   | Sut_type_not_supported _ | Type_not_supported_for_sut_parameter _
@@ -153,6 +155,8 @@ let pp_kind ppf kind =
         "Mismatch number of arguments between %a and the function \
          specification."
         W.quoted fct
+  | Functional_argument a ->
+      pf ppf "Functional argument (%a) are not tested." W.quoted a
   | _ -> W.pp_kind ppf kind
 
 let pp_errors = W.pp_param pp_kind level |> Fmt.list

@@ -18,8 +18,26 @@ module Spec =
       | Mem of char 
       | Remove of char 
       | Replace of char * int 
-      | Filter_map_inplace of (char -> int -> int option) 
-      | Length [@@deriving show { with_path = false }]
+      | Length 
+    let show_cmd cmd__001_ =
+      match cmd__001_ with
+      | Clear -> Format.asprintf "%s" "clear"
+      | Reset -> Format.asprintf "%s" "reset"
+      | Add (a_2, b_2) ->
+          Format.asprintf "%s %a %a" "add" (Util.Pp.pp_char true) a_2
+            (Util.Pp.pp_int true) b_2
+      | Find a_3 -> Format.asprintf "%s %a" "find" (Util.Pp.pp_char true) a_3
+      | Find_opt a_4 ->
+          Format.asprintf "%s %a" "find_opt" (Util.Pp.pp_char true) a_4
+      | Find_all a_5 ->
+          Format.asprintf "%s %a" "find_all" (Util.Pp.pp_char true) a_5
+      | Mem a_6 -> Format.asprintf "%s %a" "mem" (Util.Pp.pp_char true) a_6
+      | Remove a_7 ->
+          Format.asprintf "%s %a" "remove" (Util.Pp.pp_char true) a_7
+      | Replace (a_8, b_3) ->
+          Format.asprintf "%s %a %a" "replace" (Util.Pp.pp_char true) a_8
+            (Util.Pp.pp_int true) b_3
+      | Length -> Format.asprintf "%s" "length"
     type nonrec state = {
       contents: (char * int) list }
     let init_state = let random = false
@@ -43,32 +61,31 @@ module Spec =
                ((pure (fun a_8 -> fun b_3 -> Replace (a_8, b_3))) <*> char)
                  <*> int;
                pure Length])
-    let next_state cmd__001_ state__002_ =
-      match cmd__001_ with
-      | Clear -> { state__002_ with contents = [] }
-      | Reset -> { state__002_ with contents = [] }
+    let next_state cmd__002_ state__003_ =
+      match cmd__002_ with
+      | Clear -> { state__003_ with contents = [] }
+      | Reset -> { state__003_ with contents = [] }
       | Add (a_2, b_2) ->
-          { state__002_ with contents = ((a_2, b_2) :: state__002_.contents)
+          { state__003_ with contents = ((a_2, b_2) :: state__003_.contents)
           }
-      | Find a_3 -> state__002_
-      | Find_opt a_4 -> state__002_
-      | Find_all a_5 -> state__002_
-      | Mem a_6 -> state__002_
+      | Find a_3 -> state__003_
+      | Find_opt a_4 -> state__003_
+      | Find_all a_5 -> state__003_
+      | Mem a_6 -> state__003_
       | Remove a_7 ->
           {
-            state__002_ with
-            contents = (remove_first a_7 state__002_.contents)
+            state__003_ with
+            contents = (remove_first a_7 state__003_.contents)
           }
       | Replace (a_8, b_3) ->
           {
-            state__002_ with
+            state__003_ with
             contents =
-              ((a_8, b_3) :: (remove_first a_8 state__002_.contents))
+              ((a_8, b_3) :: (remove_first a_8 state__003_.contents))
           }
-      | Filter_map_inplace f -> state__002_
-      | Length -> state__002_
-    let precond cmd__007_ state__008_ =
-      match cmd__007_ with
+      | Length -> state__003_
+    let precond cmd__008_ state__009_ =
+      match cmd__008_ with
       | Clear -> true
       | Reset -> true
       | Add (a_2, b_2) -> true
@@ -78,11 +95,10 @@ module Spec =
       | Mem a_6 -> true
       | Remove a_7 -> true
       | Replace (a_8, b_3) -> true
-      | Filter_map_inplace f -> true
       | Length -> true
-    let postcond cmd__003_ state__004_ res__005_ =
-      let new_state__006_ = lazy (next_state cmd__003_ state__004_) in
-      match (cmd__003_, res__005_) with
+    let postcond cmd__004_ state__005_ res__006_ =
+      let new_state__007_ = lazy (next_state cmd__004_ state__005_) in
+      match (cmd__004_, res__006_) with
       | (Clear, Res ((Unit, _), _)) -> true
       | (Reset, Res ((Unit, _), _)) -> true
       | (Add (a_2, b_2), Res ((Unit, _), _)) -> true
@@ -90,13 +106,13 @@ module Spec =
           (match b_4 with
            | Ok b_4 ->
                Ortac_runtime.Gospelstdlib.List.mem (a_3, b_4)
-                 (Lazy.force new_state__006_).contents
+                 (Lazy.force new_state__007_).contents
            | Error (Not_found) ->
                not
                  (Ortac_runtime.Gospelstdlib.List.mem a_3
                     (Ortac_runtime.Gospelstdlib.List.map
                        (fun x_1 -> Ortac_runtime.Gospelstdlib.fst x_1)
-                       (Lazy.force new_state__006_).contents))
+                       (Lazy.force new_state__007_).contents))
            | _ -> false)
       | (Find_opt a_4, Res ((Option (Int), _), o)) ->
           (match o with
@@ -106,13 +122,13 @@ module Spec =
                    (Ortac_runtime.Gospelstdlib.List.mem a_4
                       (Ortac_runtime.Gospelstdlib.List.map
                          (fun x_2 -> Ortac_runtime.Gospelstdlib.fst x_2)
-                         (Lazy.force new_state__006_).contents))
+                         (Lazy.force new_state__007_).contents))
                then true
                else false
            | Some b_5 ->
                if
                  Ortac_runtime.Gospelstdlib.List.mem (a_4, b_5)
-                   (Lazy.force new_state__006_).contents
+                   (Lazy.force new_state__007_).contents
                then true
                else false)
             = true
@@ -124,47 +140,33 @@ module Spec =
                   then Some (Ortac_runtime.Gospelstdlib.snd x_3)
                   else None)
                (Ortac_runtime.Gospelstdlib.List.to_seq
-                  (Lazy.force new_state__006_).contents))
+                  (Lazy.force new_state__007_).contents))
       | (Mem a_6, Res ((Bool, _), b_6)) ->
           (b_6 = true) =
             (Ortac_runtime.Gospelstdlib.List.mem a_6
                (Ortac_runtime.Gospelstdlib.List.map
                   (fun x_4 -> Ortac_runtime.Gospelstdlib.fst x_4)
-                  (Lazy.force new_state__006_).contents))
+                  (Lazy.force new_state__007_).contents))
       | (Remove a_7, Res ((Unit, _), _)) -> true
       | (Replace (a_8, b_3), Res ((Unit, _), _)) -> true
-      | (Filter_map_inplace f, Res ((Unit, _), _)) ->
-          (Ortac_runtime.Gospelstdlib.List.to_seq
-             (Lazy.force new_state__006_).contents)
-            =
-            (Ortac_runtime.Gospelstdlib.Sequence.filter_map
-               (fun x_5 ->
-                  match f (Ortac_runtime.Gospelstdlib.fst x_5)
-                          (Ortac_runtime.Gospelstdlib.snd x_5)
-                  with
-                  | None -> None
-                  | Some b' ->
-                      Some ((Ortac_runtime.Gospelstdlib.fst x_5), b'))
-               (Ortac_runtime.Gospelstdlib.List.to_seq state__004_.contents))
       | (Length, Res ((Int, _), i)) ->
           (Ortac_runtime.Gospelstdlib.integer_of_int i) =
             (Ortac_runtime.Gospelstdlib.List.length
-               (Lazy.force new_state__006_).contents)
+               (Lazy.force new_state__007_).contents)
       | _ -> true
-    let run cmd__009_ sut__010_ =
-      match cmd__009_ with
-      | Clear -> Res (unit, (clear sut__010_))
-      | Reset -> Res (unit, (reset sut__010_))
-      | Add (a_2, b_2) -> Res (unit, (add sut__010_ a_2 b_2))
+    let run cmd__010_ sut__011_ =
+      match cmd__010_ with
+      | Clear -> Res (unit, (clear sut__011_))
+      | Reset -> Res (unit, (reset sut__011_))
+      | Add (a_2, b_2) -> Res (unit, (add sut__011_ a_2 b_2))
       | Find a_3 ->
-          Res ((result int exn), (protect (fun () -> find sut__010_ a_3) ()))
-      | Find_opt a_4 -> Res ((option int), (find_opt sut__010_ a_4))
-      | Find_all a_5 -> Res ((list int), (find_all sut__010_ a_5))
-      | Mem a_6 -> Res (bool, (mem sut__010_ a_6))
-      | Remove a_7 -> Res (unit, (remove sut__010_ a_7))
-      | Replace (a_8, b_3) -> Res (unit, (replace sut__010_ a_8 b_3))
-      | Filter_map_inplace f -> Res (unit, (filter_map_inplace f sut__010_))
-      | Length -> Res (int, (length sut__010_))
+          Res ((result int exn), (protect (fun () -> find sut__011_ a_3) ()))
+      | Find_opt a_4 -> Res ((option int), (find_opt sut__011_ a_4))
+      | Find_all a_5 -> Res ((list int), (find_all sut__011_ a_5))
+      | Mem a_6 -> Res (bool, (mem sut__011_ a_6))
+      | Remove a_7 -> Res (unit, (remove sut__011_ a_7))
+      | Replace (a_8, b_3) -> Res (unit, (replace sut__011_ a_8 b_3))
+      | Length -> Res (int, (length sut__011_))
   end
 module STMTests = (STM_sequential.Make)(Spec)
 let _ =

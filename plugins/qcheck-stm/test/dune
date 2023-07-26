@@ -15,11 +15,10 @@
   qcheck-core.runner
   qcheck-stm.stm
   qcheck-stm.sequential
+  qcheck-multicoretests-util
   ortac-runtime
   array)
  (flags :standard -w -26-27-32-33)
- (preprocess
-  (pps ppx_deriving.show))
  (action
   (echo
    "\n%{dep:array_stm_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))
@@ -58,11 +57,10 @@
   qcheck-core.runner
   qcheck-stm.stm
   qcheck-stm.sequential
+  qcheck-multicoretests-util
   ortac-runtime
   hashtbl)
  (flags :standard -w -23-26-27-32-33 -w -37)
- (preprocess
-  (pps ppx_deriving.show))
  (action
   (echo
    "\n%{dep:hashtbl_stm_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))
