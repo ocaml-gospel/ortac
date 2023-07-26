@@ -9,6 +9,9 @@
 (rule
  (target wrapper.ml)
  (package ortac-wrapper)
+ (deps
+  (package ortac-core)
+  (package ortac-wrapper))
  (action
   (with-stderr-to
    errors

@@ -1,6 +1,9 @@
 (rule
  (target lib_rtac.ml)
  (package ortac-wrapper)
+ (deps
+  (package ortac-core)
+  (package ortac-wrapper))
  (action
   (with-stdout-to
     %{target}

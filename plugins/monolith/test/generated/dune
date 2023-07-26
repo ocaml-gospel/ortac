@@ -26,6 +26,8 @@
  (target wrapper.ml)
  (package ortac-monolith)
  (deps
+  (package ortac-core)
+  (package ortac-wrapper)
   (package ortac-monolith))
  (action
   (with-stderr-to

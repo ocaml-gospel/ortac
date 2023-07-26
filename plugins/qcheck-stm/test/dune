@@ -28,6 +28,7 @@
  (target array_stm_tests.ml)
  (package ortac-qcheck-stm)
  (deps
+  (package ortac-core)
   (package ortac-qcheck-stm))
  (action
   (with-stderr-to
@@ -71,6 +72,7 @@
  (target hashtbl_stm_tests.ml)
  (package ortac-qcheck-stm)
  (deps
+  (package ortac-core)
   (package ortac-qcheck-stm))
  (action
   (with-stderr-to
