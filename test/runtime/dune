@@ -1,0 +1,31 @@
+(test
+ (name stdlibset)
+ (package ortac-runtime)
+ (libraries ortac-runtime zarith monolith)
+ (deps stdlibset.exe)
+ (action (progn)))
+
+(rule
+ (alias runtest)
+ (package ortac-runtime)
+ ; We rely on rm, ls and timeout to run the test
+ (enabled_if
+  (and
+   %{bin-available:timeout}
+   (and %{bin-available:rm} %{bin-available:ls})))
+ (action
+  (chdir
+   %{project_root}
+   ; we chdir so that `timeout` will be fed a path to `stdlibset.exe`
+   (progn
+    (run rm -rf output/crashes)
+    (with-accepted-exit-codes
+     ; the test must exit on timeout, not for another reason
+     124
+     (run timeout -s INT -k 3 20 %{dep:stdlibset.exe}))
+    ; fail if any crash was found
+    (with-outputs-to
+     %{null}
+     (with-accepted-exit-codes
+      (not 0)
+      (run ls output/crashes)))))))
