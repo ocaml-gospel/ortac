@@ -119,7 +119,7 @@ and term ~context (t : Tterm.term) : expression =
             t_node =
               Tbinop
                 ( ((Timplies | Tand | Tand_asym) as op),
-                  { t_node = Tbinop (Tand, t1, t2); _ },
+                  { t_node = Tbinop ((Tand | Tand_asym), t1, t2); _ },
                   p );
             _;
           } ) ->
