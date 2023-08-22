@@ -1,14 +1,16 @@
+module Ir = Ortac_wrapper__Ir
+module Utils = Ortac_core__Utils
+
 let translate path =
-  let module_name = Ortac_core__Utils.module_name_of_path path in
-  Gospel.Parser_frontend.parse_ocaml_gospel path
-  |> Ortac_core__Utils.type_check [] path
+  let module_name = Utils.module_name_of_path path in
+  Gospel.Parser_frontend.parse_ocaml_gospel path |> Utils.type_check [] path
   |> fun (env, sigs) ->
   assert (List.length env = 1);
   let context = Ortac_core.Context.init module_name (List.hd env) in
-  Ortac_default.Ir_of_gospel.signature ~context sigs
+  Ortac_wrapper__Ir_of_gospel.signature ~context sigs
 
 let mutability =
-  let open Ortac_default.Ir in
+  let open Ir in
   let pp_mut ppf (m : mutability) =
     match m with
     | Unknown -> Fmt.pf ppf "Unknown"
@@ -27,26 +29,23 @@ let mutability =
   in
   Alcotest.testable pp_mut eq
 
-let get_mutability = function
-  | Ortac_default.Ir.Type t -> t.mutable_
-  | _ -> assert false
-
-let is_pure = function Ortac_default.Ir.Value v -> v.pure | _ -> assert false
-let type_name = function Ortac_default.Ir.Type t -> t.name | _ -> assert false
-let val_name = function Ortac_default.Ir.Value v -> v.name | _ -> assert false
+let get_mutability = function Ir.Type t -> t.mutable_ | _ -> assert false
+let is_pure = function Ir.Value v -> v.pure | _ -> assert false
+let type_name = function Ir.Type t -> t.name | _ -> assert false
+let val_name = function Ir.Value v -> v.name | _ -> assert false
 
 let mutability_to_string = function
-  | Ortac_default.Ir.Mutable -> "mutable"
-  | Ortac_default.Ir.Unknown -> "unknown"
-  | Ortac_default.Ir.Dependant _ -> "dependant"
-  | Ortac_default.Ir.Immutable -> "immutable"
+  | Ir.Mutable -> "mutable"
+  | Ir.Unknown -> "unknown"
+  | Ir.Dependant _ -> "dependant"
+  | Ir.Immutable -> "immutable"
 
-let is_val (t : Ortac_default.Ir.structure_item) =
-  match t with Ortac_default.Ir.Value _ -> true | _ -> false
+let is_val (t : Ir.structure_item) =
+  match t with Ir.Value _ -> true | _ -> false
 
 let test_mutability path mut flag () =
   let translations = translate path in
-  Ortac_default.Ir.iter_translation
+  Ir.iter_translation
     ~f:(fun t ->
       if !flag then (
         print_endline (type_name t);
@@ -58,25 +57,25 @@ let test_mutability path mut flag () =
 
 let type_unknown () =
   let flag = ref false in
-  test_mutability "./translation/unknown.mli" Ortac_default.Ir.Unknown flag
+  test_mutability "./translation/unknown.mli" Ir.Unknown flag
 
 let type_mutable () =
   let flag = ref false in
-  test_mutability "./translation/mutable.mli" Ortac_default.Ir.Mutable flag
+  test_mutability "./translation/mutable.mli" Ir.Mutable flag
 
 let type_immutable () =
   let flag = ref false in
-  test_mutability "./translation/immutable.mli" Ortac_default.Ir.Immutable flag
+  test_mutability "./translation/immutable.mli" Ir.Immutable flag
 
 let type_dependant () =
   let flag = ref false in
   test_mutability "./translation/dependant.mli"
-    (Ortac_default.Ir.Dependant (fun _ -> Ortac_default.Ir.Unknown))
+    (Ir.Dependant (fun _ -> Ir.Unknown))
     flag
 
 let val_pure () =
   let translations = translate "./translation/pure.mli" in
-  Ortac_default.Ir.iter_translation
+  Ir.iter_translation
     ~f:(fun v ->
       Alcotest.(check bool) (Fmt.str "%s is pure" (val_name v)) true (is_pure v))
     translations

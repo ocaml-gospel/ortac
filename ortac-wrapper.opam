@@ -30,14 +30,11 @@ depends: [
   "ocaml" {>= "4.11.0"}
   "dune" {>= "3.0"}
   "dune-site"
+  "ortac-core"
   "cmdliner" {>= "1.1.0"}
   "fmt"
   "ppxlib" {>= "0.26.0"}
   "gospel"
   "alcotest" {>= "0.8.1" with-test}
   "ortac-runtime" {with-test}
-]
-
-pin-depends: [
-  "gospel.dev" "git+https://github.com/ocaml-gospel/gospel#aed0e75996116f89184e70717966983b309aec15"
 ]

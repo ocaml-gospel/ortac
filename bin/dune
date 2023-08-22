@@ -2,7 +2,7 @@
  (name cli)
  (public_name ortac)
  (modules sites cli)
- (package ortac)
+ (package ortac-core)
  (libraries
   dune-site
   dune-site.plugins
@@ -10,13 +10,10 @@
   registration
   cmdliner
   fmt
-  gospel
-  ortac_default
-  ortac.register
-  ortac_core))
+  gospel))
 
 (library
- (public_name ortac.register)
+ (public_name ortac-core.register)
  (name registration)
  (modules registration)
  (libraries cmdliner fmt.tty fmt.cli))
@@ -24,4 +21,4 @@
 (generate_sites_module
  (module sites)
  (plugins
-  (ortac plugins)))
+  (ortac-core plugins)))

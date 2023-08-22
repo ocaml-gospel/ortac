@@ -4,11 +4,15 @@
 (implicit_transitive_deps false)
 
 (package
-  (name ortac)
+  (name ortac-core)
   (sites (lib plugins)))
 
 (package
   (name ortac-runtime))
+
+; Wrapper plugin
+(package
+  (name ortac-wrapper))
 
 ; Monolith plugin
 (package

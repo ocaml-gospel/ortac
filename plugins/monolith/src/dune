@@ -4,9 +4,9 @@
  (preprocess
   (pps ppxlib.metaquot))
  (libraries
-  ortac.ortac_core
-  ortac.ortac_default
-  ortac.register
+  ortac-core
+  ortac-core.register
+  ortac-wrapper.plugin
   gospel
   cmdliner
   fmt
@@ -18,4 +18,4 @@
  (package ortac-monolith)
  (libraries ortac-monolith.plugin)
  (site
-  (ortac plugins)))
+  (ortac-core plugins)))

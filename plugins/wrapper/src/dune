@@ -1,6 +1,6 @@
 (library
- (public_name ortac-qcheck-stm.plugin)
- (name ortac_qcheck_stm)
+ (public_name ortac-wrapper.plugin)
+ (name ortac_wrapper)
  (libraries
   cmdliner
   fmt
@@ -13,8 +13,8 @@
   (pps ppxlib.metaquot)))
 
 (plugin
- (name ortac-qcheck-stm)
- (package ortac-qcheck-stm)
- (libraries ortac-qcheck-stm.plugin)
+ (name ortac-wrapper)
+ (package ortac-wrapper)
+ (libraries ortac-wrapper.plugin)
  (site
   (ortac-core plugins)))

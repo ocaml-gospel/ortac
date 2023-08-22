@@ -1,3 +1,2 @@
-plugins/monolith/test/generated/wrapper.expected.ml
+plugins/*/test/generated/*.expected.ml
 plugins/qcheck-stm/test/*.expected.ml
-test/generated/wrapper.expected.ml

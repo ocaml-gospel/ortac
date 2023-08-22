@@ -10,6 +10,4 @@
  (deps
   (alias_rec src/runtest)
   (alias_rec bin/runtest)
-  (alias_rec plugins/runtest)
-  (alias_rec test/all)
-  (alias_rec test/runtest)))
+  (alias_rec plugins/runtest)))

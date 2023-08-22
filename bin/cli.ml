@@ -1,36 +1,21 @@
 let () = Sites.Plugins.Plugins.load_all ()
 
-open Registration
 open Cmdliner
 
-module Default : sig
-  val cmd : unit Cmd.t
-end = struct
-  let main input output () =
-    let channel = get_channel output in
-    try Ortac_default.Generate.generate input channel
-    with Gospel.Warnings.Error e ->
-      Fmt.epr "%a@." Gospel.Warnings.pp e;
-      exit 1
+let usage () =
+  Format.(fprintf err_formatter)
+    "@[ortac: required plugin is missing, please install at least one@ \
+     (qcheck-stm,@ monolith@ or@ wrapper).@]@.";
+  exit Cmd.Exit.cli_error
 
-  let info =
-    Cmd.info "default"
-      ~doc:
-        "Wrap module functions with assertions to check their specifications."
-
-  let term = Term.(const main $ ocaml_file $ output_file $ setup_log)
-  let cmd = Cmd.v info term
-end
-
-let group =
-  let cmds =
-    Registration.fold
-      (fun acc cmd -> cmd :: acc)
-      [ Default.cmd ] Registration.plugins
-  in
-  let doc = "Run ORTAC." in
-  let version = "ortac version %%VERSION%%" in
-  let info = Cmd.info "ortac" ~doc ~version in
-  Cmd.group info cmds
-
-let () = Stdlib.exit (Cmd.eval group)
+let () =
+  match
+    Registration.fold (fun acc cmd -> cmd :: acc) [] Registration.plugins
+  with
+  | [] -> usage ()
+  | cmds ->
+      let doc = "Run ORTAC." in
+      let version = "ortac version %%VERSION%%" in
+      let info = Cmd.info "ortac" ~doc ~version in
+      let group = Cmd.group info cmds in
+      Stdlib.exit (Cmd.eval group)

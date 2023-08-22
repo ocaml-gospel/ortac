@@ -2,4 +2,5 @@
  (name default)
  (deps
   (alias monolith/default)
-  (alias qcheck-stm/default)))
+  (alias qcheck-stm/default)
+  (alias wrapper/default)))
