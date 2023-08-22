@@ -117,20 +117,22 @@ $ head -c 16 /dev/urandom > inputs/input
 $ afl-fuzz -i inputs -o outputs -- ./path/to/main.exe @@
 ```
 
-## Known limitations
+## Supported Gospel and other limitations
 
-There are some limitations the user should know about:
+The Monolith plugin has currently some limitations on what Gospel
+specifications are supported. Apart from the general restriction to
+the executable fragment of Gospel (as mentioned in the [main README]),
+the Monolith plugin does not support yet:
+
+- `model`s,
+- the `old` operator.
+
+[main README]: ../../README.md#supported-gospel
+
+There are some other limitations the user should know about:
 
 - as Monolith does not support tuple greater than pairs, this plugin
   does not either,
 - the generated data generators are not very smart, so if you have
   strict preconditions or invariants, you will obtain a lot of
   uninformative inputs.
-
-
-## Supported Gospel
-
-The monolith plugin has currently some limitations on what Gospel
-specifications are supported. They are listed in the [main README].
-
-[main README]: ../../README.md#supported-gospel
