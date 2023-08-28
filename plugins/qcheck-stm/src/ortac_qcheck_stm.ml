@@ -4,7 +4,7 @@ module Ir_of_gospel = Ir_of_gospel
 module Reserr = Reserr
 module Stm_of_ir = Stm_of_ir
 
-let main path init sut =
+let main path init sut () =
   let open Reserr in
   let pp = Fmt.((pp Ppxlib_ast.Pprintast.structure) stdout) in
   pp
@@ -39,7 +39,7 @@ end = struct
 
   let term =
     let open Registration in
-    Term.(const main $ ocaml_file $ init $ sut)
+    Term.(const main $ ocaml_file $ init $ sut $ setup_log)
 
   let cmd = Cmd.v info term
 end
