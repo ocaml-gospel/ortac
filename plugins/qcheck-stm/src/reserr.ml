@@ -30,6 +30,7 @@ type W.kind +=
   | Type_not_supported of string
   | Impossible_init_state_generation of init_state_error
   | Functional_argument of string
+  | Ghost_values of (string * [ `Arg | `Ret ])
 
 let level kind =
   match kind with
@@ -37,7 +38,7 @@ let level kind =
   | Multiple_sut_arguments _ | Incompatible_type _ | No_spec _
   | Impossible_term_substitution _ | Ignored_modifies _
   | Ensures_not_found_for_next_state _ | Type_not_supported _
-  | Functional_argument _ ->
+  | Functional_argument _ | Ghost_values _ ->
       W.Warning
   | No_sut_type _ | No_init_function _ | Syntax_error_in_type _
   | Sut_type_not_supported _ | Type_not_supported_for_sut_parameter _
@@ -157,6 +158,10 @@ let pp_kind ppf kind =
         W.quoted fct
   | Functional_argument a ->
       pf ppf "Functional argument (%a) are not tested." W.quoted a
+  | Ghost_values (id, k) ->
+      pf ppf "Functions with a ghost %s (%a) are not tested."
+        (match k with `Arg -> "argument" | `Ret -> "returned value")
+        W.quoted id
   | _ -> W.pp_kind ppf kind
 
 let pp_errors = W.pp_param pp_kind level |> Fmt.list
