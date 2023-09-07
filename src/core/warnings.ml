@@ -26,8 +26,7 @@ let quoted ppf = pf ppf "`%s'"
 
 let pp_kind ppf = function
   | GospelError k -> pf ppf "Gospel error: %a" Gospel.Warnings.pp_kind k
-  | Unsupported msg ->
-      pf ppf "unsupported %s. The clause has not been translated" msg
+  | Unsupported msg -> pf ppf "Skipping clause:@ unsupported %s" msg
   | _ -> raise Unkown_kind
 
 let pp_param pp_kind level ppf (k, loc) =
