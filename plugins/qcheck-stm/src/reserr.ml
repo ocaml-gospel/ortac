@@ -88,86 +88,97 @@ let ( <*> ) = app
 let pp_kind ppf kind =
   let open Fmt in
   match kind with
-  | Constant_value id -> pf ppf "%a is a constant." W.quoted id
-  | Returning_sut id -> pf ppf "%a returns a sut." W.quoted id
-  | No_sut_argument id -> pf ppf "%a have no sut argument." W.quoted id
+  (* Warnings *)
+  | Constant_value id ->
+      pf ppf "Skipping %a:@ %a" W.quoted id text "constants cannot be tested"
+  | Returning_sut id ->
+      pf ppf "Skipping %a:@ %a" W.quoted id text
+        "functions returning a SUT value cannot be tested"
+  | No_sut_argument id ->
+      pf ppf "Skipping %a:@ %a" W.quoted id text
+        "functions with no SUT argument cannot be tested"
   | Multiple_sut_arguments id ->
-      pf ppf "%a have multiple sut arguments." W.quoted id
-  | No_sut_type ty ->
-      pf ppf "Type %a is not declared in the module." W.quoted ty
-  | No_init_function f ->
-      pf ppf "Function %a is not declared in the module." W.quoted f
-  | Syntax_error_in_type t ->
-      pf ppf "%a is not a well formed type expression." W.quoted t
-  | Syntax_error_in_init_sut s ->
-      pf ppf "%a is not a well formed OCaml expression." W.quoted s
-  | Sut_type_not_supported ty ->
-      pf ppf "The type %a given for the system under test is not supported."
-        W.quoted ty
-  | Init_sut_not_supported e ->
-      pf ppf "The expression %a given for init_sut in not supported." W.quoted e
-  | Type_parameter_not_instantiated ty ->
-      pf ppf "Type parameter %a should be instantiated." W.quoted ty
-  | Type_not_supported_for_sut_parameter ty ->
-      pf ppf
-        "Type parameter in %a are not supported as type argument for the \
-         system under test."
-        W.quoted ty
+      pf ppf "Skipping %a:@ %a" W.quoted id text
+        "functions with multiple SUT arguments cannot be tested"
   | Incompatible_type v ->
-      pf ppf
-        "Type of system under test in %a is incompatible with command line \
-         argument."
-        W.quoted v
-  | Sut_type_not_specified ty ->
-      pf ppf "The type %a given for the system under test is not specified."
-        W.quoted ty
-  | No_models ty ->
-      pf ppf "The type %a given for the system under test has no models."
-        W.quoted ty
-  | No_spec fct -> pf ppf "The function %a is not specified." W.quoted fct
-  | Impossible_term_substitution (t, `NotModel) ->
-      pf ppf
-        "The term %a can not be substituted (supported only when applied to \
-         one of its model fields)."
-        W.quoted t
-  | Impossible_term_substitution (t, (`Old as no))
-  | Impossible_term_substitution (t, (`New as no)) ->
-      let s = match no with `Old -> "under" | `New -> "above" in
-      pf ppf
-        "The term %a can not be substituted (supported only %s `old` operator)."
-        W.quoted t s
-  | Ignored_modifies m -> pf ppf "Skipping `modifies` %a." W.quoted m
+      pf ppf "Skipping %a:@ %a" W.quoted v text
+        "the type of its SUT-type argument is incompatible with command-line \
+         argument"
+  | No_spec fct ->
+      pf ppf "Skipping %a:@ %a" W.quoted fct text
+        "functions without specification cannot be tested"
+  | Impossible_term_substitution (t, why) ->
+      let msg =
+        match why with
+        | `Old -> "substitution supported only above `old` operator"
+        | `New -> "substitution supported only under `old` operator"
+        | `NotModel ->
+            "substitution supported only when applied to one of the model \
+             fields"
+      in
+      pf ppf "Skipping clause with term %a:@ %a" W.quoted t text msg
+  | Ignored_modifies m ->
+      pf ppf "Skipping unsupported `modifies` clause %a:@ %a" W.quoted m text
+        "expected `modifies x` or `modifies x.model` where `x` is the SUT"
   | Ensures_not_found_for_next_state m ->
-      pf ppf
-        "No translatable `ensures` clause found to generate `next_state` for \
-         model %a."
-        W.quoted m
-  | Type_not_supported ty -> pf ppf "Type not supported %a." W.quoted ty
-  | Impossible_init_state_generation (Not_a_function_call f) ->
-      pf ppf "The expression %a given for `init_state` is not a function call."
-        W.quoted f
-  | Impossible_init_state_generation (No_appropriate_specifications fct) ->
-      pf ppf
-        "The function %a used for `init_state` is not approriately specified."
-        W.quoted fct
-  | Impossible_init_state_generation (Not_returning_sut fct) ->
-      pf ppf "The function %a used for `init_state` does not return `sut`."
-        W.quoted fct
-  | Impossible_init_state_generation (Qualified_name fct) ->
-      pf ppf
-        "Qualified name (%a) is not supported yet for generating `init_state`."
-        W.quoted fct
-  | Impossible_init_state_generation (Mismatch_number_of_arguments fct) ->
-      pf ppf
-        "Mismatch number of arguments between %a and the function \
-         specification."
-        W.quoted fct
+      pf ppf "Skipping function because its impact on model %a is unknown:@ %a"
+        W.quoted m text
+        "model is declared as modified by the function but no translatable \
+         `ensures` clause was found"
+  (* TODO: This error message is broad and used in seemingly different contexts;
+     we might turn it into more specific error messages *)
+  | Type_not_supported ty -> pf ppf "Type %a not supported" W.quoted ty
   | Functional_argument a ->
-      pf ppf "Functional argument (%a) are not tested." W.quoted a
+      pf ppf "Skipping function with argument of type %a:@ %a" W.quoted a text
+        "functions are not supported yet as arguments"
   | Ghost_values (id, k) ->
-      pf ppf "Functions with a ghost %s (%a) are not tested."
+      pf ppf "Skipping function with a ghost %s %a"
         (match k with `Arg -> "argument" | `Ret -> "returned value")
         W.quoted id
+  (* Errors *)
+  | No_sut_type ty -> pf ppf "Type %a not declared in the module" W.quoted ty
+  | No_init_function f ->
+      pf ppf "Function %a not declared in the module" W.quoted f
+  | Syntax_error_in_type t -> pf ppf "Syntax error in type %a" W.quoted t
+  | Syntax_error_in_init_sut s ->
+      pf ppf "Syntax error in OCaml expression %a" W.quoted s
+  | Sut_type_not_supported ty ->
+      pf ppf "Unsupported SUT type %a:@ %a" W.quoted ty text
+        "SUT type must be a type constructor, possibly applied to type \
+         arguments"
+  | Init_sut_not_supported e ->
+      (* DEAD? *)
+      pf ppf "The expression %a given for init_sut in not supported." W.quoted e
+  | Type_parameter_not_instantiated ty ->
+      pf ppf "Unsupported type parameter %a:@ %a" W.quoted ty text
+        "SUT type should be fully instantiated"
+  | Type_not_supported_for_sut_parameter ty ->
+      pf ppf "Unsupported type parameter %a:@ %a" W.quoted ty text
+        "only constructors and tuples are supported in arguments for the SUT \
+         type"
+  | Sut_type_not_specified ty ->
+      pf ppf "Missing specification for the SUT type %a" W.quoted ty
+  | No_models ty -> pf ppf "Missing model(s) for the SUT type %a" W.quoted ty
+  | Impossible_init_state_generation (Not_a_function_call fct) ->
+      pf ppf "Unsupported INIT expression %a:@ %a" W.quoted fct text
+        "the INIT expression is expected to be a function call (the \
+         specification of that function is required to initialize the model \
+         state)"
+  | Impossible_init_state_generation (No_appropriate_specifications fct) ->
+      pf ppf "Unsupported INIT expression %a:@ %a" W.quoted fct text
+        "the function called in the INIT expression must be specified to \
+         initialize the model state"
+  | Impossible_init_state_generation (Not_returning_sut fct) ->
+      pf ppf "Unsupported INIT expression %a:@ %a" W.quoted fct text
+        "the function called in the INIT expression must return a value of SUT \
+         type"
+  | Impossible_init_state_generation (Qualified_name fct) ->
+      pf ppf "Unsupported INIT expression %a:@ %a" W.quoted fct text
+        "qualified names are not yet supported"
+  | Impossible_init_state_generation (Mismatch_number_of_arguments fct) ->
+      pf ppf "Error in INIT expression %a:@ %a" W.quoted fct text
+        "mismatch in the number of arguments between the INIT expression and \
+         the function specification"
   | _ -> W.pp_kind ppf kind
 
 let pp_errors = W.pp_param pp_kind level |> Fmt.list
