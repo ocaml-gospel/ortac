@@ -107,21 +107,26 @@ let ty_var_substitution config (vd : val_description) =
 
 let split_args config ty args =
   let open Ppxlib in
+  let open Reserr in
+  let module Ident = Identifier.Ident in
   let rec aux sut acc ty args =
     match (ty.ptyp_desc, args) with
-    | _, Lghost _ :: xs -> aux sut acc ty xs
+    | _, Lghost vs :: _ ->
+        error
+          ( Ghost_values (Fmt.str "%a" Ident.pp vs.vs_name, `Arg),
+            vs.vs_name.id_loc )
     | Ptyp_arrow (_, l, r), Lnone vs :: xs
     | Ptyp_arrow (_, l, r), Loptional vs :: xs
     | Ptyp_arrow (_, l, r), Lnamed vs :: xs ->
         if Cfg.is_sut config l then aux (Some vs.vs_name) acc r xs
         else aux sut ((l, Some vs.vs_name) :: acc) r xs
     | Ptyp_arrow (_, l, r), Lunit :: xs -> aux sut ((l, None) :: acc) r xs
-    | _, [] -> (sut, List.rev acc)
+    | _, [] -> ok (sut, List.rev acc)
     | _, _ -> failwith "shouldn't happen (too few parameters)"
   in
-  match aux None [] ty args with
-  | None, _ -> failwith "shouldn't happen (sut type not found)"
-  | Some sut, args -> (sut, args)
+  let* sut, args = aux None [] ty args in
+  (* sut cannot be none because its presence has already been checked *)
+  ok (Option.get sut, args)
 
 let get_state_description_with_index is_t state spec =
   let open Tterm in
@@ -185,14 +190,16 @@ let val_desc config state vd =
   and* spec =
     of_option ~default:(No_spec vd.vd_name.id_str, vd.vd_loc) vd.vd_spec
   in
-  let sut, args = split_args config vd.vd_type spec.sp_args in
-  let ret =
-    List.filter_map
-      (function Lnone vs -> Some vs.vs_name | _ -> None)
-      spec.sp_ret
-    |> function
-    | [] -> None
-    | x :: _ -> Some x
+  let* sut, args = split_args config vd.vd_type spec.sp_args
+  and* ret =
+    match spec.sp_ret with
+    | [ Lnone vs ] -> ok (Some vs.vs_name)
+    | [] -> ok None
+    | Lghost vs :: _ | _ :: Lghost vs :: _ ->
+        error
+          ( Ghost_values (Fmt.str "%a" Ident.pp vs.vs_name, `Ret),
+            vs.vs_name.id_loc )
+    | _ -> failwith "shouldn't happen (more than one return OCaml value)"
   in
   let* next_state = next_state sut state spec in
   let postcond = postcond spec in
