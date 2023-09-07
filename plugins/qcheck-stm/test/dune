@@ -1,3 +1,24 @@
+(rule
+ (target all_warnings_errors)
+ (package ortac-qcheck-stm)
+ (deps
+  (package ortac-core)
+  (package ortac-qcheck-stm))
+ (action
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   qcheck-stm
+   (ignore-stdout
+    (with-stderr-to
+     %{target}
+     (run ortac qcheck-stm %{dep:all_warnings.mli} "make 16 'a'" "char t"))))))
+
+(rule
+ (alias runtest)
+ (package ortac-qcheck-stm)
+ (action
+  (diff all_warnings_errors.expected all_warnings_errors)))
+
 (library
  (name array)
  (modules array))
