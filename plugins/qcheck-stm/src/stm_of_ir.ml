@@ -308,7 +308,7 @@ let run config ir =
   let expr = efun [ (Nolabel, pvar cmd_name); (Nolabel, pvar sut_name) ] body in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
-let next_state_case config state_ident value =
+let next_state_case config state_ident nb_models value =
   let state_var = str_of_ident state_ident |> evar in
   let lhs = mk_cmd_pattern value in
   let open Reserr in
@@ -345,7 +345,9 @@ let next_state_case config state_ident value =
     | [] -> ok (idx, state_var)
     | fields -> (
         let new_state =
-          pexp_record fields (Some (evar (str_of_ident state_ident)))
+          pexp_record fields
+            (if List.length fields = nb_models then None
+             else Some (evar (str_of_ident state_ident)))
         in
         let translate_checks = translate_checks config value state_ident in
         let* checks = map translate_checks value.postcond.checks in
@@ -362,11 +364,12 @@ let next_state config ir =
   let cmd_name = gen_symbol ~prefix:"cmd" () in
   let state_name = gen_symbol ~prefix:"state" () in
   let state_ident = Ident.create ~loc:Location.none state_name in
+  let nb_models = List.length ir.state in
   let open Reserr in
   let* idx_cases =
     map
       (fun v ->
-        let* i, c = next_state_case config state_ident v in
+        let* i, c = next_state_case config state_ident nb_models v in
         ok ((v.id, i), c))
       ir.values
   in
