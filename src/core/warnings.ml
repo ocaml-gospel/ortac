@@ -1,4 +1,5 @@
 open Ppxlib
+module GW = Gospel.Warnings
 
 type level = Warning | Error
 type kind = ..
@@ -17,11 +18,9 @@ exception Error of t
 
 open Fmt
 
-let styled_list l pp = List.fold_left (fun acc x -> styled x acc) pp l
-
 let pp_level ppf = function
-  | Warning -> pf ppf "%a: " (styled_list [ `Yellow; `Bold ] string) "Warning"
-  | Error -> pf ppf "%a: " (styled_list [ `Red; `Bold ] string) "Error"
+  | Warning -> GW.styled_list [ `Yellow; `Bold ] string ppf "Warning"
+  | Error -> GW.styled_list [ `Red; `Bold ] string ppf "Error"
 
 let quoted ppf = pf ppf "`%s'"
 
@@ -31,14 +30,9 @@ let pp_kind ppf = function
       pf ppf "unsupported %s. The clause has not been translated" msg
   | _ -> raise Unkown_kind
 
-let is_fake_loc loc = loc.loc_start.pos_fname = "_none_"
-
 let pp_param pp_kind level ppf (k, loc) =
-  if is_fake_loc loc then pf ppf "%a@[%a@]@\n" pp_level (level k) pp_kind k
-  else
-    pf ppf "%a@\n%a@[%a@]@\n"
-      (styled `Bold Location.print)
-      loc pp_level (level k) pp_kind k
+  let pp_sort ppf k = pp_level ppf (level k) in
+  GW.pp_gen pp_sort pp_kind ppf loc k
 
 let pp = pp_param pp_kind level
 
