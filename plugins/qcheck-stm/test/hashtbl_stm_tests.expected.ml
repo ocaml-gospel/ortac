@@ -63,23 +63,16 @@ module Spec =
                pure Length])
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
-      | Clear -> { state__003_ with contents = [] }
-      | Reset -> { state__003_ with contents = [] }
-      | Add (a_2, b_2) ->
-          { state__003_ with contents = ((a_2, b_2) :: state__003_.contents)
-          }
+      | Clear -> { contents = [] }
+      | Reset -> { contents = [] }
+      | Add (a_2, b_2) -> { contents = ((a_2, b_2) :: state__003_.contents) }
       | Find a_3 -> state__003_
       | Find_opt a_4 -> state__003_
       | Find_all a_5 -> state__003_
       | Mem a_6 -> state__003_
-      | Remove a_7 ->
-          {
-            state__003_ with
-            contents = (remove_first a_7 state__003_.contents)
-          }
+      | Remove a_7 -> { contents = (remove_first a_7 state__003_.contents) }
       | Replace (a_8, b_3) ->
           {
-            state__003_ with
             contents =
               ((a_8, b_3) :: (remove_first a_8 state__003_.contents))
           }
