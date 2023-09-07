@@ -1,3 +1,5 @@
 File "ref.mli", line 12, characters 26-27:
-Warning: The term `r:int ref' can not be substituted (supported only when applied to one of its model fields).
-
+12 |     ensures i + 1 = succ !r *)
+                               ^
+Warning: Skipping clause with term `r:int ref': substitution supported only
+         when applied to one of the model fields.

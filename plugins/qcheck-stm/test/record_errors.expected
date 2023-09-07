@@ -1,3 +1,5 @@
 File "record.mli", line 13, characters 16-17:
-Warning: The term `r:t' can not be substituted (supported only when applied to one of its model fields).
-
+13 |     ensures i = r.c *)
+                     ^
+Warning: Skipping clause with term `r:t': substitution supported only when
+         applied to one of the model fields.

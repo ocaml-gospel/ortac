@@ -1,2 +1,4 @@
 File "lib.mli", line 20, characters 44-52:
-Warning: unsupported old operator. The clause has not been translated
+20 |                 mem j bv <-> i = j \/ mem j (old bv) *)
+                                                 ^^^^^^^^
+Warning: Skipping clause: unsupported old operator.
