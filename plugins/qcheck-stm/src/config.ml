@@ -84,13 +84,16 @@ let init_sut_from_string str =
   with _ -> Reserr.(error (Syntax_error_in_init_sut str, Location.none))
 
 let init path init_sut sut_str =
-  let module_name = Utils.module_name_of_path path in
-  Parser_frontend.parse_ocaml_gospel path |> Utils.type_check [] path
-  |> fun (env, sigs) ->
-  assert (List.length env = 1);
-  let namespace = List.hd env in
-  let context = Context.init module_name namespace in
   let open Reserr in
-  let* sut_core_type = sut_core_type sut_str
-  and* init_sut = init_sut_from_string init_sut in
-  ok (sigs, { context; sut_core_type; init_sut })
+  try
+    let module_name = Utils.module_name_of_path path in
+    Parser_frontend.parse_ocaml_gospel path |> Utils.type_check [] path
+    |> fun (env, sigs) ->
+    assert (List.length env = 1);
+    let namespace = List.hd env in
+    let context = Context.init module_name namespace in
+    let* sut_core_type = sut_core_type sut_str
+    and* init_sut = init_sut_from_string init_sut in
+    ok (sigs, { context; sut_core_type; init_sut })
+  with Gospel.Warnings.Error (l, k) ->
+    error (Ortac_core.Warnings.GospelError k, l)

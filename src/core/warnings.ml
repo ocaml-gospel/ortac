@@ -2,13 +2,16 @@ open Ppxlib
 
 type level = Warning | Error
 type kind = ..
-type kind += Unsupported of string
+type kind += GospelError of Gospel.Warnings.kind | Unsupported of string
 
 exception Unkown_kind
 
 type t = kind * Location.t
 
-let level = function Unsupported _ -> Warning | _ -> raise Unkown_kind
+let level = function
+  | GospelError _ -> Error
+  | Unsupported _ -> Warning
+  | _ -> raise Unkown_kind
 
 exception Error of t
 
@@ -23,6 +26,7 @@ let pp_level ppf = function
 let quoted ppf = pf ppf "`%s'"
 
 let pp_kind ppf = function
+  | GospelError k -> pf ppf "Gospel error: %a" Gospel.Warnings.pp_kind k
   | Unsupported msg ->
       pf ppf "unsupported %s. The clause has not been translated" msg
   | _ -> raise Unkown_kind
