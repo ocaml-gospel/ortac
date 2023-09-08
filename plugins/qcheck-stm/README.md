@@ -1,8 +1,5 @@
 # QCheck-STM plugin for Ortac
 
-:warning: This project is still under heavy development, with no
-stable release yet. Expect rough edges!
-
 This directory contains a plugin for [Ortac] that can generate a
 standalone executable using [QCheck-STM] to perform model-based
 state-machine testing of a module by using the model of its Gospel
@@ -15,7 +12,7 @@ specifications.
 
 Follow the global [installation instructions] in the main README of
 this repository. The QCheck-STM plugin is provided by the
-`ortac-qcheck-stm` OPAM package, which depends on the `ortac` and
+`ortac-qcheck-stm` OPAM package, which depends on the `ortac-core` and
 `ortac-runtime` packages.
 
 [installation instructions]: ../../README.md#installation
