@@ -28,8 +28,7 @@
  (deps
   (package ortac-core)
   (package ortac-wrapper)
-  (package ortac-monolith)
-  (package ortac-qcheck-stm))
+  (package ortac-monolith))
  (action
   (with-stderr-to
    errors

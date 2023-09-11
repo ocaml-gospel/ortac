@@ -3,9 +3,7 @@
  (package ortac-wrapper)
  (deps
   (package ortac-core)
-  (package ortac-wrapper)
-  (package ortac-monolith)
-  (package ortac-qcheck-stm))
+  (package ortac-wrapper))
  (action
   (with-stdout-to
     %{target}

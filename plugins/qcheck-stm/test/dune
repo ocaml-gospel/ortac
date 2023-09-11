@@ -28,8 +28,6 @@
  (package ortac-qcheck-stm)
  (deps
   (package ortac-core)
-  (package ortac-wrapper)
-  (package ortac-monolith)
   (package ortac-qcheck-stm))
  (action
   (with-stderr-to
@@ -73,8 +71,6 @@
  (package ortac-qcheck-stm)
  (deps
   (package ortac-core)
-  (package ortac-wrapper)
-  (package ortac-monolith)
   (package ortac-qcheck-stm))
  (action
   (with-stderr-to
