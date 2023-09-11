@@ -30,11 +30,14 @@
   (package ortac-core)
   (package ortac-qcheck-stm))
  (action
-  (with-stderr-to
-   array_errors
-   (with-stdout-to
-    %{target}
-    (run ortac qcheck-stm %{dep:array.mli} "make 16 'a'" "char t")))))
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   qcheck-stm
+   (with-stderr-to
+    array_errors
+    (with-stdout-to
+     %{target}
+     (run ortac qcheck-stm %{dep:array.mli} "make 16 'a'" "char t"))))))
 
 (rule
  (alias runtest)
@@ -73,16 +76,19 @@
   (package ortac-core)
   (package ortac-qcheck-stm))
  (action
-  (with-stderr-to
-   hashtbl_errors
-   (with-stdout-to
-    %{target}
-    (run
-     ortac
-     qcheck-stm
-     %{dep:hashtbl.mli}
-     "create ~random:false 16"
-     "(char, int) t")))))
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   qcheck-stm
+   (with-stderr-to
+    hashtbl_errors
+    (with-stdout-to
+     %{target}
+     (run
+      ortac
+      qcheck-stm
+      %{dep:hashtbl.mli}
+      "create ~random:false 16"
+      "(char, int) t"))))))
 
 (rule
  (alias runtest)

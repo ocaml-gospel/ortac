@@ -30,9 +30,12 @@
   (package ortac-wrapper)
   (package ortac-monolith))
  (action
-  (with-stderr-to
-   errors
-   (run ortac monolith -o %{target} %{dep:lib.mli}))))
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   monolith
+   (with-stderr-to
+    errors
+    (run ortac monolith -o %{target} %{dep:lib.mli})))))
 
 (rule
  (copy ../../../wrapper/test/generated/lib.mli lib.mli))
