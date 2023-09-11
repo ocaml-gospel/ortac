@@ -35,7 +35,7 @@ depends: [
   "fmt"
   "ppxlib" {>= "0.26.0"}
   "gospel"
-  "alcotest" {>= "0.8.1" with-test}
+  "alcotest" {with-test & >= "0.8.1"}
   "ortac-runtime" {with-test}
 ]
 

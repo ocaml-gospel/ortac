@@ -27,6 +27,6 @@ depends: [
   "dune" {>= "3.0"}
   "monolith" {>= "20201026"}
   "pprint"
-  "ortac-runtime"
   "fmt" {>= "0.9.0"}
+  "ortac-runtime"
 ]
