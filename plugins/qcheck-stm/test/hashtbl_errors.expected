@@ -4,17 +4,11 @@ Warning: `copy' returns a sut.
 File "hashtbl.mli", line 63, characters 12-28:
 Warning: Functional argument (`'a -> 'b -> unit') are not tested.
 
-File "hashtbl.mli", line 63, characters 0-51:
-Warning: The function `iter' is not specified.
-
 File "hashtbl.mli", line 64, characters 26-47:
 Warning: Functional argument (`'a -> 'b -> 'b option') are not tested.
 
 File "hashtbl.mli", line 73, characters 12-32:
 Warning: Functional argument (`'a -> 'b -> 'c -> 'c') are not tested.
-
-File "hashtbl.mli", line 73, characters 0-59:
-Warning: The function `fold' is not specified.
 
 File "hashtbl.mli", line 78, characters 16-28:
 Warning: `randomize' have no sut argument.

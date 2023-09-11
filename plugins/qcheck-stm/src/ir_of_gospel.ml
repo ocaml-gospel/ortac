@@ -184,9 +184,8 @@ let postcond spec =
 
 let val_desc config state vd =
   let open Reserr in
-  let* () = constant_test vd
-  and* () = higher_order_test vd
-  and* inst = ty_var_substitution config vd
+  let* () = constant_test vd and* () = higher_order_test vd in
+  let* inst = ty_var_substitution config vd
   and* spec =
     of_option ~default:(No_spec vd.vd_name.id_str, vd.vd_loc) vd.vd_spec
   in
