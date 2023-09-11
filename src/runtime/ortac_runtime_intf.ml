@@ -259,7 +259,7 @@ module type S = sig
 
     module Order : sig
       val is_pre_order : ('a -> 'a -> int) -> bool
-        [@@alert not_implemented "This function cannot be implemented in Ortac"]
+      [@@alert not_implemented "This function cannot be implemented in Ortac"]
       (** This function cannot be implemented as a test in Ortac! *)
     end
 
