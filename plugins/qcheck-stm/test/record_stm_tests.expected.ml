@@ -1,4 +1,7 @@
 open Record
+let plus1_1 i =
+  Ortac_runtime.Gospelstdlib.(+) i
+    (Ortac_runtime.Gospelstdlib.integer_of_int 1)
 module Spec =
   struct
     open STM
@@ -11,8 +14,8 @@ module Spec =
     type nonrec state = {
       value: Ortac_runtime.integer }
     let init_state =
-      let i_1 = 42 in
-      { value = (Ortac_runtime.Gospelstdlib.integer_of_int i_1) }
+      let i_2 = 42 in
+      { value = (Ortac_runtime.Gospelstdlib.integer_of_int i_2) }
     let init_sut () = make 42
     let cleanup _ = ()
     let arb_cmd _ =
@@ -24,9 +27,19 @@ module Spec =
     let postcond cmd__004_ state__005_ res__006_ =
       let new_state__007_ = lazy (next_state cmd__004_ state__005_) in
       match (cmd__004_, res__006_) with
-      | (Get, Res ((Int, _), i)) ->
-          (Ortac_runtime.Gospelstdlib.integer_of_int i) =
-            (Lazy.force new_state__007_).value
+      | (Get, Res ((Int, _), i_1)) ->
+          ((Ortac_runtime.Gospelstdlib.integer_of_int i_1) =
+             (Lazy.force new_state__007_).value)
+            &&
+            (((plus1_1 (Ortac_runtime.Gospelstdlib.integer_of_int i_1)) =
+                (Ortac_runtime.Gospelstdlib.(+)
+                   (Ortac_runtime.Gospelstdlib.integer_of_int i_1)
+                   (Ortac_runtime.Gospelstdlib.integer_of_int 1)))
+               &&
+               ((Ortac_runtime.Gospelstdlib.integer_of_int (plus2 i_1)) =
+                  (Ortac_runtime.Gospelstdlib.(+)
+                     (Ortac_runtime.Gospelstdlib.integer_of_int i_1)
+                     (Ortac_runtime.Gospelstdlib.integer_of_int 2))))
       | _ -> true
     let run cmd__010_ sut__011_ =
       match cmd__010_ with | Get -> Res (int, (get sut__011_))

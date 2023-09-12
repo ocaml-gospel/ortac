@@ -83,6 +83,18 @@ let init path init_sut sut_str =
     assert (List.length env = 1);
     let namespace = List.hd env in
     let context = Context.init module_name namespace in
+    let add ctx s =
+      (* we add to the context the pure OCaml values and the functions and
+         predicates with a body *)
+      match s.Tast.sig_desc with
+      | Sig_val ({ vd_name; vd_spec = Some { sp_pure = true; _ }; _ }, _) ->
+          let ls = Context.get_ls ctx [ vd_name.id_str ] in
+          Context.add_function ls vd_name.id_str ctx
+      | Sig_function { fun_ls; fun_def = Some _; _ } ->
+          Context.add_function fun_ls fun_ls.ls_name.id_str ctx
+      | _ -> ctx
+    in
+    let context = List.fold_left add context sigs in
     let* sut_core_type = sut_core_type sut_str
     and* init_sut = init_sut_from_string init_sut in
     ok (sigs, { context; sut_core_type; init_sut })
