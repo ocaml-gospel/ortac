@@ -4,23 +4,24 @@
 (implicit_transitive_deps false)
 
 (package
-  (name ortac-core)
-  (sites (lib plugins)))
+ (name ortac-core)
+ (sites
+  (lib plugins)))
 
 (package
-  (name ortac-runtime))
+ (name ortac-runtime))
 
 ; Wrapper plugin
 (package
-  (name ortac-wrapper))
+ (name ortac-wrapper))
 
 ; Monolith plugin
 (package
-  (name ortac-monolith))
+ (name ortac-monolith))
 
 (package
-  (name ortac-runtime-monolith))
+ (name ortac-runtime-monolith))
 
 ; QCheck-STM plugin
 (package
-  (name ortac-qcheck-stm))
+ (name ortac-qcheck-stm))
