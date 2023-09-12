@@ -1,7 +1,7 @@
 (test
  (name stdlibset)
  (package ortac-runtime)
- (libraries ortac-runtime zarith monolith)
+ (libraries zarith monolith ortac-runtime)
  (deps stdlibset.exe)
  (action (progn)))
 

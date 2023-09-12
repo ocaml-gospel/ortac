@@ -3,14 +3,7 @@
  (public_name ortac)
  (modules sites cli)
  (package ortac-core)
- (libraries
-  dune-site
-  dune-site.plugins
-  dune-private-libs.dune-section
-  registration
-  cmdliner
-  fmt
-  gospel))
+ (libraries dune-site.plugins cmdliner fmt gospel registration))
 
 (library
  (public_name ortac-core.register)
