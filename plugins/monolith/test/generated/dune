@@ -1,7 +1,7 @@
 (test
  (name wrapper)
  (package ortac-monolith)
- (libraries ortac-runtime-monolith monolith)
+ (libraries monolith ortac-runtime-monolith)
  (action
   (echo
    "\n%{dep:wrapper.exe} has been generated with the ortac-monolith plugin.\n")))

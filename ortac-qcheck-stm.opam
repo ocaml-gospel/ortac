@@ -32,10 +32,9 @@ depends: [
   "fmt"
   "ppxlib" {>= "0.26.0"}
   "gospel"
+  "qcheck-core" {with-test}
+  "qcheck-stm" {with-test}
+  "qcheck-multicoretests-util" {with-test}
   "ortac-core"
   "ortac-runtime"
-  "qcheck-stm"
-  "qcheck-core"
 ]
-
-

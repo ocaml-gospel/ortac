@@ -4,14 +4,13 @@
  (preprocess
   (pps ppxlib.metaquot))
  (libraries
-  ortac-core
-  ortac-core.register
-  ortac-wrapper.plugin
   gospel
   cmdliner
   fmt
-  ppxlib
-  ppxlib.astlib))
+  ppxlib.astlib
+  ortac-core
+  ortac-core.register
+  ortac-wrapper.plugin))
 
 (plugin
  (name ortac-monolith)

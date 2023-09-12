@@ -5,13 +5,13 @@
   (source_tree translation/))
  (libraries
   alcotest
-  ortac-runtime
-  ortac-core
-  ortac-wrapper.plugin
   gospel
   fmt
   arrays
   arith
   exceptions
   terms
-  ltypes))
+  ltypes
+  ortac-runtime
+  ortac-core
+  ortac-wrapper.plugin))
