@@ -14,7 +14,7 @@
   ppxlib.astlib))
 
 (plugin
- (name ortac-monolith)
+ (name monolith)
  (package ortac-monolith)
  (libraries ortac-monolith.plugin)
  (site
