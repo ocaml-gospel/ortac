@@ -3,13 +3,14 @@
  (package ortac-wrapper)
  (deps
   (package ortac-core)
-  (package ortac-wrapper)
-  (package ortac-monolith)
-  (package ortac-qcheck-stm))
+  (package ortac-wrapper))
  (action
-  (with-stdout-to
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   wrapper
+   (with-stdout-to
     %{target}
-   (run ortac wrapper %{dep:lib.mli}))))
+    (run ortac wrapper %{dep:lib.mli})))))
 
 (rule
  (target lib_rtac.mli)

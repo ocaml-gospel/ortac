@@ -1,4 +1,7 @@
-let () = Sites.Plugins.Plugins.load_all ()
+let () =
+  match Sys.getenv_opt "ORTAC_ONLY_PLUGIN" with
+  | None -> Sites.Plugins.Plugins.load_all ()
+  | Some plug -> Sites.Plugins.Plugins.load plug
 
 open Cmdliner
 

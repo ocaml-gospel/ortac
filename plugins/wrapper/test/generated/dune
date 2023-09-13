@@ -11,13 +11,14 @@
  (package ortac-wrapper)
  (deps
   (package ortac-core)
-  (package ortac-wrapper)
-  (package ortac-monolith)
-  (package ortac-qcheck-stm))
+  (package ortac-wrapper))
  (action
-  (with-stderr-to
-   errors
-   (run ortac wrapper -o %{target} %{dep:lib.mli}))))
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   wrapper
+   (with-stderr-to
+    errors
+    (run ortac wrapper -o %{target} %{dep:lib.mli})))))
 
 (rule
  (alias runtest)

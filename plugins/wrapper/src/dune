@@ -6,7 +6,7 @@
   (pps ppxlib.metaquot)))
 
 (plugin
- (name ortac-wrapper)
+ (name wrapper)
  (package ortac-wrapper)
  (libraries ortac-wrapper.plugin)
  (site

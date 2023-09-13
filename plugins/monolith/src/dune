@@ -13,7 +13,7 @@
   ortac-wrapper.plugin))
 
 (plugin
- (name ortac-monolith)
+ (name monolith)
  (package ortac-monolith)
  (libraries ortac-monolith.plugin)
  (site

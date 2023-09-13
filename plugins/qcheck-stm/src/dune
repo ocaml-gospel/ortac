@@ -6,7 +6,7 @@
   (pps ppxlib.metaquot)))
 
 (plugin
- (name ortac-qcheck-stm)
+ (name qcheck-stm)
  (package ortac-qcheck-stm)
  (libraries ortac-qcheck-stm.plugin)
  (site
