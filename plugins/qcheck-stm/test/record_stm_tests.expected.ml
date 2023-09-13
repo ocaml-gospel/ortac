@@ -24,9 +24,8 @@ module Spec =
       let new_state__007_ = lazy (next_state cmd__004_ state__005_) in
       match (cmd__004_, res__006_) with
       | (Get, Res ((Int, _), i)) ->
-          ((Ortac_runtime.Gospelstdlib.integer_of_int i) =
-             (Lazy.force new_state__007_).value)
-            && (i = (Lazy.force new_state__007_).c)
+          (Ortac_runtime.Gospelstdlib.integer_of_int i) =
+            (Lazy.force new_state__007_).value
       | _ -> true
     let run cmd__010_ sut__011_ =
       match cmd__010_ with | Get -> Res (int, (get sut__011_))

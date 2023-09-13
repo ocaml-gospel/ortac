@@ -84,21 +84,37 @@ let ocaml_of_term cfg t =
   let open Reserr in
   try term ~context:cfg.Cfg.context t |> ok with W.Error e -> error e
 
-let subst_term ~gos_t ?(old_lz = false) ~old_t ?(new_lz = false) ~new_t term =
-  let exception ImpossibleSubst of (Gospel.Tterm.term * [ `New | `Old ]) in
+(** [subst_term state ~gos_t ?old_lz ~old_t ?new_lz ~new_t trm] will substitute
+    occurrences of [gos_t] with [new_t] or [old_t] depending on whether the
+    occurrence appears above or under the [old] operator, adding a [Lazy.force]
+    if the corresponding [xxx_lz] is [true] (defaults to [false]). [gos_t] must
+    always be in a position in which it is applied to one of its model fields *)
+let subst_term state ~gos_t ?(old_lz = false) ~old_t ?(new_lz = false) ~new_t
+    term =
+  let exception
+    ImpossibleSubst of (Gospel.Tterm.term * [ `New | `Old | `NotModel ])
+  in
   let rec aux cur_lz cur_t term =
     let open Gospel.Tterm in
     let next = aux cur_lz cur_t in
     match term.t_node with
-    | Tconst _ -> term
-    | Tvar { vs_name; vs_ty } when vs_name = gos_t -> (
+    (* First: the only case where substitution happens, ie x.model *)
+    | Tfield (({ t_node = Tvar { vs_name; vs_ty }; _ } as subt), ls)
+      when Ident.equal vs_name gos_t
+           && List.exists (fun (m, _) -> Ident.equal m ls.ls_name) state -> (
         match cur_t with
         | Some cur_t ->
-            let t = { term with t_node = Tvar { vs_name = cur_t; vs_ty } } in
-            if cur_lz then lazy_force t else t
+            let t = { subt with t_node = Tvar { vs_name = cur_t; vs_ty } } in
+            let t = if cur_lz then lazy_force t else t in
+            { term with t_node = Tfield (t, ls) }
         | None ->
-            raise (ImpossibleSubst (term, if cur_t = new_t then `New else `Old))
+            raise (ImpossibleSubst (subt, if cur_t = new_t then `New else `Old))
         )
+    (* If the first case didn't match, it must be because [gos_t] is not used to
+       access one of its model fields, so we error out *)
+    | Tvar { vs_name; _ } when Ident.equal vs_name gos_t ->
+        raise (ImpossibleSubst (term, `NotModel))
+    | Tconst _ -> term
     | Tvar _ -> term
     | Tapp (ls, terms) -> { term with t_node = Tapp (ls, List.map next terms) }
     | Tfield (t, ls) -> { term with t_node = Tfield (next t, ls) }
@@ -130,9 +146,9 @@ let subst_term ~gos_t ?(old_lz = false) ~old_t ?(new_lz = false) ~new_t term =
           (Fmt.str "%a" Gospel.Tterm_printer.print_term t, b),
         t.t_loc )
 
-let translate_checks config value state_ident t =
+let translate_checks config state value state_ident t =
   let open Reserr in
-  subst_term ~gos_t:value.sut_var ~old_t:(Some state_ident)
+  subst_term state ~gos_t:value.sut_var ~old_t:(Some state_ident)
     ~new_t:(Some state_ident) t
   >>= ocaml_of_term config
 
@@ -308,7 +324,7 @@ let run config ir =
   let expr = efun [ (Nolabel, pvar cmd_name); (Nolabel, pvar sut_name) ] body in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
-let next_state_case config state_ident nb_models value =
+let next_state_case state config state_ident nb_models value =
   let state_var = str_of_ident state_ident |> evar in
   let lhs = mk_cmd_pattern value in
   let open Reserr in
@@ -317,8 +333,8 @@ let next_state_case config state_ident nb_models value =
     let descriptions =
       List.filter_map
         (fun (i, { model; description }) ->
-          subst_term ~gos_t:value.sut_var ~old_t:(Some state_ident) ~new_t:None
-            description
+          subst_term state ~gos_t:value.sut_var ~old_t:(Some state_ident)
+            ~new_t:None description
           >>= ocaml_of_term config
           |> to_option
           |> Option.map (fun description -> (i, model, description)))
@@ -349,7 +365,9 @@ let next_state_case config state_ident nb_models value =
             (if List.length fields = nb_models then None
              else Some (evar (str_of_ident state_ident)))
         in
-        let translate_checks = translate_checks config value state_ident in
+        let translate_checks =
+          translate_checks config state value state_ident
+        in
         let* checks = map translate_checks value.postcond.checks in
         match checks with
         | [] -> ok (idx, new_state)
@@ -369,7 +387,7 @@ let next_state config ir =
   let* idx_cases =
     map
       (fun v ->
-        let* i, c = next_state_case config state_ident nb_models v in
+        let* i, c = next_state_case ir.state config state_ident nb_models v in
         ok ((v.id, i), c))
       ir.values
   in
@@ -381,14 +399,14 @@ let next_state config ir =
   in
   (idx, pstr_value Nonrecursive [ value_binding ~pat ~expr ]) |> ok
 
-let precond_case config state_ident value =
+let precond_case config state state_ident value =
   let lhs = mk_cmd_pattern value in
   let open Reserr in
   let* rhs =
     list_and
     <$> map
           (fun t ->
-            subst_term ~gos_t:value.sut_var ~old_t:None
+            subst_term state ~gos_t:value.sut_var ~old_t:None
               ~new_t:(Some state_ident) t
             >>= ocaml_of_term config)
           value.precond
@@ -400,7 +418,7 @@ let precond config ir =
   let state_name = gen_symbol ~prefix:"state" () in
   let state_ident = Ident.create ~loc:Location.none state_name in
   let open Reserr in
-  let* cases = map (precond_case config state_ident) ir.values in
+  let* cases = map (precond_case config ir.state state_ident) ir.values in
   let body = pexp_match (evar cmd_name) cases in
   let pat = pvar "precond" in
   let expr =
@@ -408,10 +426,10 @@ let precond config ir =
   in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
-let postcond_case config idx state_ident new_state_ident value =
+let postcond_case config state idx state_ident new_state_ident value =
   let open Reserr in
   let translate_postcond t =
-    subst_term ~gos_t:value.sut_var ~old_t:(Some state_ident) ~new_lz:true
+    subst_term state ~gos_t:value.sut_var ~old_t:(Some state_ident) ~new_lz:true
       ~new_t:(Some new_state_ident) t
     >>= ocaml_of_term config
   in
@@ -492,7 +510,7 @@ let postcond_case config idx state_ident new_state_ident value =
     else ok rhs
   in
   let* rhs =
-    let translate_checks = translate_checks config value state_ident in
+    let translate_checks = translate_checks config state value state_ident in
     let* checks = map translate_checks value.postcond.checks in
     match checks with
     | [] -> ok rhs
@@ -539,7 +557,7 @@ let postcond config idx ir =
     (Fun.flip ( @ )) [ case ~lhs:ppat_any ~guard:None ~rhs:(ebool true) ]
     <$> map
           (fun v ->
-            postcond_case config (List.assoc v.id idx) state_ident
+            postcond_case config ir.state (List.assoc v.id idx) state_ident
               new_state_ident v)
           ir.values
   in
