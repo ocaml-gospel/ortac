@@ -27,15 +27,6 @@ let is_sut config ty =
   | Ptyp_constr (lid, _) -> lid.txt = sut_type_name
   | _ -> false
 
-let is_sut_gospel_ty config ty =
-  let sut_type_unqualified_name = get_sut_type_name_str config in
-  let open Gospel.Ttypes in
-  match ty.ty_node with
-  | Tyvar _ -> false
-  | Tyapp (ts, _) ->
-      Fmt.str "%a" Gospel.Identifier.Ident.pp ts.ts_ident
-      = sut_type_unqualified_name
-
 let dump ppf t =
   Fmt.(
     pf ppf "sut_core_type: %a; init_sut: %a@." Ppxlib_ast.Pprintast.expression
