@@ -165,7 +165,8 @@ and term ~context (t : Tterm.term) : expression =
 let core_type_of_ty_with_subst subst ty =
   let open Ttypes in
   let lident_of_tysymbol ts =
-    (if ty_equal ty_integer ty then "int" else Fmt.str "%a" Ident.pp ts.ts_ident)
+    (if ty_equal ty_integer ty then "Ortac_runtime.integer"
+     else Fmt.str "%a" Ident.pp ts.ts_ident)
     |> Builder.lident
   in
   let rec aux ty =
