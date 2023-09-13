@@ -1,3 +1,9 @@
+(cram
+ (package ortac-qcheck-stm)
+ (deps
+  (package ortac-core)
+  (package ortac-qcheck-stm)))
+
 (rule
  (target all_warnings_errors)
  (package ortac-qcheck-stm)
