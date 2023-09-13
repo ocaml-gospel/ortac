@@ -321,11 +321,13 @@ let init_state config state sigs =
           Location.none )
   in
   let open Gospel.Symbols in
+  let rec return_type ty =
+    match ty.ptyp_desc with Ptyp_arrow (_, _, r) -> return_type r | _ -> ty
+  in
+  let ret_sut = Cfg.is_sut config (return_type value.vd_type) in
   let* sut =
     List.find_map
-      (function
-        | Lnone vs when Cfg.is_sut_gospel_ty config vs.vs_ty -> Some vs.vs_name
-        | _ -> None)
+      (function Lnone vs when ret_sut -> Some vs.vs_name | _ -> None)
       spec.sp_ret
     |> of_option
          ~default:
