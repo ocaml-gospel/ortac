@@ -209,10 +209,11 @@ let with_posts ~context ~term_printer posts (value : value) =
   let register_name = evar value.register_name in
   let violated term = F.violated_condition `Post ~term ~register_name in
   let nonexec term exn = F.spec_failure `Post ~term ~exn ~register_name in
+  let copies, posts = List.map Old.collect_old posts |> List.split in
   let postconditions =
     conditions ~context ~term_printer violated nonexec posts
   in
-  { value with postconditions }
+  { value with copies = copies @ value.copies; postconditions }
 
 let with_constant_checks ~context ~term_printer checks (constant : Ir.constant)
     =

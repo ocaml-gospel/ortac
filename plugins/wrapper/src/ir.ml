@@ -73,6 +73,7 @@ type value = {
   ghost : Gospel.Tast.ghost;
   pure : bool;
   checks : check list;
+  copies : (string * term) list;
   preconditions : term list;
   postconditions : term list;
   xpostconditions : xpost list;
@@ -88,6 +89,7 @@ let value ~name ~loc ~arguments ~returns ~register_name ~ghost ~pure =
     ghost;
     pure;
     checks = [];
+    copies = [];
     preconditions = [];
     postconditions = [];
     xpostconditions = [];
