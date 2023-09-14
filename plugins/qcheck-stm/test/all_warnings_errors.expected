@@ -1,0 +1,36 @@
+File "all_warnings.mli", line 12, characters 0-130:
+Warning: `constant' is a constant.
+
+File "all_warnings.mli", line 16, characters 26-30:
+Warning: `returning_sut' returns a sut.
+
+File "all_warnings.mli", line 19, characters 22-34:
+Warning: `no_sut_argument' have no sut argument.
+
+File "all_warnings.mli", line 22, characters 28-48:
+Warning: `multiple_sut_argument' have multiple sut arguments.
+
+File "all_warnings.mli", line 25, characters 24-29:
+Warning: Type of system under test in `incompatible_type' is incompatible with command line argument.
+
+File "all_warnings.mli", line 37, characters 13-15:
+Warning: Skipping `modifies` `(unit ):unit_1'.
+
+File "all_warnings.mli", line 46, characters 27-37:
+Warning: Functional argument (`'a -> bool') are not tested.
+
+File "all_warnings.mli", line 50, characters 24-25:
+Warning: Functions with a ghost argument (`x') are not tested.
+
+File "all_warnings.mli", line 53, characters 6-7:
+Warning: Functions with a ghost returned value (`x_1') are not tested.
+
+File "all_warnings.mli", line 4, characters 18-26:
+Warning: No translatable `ensures` clause found to generate `next_state` for model `contents'.
+
+File "all_warnings.mli", line 57, characters 16-54:
+Warning: unsupported quantification. The clause has not been translated
+
+File "all_warnings.mli", line 33, characters 17-18:
+Warning: The term `t_1:'a t' can not be substituted (supported only under `old` operator).
+
