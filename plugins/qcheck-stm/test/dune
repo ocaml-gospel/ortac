@@ -129,3 +129,103 @@
  (alias launchtests)
  (action
   (run %{dep:hashtbl_stm_tests.exe} -v)))
+
+(library
+ (name record)
+ (modules record))
+
+(test
+ (name record_stm_tests)
+ (package ortac-qcheck-stm)
+ (modules record_stm_tests)
+ (libraries
+  qcheck-core
+  qcheck-core.runner
+  qcheck-stm.stm
+  qcheck-stm.sequential
+  qcheck-multicoretests-util
+  ortac-runtime
+  record)
+ (flags :standard -w -27)
+ (action
+  (echo
+   "\n%{dep:record_stm_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))
+
+(rule
+ (target record_stm_tests.ml)
+ (package ortac-qcheck-stm)
+ (deps
+  (package ortac-core)
+  (package ortac-qcheck-stm))
+ (action
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   qcheck-stm
+   (with-stderr-to
+    record_errors
+    (with-stdout-to
+     %{target}
+     (run ortac qcheck-stm %{dep:record.mli} "make 42" "t"))))))
+
+(rule
+ (alias runtest)
+ (package ortac-qcheck-stm)
+ (action
+  (progn
+   (diff record_errors.expected record_errors)
+   (diff record_stm_tests.expected.ml record_stm_tests.ml))))
+
+(rule
+ (alias launchtests)
+ (action
+  (run %{dep:record_stm_tests.exe} -v)))
+
+(library
+ (name ref)
+ (modules ref))
+
+(test
+ (name ref_stm_tests)
+ (package ortac-qcheck-stm)
+ (modules ref_stm_tests)
+ (libraries
+  qcheck-core
+  qcheck-core.runner
+  qcheck-stm.stm
+  qcheck-stm.sequential
+  qcheck-multicoretests-util
+  ortac-runtime
+  ref)
+ (flags :standard -w -27)
+ (action
+  (echo
+   "\n%{dep:ref_stm_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))
+
+(rule
+ (target ref_stm_tests.ml)
+ (package ortac-qcheck-stm)
+ (deps
+  (package ortac-core)
+  (package ortac-qcheck-stm))
+ (action
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   qcheck-stm
+   (with-stderr-to
+    ref_errors
+    (with-stdout-to
+     %{target}
+     (run ortac qcheck-stm %{dep:ref.mli} "make 42" "t"))))))
+
+(rule
+ (alias runtest)
+ (package ortac-qcheck-stm)
+ (action
+  (progn
+   (diff ref_errors.expected ref_errors)
+   (diff ref_stm_tests.expected.ml ref_stm_tests.ml))))
+
+(rule
+ (alias launchtests)
+ (action
+  (run %{dep:ref_stm_tests.exe} -v)))

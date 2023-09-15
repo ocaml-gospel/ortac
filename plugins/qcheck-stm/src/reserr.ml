@@ -24,7 +24,7 @@ type W.kind +=
   | Sut_type_not_specified of string
   | No_models of string
   | No_spec of string
-  | Impossible_term_substitution of (string * [ `New | `Old ])
+  | Impossible_term_substitution of (string * [ `New | `Old | `NotModel ])
   | Ignored_modifies of string
   | Ensures_not_found_for_next_state of string
   | Type_not_supported of string
@@ -125,7 +125,13 @@ let pp_kind ppf kind =
       pf ppf "The type %a given for the system under test has no models."
         W.quoted ty
   | No_spec fct -> pf ppf "The function %a is not specified." W.quoted fct
-  | Impossible_term_substitution (t, no) ->
+  | Impossible_term_substitution (t, `NotModel) ->
+      pf ppf
+        "The term %a can not be substituted (supported only when applied to \
+         one of its model fields)."
+        W.quoted t
+  | Impossible_term_substitution (t, (`Old as no))
+  | Impossible_term_substitution (t, (`New as no)) ->
       let s = match no with `Old -> "under" | `New -> "above" in
       pf ppf
         "The term %a can not be substituted (supported only %s `old` operator)."
