@@ -73,6 +73,10 @@ let subst_invariant_fields var (t : Tterm.term) =
         let t = aux t in
         let t_node = Tterm.Tquant (q, vsl, t) in
         { t with t_node }
+    | Tlambda (ps, t) ->
+        let t = aux t in
+        let t_node = Tterm.Tlambda (ps, t) in
+        { t with t_node }
     | Tterm.Tbinop (op, t1, t2) ->
         let t1 = aux t1 in
         let t2 = aux t2 in

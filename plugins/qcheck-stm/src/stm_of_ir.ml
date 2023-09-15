@@ -132,6 +132,7 @@ let subst_term state ~gos_t ?(old_lz = false) ~old_t ?(new_lz = false) ~new_t
                   brchs );
         }
     | Tquant (q, vs, t) -> { term with t_node = Tquant (q, vs, next t) }
+    | Tlambda (ps, t) -> { term with t_node = Tlambda (ps, next t) }
     | Tbinop (o, l, r) -> { term with t_node = Tbinop (o, next l, next r) }
     | Tnot t -> { term with t_node = Tnot (next t) }
     | Told t -> aux old_lz old_t t
