@@ -6,9 +6,7 @@ module Stm_of_ir = Stm_of_ir
 
 let main path init sut output () =
   let open Reserr in
-  let fmt =
-    Registration.get_channel output |> Format.formatter_of_out_channel
-  in
+  let fmt = Registration.get_out_formatter output in
   let pp = pp Ppxlib_ast.Pprintast.structure fmt in
   pp
     (let* sigs, config = Config.init path init sut in

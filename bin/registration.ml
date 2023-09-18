@@ -4,6 +4,7 @@ let plugins = Queue.create ()
 let register cmd = Queue.add cmd plugins
 let fold = Queue.fold
 let get_channel = function None -> stdout | Some path -> open_out path
+let get_out_formatter s = get_channel s |> Format.formatter_of_out_channel
 
 open Cmdliner
 
