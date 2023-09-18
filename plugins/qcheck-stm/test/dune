@@ -62,9 +62,14 @@
    qcheck-stm
    (with-stderr-to
     array_errors
-    (with-stdout-to
-     %{target}
-     (run ortac qcheck-stm %{dep:array.mli} "make 16 'a'" "char t"))))))
+    (run
+     ortac
+     qcheck-stm
+     %{dep:array.mli}
+     "make 16 'a'"
+     "char t"
+     -o
+     %{target})))))
 
 (rule
  (alias runtest)
@@ -108,14 +113,14 @@
    qcheck-stm
    (with-stderr-to
     hashtbl_errors
-    (with-stdout-to
-     %{target}
-     (run
-      ortac
-      qcheck-stm
-      %{dep:hashtbl.mli}
-      "create ~random:false 16"
-      "(char, int) t"))))))
+    (run
+     ortac
+     qcheck-stm
+     %{dep:hashtbl.mli}
+     "create ~random:false 16"
+     "(char, int) t"
+     -o
+     %{target})))))
 
 (rule
  (alias runtest)
@@ -163,9 +168,7 @@
    qcheck-stm
    (with-stderr-to
     record_errors
-    (with-stdout-to
-     %{target}
-     (run ortac qcheck-stm %{dep:record.mli} "make 42" "t"))))))
+    (run ortac qcheck-stm %{dep:record.mli} "make 42" "t" -o %{target})))))
 
 (rule
  (alias runtest)
@@ -213,9 +216,7 @@
    qcheck-stm
    (with-stderr-to
     ref_errors
-    (with-stdout-to
-     %{target}
-     (run ortac qcheck-stm %{dep:ref.mli} "make 42" "t"))))))
+    (run ortac qcheck-stm %{dep:ref.mli} "make 42" "t" -o %{target})))))
 
 (rule
  (alias runtest)
