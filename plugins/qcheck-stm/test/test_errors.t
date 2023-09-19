@@ -1,5 +1,7 @@
 In this file, we test the different ways to make the `ortac qcheck-stm`
-command-line fail.
+command-line fail, so we load only the `qcheck-stm` plugin:
+
+  $ export ORTAC_ONLY_PLUGIN=qcheck-stm
 
 We can make a syntax error in either the expression for the `init` function, or
 in the type declaration for the sytem under test:
