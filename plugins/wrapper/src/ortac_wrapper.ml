@@ -8,8 +8,8 @@ module Plugin : sig
   val cmd : unit Cmd.t
 end = struct
   let main input output () =
-    let channel = get_channel output in
-    try Generate.generate input channel
+    let fmt = get_out_formatter output in
+    try Generate.generate input fmt
     with Gospel.Warnings.Error e ->
       Fmt.epr "%a@." Gospel.Warnings.pp e;
       exit 1

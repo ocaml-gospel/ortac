@@ -131,15 +131,14 @@ let standalone module_name env s =
   :: module_s
   :: specs
 
-let generate path output =
+let generate path fmt =
   let module_name = Ortac_core.Utils.module_name_of_path path in
-  let output = Format.formatter_of_out_channel output in
   Gospel.Parser_frontend.parse_ocaml_gospel path
   |> Ortac_core.Utils.type_check [] path
   |> fun (env, sigs) ->
   assert (List.length env = 1);
   standalone module_name (List.hd env) sigs
-  |> Fmt.pf output "%a@." Ppxlib_ast.Pprintast.structure;
+  |> Fmt.pf fmt "%a@." Ppxlib_ast.Pprintast.structure;
   W.report ()
 
 open Cmdliner
@@ -150,8 +149,8 @@ end = struct
   open Registration
 
   let main input output () =
-    let channel = get_channel output in
-    try generate input channel
+    let fmt = get_out_formatter output in
+    try generate input fmt
     with Gospel.Warnings.Error e ->
       Fmt.epr "%a@." Gospel.Warnings.pp e;
       exit 1
