@@ -45,7 +45,6 @@
   qcheck-multicoretests-util
   ortac-runtime
   array)
- (flags :standard -w -26-27-32-33)
  (action
   (echo
    "\n%{dep:array_stm_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))
@@ -96,7 +95,6 @@
   qcheck-multicoretests-util
   ortac-runtime
   hashtbl)
- (flags :standard -w -23-26-27-32-33 -w -37)
  (action
   (echo
    "\n%{dep:hashtbl_stm_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))
@@ -151,7 +149,6 @@
   qcheck-multicoretests-util
   ortac-runtime
   record)
- (flags :standard -w -27)
  (action
   (echo
    "\n%{dep:record_stm_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))
@@ -199,7 +196,6 @@
   qcheck-multicoretests-util
   ortac-runtime
   ref)
- (flags :standard -w -27)
  (action
   (echo
    "\n%{dep:ref_stm_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))

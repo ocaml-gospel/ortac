@@ -2,6 +2,7 @@ open Array
 module Spec =
   struct
     open STM
+    [@@@ocaml.warning "-26-27"]
     type sut = char t
     type cmd =
       | Length 
