@@ -28,10 +28,6 @@ val incompatible_type : int t -> bool
 val no_spec : 'a t -> bool
 (*@ b = no_spec t *)
 
-val impossible_term_substitution : 'a t -> bool
-(*@ impossible_term_substitution t
-    requires old t.contents = [] *)
-
 val ignored_modified : 'a t -> unit
 (*@ ignored_modified t
     modifies () *)

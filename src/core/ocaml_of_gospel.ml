@@ -102,15 +102,8 @@ and term ~context (t : Tterm.term) : expression =
           case ~guard:(Option.map term g) ~lhs:(pattern p) ~rhs:(term t))
         ptl
       |> pexp_match (term t)
-  | Tquant (Tterm.Tlambda, args, t) ->
-      let t = term t in
-      let args =
-        List.map
-          (fun (vs : Symbols.vsymbol) ->
-            (Nolabel, pvar (str "%a" Ident.pp vs.vs_name)))
-          args
-      in
-      efun args t
+  | Tlambda (ps, t) ->
+      efun (List.map (fun p -> (Nolabel, pattern p)) ps) (term t)
   | Tquant
       ( (Tterm.(Tforall | Texists) as quant),
         [ var ],
