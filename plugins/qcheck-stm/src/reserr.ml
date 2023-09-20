@@ -2,7 +2,9 @@ module W = Ortac_core.Warnings
 
 type init_state_error =
   | Not_a_function_call of string
-  | No_appropriate_specifications of string
+  | No_specification of string
+  | No_appropriate_specifications of string * string list
+  | No_translatable_specification of string
   | Not_returning_sut of string
   | Qualified_name of string
   | Mismatch_number_of_arguments of string
@@ -165,16 +167,29 @@ let pp_kind ppf kind =
         "the INIT expression is expected to be a function call (the \
          specification of that function is required to initialize the model \
          state)"
-  | Impossible_init_state_generation (No_appropriate_specifications fct) ->
-      pf ppf "Unsupported INIT expression %a:@ %a" W.quoted fct text
+  | Impossible_init_state_generation (No_specification fct) ->
+      pf ppf "Unsupported INIT function %a:@ %a" W.quoted fct text
         "the function called in the INIT expression must be specified to \
          initialize the model state"
+  | Impossible_init_state_generation
+      (No_appropriate_specifications (fct, models)) ->
+      pf ppf "Unsupported INIT function %a:@ %a:@ %a" W.quoted fct text
+        "the specification of the function called in the INIT expression does \
+         not specify the following fields of the model"
+        (Fmt.list ~sep:(Fmt.any ",@ ") Fmt.string)
+        models
+  | Impossible_init_state_generation (No_translatable_specification model) ->
+      pf ppf "Unsupported INIT function:@ %a:@ %s" text
+        "the specification of the function called in the INIT expression does \
+         not provide a translatable specification for the following field of \
+         the model"
+        model
   | Impossible_init_state_generation (Not_returning_sut fct) ->
       pf ppf "Unsupported INIT expression %a:@ %a" W.quoted fct text
         "the function called in the INIT expression must return a value of SUT \
          type"
   | Impossible_init_state_generation (Qualified_name fct) ->
-      pf ppf "Unsupported INIT expression %a:@ %a" W.quoted fct text
+      pf ppf "Unsupported INIT function %a:@ %a" W.quoted fct text
         "qualified names are not yet supported"
   | Impossible_init_state_generation (Mismatch_number_of_arguments fct) ->
       pf ppf "Error in INIT expression %a:@ %a" W.quoted fct text

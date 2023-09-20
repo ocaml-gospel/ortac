@@ -269,7 +269,7 @@ let init_state config state sigs =
     | expr ->
         error
           ( Impossible_init_state_generation
-              (Not_a_function_call (Fmt.str "%a@." Pprintast.expression expr)),
+              (Not_a_function_call (Fmt.str "%a" Pprintast.expression expr)),
             Location.none )
   in
   let* fct_str =
@@ -283,7 +283,7 @@ let init_state config state sigs =
         in
         error
           ( Impossible_init_state_generation
-              (Qualified_name Fmt.(str "%a@." Pprintast.expression name)),
+              (Qualified_name Fmt.(str "%a" Pprintast.expression name)),
             Location.none )
   in
   let is_init_declaration = function
@@ -302,8 +302,7 @@ let init_state config state sigs =
     of_option
       ~default:
         ( Impossible_init_state_generation
-            (No_appropriate_specifications
-               (Fmt.str "%a" Gospel.Identifier.Ident.pp value.Tast.vd_name)),
+            (No_specification value.Tast.vd_name.id_str),
           value.vd_loc )
       value.vd_spec
   in
@@ -315,7 +314,7 @@ let init_state config state sigs =
       error
         ( Impossible_init_state_generation
             (Mismatch_number_of_arguments
-               (Fmt.str "%a@." Pprintast.expression config.init_sut)),
+               (Fmt.str "%a" Pprintast.expression config.init_sut)),
           Location.none )
   in
   let open Gospel.Symbols in
@@ -339,18 +338,25 @@ let init_state config state sigs =
     get_state_description_with_index is_t state spec |> List.map snd
   in
   let* () =
-    if
+    match
       (* at least one description per model in state, choice is made when translating *)
-      List.for_all
+      List.filter
         (fun (id, _) ->
-          List.exists (fun Ir.{ model; _ } -> Ident.equal model id) descriptions)
+          not
+            (List.exists
+               (fun Ir.{ model; _ } -> Ident.equal model id)
+               descriptions))
         state
-    then ok ()
-    else
-      error
-        ( Impossible_init_state_generation
-            (No_appropriate_specifications spec.sp_text),
-          spec.sp_loc )
+    with
+    | [] -> ok ()
+    | missing_models ->
+        let missing_models =
+          List.map (fun (id, _) -> id.Ident.id_str) missing_models
+        in
+        error
+          ( Impossible_init_state_generation
+              (No_appropriate_specifications (fct_str, missing_models)),
+            spec.sp_loc )
   in
   ok (fct_str, Ir.{ arguments; descriptions })
 

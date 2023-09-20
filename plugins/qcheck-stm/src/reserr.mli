@@ -2,7 +2,9 @@ module W = Ortac_core.Warnings
 
 type init_state_error =
   | Not_a_function_call of string
-  | No_appropriate_specifications of string
+  | No_specification of string
+  | No_appropriate_specifications of string * string list
+  | No_translatable_specification of string
   | Not_returning_sut of string
   | Qualified_name of string
   | Mismatch_number_of_arguments of string

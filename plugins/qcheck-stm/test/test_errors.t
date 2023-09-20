@@ -76,26 +76,48 @@ We can forget to specify the function used for the `init_state` function:
   File "foo.mli", line 3, characters 0-21:
   3 | val make : 'a -> 'a t
       ^^^^^^^^^^^^^^^^^^^^^
-  Error: Unsupported INIT expression `make': the function called in the INIT
+  Error: Unsupported INIT function `make': the function called in the INIT
          expression must be specified to initialize the model state.
 
-Or specify it in a manner that does not allow to deduce the value of `state`:
+Or specify it in a manner that does not allow to deduce the complete `state`:
+
+  $ cat > foo.mli << EOF
+  > type 'a t
+  > (*@ mutable model value : 'a list
+  >     model size : integer
+  >     model max_size : integer *)
+  > val make : 'a -> 'a t
+  > (*@ t = make a
+  >     requires true
+  >     ensures t.max_size = 123 *)
+  > EOF
+  $ ortac qcheck-stm foo.mli "make 42" "int t"
+  File "foo.mli", line 6, characters 3-62:
+  6 | ... t = make a
+  7 |     requires true
+  8 |     ensures t.max_size = 123 ..
+  Error: Unsupported INIT function `make': the specification of the function
+         called in the INIT expression does not specify the following fields of
+         the model: value, size.
+
+Or specify it using clauses that cannot be executed:
 
   $ cat > foo.mli << EOF
   > type 'a t
   > (*@ mutable model value : 'a list *)
   > val make : 'a -> 'a t
   > (*@ t = make a
-  >     requires true *)
+  >     requires true
+  >     ensures t.value = if forall i. i = i then a :: [] else [] *)
   > EOF
   $ ortac qcheck-stm foo.mli "make 42" "int t"
-  File "foo.mli", line 4, characters 3-33:
-  4 | ... t = make a
-  5 |     requires true ..
-  Error: Unsupported INIT expression ` t = make a
-      requires true ': the
-         function called in the INIT expression must be specified to initialize
-         the model state.
+  Error: Unsupported INIT function: the specification of the function called in
+         the INIT expression does not provide a translatable specification for
+         the following field of the model: value.
+  File "foo.mli", line 6, characters 25-40:
+  6 |     ensures t.value = if forall i. i = i then a :: [] else [] *)
+                               ^^^^^^^^^^^^^^^
+  Warning: Skipping clause: unsupported quantification.
 
 Or we can give a function that does not return the type of the system under test:
 
@@ -121,8 +143,7 @@ We are expected to give a function call as expression for the `init_state` funct
   > (*@ mutable model value : 'a *)
   > EOF
   $ ortac qcheck-stm foo.mli "42" "int t"
-  Error: Unsupported INIT expression `42
-  ': the INIT expression is expected to
+  Error: Unsupported INIT expression `42': the INIT expression is expected to
          be a function call (the specification of that function is required to
          initialize the model state).
 
@@ -133,8 +154,7 @@ It also does not support qualified names:
   > (*@ mutable model value : 'a *)
   > EOF
   $ ortac qcheck-stm foo.mli "Bar.make 42" "int t"
-  Error: Unsupported INIT expression `Bar.make
-  ': qualified names are not yet
+  Error: Unsupported INIT function `Bar.make': qualified names are not yet
          supported.
 
 It checks the number of arguments in the function call:
@@ -147,6 +167,5 @@ It checks the number of arguments in the function call:
   >     ensures t.value = a *)
   > EOF
   $ ortac qcheck-stm foo.mli "make 42 73" "int t"
-  Error: Error in INIT expression `make 42 73
-  ': mismatch in the number of
+  Error: Error in INIT expression `make 42 73': mismatch in the number of
          arguments between the INIT expression and the function specification.

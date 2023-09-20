@@ -350,7 +350,9 @@ let next_state_case state config state_ident nb_models value =
         (fun (id, loc) ->
           of_option
             ~default:
-              (Ensures_not_found_for_next_state (value.id.id_str, str_of_ident id), loc)
+              ( Ensures_not_found_for_next_state
+                  (value.id.id_str, id.Ident.id_str),
+                loc )
             (pick id))
         value.next_state.modifies
     in
@@ -707,7 +709,7 @@ let init_state config ir =
             |> of_option
                  ~default:
                    ( Impossible_init_state_generation
-                       (No_appropriate_specifications (Fmt.str "%a" Ident.pp id)),
+                       (No_translatable_specification id.Ident.id_str),
                      Ppxlib.Location.none )))
       ir.state
   in
