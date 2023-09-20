@@ -16,7 +16,7 @@ type next_state = {
   (* description of the new values are stored with the index of the
      postcondition they come from *)
   formulae : (int * new_state_formulae) list;
-  modifies : Ident.t list;
+  modifies : (Ident.t * Ppxlib.Location.t) list;
 }
 
 type postcond = {

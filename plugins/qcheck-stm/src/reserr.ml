@@ -26,7 +26,7 @@ type W.kind +=
   | No_spec of string
   | Impossible_term_substitution of (string * [ `New | `Old | `NotModel ])
   | Ignored_modifies
-  | Ensures_not_found_for_next_state of string
+  | Ensures_not_found_for_next_state of (string * string)
   | Type_not_supported of string
   | Impossible_init_state_generation of init_state_error
   | Functional_argument of string
@@ -120,11 +120,10 @@ let pp_kind ppf kind =
   | Ignored_modifies ->
       pf ppf "Skipping unsupported `modifies` clause:@ %a" text
         "expected `modifies x` or `modifies x.model` where `x` is the SUT"
-  | Ensures_not_found_for_next_state m ->
-      pf ppf "Skipping function because its impact on model %a is unknown:@ %a"
-        W.quoted m text
-        "model is declared as modified by the function but no translatable \
-         `ensures` clause was found"
+  | Ensures_not_found_for_next_state (f, m) ->
+      pf ppf "Skipping %a:@ model@ %a@ %a" W.quoted f W.quoted m text
+        "is declared as modified by the function but no translatable `ensures` \
+         clause was found"
   (* TODO: This error message is broad and used in seemingly different contexts;
      we might turn it into more specific error messages *)
   | Type_not_supported ty -> pf ppf "Type %a not supported" W.quoted ty

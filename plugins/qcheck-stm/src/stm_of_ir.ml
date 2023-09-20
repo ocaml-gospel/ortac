@@ -347,10 +347,10 @@ let next_state_case state config state_ident nb_models value =
     in
     let* descriptions =
       map
-        (fun id ->
+        (fun (id, loc) ->
           of_option
             ~default:
-              (Ensures_not_found_for_next_state (str_of_ident id), id.id_loc)
+              (Ensures_not_found_for_next_state (value.id.id_str, str_of_ident id), loc)
             (pick id))
         value.next_state.modifies
     in

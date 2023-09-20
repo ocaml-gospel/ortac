@@ -146,13 +146,16 @@ let next_state sut state spec =
   let formulae = get_state_description_with_index is_t state spec in
   let open Reserr in
   let check_modify = function
-    | { t_node = Tvar vs; _ } when is_t vs -> List.map fst state |> ok
-    | { t_node = Tfield ({ t_node = Tvar vs; _ }, m); _ } when is_t vs ->
-        ok [ m.ls_name ]
+    | { t_node = Tvar vs; _ } as t when is_t vs ->
+        List.map (fun (m, _) -> (m, t.t_loc)) state |> ok
+    | { t_node = Tfield ({ t_node = Tvar vs; _ }, m); _ } as t when is_t vs ->
+        ok [ (m.ls_name, t.t_loc) ]
     | t -> error (Ignored_modifies, t.t_loc)
   in
   let* modifies = concat_map check_modify spec.sp_wr in
-  let modifies = List.sort_uniq Ident.compare modifies in
+  let modifies =
+    List.sort_uniq (fun (i, _) (i', _) -> Ident.compare i i') modifies
+  in
   ok Ir.{ formulae; modifies }
 
 let postcond spec =

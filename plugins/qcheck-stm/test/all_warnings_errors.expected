@@ -43,12 +43,12 @@ File "all_warnings.mli", line 49, characters 6-7:
            ^
 Warning: Skipping `ghost_returned_value': functions with a ghost returned
          value are not supported.
-File "all_warnings.mli", line 4, characters 18-26:
-4 | (*@ mutable model contents : 'a list *)
-                      ^^^^^^^^
-Warning: Skipping function because its impact on model `contents' is unknown:
-         model is declared as modified by the function but no translatable
-         `ensures` clause was found.
+File "all_warnings.mli", line 37, characters 13-23:
+37 |     modifies t.contents *)
+                  ^^^^^^^^^^
+Warning: Skipping `ensures_not_found_for_next_state': model `contents' is
+         declared as modified by the function but no translatable `ensures`
+         clause was found.
 File "all_warnings.mli", line 53, characters 16-54:
 53 |     ensures b = forall a. List.mem a t.contents -> p a *)
                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
