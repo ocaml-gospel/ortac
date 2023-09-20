@@ -25,7 +25,7 @@ type W.kind +=
   | No_models of string
   | No_spec of string
   | Impossible_term_substitution of (string * [ `New | `Old | `NotModel ])
-  | Ignored_modifies of string
+  | Ignored_modifies
   | Ensures_not_found_for_next_state of string
   | Type_not_supported of string
   | Impossible_init_state_generation of init_state_error

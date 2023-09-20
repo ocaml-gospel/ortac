@@ -26,8 +26,8 @@ Warning: Skipping `incompatible_type': the type of its SUT-type argument is
 File "all_warnings.mli", line 33, characters 13-15:
 33 |     modifies () *)
                   ^^
-Warning: Skipping unsupported `modifies` clause `(unit ):unit_1': expected
-         `modifies x` or `modifies x.model` where `x` is the SUT.
+Warning: Skipping unsupported `modifies` clause: expected `modifies x` or
+         `modifies x.model` where `x` is the SUT.
 File "all_warnings.mli", line 42, characters 27-37:
 42 | val functional_argument : ('a -> bool) -> 'a t -> bool
                                 ^^^^^^^^^^

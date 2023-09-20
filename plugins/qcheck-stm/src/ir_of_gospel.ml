@@ -153,10 +153,7 @@ let next_state sut state spec =
     | { t_node = Tvar vs; _ } when is_t vs -> List.map fst state |> ok
     | { t_node = Tfield ({ t_node = Tvar vs; _ }, m); _ } when is_t vs ->
         ok [ m.ls_name ]
-    | t ->
-        error
-          ( Ignored_modifies (Fmt.str "%a" Gospel.Tterm_printer.print_term t),
-            t.t_loc )
+    | t -> error (Ignored_modifies, t.t_loc)
   in
   let* modifies = concat_map check_modify spec.sp_wr in
   let modifies = List.sort_uniq Ident.compare modifies in

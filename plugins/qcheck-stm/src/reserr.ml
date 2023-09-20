@@ -25,7 +25,7 @@ type W.kind +=
   | No_models of string
   | No_spec of string
   | Impossible_term_substitution of (string * [ `New | `Old | `NotModel ])
-  | Ignored_modifies of string
+  | Ignored_modifies
   | Ensures_not_found_for_next_state of string
   | Type_not_supported of string
   | Impossible_init_state_generation of init_state_error
@@ -36,7 +36,7 @@ let level kind =
   match kind with
   | Constant_value _ | Returning_sut _ | No_sut_argument _
   | Multiple_sut_arguments _ | Incompatible_type _ | No_spec _
-  | Impossible_term_substitution _ | Ignored_modifies _
+  | Impossible_term_substitution _ | Ignored_modifies
   | Ensures_not_found_for_next_state _ | Type_not_supported _
   | Functional_argument _ | Ghost_values _ ->
       W.Warning
@@ -117,8 +117,8 @@ let pp_kind ppf kind =
              fields"
       in
       pf ppf "Skipping clause with term %a:@ %a" W.quoted t text msg
-  | Ignored_modifies m ->
-      pf ppf "Skipping unsupported `modifies` clause %a:@ %a" W.quoted m text
+  | Ignored_modifies ->
+      pf ppf "Skipping unsupported `modifies` clause:@ %a" text
         "expected `modifies x` or `modifies x.model` where `x` is the SUT"
   | Ensures_not_found_for_next_state m ->
       pf ppf "Skipping function because its impact on model %a is unknown:@ %a"
