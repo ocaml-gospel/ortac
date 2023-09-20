@@ -38,11 +38,12 @@ let is_a_function ty =
 let unify value_name sut_ty ty =
   let open Ppxlib in
   let open Reserr in
+  let show_type = Fmt.to_to_string Pprintast.core_type in
   let add_if_needed a x i =
     match List.assoc_opt a i with
     | None -> ok ((a, x) :: i)
     | Some y when x.ptyp_desc = y.ptyp_desc -> ok i
-    | _ -> error (Incompatible_type value_name, ty.ptyp_loc)
+    | _ -> error (Incompatible_type (value_name, show_type sut_ty), ty.ptyp_loc)
   in
   let rec aux i = function
     | [], [] -> ok i
@@ -54,10 +55,13 @@ let unify value_name sut_ty ty =
           | Ptyp_tuple xs, Ptyp_tuple ys -> aux i (xs, ys)
           | Ptyp_constr (c, xs), Ptyp_constr (d, ys) when c.txt = d.txt ->
               aux i (xs, ys)
-          | _ -> error (Incompatible_type value_name, ty.ptyp_loc)
+          | _ ->
+              error
+                (Incompatible_type (value_name, show_type sut_ty), ty.ptyp_loc)
         in
         aux i (xs, ys)
-    | _, _ -> error (Incompatible_type value_name, ty.ptyp_loc)
+    | _, _ ->
+        error (Incompatible_type (value_name, show_type sut_ty), ty.ptyp_loc)
   in
   match (sut_ty.ptyp_desc, ty.ptyp_desc) with
   | Ptyp_constr (t, args_sut), Ptyp_constr (t', args_ty) when t.txt = t'.txt ->

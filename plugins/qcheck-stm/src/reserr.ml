@@ -20,7 +20,7 @@ type W.kind +=
   | Init_sut_not_supported of string
   | Type_parameter_not_instantiated of string
   | Type_not_supported_for_sut_parameter of string
-  | Incompatible_type of string
+  | Incompatible_type of (string * string)
   | Sut_type_not_specified of string
   | No_models of string
   | No_spec of string
@@ -100,10 +100,11 @@ let pp_kind ppf kind =
   | Multiple_sut_arguments id ->
       pf ppf "Skipping %a:@ %a" W.quoted id text
         "functions with multiple SUT arguments cannot be tested"
-  | Incompatible_type v ->
-      pf ppf "Skipping %a:@ %a" W.quoted v text
-        "the type of its SUT-type argument is incompatible with command-line \
-         argument"
+  | Incompatible_type (v, t) ->
+      pf ppf "Skipping %a:@ %a%a" W.quoted v text
+        "the type of its SUT-type argument is incompatible with the configured \
+         SUT type: "
+        W.quoted t
   | No_spec fct ->
       pf ppf "Skipping %a:@ %a" W.quoted fct text
         "functions without specification cannot be tested"

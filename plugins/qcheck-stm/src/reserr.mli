@@ -20,7 +20,7 @@ type W.kind +=
   | Init_sut_not_supported of string
   | Type_parameter_not_instantiated of string
   | Type_not_supported_for_sut_parameter of string
-  | Incompatible_type of string
+  | Incompatible_type of (string * string)
   | Sut_type_not_specified of string
   | No_models of string
   | No_spec of string
