@@ -103,16 +103,14 @@ let ty_var_substitution config (vd : val_description) =
   in
   aux None value_type
 
-let split_args config ty args =
+let split_args config vd args =
   let open Ppxlib in
   let open Reserr in
   let module Ident = Identifier.Ident in
   let rec aux sut acc ty args =
     match (ty.ptyp_desc, args) with
     | _, Lghost vs :: _ ->
-        error
-          ( Ghost_values (Fmt.str "%a" Ident.pp vs.vs_name, `Arg),
-            vs.vs_name.id_loc )
+        error (Ghost_values (vd.vd_name.id_str, `Arg), vs.vs_name.id_loc)
     | Ptyp_arrow (_, l, r), Lnone vs :: xs
     | Ptyp_arrow (_, l, r), Loptional vs :: xs
     | Ptyp_arrow (_, l, r), Lnamed vs :: xs ->
@@ -122,7 +120,7 @@ let split_args config ty args =
     | _, [] -> ok (sut, List.rev acc)
     | _, _ -> failwith "shouldn't happen (too few parameters)"
   in
-  let* sut, args = aux None [] ty args in
+  let* sut, args = aux None [] vd.vd_type args in
   (* sut cannot be none because its presence has already been checked *)
   ok (Option.get sut, args)
 
@@ -184,15 +182,13 @@ let val_desc config state vd =
   and* spec =
     of_option ~default:(No_spec vd.vd_name.id_str, vd.vd_loc) vd.vd_spec
   in
-  let* sut, args = split_args config vd.vd_type spec.sp_args
+  let* sut, args = split_args config vd spec.sp_args
   and* ret =
     match spec.sp_ret with
     | [ Lnone vs ] -> ok (Some vs.vs_name)
     | [] -> ok None
     | Lghost vs :: _ | _ :: Lghost vs :: _ ->
-        error
-          ( Ghost_values (Fmt.str "%a" Ident.pp vs.vs_name, `Ret),
-            vs.vs_name.id_loc )
+        error (Ghost_values (vd.vd_name.id_str, `Ret), vs.vs_name.id_loc)
     | _ -> failwith "shouldn't happen (more than one return OCaml value)"
   in
   let* next_state = next_state sut state spec in

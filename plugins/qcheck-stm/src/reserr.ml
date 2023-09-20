@@ -132,9 +132,10 @@ let pp_kind ppf kind =
       pf ppf "Skipping %a:@ %a" W.quoted f text
         "functions are not supported yet as arguments"
   | Ghost_values (id, k) ->
-      pf ppf "Skipping function with a ghost %s %a"
+      pf ppf "Skipping %a:@ %a%a%a" W.quoted id text "functions with a ghost "
+        text
         (match k with `Arg -> "argument" | `Ret -> "returned value")
-        W.quoted id
+        text " are not supported"
   (* Errors *)
   | No_sut_type ty -> pf ppf "Type %a not declared in the module" W.quoted ty
   | No_init_function f ->

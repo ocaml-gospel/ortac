@@ -36,11 +36,13 @@ Warning: Skipping `functional_argument': functions are not supported yet as
 File "all_warnings.mli", line 46, characters 24-25:
 46 | (*@ b = ghost_argument [x : bool] t *)
                              ^
-Warning: Skipping function with a ghost argument `x'.
+Warning: Skipping `ghost_argument': functions with a ghost argument are not
+         supported.
 File "all_warnings.mli", line 49, characters 6-7:
 49 | (*@ [ x : bool ], b = ghost_returned_value t *)
            ^
-Warning: Skipping function with a ghost returned value `x_1'.
+Warning: Skipping `ghost_returned_value': functions with a ghost returned
+         value are not supported.
 File "all_warnings.mli", line 4, characters 18-26:
 4 | (*@ mutable model contents : 'a list *)
                       ^^^^^^^^
