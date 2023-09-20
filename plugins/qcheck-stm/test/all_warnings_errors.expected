@@ -31,8 +31,8 @@ Warning: Skipping unsupported `modifies` clause: expected `modifies x` or
 File "all_warnings.mli", line 42, characters 27-37:
 42 | val functional_argument : ('a -> bool) -> 'a t -> bool
                                 ^^^^^^^^^^
-Warning: Skipping function with argument of type `'a -> bool': functions are
-         not supported yet as arguments.
+Warning: Skipping `functional_argument': functions are not supported yet as
+         arguments.
 File "all_warnings.mli", line 46, characters 24-25:
 46 | (*@ b = ghost_argument [x : bool] t *)
                              ^

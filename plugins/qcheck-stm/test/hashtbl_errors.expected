@@ -5,18 +5,16 @@ Warning: Skipping `copy': functions returning a SUT value cannot be tested.
 File "hashtbl.mli", line 63, characters 12-28:
 63 | val iter : ('a -> 'b -> unit) -> ('a, 'b) t -> unit
                  ^^^^^^^^^^^^^^^^
-Warning: Skipping function with argument of type `'a -> 'b -> unit':
-         functions are not supported yet as arguments.
+Warning: Skipping `iter': functions are not supported yet as arguments.
 File "hashtbl.mli", line 64, characters 26-47:
 64 | val filter_map_inplace : ('a -> 'b -> 'b option) -> ('a, 'b) t -> unit
                                ^^^^^^^^^^^^^^^^^^^^^
-Warning: Skipping function with argument of type `'a -> 'b -> 'b option':
-         functions are not supported yet as arguments.
+Warning: Skipping `filter_map_inplace': functions are not supported yet as
+         arguments.
 File "hashtbl.mli", line 73, characters 12-32:
 73 | val fold : ('a -> 'b -> 'c -> 'c) -> ('a, 'b) t -> 'c -> 'c
                  ^^^^^^^^^^^^^^^^^^^^
-Warning: Skipping function with argument of type `'a -> 'b -> 'c -> 'c':
-         functions are not supported yet as arguments.
+Warning: Skipping `fold': functions are not supported yet as arguments.
 File "hashtbl.mli", line 78, characters 16-28:
 78 | val randomize : unit -> unit
                      ^^^^^^^^^^^^

@@ -128,8 +128,8 @@ let pp_kind ppf kind =
   (* TODO: This error message is broad and used in seemingly different contexts;
      we might turn it into more specific error messages *)
   | Type_not_supported ty -> pf ppf "Type %a not supported" W.quoted ty
-  | Functional_argument a ->
-      pf ppf "Skipping function with argument of type %a:@ %a" W.quoted a text
+  | Functional_argument f ->
+      pf ppf "Skipping %a:@ %a" W.quoted f text
         "functions are not supported yet as arguments"
   | Ghost_values (id, k) ->
       pf ppf "Skipping function with a ghost %s %a"

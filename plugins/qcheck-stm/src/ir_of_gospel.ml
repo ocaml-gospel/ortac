@@ -16,9 +16,7 @@ let higher_order_test vd =
   let rec contains_arrow ty =
     match ty.ptyp_desc with
     | Ptyp_arrow (_, _, _) ->
-        error
-          ( Functional_argument (Fmt.str "%a" Pprintast.core_type ty),
-            ty.ptyp_loc )
+        error (Functional_argument vd.vd_name.id_str, ty.ptyp_loc)
     | Ptyp_tuple xs | Ptyp_constr (_, xs) ->
         let* _ = List.map contains_arrow xs |> sequence in
         ok ()
