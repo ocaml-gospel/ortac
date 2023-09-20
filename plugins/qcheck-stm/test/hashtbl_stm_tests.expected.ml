@@ -7,6 +7,7 @@ let rec remove_first x xs_1 =
 module Spec =
   struct
     open STM
+    [@@@ocaml.warning "-26-27"]
     type sut = (char, int) t
     type cmd =
       | Clear 

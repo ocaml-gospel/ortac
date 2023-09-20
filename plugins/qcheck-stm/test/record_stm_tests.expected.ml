@@ -2,6 +2,7 @@ open Record
 module Spec =
   struct
     open STM
+    [@@@ocaml.warning "-26-27"]
     type sut = t
     type cmd =
       | Get 
