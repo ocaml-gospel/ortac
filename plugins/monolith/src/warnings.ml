@@ -22,7 +22,7 @@ open Fmt
 let styled_list l pp = List.fold_left (fun acc x -> styled x acc) pp l
 
 let pp_level ppf = function
-  | Warning -> pf ppf "%a: " (styled_list [ `Yellow; `Bold ] string) "Warning"
+  | Warning -> pf ppf "%a: " (styled_list [ `Magenta; `Bold ] string) "Warning"
   | Error -> pf ppf "%a: " (styled_list [ `Red; `Bold ] string) "Error"
 
 let pp_kind ppf = function

@@ -19,7 +19,7 @@ exception Error of t
 open Fmt
 
 let pp_level ppf = function
-  | Warning -> GW.styled_list [ `Yellow; `Bold ] string ppf "Warning"
+  | Warning -> GW.styled_list [ `Magenta; `Bold ] string ppf "Warning"
   | Error -> GW.styled_list [ `Red; `Bold ] string ppf "Error"
 
 let quoted ppf = pf ppf "`%s'"
