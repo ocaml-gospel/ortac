@@ -31,6 +31,7 @@ type W.kind +=
   | Type_not_supported of string
   | Impossible_init_state_generation of init_state_error
   | Functional_argument of string
+  | Returned_tuple of string
   | Ghost_values of (string * [ `Arg | `Ret ])
   | Incompatible_sut of string
 
@@ -40,7 +41,7 @@ let level kind =
   | Multiple_sut_arguments _ | Incompatible_type _ | No_spec _
   | Impossible_term_substitution _ | Ignored_modifies
   | Ensures_not_found_for_next_state _ | Type_not_supported _
-  | Functional_argument _ | Ghost_values _ ->
+  | Functional_argument _ | Returned_tuple _ | Ghost_values _ ->
       W.Warning
   | No_sut_type _ | No_init_function _ | Syntax_error_in_type _
   | Sut_type_not_supported _ | Type_not_supported_for_sut_parameter _
@@ -138,6 +139,9 @@ let pp_kind ppf kind =
   | Functional_argument f ->
       pf ppf "Skipping %s:@ %a" f text
         "functions are not supported yet as arguments"
+  | Returned_tuple f ->
+      pf ppf "Skipping %s:@ %a" f text
+        "functions returning tuples are not supported yet"
   | Ghost_values (id, k) ->
       pf ppf "Skipping %s:@ %a%a%a" id text "functions with a ghost " text
         (match k with `Arg -> "argument" | `Ret -> "returned value")

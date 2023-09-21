@@ -460,10 +460,14 @@ let postcond_case config state idx state_ident new_state_ident value =
     in
     let pat_ret =
       match value.ret with
-      | None ->
+      | [] ->
           if may_raise_exception value then pvar (str_of_ident res_default)
           else ppat_any
-      | Some id -> pvar (str_of_ident id)
+      | [ id ] -> pvar (str_of_ident id)
+      | _ ->
+          failwith
+            "shouldn't happen (functions returning tuples are filtered out \
+             before)"
     in
     ok
       (ppat_construct (lident "Res")
@@ -487,10 +491,14 @@ let postcond_case config state idx state_ident new_state_ident value =
   in
   let res, pat_ret =
     match value.ret with
-    | None -> (evar (str_of_ident res_default), ppat_any)
-    | Some id ->
+    | [] -> (evar (str_of_ident res_default), ppat_any)
+    | [ id ] ->
         let id = str_of_ident id in
         (evar id, pvar id)
+    | _ ->
+        failwith
+          "shouldn't happen (functions returning tuples are filtered out \
+           before)"
   in
   let* rhs =
     if may_raise_exception value then

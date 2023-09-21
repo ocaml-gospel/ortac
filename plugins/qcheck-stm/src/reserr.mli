@@ -31,6 +31,7 @@ type W.kind +=
   | Type_not_supported of string
   | Impossible_init_state_generation of init_state_error
   | Functional_argument of string
+  | Returned_tuple of string
   | Ghost_values of (string * [ `Arg | `Ret ])
   | Incompatible_sut of string
 
