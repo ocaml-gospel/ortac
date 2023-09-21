@@ -133,9 +133,6 @@ let pp_kind ppf kind =
       pf ppf "Skipping %a:@ model@ %a@ %a" W.quoted f W.quoted m text
         "is declared as modified by the function but no translatable `ensures` \
          clause was found"
-  (* TODO: This error message is broad and used in seemingly different contexts;
-     we might turn it into more specific error messages *)
-  | Type_not_supported ty -> pf ppf "Type %a not supported" W.quoted ty
   | Functional_argument f ->
       pf ppf "Skipping %a:@ %a" W.quoted f text
         "functions are not supported yet as arguments"
@@ -144,6 +141,10 @@ let pp_kind ppf kind =
         text
         (match k with `Arg -> "argument" | `Ret -> "returned value")
         text " are not supported"
+  (* This following message is broad and used in seemingly different contexts
+     but in fact we support all the types that the Gospel type-checker supports,
+     so that error message should never get reported to the end user *)
+  | Type_not_supported ty -> pf ppf "Type %a not supported" W.quoted ty
   (* Errors *)
   | No_sut_type ty -> pf ppf "Type %a not declared in the module" W.quoted ty
   | No_init_function f ->
