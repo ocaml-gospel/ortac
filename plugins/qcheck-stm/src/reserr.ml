@@ -118,19 +118,19 @@ let pp_kind ppf kind =
         (* The following cases should not be reported to the user at the moment
            (because they should be caught at some other points) *)
         | `Old ->
-            "occurrences of the SUT in clauses are not supported under `old` \
+            "occurrences of the SUT in clauses are not supported under old \
              operator"
         | `New ->
-            "occurrences of the SUT in clauses are not supported above `old` \
+            "occurrences of the SUT in clauses are not supported above old \
              operator"
       in
       pf ppf "Skipping clause:@ %a" text msg
   | Ignored_modifies ->
-      pf ppf "Skipping unsupported `modifies` clause:@ %a" text
-        "expected `modifies x` or `modifies x.model` where `x` is the SUT"
+      pf ppf "Skipping unsupported modifies clause:@ %a" text
+        "expected \"modifies x\" or \"modifies x.model\" where x is the SUT"
   | Ensures_not_found_for_next_state (f, m) ->
       pf ppf "Skipping %s:@ model@ %s@ %a" f m text
-        "is declared as modified by the function but no translatable `ensures` \
+        "is declared as modified by the function but no translatable ensures \
          clause was found"
   | Functional_argument f ->
       pf ppf "Skipping %s:@ %a" f text

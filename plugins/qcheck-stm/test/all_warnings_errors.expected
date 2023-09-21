@@ -30,8 +30,8 @@ Warning: Skipping no_spec: functions without specifications cannot be tested.
 File "all_warnings.mli", line 33, characters 13-15:
 33 |     modifies () *)
                   ^^
-Warning: Skipping unsupported `modifies` clause: expected `modifies x` or
-         `modifies x.model` where `x` is the SUT.
+Warning: Skipping unsupported modifies clause: expected "modifies x" or
+         "modifies x.model" where x is the SUT.
 File "all_warnings.mli", line 42, characters 27-37:
 42 | val functional_argument : ('a -> bool) -> 'a t -> bool
                                 ^^^^^^^^^^
@@ -51,7 +51,7 @@ File "all_warnings.mli", line 37, characters 13-23:
 37 |     modifies t.contents *)
                   ^^^^^^^^^^
 Warning: Skipping ensures_not_found_for_next_state: model contents is
-         declared as modified by the function but no translatable `ensures`
+         declared as modified by the function but no translatable ensures
          clause was found.
 File "all_warnings.mli", line 53, characters 16-54:
 53 |     ensures b = forall a. List.mem a t.contents -> p a *)
