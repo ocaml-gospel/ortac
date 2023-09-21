@@ -2,32 +2,31 @@ File "all_warnings.mli", line 12, characters 0-52:
 12 | val constant : unit
 13 | (*@ constant
 14 |     ensures true *)
-Warning: Skipping `constant': constants cannot be tested.
+Warning: Skipping constant: constants cannot be tested.
 File "all_warnings.mli", line 16, characters 26-30:
 16 | val returning_sut : 'a -> 'a t
                                ^^^^
-Warning: Skipping `returning_sut': functions returning a SUT value cannot be
+Warning: Skipping returning_sut: functions returning a SUT value cannot be
          tested.
 File "all_warnings.mli", line 19, characters 22-34:
 19 | val no_sut_argument : bool -> bool
                            ^^^^^^^^^^^^
-Warning: Skipping `no_sut_argument': functions with no SUT argument cannot be
+Warning: Skipping no_sut_argument: functions with no SUT argument cannot be
          tested.
 File "all_warnings.mli", line 22, characters 28-48:
 22 | val multiple_sut_argument : 'a t -> 'a t -> bool
                                  ^^^^^^^^^^^^^^^^^^^^
-Warning: Skipping `multiple_sut_argument': functions with multiple SUT
+Warning: Skipping multiple_sut_argument: functions with multiple SUT
          arguments cannot be tested.
 File "all_warnings.mli", line 25, characters 24-29:
 25 | val incompatible_type : int t -> bool
                              ^^^^^
-Warning: Skipping `incompatible_type': the type of its SUT-type argument is
-         incompatible with the configured SUT type: `char t'.
+Warning: Skipping incompatible_type: the type of its SUT-type argument is
+         incompatible with the configured SUT type: char t.
 File "all_warnings.mli", line 28, characters 0-26:
 28 | val no_spec : 'a t -> bool
      ^^^^^^^^^^^^^^^^^^^^^^^^^^
-Warning: Skipping `no_spec': functions without specifications cannot be
-         tested.
+Warning: Skipping no_spec: functions without specifications cannot be tested.
 File "all_warnings.mli", line 33, characters 13-15:
 33 |     modifies () *)
                   ^^
@@ -36,22 +35,22 @@ Warning: Skipping unsupported `modifies` clause: expected `modifies x` or
 File "all_warnings.mli", line 42, characters 27-37:
 42 | val functional_argument : ('a -> bool) -> 'a t -> bool
                                 ^^^^^^^^^^
-Warning: Skipping `functional_argument': functions are not supported yet as
+Warning: Skipping functional_argument: functions are not supported yet as
          arguments.
 File "all_warnings.mli", line 46, characters 24-25:
 46 | (*@ b = ghost_argument [x : bool] t *)
                              ^
-Warning: Skipping `ghost_argument': functions with a ghost argument are not
+Warning: Skipping ghost_argument: functions with a ghost argument are not
          supported.
 File "all_warnings.mli", line 49, characters 6-7:
 49 | (*@ [ x : bool ], b = ghost_returned_value t *)
            ^
-Warning: Skipping `ghost_returned_value': functions with a ghost returned
-         value are not supported.
+Warning: Skipping ghost_returned_value: functions with a ghost returned value
+         are not supported.
 File "all_warnings.mli", line 37, characters 13-23:
 37 |     modifies t.contents *)
                   ^^^^^^^^^^
-Warning: Skipping `ensures_not_found_for_next_state': model `contents' is
+Warning: Skipping ensures_not_found_for_next_state: model contents is
          declared as modified by the function but no translatable `ensures`
          clause was found.
 File "all_warnings.mli", line 53, characters 16-54:

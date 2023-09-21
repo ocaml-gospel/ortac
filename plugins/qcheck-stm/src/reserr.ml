@@ -91,23 +91,23 @@ let pp_kind ppf kind =
   match kind with
   (* Warnings *)
   | Constant_value id ->
-      pf ppf "Skipping %a:@ %a" W.quoted id text "constants cannot be tested"
+      pf ppf "Skipping %s:@ %a" id text "constants cannot be tested"
   | Returning_sut id ->
-      pf ppf "Skipping %a:@ %a" W.quoted id text
+      pf ppf "Skipping %s:@ %a" id text
         "functions returning a SUT value cannot be tested"
   | No_sut_argument id ->
-      pf ppf "Skipping %a:@ %a" W.quoted id text
+      pf ppf "Skipping %s:@ %a" id text
         "functions with no SUT argument cannot be tested"
   | Multiple_sut_arguments id ->
-      pf ppf "Skipping %a:@ %a" W.quoted id text
+      pf ppf "Skipping %s:@ %a" id text
         "functions with multiple SUT arguments cannot be tested"
   | Incompatible_type (v, t) ->
-      pf ppf "Skipping %a:@ %a%a" W.quoted v text
+      pf ppf "Skipping %s:@ %a%s" v text
         "the type of its SUT-type argument is incompatible with the configured \
          SUT type: "
-        W.quoted t
+        t
   | No_spec fct ->
-      pf ppf "Skipping %a:@ %a" W.quoted fct text
+      pf ppf "Skipping %s:@ %a" fct text
         "functions without specifications cannot be tested"
   | Impossible_term_substitution why ->
       let msg =
@@ -129,54 +129,51 @@ let pp_kind ppf kind =
       pf ppf "Skipping unsupported `modifies` clause:@ %a" text
         "expected `modifies x` or `modifies x.model` where `x` is the SUT"
   | Ensures_not_found_for_next_state (f, m) ->
-      pf ppf "Skipping %a:@ model@ %a@ %a" W.quoted f W.quoted m text
+      pf ppf "Skipping %s:@ model@ %s@ %a" f m text
         "is declared as modified by the function but no translatable `ensures` \
          clause was found"
   | Functional_argument f ->
-      pf ppf "Skipping %a:@ %a" W.quoted f text
+      pf ppf "Skipping %s:@ %a" f text
         "functions are not supported yet as arguments"
   | Ghost_values (id, k) ->
-      pf ppf "Skipping %a:@ %a%a%a" W.quoted id text "functions with a ghost "
-        text
+      pf ppf "Skipping %s:@ %a%a%a" id text "functions with a ghost " text
         (match k with `Arg -> "argument" | `Ret -> "returned value")
         text " are not supported"
   (* This following message is broad and used in seemingly different contexts
      but in fact we support all the types that the Gospel type-checker supports,
      so that error message should never get reported to the end user *)
-  | Type_not_supported ty -> pf ppf "Type %a not supported" W.quoted ty
+  | Type_not_supported ty -> pf ppf "Type %s not supported" ty
   (* Errors *)
-  | No_sut_type ty -> pf ppf "Type %a not declared in the module" W.quoted ty
-  | No_init_function f ->
-      pf ppf "Function %a not declared in the module" W.quoted f
-  | Syntax_error_in_type t -> pf ppf "Syntax error in type %a" W.quoted t
-  | Syntax_error_in_init_sut s ->
-      pf ppf "Syntax error in OCaml expression %a" W.quoted s
+  | No_sut_type ty -> pf ppf "Type %s not declared in the module" ty
+  | No_init_function f -> pf ppf "Function %s not declared in the module" f
+  | Syntax_error_in_type t -> pf ppf "Syntax error in type %s" t
+  | Syntax_error_in_init_sut s -> pf ppf "Syntax error in OCaml expression %s" s
   | Sut_type_not_supported ty ->
-      pf ppf "Unsupported SUT type %a:@ %a" W.quoted ty text
+      pf ppf "Unsupported SUT type %s:@ %a" ty text
         "SUT type must be a type constructor, possibly applied to type \
          arguments"
   | Type_parameter_not_instantiated ty ->
-      pf ppf "Unsupported type parameter %a:@ %a" W.quoted ty text
+      pf ppf "Unsupported type parameter %s:@ %a" ty text
         "SUT type should be fully instantiated"
   | Type_not_supported_for_sut_parameter ty ->
-      pf ppf "Unsupported type parameter %a:@ %a" W.quoted ty text
+      pf ppf "Unsupported type parameter %s:@ %a" ty text
         "only constructors and tuples are supported in arguments for the SUT \
          type"
   | Sut_type_not_specified ty ->
-      pf ppf "Missing specification for the SUT type %a" W.quoted ty
-  | No_models ty -> pf ppf "Missing model(s) for the SUT type %a" W.quoted ty
+      pf ppf "Missing specification for the SUT type %s" ty
+  | No_models ty -> pf ppf "Missing model(s) for the SUT type %s" ty
   | Impossible_init_state_generation (Not_a_function_call fct) ->
-      pf ppf "Unsupported INIT expression %a:@ %a" W.quoted fct text
+      pf ppf "Unsupported INIT expression %s:@ %a" fct text
         "the INIT expression is expected to be a function call (the \
          specification of that function is required to initialize the model \
          state)"
   | Impossible_init_state_generation (No_specification fct) ->
-      pf ppf "Unsupported INIT function %a:@ %a" W.quoted fct text
+      pf ppf "Unsupported INIT function %s:@ %a" fct text
         "the function called in the INIT expression must be specified to \
          initialize the model state"
   | Impossible_init_state_generation
       (No_appropriate_specifications (fct, models)) ->
-      pf ppf "Unsupported INIT function %a:@ %a:@ %a" W.quoted fct text
+      pf ppf "Unsupported INIT function %s:@ %a:@ %a" fct text
         "the specification of the function called in the INIT expression does \
          not specify the following fields of the model"
         (Fmt.list ~sep:(Fmt.any ",@ ") Fmt.string)
@@ -188,14 +185,14 @@ let pp_kind ppf kind =
          the model"
         model
   | Impossible_init_state_generation (Not_returning_sut fct) ->
-      pf ppf "Unsupported INIT expression %a:@ %a" W.quoted fct text
+      pf ppf "Unsupported INIT expression %s:@ %a" fct text
         "the function called in the INIT expression must return a value of SUT \
          type"
   | Impossible_init_state_generation (Qualified_name fct) ->
-      pf ppf "Unsupported INIT function %a:@ %a" W.quoted fct text
+      pf ppf "Unsupported INIT function %s:@ %a" fct text
         "qualified names are not yet supported"
   | Impossible_init_state_generation (Mismatch_number_of_arguments fct) ->
-      pf ppf "Error in INIT expression %a:@ %a" W.quoted fct text
+      pf ppf "Error in INIT expression %s:@ %a" fct text
         "mismatch in the number of arguments between the INIT expression and \
          the function specification"
   | _ -> W.pp_kind ppf kind

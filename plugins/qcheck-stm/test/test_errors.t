@@ -11,20 +11,20 @@ in the type declaration for the sytem under test:
   > val make : 'a -> 'a t
   > EOF
   $ ortac qcheck-stm foo.mli "" "int t"
-  Error: Syntax error in OCaml expression `'.
+  Error: Syntax error in OCaml expression .
   $ ortac qcheck-stm foo.mli "make 42" ""
-  Error: Syntax error in type `'.
+  Error: Syntax error in type .
 
 We can give a pair as SUT type:
 
   $ ortac qcheck-stm foo.mli "make 42" "int * bool"
-  Error: Unsupported SUT type `(int * bool)': SUT type must be a type
+  Error: Unsupported SUT type (int * bool): SUT type must be a type
          constructor, possibly applied to type arguments.
 
 We can give a functional argument to the SUT type:
 
   $ ortac qcheck-stm foo.mli "make 42" "(int -> bool) t"
-  Error: Unsupported type parameter `int -> bool': only constructors and tuples
+  Error: Unsupported type parameter int -> bool: only constructors and tuples
          are supported in arguments for the SUT type.
 
 We can give a type that does not exist in the module as the system under test:
@@ -33,7 +33,7 @@ We can give a type that does not exist in the module as the system under test:
   > type 'a t
   > EOF
   $ ortac qcheck-stm foo.mli "()" "ty"
-  Error: Type `ty' not declared in the module.
+  Error: Type ty not declared in the module.
 
 We can forget to instantiate the type parameter of the system under test:
 
@@ -42,8 +42,7 @@ We can forget to instantiate the type parameter of the system under test:
   > val make : 'a -> 'a t
   > EOF
   $ ortac qcheck-stm foo.mli "make 42" "'a t"
-  Error: Unsupported type parameter `'a': SUT type should be fully
-         instantiated.
+  Error: Unsupported type parameter 'a: SUT type should be fully instantiated.
 
 We can forget to specify the type of the system under test:
 
@@ -54,7 +53,7 @@ We can forget to specify the type of the system under test:
   File "foo.mli", line 1, characters 0-9:
   1 | type 'a t
       ^^^^^^^^^
-  Error: Missing specification for the SUT type `t'.
+  Error: Missing specification for the SUT type t.
 
 Or specify it without any model:
 
@@ -66,7 +65,7 @@ Or specify it without any model:
   File "foo.mli", line 2, characters 3-14:
   2 | (*@ ephemeral *)
          ^^^^^^^^^^^
-  Error: Missing model(s) for the SUT type `t'.
+  Error: Missing model(s) for the SUT type t.
 
 We can give a non-existing function for `init_state`:
 
@@ -75,7 +74,7 @@ We can give a non-existing function for `init_state`:
   > (*@ mutable model value : 'a *)
   > EOF
   $ ortac qcheck-stm foo.mli "make 42" "int t"
-  Error: Function `make' not declared in the module.
+  Error: Function make not declared in the module.
 
 We can forget to specify the function used for the `init_state` function:
 
@@ -88,7 +87,7 @@ We can forget to specify the function used for the `init_state` function:
   File "foo.mli", line 3, characters 0-21:
   3 | val make : 'a -> 'a t
       ^^^^^^^^^^^^^^^^^^^^^
-  Error: Unsupported INIT function `make': the function called in the INIT
+  Error: Unsupported INIT function make: the function called in the INIT
          expression must be specified to initialize the model state.
 
 Or specify it in a manner that does not allow to deduce the complete `state`:
@@ -108,7 +107,7 @@ Or specify it in a manner that does not allow to deduce the complete `state`:
   6 | ... t = make a
   7 |     requires true
   8 |     ensures t.max_size = 123 ..
-  Error: Unsupported INIT function `make': the specification of the function
+  Error: Unsupported INIT function make: the specification of the function
          called in the INIT expression does not specify the following fields of
          the model: value, size.
 
@@ -145,7 +144,7 @@ Or we can give a function that does not return the type of the system under test
   3 | val make : int -> unit
   4 | (*@ make i
   5 |     modifies () *)
-  Error: Unsupported INIT expression `make': the function called in the INIT
+  Error: Unsupported INIT expression make: the function called in the INIT
          expression must return a value of SUT type.
 
 We are expected to give a function call as expression for the `init_state` function:
@@ -155,8 +154,8 @@ We are expected to give a function call as expression for the `init_state` funct
   > (*@ mutable model value : 'a *)
   > EOF
   $ ortac qcheck-stm foo.mli "42" "int t"
-  Error: Unsupported INIT expression `42': the INIT expression is expected to
-         be a function call (the specification of that function is required to
+  Error: Unsupported INIT expression 42: the INIT expression is expected to be
+         a function call (the specification of that function is required to
          initialize the model state).
 
 It also does not support qualified names:
@@ -166,7 +165,7 @@ It also does not support qualified names:
   > (*@ mutable model value : 'a *)
   > EOF
   $ ortac qcheck-stm foo.mli "Bar.make 42" "int t"
-  Error: Unsupported INIT function `Bar.make': qualified names are not yet
+  Error: Unsupported INIT function Bar.make: qualified names are not yet
          supported.
 
 It checks the number of arguments in the function call:
@@ -179,5 +178,5 @@ It checks the number of arguments in the function call:
   >     ensures t.value = a *)
   > EOF
   $ ortac qcheck-stm foo.mli "make 42 73" "int t"
-  Error: Error in INIT expression `make 42 73': mismatch in the number of
+  Error: Error in INIT expression make 42 73: mismatch in the number of
          arguments between the INIT expression and the function specification.

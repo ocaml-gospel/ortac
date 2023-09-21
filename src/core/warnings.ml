@@ -22,8 +22,6 @@ let pp_level ppf = function
   | Warning -> GW.styled_list [ `Magenta; `Bold ] string ppf "Warning"
   | Error -> GW.styled_list [ `Red; `Bold ] string ppf "Error"
 
-let quoted ppf = pf ppf "`%s'"
-
 let pp_kind ppf = function
   | GospelError k -> pf ppf "Gospel error: %a" Gospel.Warnings.pp_kind k
   | Unsupported msg -> pf ppf "Skipping clause:@ unsupported %s" msg
