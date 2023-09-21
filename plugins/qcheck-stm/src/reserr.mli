@@ -19,7 +19,6 @@ type W.kind +=
   | Syntax_error_in_type of string
   | Syntax_error_in_init_sut of string
   | Sut_type_not_supported of string
-  | Init_sut_not_supported of string
   | Type_parameter_not_instantiated of string
   | Type_not_supported_for_sut_parameter of string
   | Incompatible_type of (string * string)

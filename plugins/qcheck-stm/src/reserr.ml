@@ -19,7 +19,6 @@ type W.kind +=
   | Syntax_error_in_type of string
   | Syntax_error_in_init_sut of string
   | Sut_type_not_supported of string
-  | Init_sut_not_supported of string
   | Type_parameter_not_instantiated of string
   | Type_not_supported_for_sut_parameter of string
   | Incompatible_type of (string * string)
@@ -44,9 +43,9 @@ let level kind =
       W.Warning
   | No_sut_type _ | No_init_function _ | Syntax_error_in_type _
   | Sut_type_not_supported _ | Type_not_supported_for_sut_parameter _
-  | Init_sut_not_supported _ | Syntax_error_in_init_sut _
-  | Type_parameter_not_instantiated _ | Sut_type_not_specified _ | No_models _
-  | Impossible_init_state_generation _ ->
+  | Syntax_error_in_init_sut _ | Type_parameter_not_instantiated _
+  | Sut_type_not_specified _ | No_models _ | Impossible_init_state_generation _
+    ->
       W.Error
   | _ -> W.level kind
 
@@ -156,9 +155,6 @@ let pp_kind ppf kind =
       pf ppf "Unsupported SUT type %a:@ %a" W.quoted ty text
         "SUT type must be a type constructor, possibly applied to type \
          arguments"
-  | Init_sut_not_supported e ->
-      (* DEAD? *)
-      pf ppf "The expression %a given for init_sut in not supported." W.quoted e
   | Type_parameter_not_instantiated ty ->
       pf ppf "Unsupported type parameter %a:@ %a" W.quoted ty text
         "SUT type should be fully instantiated"
