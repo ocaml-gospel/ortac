@@ -44,7 +44,7 @@ let subst_core_type inst ty =
       ty with
       ptyp_desc =
         (match ty.ptyp_desc with
-        | Ptyp_any -> Ptyp_any
+        | Ptyp_any -> ty_default
         | Ptyp_var x ->
             Option.fold ~none:ty_default
               ~some:(fun x -> x.ptyp_desc)
@@ -64,7 +64,7 @@ let subst_core_type inst ty =
         | Ptyp_variant (_, _, _)
         | Ptyp_poly (_, _)
         | Ptyp_package _ | Ptyp_extension _ ->
-            failwith "Case should not happen in `subst'");
+            failwith "Case should not happen in `subst_core_type'");
     }
   in
   aux ty
@@ -186,6 +186,7 @@ let pat_of_core_type inst typ =
   let rec aux ty =
     let open Reserr in
     match ty.ptyp_desc with
+    | Ptyp_any -> ok pat_default
     | Ptyp_var v -> (
         match List.assoc_opt v inst with
         | None -> ok pat_default
@@ -209,6 +210,7 @@ let exp_of_core_type inst typ =
   let rec aux ty =
     let open Reserr in
     match ty.ptyp_desc with
+    | Ptyp_any -> ok exp_default
     | Ptyp_var v -> (
         match List.assoc_opt v inst with
         | None -> ok exp_default
