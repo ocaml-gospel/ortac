@@ -699,7 +699,11 @@ let init_state config ir =
   in
   let open Reserr in
   let translate_field_desc Ir.{ model; description } =
-    let* desc = ocaml_of_term config description in
+    let* desc =
+      subst_term ir.state ~gos_t:ir.init_state.returned_sut ~old_t:None
+        ~new_t:None description
+      >>= ocaml_of_term config
+    in
     ok (model, desc)
   in
   let* fields = map translate_field_desc ir.Ir.init_state.descriptions in

@@ -189,3 +189,21 @@ It checks the number of arguments in the function call:
   $ ortac qcheck-stm foo.mli "make 42 73" "int t"
   Error: Error in INIT expression make 42 73: mismatch in the number of
          arguments between the INIT expression and the function specification.
+We shouldn't be able to define a model by itsef in the `make` function:
+  $ cat > foo.mli << EOF
+  > type 'a t
+  > (*@ mutable model value : 'a list *)
+  > val make : 'a -> 'a t
+  > (*@ t = make a
+  >     requires true
+  >     ensures t.value = t.value *)
+  > EOF
+  $ ortac qcheck-stm foo.mli "make 42" "int t"
+  Error: Unsupported INIT function: the specification of the function called in
+         the INIT expression does not provide a translatable specification for
+         the following field of the model: value.
+  File "foo.mli", line 6, characters 22-23:
+  6 |     ensures t.value = t.value *)
+                            ^
+  Warning: Skipping clause: occurrences of the SUT in clauses are not supported
+           above old operator.
