@@ -26,7 +26,7 @@ type W.kind +=
   | Sut_type_not_specified of string
   | No_models of string
   | No_spec of string
-  | Impossible_term_substitution of (string * [ `New | `Old | `NotModel ])
+  | Impossible_term_substitution of [ `New | `Old | `NotModel ]
   | Ignored_modifies
   | Ensures_not_found_for_next_state of (string * string)
   | Type_not_supported of string

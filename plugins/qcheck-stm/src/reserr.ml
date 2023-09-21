@@ -26,7 +26,7 @@ type W.kind +=
   | Sut_type_not_specified of string
   | No_models of string
   | No_spec of string
-  | Impossible_term_substitution of (string * [ `New | `Old | `NotModel ])
+  | Impossible_term_substitution of [ `New | `Old | `NotModel ]
   | Ignored_modifies
   | Ensures_not_found_for_next_state of (string * string)
   | Type_not_supported of string
@@ -110,16 +110,22 @@ let pp_kind ppf kind =
   | No_spec fct ->
       pf ppf "Skipping %a:@ %a" W.quoted fct text
         "functions without specifications cannot be tested"
-  | Impossible_term_substitution (t, why) ->
+  | Impossible_term_substitution why ->
       let msg =
         match why with
-        | `Old -> "substitution supported only above `old` operator"
-        | `New -> "substitution supported only under `old` operator"
         | `NotModel ->
-            "substitution supported only when applied to one of the model \
-             fields"
+            "occurrences of the SUT in clauses are only supported to access \
+             its model fields"
+        (* The following cases should not be reported to the user at the moment
+           (because they should be caught at some other points) *)
+        | `Old ->
+            "occurrences of the SUT in clauses are not supported under `old` \
+             operator"
+        | `New ->
+            "occurrences of the SUT in clauses are not supported above `old` \
+             operator"
       in
-      pf ppf "Skipping clause with term %a:@ %a" W.quoted t text msg
+      pf ppf "Skipping clause:@ %a" text msg
   | Ignored_modifies ->
       pf ppf "Skipping unsupported `modifies` clause:@ %a" text
         "expected `modifies x` or `modifies x.model` where `x` is the SUT"

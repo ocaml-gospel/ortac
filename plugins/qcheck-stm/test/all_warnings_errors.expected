@@ -58,3 +58,8 @@ File "all_warnings.mli", line 53, characters 16-54:
 53 |     ensures b = forall a. List.mem a t.contents -> p a *)
                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping clause: unsupported quantification.
+File "all_warnings.mli", line 57, characters 26-29:
+57 |     requires Array.length t.v > 0 *)
+                               ^^^
+Warning: Skipping clause: occurrences of the SUT in clauses are only
+         supported to access its model fields.

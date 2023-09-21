@@ -100,16 +100,19 @@ let subst_term state ~gos_t ?(old_lz = false) ~old_t ?(new_lz = false) ~new_t
     match term.t_node with
     (* First: the only case where substitution happens, ie x.model *)
     | Tfield (({ t_node = Tvar { vs_name; vs_ty }; _ } as subt), ls)
-      when Ident.equal vs_name gos_t
-           && List.exists (fun (m, _) -> Ident.equal m ls.ls_name) state -> (
-        match cur_t with
-        | Some cur_t ->
-            let t = { subt with t_node = Tvar { vs_name = cur_t; vs_ty } } in
-            let t = if cur_lz then lazy_force t else t in
-            { term with t_node = Tfield (t, ls) }
-        | None ->
-            raise (ImpossibleSubst (subt, if cur_t = new_t then `New else `Old))
-        )
+      when Ident.equal vs_name gos_t ->
+        if List.exists (fun (m, _) -> Ident.equal m ls.ls_name) state then
+          match cur_t with
+          | Some cur_t ->
+              let t = { subt with t_node = Tvar { vs_name = cur_t; vs_ty } } in
+              let t = if cur_lz then lazy_force t else t in
+              { term with t_node = Tfield (t, ls) }
+          | None ->
+              raise
+                (ImpossibleSubst (subt, if cur_t = new_t then `New else `Old))
+        else
+          (* case x.f where f is _not_ a model field *)
+          raise (ImpossibleSubst (term, `NotModel))
     (* If the first case didn't match, it must be because [gos_t] is not used to
        access one of its model fields, so we error out *)
     | Tvar { vs_name; _ } when Ident.equal vs_name gos_t ->
@@ -142,10 +145,7 @@ let subst_term state ~gos_t ?(old_lz = false) ~old_t ?(new_lz = false) ~new_t
   let open Reserr in
   try ok (aux new_lz new_t term)
   with ImpossibleSubst (t, b) ->
-    error
-      ( Impossible_term_substitution
-          (Fmt.str "%a" Gospel.Tterm_printer.print_term t, b),
-        t.t_loc )
+    error (Impossible_term_substitution b, t.t_loc)
 
 let translate_checks config state value state_ident t =
   let open Reserr in

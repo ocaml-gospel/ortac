@@ -1,6 +1,6 @@
 (*@ predicate p (x : 'a) = true *)
 
-type 'a t
+type 'a t = { v : 'a array }
 (*@ mutable model contents : 'a list *)
 
 type s
@@ -51,3 +51,7 @@ val ghost_returned_value : 'a t -> bool
 val unsupported_quantification : 'a t -> bool
 (*@ b = unsupported_quantification t
     ensures b = forall a. List.mem a t.contents -> p a *)
+
+val record_not_model_field : 'a t -> bool
+(*@ b = record_not_model_field t
+    requires Array.length t.v > 0 *)
