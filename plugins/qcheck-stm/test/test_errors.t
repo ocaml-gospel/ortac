@@ -15,6 +15,18 @@ in the type declaration for the sytem under test:
   $ ortac qcheck-stm foo.mli "make 42" ""
   Error: Syntax error in type `'.
 
+We can give a pair as SUT type:
+
+  $ ortac qcheck-stm foo.mli "make 42" "int * bool"
+  Error: Unsupported SUT type `(int * bool)': SUT type must be a type
+         constructor, possibly applied to type arguments.
+
+We can give a functional argument to the SUT type:
+
+  $ ortac qcheck-stm foo.mli "make 42" "(int -> bool) t"
+  Error: Unsupported type parameter `int -> bool': only constructors and tuples
+         are supported in arguments for the SUT type.
+
 We can give a type that does not exist in the module as the system under test:
 
   $ cat > foo.mli << EOF
