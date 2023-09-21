@@ -26,7 +26,7 @@ val incompatible_type : int t -> bool
 (*@ b = incompatible_type t *)
 
 val no_spec : 'a t -> bool
-(*@ b = no_spec t *)
+(**)
 
 val ignored_modified : 'a t -> unit
 (*@ ignored_modified t

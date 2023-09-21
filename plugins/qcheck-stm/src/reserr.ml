@@ -109,7 +109,7 @@ let pp_kind ppf kind =
         W.quoted t
   | No_spec fct ->
       pf ppf "Skipping %a:@ %a" W.quoted fct text
-        "functions without specification cannot be tested"
+        "functions without specifications cannot be tested"
   | Impossible_term_substitution (t, why) ->
       let msg =
         match why with
