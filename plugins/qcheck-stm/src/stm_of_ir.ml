@@ -44,7 +44,7 @@ let subst_core_type inst ty =
       ty with
       ptyp_desc =
         (match ty.ptyp_desc with
-        | Ptyp_any -> Ptyp_any
+        | Ptyp_any -> ty_default
         | Ptyp_var x ->
             Option.fold ~none:ty_default
               ~some:(fun x -> x.ptyp_desc)
@@ -64,7 +64,7 @@ let subst_core_type inst ty =
         | Ptyp_variant (_, _, _)
         | Ptyp_poly (_, _)
         | Ptyp_package _ | Ptyp_extension _ ->
-            failwith "Case should not happen in `subst'");
+            failwith "Case should not happen in `subst_core_type'");
     }
   in
   aux ty
@@ -100,16 +100,19 @@ let subst_term state ~gos_t ?(old_lz = false) ~old_t ?(new_lz = false) ~new_t
     match term.t_node with
     (* First: the only case where substitution happens, ie x.model *)
     | Tfield (({ t_node = Tvar { vs_name; vs_ty }; _ } as subt), ls)
-      when Ident.equal vs_name gos_t
-           && List.exists (fun (m, _) -> Ident.equal m ls.ls_name) state -> (
-        match cur_t with
-        | Some cur_t ->
-            let t = { subt with t_node = Tvar { vs_name = cur_t; vs_ty } } in
-            let t = if cur_lz then lazy_force t else t in
-            { term with t_node = Tfield (t, ls) }
-        | None ->
-            raise (ImpossibleSubst (subt, if cur_t = new_t then `New else `Old))
-        )
+      when Ident.equal vs_name gos_t ->
+        if List.exists (fun (m, _) -> Ident.equal m ls.ls_name) state then
+          match cur_t with
+          | Some cur_t ->
+              let t = { subt with t_node = Tvar { vs_name = cur_t; vs_ty } } in
+              let t = if cur_lz then lazy_force t else t in
+              { term with t_node = Tfield (t, ls) }
+          | None ->
+              raise
+                (ImpossibleSubst (subt, if cur_t = new_t then `New else `Old))
+        else
+          (* case x.f where f is _not_ a model field *)
+          raise (ImpossibleSubst (term, `NotModel))
     (* If the first case didn't match, it must be because [gos_t] is not used to
        access one of its model fields, so we error out *)
     | Tvar { vs_name; _ } when Ident.equal vs_name gos_t ->
@@ -142,10 +145,7 @@ let subst_term state ~gos_t ?(old_lz = false) ~old_t ?(new_lz = false) ~new_t
   let open Reserr in
   try ok (aux new_lz new_t term)
   with ImpossibleSubst (t, b) ->
-    error
-      ( Impossible_term_substitution
-          (Fmt.str "%a" Gospel.Tterm_printer.print_term t, b),
-        t.t_loc )
+    error (Impossible_term_substitution b, t.t_loc)
 
 let translate_checks config state value state_ident t =
   let open Reserr in
@@ -186,6 +186,7 @@ let pat_of_core_type inst typ =
   let rec aux ty =
     let open Reserr in
     match ty.ptyp_desc with
+    | Ptyp_any -> ok pat_default
     | Ptyp_var v -> (
         match List.assoc_opt v inst with
         | None -> ok pat_default
@@ -209,6 +210,7 @@ let exp_of_core_type inst typ =
   let rec aux ty =
     let open Reserr in
     match ty.ptyp_desc with
+    | Ptyp_any -> ok exp_default
     | Ptyp_var v -> (
         match List.assoc_opt v inst with
         | None -> ok exp_default
@@ -347,10 +349,12 @@ let next_state_case state config state_ident nb_models value =
     in
     let* descriptions =
       map
-        (fun id ->
+        (fun (id, loc) ->
           of_option
             ~default:
-              (Ensures_not_found_for_next_state (str_of_ident id), id.id_loc)
+              ( Ensures_not_found_for_next_state
+                  (value.id.id_str, id.Ident.id_str),
+                loc )
             (pick id))
         value.next_state.modifies
     in
@@ -707,7 +711,7 @@ let init_state config ir =
             |> of_option
                  ~default:
                    ( Impossible_init_state_generation
-                       (No_appropriate_specifications (Fmt.str "%a" Ident.pp id)),
+                       (No_translatable_specification id.Ident.id_str),
                      Ppxlib.Location.none )))
       ir.state
   in

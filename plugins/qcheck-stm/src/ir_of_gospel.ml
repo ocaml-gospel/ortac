@@ -16,9 +16,7 @@ let higher_order_test vd =
   let rec contains_arrow ty =
     match ty.ptyp_desc with
     | Ptyp_arrow (_, _, _) ->
-        error
-          ( Functional_argument (Fmt.str "%a" Pprintast.core_type ty),
-            ty.ptyp_loc )
+        error (Functional_argument vd.vd_name.id_str, ty.ptyp_loc)
     | Ptyp_tuple xs | Ptyp_constr (_, xs) ->
         let* _ = List.map contains_arrow xs |> sequence in
         ok ()
@@ -40,11 +38,12 @@ let is_a_function ty =
 let unify value_name sut_ty ty =
   let open Ppxlib in
   let open Reserr in
+  let show_type = Fmt.to_to_string Pprintast.core_type in
   let add_if_needed a x i =
     match List.assoc_opt a i with
     | None -> ok ((a, x) :: i)
     | Some y when x.ptyp_desc = y.ptyp_desc -> ok i
-    | _ -> error (Incompatible_type value_name, ty.ptyp_loc)
+    | _ -> error (Incompatible_type (value_name, show_type sut_ty), ty.ptyp_loc)
   in
   let rec aux i = function
     | [], [] -> ok i
@@ -56,10 +55,13 @@ let unify value_name sut_ty ty =
           | Ptyp_tuple xs, Ptyp_tuple ys -> aux i (xs, ys)
           | Ptyp_constr (c, xs), Ptyp_constr (d, ys) when c.txt = d.txt ->
               aux i (xs, ys)
-          | _ -> error (Incompatible_type value_name, ty.ptyp_loc)
+          | _ ->
+              error
+                (Incompatible_type (value_name, show_type sut_ty), ty.ptyp_loc)
         in
         aux i (xs, ys)
-    | _, _ -> error (Incompatible_type value_name, ty.ptyp_loc)
+    | _, _ ->
+        error (Incompatible_type (value_name, show_type sut_ty), ty.ptyp_loc)
   in
   match (sut_ty.ptyp_desc, ty.ptyp_desc) with
   | Ptyp_constr (t, args_sut), Ptyp_constr (t', args_ty) when t.txt = t'.txt ->
@@ -105,16 +107,14 @@ let ty_var_substitution config (vd : val_description) =
   in
   aux None value_type
 
-let split_args config ty args =
+let split_args config vd args =
   let open Ppxlib in
   let open Reserr in
   let module Ident = Identifier.Ident in
   let rec aux sut acc ty args =
     match (ty.ptyp_desc, args) with
     | _, Lghost vs :: _ ->
-        error
-          ( Ghost_values (Fmt.str "%a" Ident.pp vs.vs_name, `Arg),
-            vs.vs_name.id_loc )
+        error (Ghost_values (vd.vd_name.id_str, `Arg), vs.vs_name.id_loc)
     | Ptyp_arrow (_, l, r), Lnone vs :: xs
     | Ptyp_arrow (_, l, r), Loptional vs :: xs
     | Ptyp_arrow (_, l, r), Lnamed vs :: xs ->
@@ -124,7 +124,7 @@ let split_args config ty args =
     | _, [] -> ok (sut, List.rev acc)
     | _, _ -> failwith "shouldn't happen (too few parameters)"
   in
-  let* sut, args = aux None [] ty args in
+  let* sut, args = aux None [] vd.vd_type args in
   (* sut cannot be none because its presence has already been checked *)
   ok (Option.get sut, args)
 
@@ -150,16 +150,16 @@ let next_state sut state spec =
   let formulae = get_state_description_with_index is_t state spec in
   let open Reserr in
   let check_modify = function
-    | { t_node = Tvar vs; _ } when is_t vs -> List.map fst state |> ok
-    | { t_node = Tfield ({ t_node = Tvar vs; _ }, m); _ } when is_t vs ->
-        ok [ m.ls_name ]
-    | t ->
-        error
-          ( Ignored_modifies (Fmt.str "%a" Gospel.Tterm_printer.print_term t),
-            t.t_loc )
+    | { t_node = Tvar vs; _ } as t when is_t vs ->
+        List.map (fun (m, _) -> (m, t.t_loc)) state |> ok
+    | { t_node = Tfield ({ t_node = Tvar vs; _ }, m); _ } as t when is_t vs ->
+        ok [ (m.ls_name, t.t_loc) ]
+    | t -> error (Ignored_modifies, t.t_loc)
   in
   let* modifies = concat_map check_modify spec.sp_wr in
-  let modifies = List.sort_uniq Ident.compare modifies in
+  let modifies =
+    List.sort_uniq (fun (i, _) (i', _) -> Ident.compare i i') modifies
+  in
   ok Ir.{ formulae; modifies }
 
 let postcond spec =
@@ -189,15 +189,13 @@ let val_desc config state vd =
   and* spec =
     of_option ~default:(No_spec vd.vd_name.id_str, vd.vd_loc) vd.vd_spec
   in
-  let* sut, args = split_args config vd.vd_type spec.sp_args
+  let* sut, args = split_args config vd spec.sp_args
   and* ret =
     match spec.sp_ret with
     | [ Lnone vs ] -> ok (Some vs.vs_name)
     | [] -> ok None
     | Lghost vs :: _ | _ :: Lghost vs :: _ ->
-        error
-          ( Ghost_values (Fmt.str "%a" Ident.pp vs.vs_name, `Ret),
-            vs.vs_name.id_loc )
+        error (Ghost_values (vd.vd_name.id_str, `Ret), vs.vs_name.id_loc)
     | _ -> failwith "shouldn't happen (more than one return OCaml value)"
   in
   let* next_state = next_state sut state spec in
@@ -271,7 +269,7 @@ let init_state config state sigs =
     | expr ->
         error
           ( Impossible_init_state_generation
-              (Not_a_function_call (Fmt.str "%a@." Pprintast.expression expr)),
+              (Not_a_function_call (Fmt.str "%a" Pprintast.expression expr)),
             Location.none )
   in
   let* fct_str =
@@ -285,7 +283,7 @@ let init_state config state sigs =
         in
         error
           ( Impossible_init_state_generation
-              (Qualified_name Fmt.(str "%a@." Pprintast.expression name)),
+              (Qualified_name Fmt.(str "%a" Pprintast.expression name)),
             Location.none )
   in
   let is_init_declaration = function
@@ -304,8 +302,7 @@ let init_state config state sigs =
     of_option
       ~default:
         ( Impossible_init_state_generation
-            (No_appropriate_specifications
-               (Fmt.str "%a" Gospel.Identifier.Ident.pp value.Tast.vd_name)),
+            (No_specification value.Tast.vd_name.id_str),
           value.vd_loc )
       value.vd_spec
   in
@@ -317,7 +314,7 @@ let init_state config state sigs =
       error
         ( Impossible_init_state_generation
             (Mismatch_number_of_arguments
-               (Fmt.str "%a@." Pprintast.expression config.init_sut)),
+               (Fmt.str "%a" Pprintast.expression config.init_sut)),
           Location.none )
   in
   let open Gospel.Symbols in
@@ -341,18 +338,25 @@ let init_state config state sigs =
     get_state_description_with_index is_t state spec |> List.map snd
   in
   let* () =
-    if
+    match
       (* at least one description per model in state, choice is made when translating *)
-      List.for_all
+      List.filter
         (fun (id, _) ->
-          List.exists (fun Ir.{ model; _ } -> Ident.equal model id) descriptions)
+          not
+            (List.exists
+               (fun Ir.{ model; _ } -> Ident.equal model id)
+               descriptions))
         state
-    then ok ()
-    else
-      error
-        ( Impossible_init_state_generation
-            (No_appropriate_specifications spec.sp_text),
-          spec.sp_loc )
+    with
+    | [] -> ok ()
+    | missing_models ->
+        let missing_models =
+          List.map (fun (id, _) -> id.Ident.id_str) missing_models
+        in
+        error
+          ( Impossible_init_state_generation
+              (No_appropriate_specifications (fct_str, missing_models)),
+            spec.sp_loc )
   in
   ok (fct_str, Ir.{ arguments; descriptions })
 

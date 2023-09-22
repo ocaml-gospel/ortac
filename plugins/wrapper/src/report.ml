@@ -17,18 +17,15 @@ open Fmt
 
 let pp_kind ppf = function
   | Ghost_value name ->
-      pf ppf "%a is a ghost value. It was not translated." W.quoted name
-  | Ghost_type name ->
-      pf ppf "%a is a ghost type. It was not translated." W.quoted name
+      pf ppf "%s is a ghost value. It was not translated." name
+  | Ghost_type name -> pf ppf "%s is a ghost type. It was not translated." name
   | Unsupported_model (type_, name) ->
-      pf ppf "Model %a of type %a is not supported. It was not translated."
-        W.quoted name W.quoted type_
+      pf ppf "Model %s of type %s is not supported. It was not translated." name
+        type_
   | Function_without_definition name ->
-      pf ppf "The function %a has no definition. It was not translated."
-        W.quoted name
+      pf ppf "The function %s has no definition. It was not translated." name
   | Predicate_without_definition name ->
-      pf ppf "The predicate %a has no definition. It was not translated."
-        W.quoted name
+      pf ppf "The predicate %s has no definition. It was not translated." name
   | kind -> W.pp_kind ppf kind
 
 let pp = W.pp_param pp_kind level
