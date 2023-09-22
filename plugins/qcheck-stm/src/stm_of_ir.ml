@@ -88,11 +88,14 @@ let ocaml_of_term cfg t =
     occurrences of [gos_t] with [new_t] or [old_t] depending on whether the
     occurrence appears above or under the [old] operator, adding a [Lazy.force]
     if the corresponding [xxx_lz] is [true] (defaults to [false]). [gos_t] must
-    always be in a position in which it is applied to one of its model fields *)
+    always be in a position in which it is applied to one of its model fields.
+    Calling [subst_term] with [new_t] and [old_t] as None will check that the
+    term does not contain [gos_t] *)
 let subst_term state ~gos_t ?(old_lz = false) ~old_t ?(new_lz = false) ~new_t
     term =
   let exception
-    ImpossibleSubst of (Gospel.Tterm.term * [ `New | `Old | `NotModel ])
+    ImpossibleSubst of
+      (Gospel.Tterm.term * [ `Never | `New | `Old | `NotModel ])
   in
   let rec aux cur_lz cur_t term =
     let open Gospel.Tterm in
@@ -109,7 +112,12 @@ let subst_term state ~gos_t ?(old_lz = false) ~old_t ?(new_lz = false) ~new_t
               { term with t_node = Tfield (t, ls) }
           | None ->
               raise
-                (ImpossibleSubst (subt, if cur_t = new_t then `New else `Old))
+                (ImpossibleSubst
+                   ( subt,
+                     match (new_t, old_t) with
+                     | None, None -> `Never
+                     | None, _ -> `New
+                     | _, _ -> `Old ))
         else
           (* case x.f where f is _not_ a model field *)
           raise (ImpossibleSubst (term, `NotModel))

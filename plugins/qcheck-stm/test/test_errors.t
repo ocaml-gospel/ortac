@@ -205,5 +205,5 @@ We shouldn't be able to define a model by itsef in the `make` function:
   File "foo.mli", line 6, characters 22-23:
   6 |     ensures t.value = t.value *)
                             ^
-  Warning: Skipping clause: occurrences of the SUT in clauses are not supported
-           above old operator.
+  Warning: Skipping clause: impossible to define the initial value of the model
+           with a recursive expression.
