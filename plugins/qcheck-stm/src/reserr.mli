@@ -32,6 +32,7 @@ type W.kind +=
   | Impossible_init_state_generation of init_state_error
   | Functional_argument of string
   | Ghost_values of (string * [ `Arg | `Ret ])
+  | Incompatible_sut of string
 
 type 'a reserr
 

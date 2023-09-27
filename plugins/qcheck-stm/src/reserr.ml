@@ -32,6 +32,7 @@ type W.kind +=
   | Impossible_init_state_generation of init_state_error
   | Functional_argument of string
   | Ghost_values of (string * [ `Arg | `Ret ])
+  | Incompatible_sut of string
 
 let level kind =
   match kind with
@@ -45,7 +46,7 @@ let level kind =
   | Sut_type_not_supported _ | Type_not_supported_for_sut_parameter _
   | Syntax_error_in_init_sut _ | Type_parameter_not_instantiated _
   | Sut_type_not_specified _ | No_models _ | Impossible_init_state_generation _
-    ->
+  | Incompatible_sut _ ->
       W.Error
   | _ -> W.level kind
 
@@ -195,6 +196,11 @@ let pp_kind ppf kind =
       pf ppf "Error in INIT expression %s:@ %a" fct text
         "mismatch in the number of arguments between the INIT expression and \
          the function specification"
+  | Incompatible_sut t ->
+      pf ppf "Incompatible declaration of SUT type:@ %a%s" text
+        "the declaration of the SUT type is incompatible with the configured \
+         one: "
+        t
   | _ -> W.pp_kind ppf kind
 
 let pp_errors = W.pp_param pp_kind level |> Fmt.list
