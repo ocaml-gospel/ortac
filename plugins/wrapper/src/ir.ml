@@ -1,12 +1,6 @@
 module W = Ortac_core.Warnings
 open Ppxlib
 
-type mutability =
-  | Unknown
-  | Immutable
-  | Mutable
-  | Dependant of (mutability list -> mutability)
-
 type term = {
   txt : string;
   loc : Location.t;
@@ -28,7 +22,6 @@ type invariant = {
 type type_ = {
   name : string;
   loc : Location.t;
-  mutable_ : mutability;
   ghost : Gospel.Tast.ghost;
   models : (string * bool) list;
   invariants : invariant list;
@@ -37,11 +30,10 @@ type type_ = {
   copy : (expression, W.t) result;
 }
 
-let type_ ~name ~loc ~mutable_ ~ghost =
+let type_ ~name ~loc ~ghost =
   {
     name;
     loc;
-    mutable_;
     ghost;
     models = [];
     invariants = [];
@@ -73,7 +65,7 @@ type value = {
   ghost : Gospel.Tast.ghost;
   pure : bool;
   checks : check list;
-  copies : (string * term) list;
+  copies : (string * expression) list;
   preconditions : term list;
   postconditions : term list;
   xpostconditions : xpost list;
@@ -137,38 +129,20 @@ let stdlib_types =
   let loc = Ppxlib.Location.none in
   let ghost = Gospel.Tast.Nonghost in
   [
-    ([ "unit" ], type_ ~name:"unit" ~loc ~mutable_:Immutable ~ghost);
-    ([ "string" ], type_ ~name:"string" ~loc ~mutable_:Immutable ~ghost);
-    ([ "char" ], type_ ~name:"char" ~loc ~mutable_:Immutable ~ghost);
-    ([ "float" ], type_ ~name:"float" ~loc ~mutable_:Immutable ~ghost);
-    ([ "bool" ], type_ ~name:"bool" ~loc ~mutable_:Immutable ~ghost);
-    ([ "integer" ], type_ ~name:"integer" ~loc ~mutable_:Immutable ~ghost);
-    ( [ "option" ],
-      type_ ~name:"option" ~loc
-        ~mutable_:(Dependant (function [ m ] -> m | _ -> assert false))
-        ~ghost );
-    ( [ "list" ],
-      type_ ~name:"list" ~loc
-        ~mutable_:(Dependant (function [ m ] -> m | _ -> assert false))
-        ~ghost );
-    ( [ "Gospelstdlib"; "sequence" ],
-      type_ ~name:"sequence" ~loc
-        ~mutable_:(Dependant (function [ m ] -> m | _ -> assert false))
-        ~ghost );
-    ( [ "Gospelstdlib"; "bag" ],
-      type_ ~name:"bag" ~loc
-        ~mutable_:(Dependant (function [ m ] -> m | _ -> assert false))
-        ~ghost );
-    ( [ "Gospelstdlib"; "ref" ],
-      type_ ~name:"ref" ~loc ~mutable_:(Dependant (fun _ -> Mutable)) ~ghost );
-    ( [ "array" ],
-      type_ ~name:"array" ~loc ~mutable_:(Dependant (fun _ -> Mutable)) ~ghost
-    );
-    ( [ "Gospelstdlib"; "set" ],
-      type_ ~name:"set" ~loc
-        ~mutable_:(Dependant (function [ m ] -> m | _ -> assert false))
-        ~ghost );
-    ([ "int" ], type_ ~name:"int" ~loc ~mutable_:Immutable ~ghost);
+    ([ "unit" ], type_ ~name:"unit" ~loc ~ghost);
+    ([ "string" ], type_ ~name:"string" ~loc ~ghost);
+    ([ "char" ], type_ ~name:"char" ~loc ~ghost);
+    ([ "float" ], type_ ~name:"float" ~loc ~ghost);
+    ([ "bool" ], type_ ~name:"bool" ~loc ~ghost);
+    ([ "integer" ], type_ ~name:"integer" ~loc ~ghost);
+    ([ "option" ], type_ ~name:"option" ~loc ~ghost);
+    ([ "list" ], type_ ~name:"list" ~loc ~ghost);
+    ([ "Gospelstdlib"; "sequence" ], type_ ~name:"sequence" ~loc ~ghost);
+    ([ "Gospelstdlib"; "bag" ], type_ ~name:"bag" ~loc ~ghost);
+    ([ "Gospelstdlib"; "ref" ], type_ ~name:"ref" ~loc ~ghost);
+    ([ "array" ], type_ ~name:"array" ~loc ~ghost);
+    ([ "Gospelstdlib"; "set" ], type_ ~name:"set" ~loc ~ghost);
+    ([ "int" ], type_ ~name:"int" ~loc ~ghost);
   ]
 
 type structure = structure_item list
