@@ -105,7 +105,7 @@ module Spec =
                not
                  (Ortac_runtime.Gospelstdlib.List.mem a_3
                     (Ortac_runtime.Gospelstdlib.List.map
-                       (fun x_1 -> Ortac_runtime.Gospelstdlib.fst x_1)
+                       Ortac_runtime.Gospelstdlib.fst
                        (Lazy.force new_state__007_).contents))
            | _ -> false)
       | (Find_opt a_4, Res ((Option (Int), _), o)) ->
@@ -115,7 +115,7 @@ module Spec =
                  not
                    (Ortac_runtime.Gospelstdlib.List.mem a_4
                       (Ortac_runtime.Gospelstdlib.List.map
-                         (fun x_2 -> Ortac_runtime.Gospelstdlib.fst x_2)
+                         Ortac_runtime.Gospelstdlib.fst
                          (Lazy.force new_state__007_).contents))
                then true
                else false
@@ -129,17 +129,14 @@ module Spec =
       | (Find_all a_5, Res ((List (Int), _), bs)) ->
           (Ortac_runtime.Gospelstdlib.List.to_seq bs) =
             (Ortac_runtime.Gospelstdlib.Sequence.filter_map
-               (fun x_3 ->
-                  if (Ortac_runtime.Gospelstdlib.fst x_3) = a_5
-                  then Some (Ortac_runtime.Gospelstdlib.snd x_3)
-                  else None)
+               (fun (x_1, y) -> if x_1 = a_5 then Some y else None)
                (Ortac_runtime.Gospelstdlib.List.to_seq
                   (Lazy.force new_state__007_).contents))
       | (Mem a_6, Res ((Bool, _), b_6)) ->
           (b_6 = true) =
             (Ortac_runtime.Gospelstdlib.List.mem a_6
                (Ortac_runtime.Gospelstdlib.List.map
-                  (fun x_4 -> Ortac_runtime.Gospelstdlib.fst x_4)
+                  Ortac_runtime.Gospelstdlib.fst
                   (Lazy.force new_state__007_).contents))
       | (Remove a_7, Res ((Unit, _), _)) -> true
       | (Replace (a_8, b_3), Res ((Unit, _), _)) -> true

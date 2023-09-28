@@ -28,22 +28,22 @@ val add : ('a, 'b) t -> 'a -> 'b -> unit
 val find : ('a, 'b) t -> 'a -> 'b
 (*@ b = find h a
     raises Not_found -> forall x. not (List.mem (a, x) h.contents)
-    raises Not_found -> not (List.mem a (List.map (fun x -> fst x) h.contents))
+    raises Not_found -> not (List.mem a (List.map fst h.contents))
     ensures List.mem (a, b) h.contents *)
 
 val find_opt : ('a, 'b) t -> 'a -> 'b option
 (*@ o = find_opt h a
     ensures match o with
-      | None -> not (List.mem a (List.map (fun x -> fst x) h.contents))
+      | None -> not (List.mem a (List.map fst h.contents))
       | Some b -> List.mem (a, b) h.contents *)
 
 val find_all : ('a, 'b) t -> 'a -> 'b list
 (*@ bs = find_all h a
-    ensures bs = Sequence.filter_map (fun x -> if fst x = a then Some (snd x) else None)  h.contents *)
+    ensures bs = Sequence.filter_map (fun (x, y) -> if x = a then Some y else None) h.contents *)
 
 val mem : ('a, 'b) t -> 'a -> bool
 (*@ b = mem h a
-    ensures b = List.mem a (List.map (fun x -> fst x) h.contents) *)
+    ensures b = List.mem a (List.map fst h.contents) *)
 
 (*@ function rec remove_first (x: 'a) (xs : ('a * 'b) list) : ('a * 'b) list =
       match xs with
@@ -65,9 +65,9 @@ val filter_map_inplace : ('a -> 'b -> 'b option) -> ('a, 'b) t -> unit
 (*@ filter_map_inplace f h
     modifies h
     ensures h.contents = Sequence.filter_map
-                            (fun x -> match f (fst x) (snd x) with
-                                       | None -> None
-                                       | Some b' -> Some (fst x, b'))
+                            (fun (x,y) -> match f x y with
+                                          | None -> None
+                                          | Some b' -> Some (x, b'))
                             (old h.contents) *)
 
 val fold : ('a -> 'b -> 'c -> 'c) -> ('a, 'b) t -> 'c -> 'c

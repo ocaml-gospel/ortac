@@ -7,7 +7,7 @@ type s
 
 val make : int -> 'a -> 'a t
 (*@ t = make i a
-    ensures t.contents = List.init i (fun x -> a) *)
+    ensures t.contents = List.init i (fun _ -> a) *)
 
 val constant : unit
 (*@ constant
