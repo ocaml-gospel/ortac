@@ -35,15 +35,20 @@ let is_a_function ty =
   let open Ppxlib in
   match ty.ptyp_desc with Ptyp_arrow (_, _, _) -> true | _ -> false
 
-let unify value_name sut_ty ty =
+let unify case sut_ty ty =
   let open Ppxlib in
   let open Reserr in
-  let show_type = Fmt.to_to_string Pprintast.core_type in
+  let fail () =
+    let sut_ty = Fmt.to_to_string Pprintast.core_type sut_ty in
+    match case with
+    | `Value name -> error (Incompatible_type (name, sut_ty), ty.ptyp_loc)
+    | `Type ty -> error (Incompatible_sut sut_ty, ty.td_loc)
+  in
   let add_if_needed a x i =
     match List.assoc_opt a i with
     | None -> ok ((a, x) :: i)
     | Some y when x.ptyp_desc = y.ptyp_desc -> ok i
-    | _ -> error (Incompatible_type (value_name, show_type sut_ty), ty.ptyp_loc)
+    | _ -> fail ()
   in
   let rec aux i = function
     | [], [] -> ok i
@@ -55,13 +60,10 @@ let unify value_name sut_ty ty =
           | Ptyp_tuple xs, Ptyp_tuple ys -> aux i (xs, ys)
           | Ptyp_constr (c, xs), Ptyp_constr (d, ys) when c.txt = d.txt ->
               aux i (xs, ys)
-          | _ ->
-              error
-                (Incompatible_type (value_name, show_type sut_ty), ty.ptyp_loc)
+          | _ -> fail ()
         in
         aux i (xs, ys)
-    | _, _ ->
-        error (Incompatible_type (value_name, show_type sut_ty), ty.ptyp_loc)
+    | _, _ -> fail ()
   in
   match (sut_ty.ptyp_desc, ty.ptyp_desc) with
   | Ptyp_constr (t, args_sut), Ptyp_constr (t', args_ty) when t.txt = t'.txt ->
@@ -84,7 +86,7 @@ let ty_var_substitution config (vd : val_description) =
           match seen with
           | None ->
               let open Reserr in
-              let* x = unify value_name config.sut_core_type l in
+              let* x = unify (`Value value_name) config.sut_core_type l in
               aux (Some x) r
           | Some _ ->
               Reserr.(
@@ -238,8 +240,9 @@ let state config sigs =
   let* subst =
     Fun.flip List.assoc_opt
     <$> (Ocaml_of_gospel.core_type_of_tysymbol ty.td_ts
-        |> unify sut_name config.sut_core_type)
-  and* spec =
+        |> unify (`Type ty) config.sut_core_type)
+  in
+  let* spec =
     match ty.td_spec with
     | None -> error (Sut_type_not_specified sut_name, ty.td_loc)
     | Some spec -> ok spec

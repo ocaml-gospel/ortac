@@ -35,6 +35,15 @@ We can give a type that does not exist in the module as the system under test:
   $ ortac qcheck-stm foo.mli "()" "ty"
   Error: Type ty not declared in the module.
 
+Or forget its argument:
+
+  $ ortac qcheck-stm foo.mli "()" "t"
+  File "foo.mli", line 1, characters 0-9:
+  1 | type 'a t
+      ^^^^^^^^^
+  Error: Incompatible declaration of SUT type: the declaration of the SUT type
+         is incompatible with the configured one: t.
+
 We can forget to instantiate the type parameter of the system under test:
 
   $ cat > foo.mli << EOF
