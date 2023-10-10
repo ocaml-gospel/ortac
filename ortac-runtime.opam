@@ -12,7 +12,7 @@ doc: "https://pascutto.github.io/ortac/"
 bug-reports: "https://github.com/ocaml-gospel/ortac/issues"
 depends: [
   "ocaml" {>= "4.11.0"}
-  "dune" {>= "3.0"}
+  "dune" {>= "3.8"}
   "fmt"
   "zarith"
   "monolith" {with-test}
