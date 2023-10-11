@@ -5,6 +5,7 @@ maintainer: "Clément Pascutto <clement@pascutto.fr>"
 authors: [
   "Clément Pascutto <clement@pascutto.fr>"
   "Nicolas Osborne <nicolas.osborne@tarides.com>"
+  "Samuel Hym <samuel.hym@rustyne.lautre.net>"
 ]
 homepage: "https://github.com/ocaml-gospel/ortac"
 doc: "https://pascutto.github.io/ortac/"
