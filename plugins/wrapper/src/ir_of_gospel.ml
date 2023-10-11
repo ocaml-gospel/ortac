@@ -345,7 +345,7 @@ let fresh_var =
 let collect_old t =
   let rec aux acc t =
     match t.Tterm.t_node with
-    | Tvar _ | Tconst _ | Ttrue | Tfalse -> ([], t)
+    | Tvar _ | Tconst _ | Ttrue | Tfalse -> (acc, t)
     | Tapp (ls, tl) ->
         let acc, tl = List.fold_left_map aux acc tl in
         let t_node = Tterm.Tapp (ls, tl) in
@@ -414,7 +414,7 @@ let with_posts ~context ~term_printer posts (value : value) =
   let copies, posts =
     List.fold_left_map
       (fun acc t ->
-        let copies, t' = collect_old (old_down VSet.empty t) in
+        let copies, t' = collect_old t (*(old_down VSet.empty t)*) in
         (copies @ acc, t'))
       [] posts
   in
