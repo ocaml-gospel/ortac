@@ -34,11 +34,7 @@ depends: [
   "cmdliner" {>= "1.1.0"}
   "fmt"
   "ppxlib" {>= "0.26.0"}
-  "gospel"
+  "gospel" {>= "0.2.0"}
   "alcotest" {with-test & >= "0.8.1"}
   "ortac-runtime" {with-test}
-]
-
-pin-depends: [
-  "gospel.dev" "git+https://github.com/ocaml-gospel/gospel#ef8f0d23f2df6f825355cfa27e38e904ddc3c3a3"
 ]
