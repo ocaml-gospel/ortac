@@ -132,13 +132,15 @@ let split_args config vd args =
 
 let get_state_description_with_index is_t state spec =
   let open Tterm in
-  let pred i t =
+  let rec pred i t =
     match t.t_node with
     | Tapp (ls, [ { t_node = Tfield ({ t_node = Tvar vs; _ }, m); _ }; right ])
       when Symbols.(ls_equal ps_equ ls) && is_t vs ->
         if List.exists (fun (id, _) -> Ident.equal id m.ls_name) state then
           Some (i, Ir.{ model = m.ls_name; description = right })
         else None
+    | Tbinop ((Tand | Tand_asym), l, r) -> (
+        match pred i l with None -> pred i r | o -> o)
     | _ -> None
   in
   List.mapi pred spec.sp_post |> List.filter_map Fun.id
