@@ -1,12 +1,32 @@
 opam-version: "2.0"
 synopsis: "Monolith plugin for Ortac"
-description: "Monolith plugin for Ortac"
-maintainer: ["Nicolas Osborne <nicolas.osborne@tarides.com>"]
-authors: ["Nicolas Osborne <nicolas.osborne@tarides.com>"]
+description: """\
+The Monolith plugin for the Ortac command-line tool (provided by
+the ortac-core package) can generate tests for a module with Gospel
+specifications. The generated code will test that the function
+specifications hold by using the Monolith library to compare the
+behaviours of the original module with a module that adds runtime
+checks around all function calls.
+
+Ortac (OCaml Runtime Assertion Checking) is a tool to turn
+executable Gospel specifications into code to test they hold."""
+maintainer: "Nicolas Osborne <nicolas.osborne@tarides.com>"
+authors: "Nicolas Osborne <nicolas.osborne@tarides.com>"
 homepage: "https://github.com/ocaml-gospel/ortac"
-dev-repo: "git+https://github.com/ocaml-gospel/ortac.git"
-doc: "https://ocaml-gospel.github.io/ortac/"
 bug-reports: "https://github.com/ocaml-gospel/ortac/issues"
+depends: [
+  "ocaml" {>= "4.11.0"}
+  "dune" {>= "3.8"}
+  "cmdliner" {>= "1.1.0"}
+  "fmt"
+  "ppxlib" {>= "0.26.0"}
+  "gospel" {>= "0.2.0"}
+  "monolith" {with-test & >= "20201026"}
+  "pprint" {with-test}
+  "ortac-core"
+  "ortac-wrapper"
+  "ortac-runtime-monolith" {with-test}
+]
 build: [
   ["dune" "subst"] {dev}
   [
@@ -21,17 +41,4 @@ build: [
     "@doc" {with-doc}
   ]
 ]
-
-depends: [
-  "ocaml" {>= "4.11.0"}
-  "dune" {>= "3.8"}
-  "cmdliner" {>= "1.1.0"}
-  "fmt"
-  "ppxlib" {>= "0.26.0"}
-  "gospel"
-  "monolith" {with-test & >= "20201026"}
-  "pprint" {with-test}
-  "ortac-core"
-  "ortac-wrapper"
-  "ortac-runtime-monolith" {with-test}
-]
+dev-repo: "git+https://github.com/ocaml-gospel/ortac.git"
