@@ -55,3 +55,6 @@ val unsupported_quantification : 'a t -> bool
 val record_not_model_field : 'a t -> bool
 (*@ b = record_not_model_field t
     requires Array.length t.v > 0 *)
+
+val return_tuple : 'a t -> 'a * bool
+(*@ (a, b) = return_tuple t *)

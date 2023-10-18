@@ -10,7 +10,7 @@ let constant_test vd =
       (Constant_value (Fmt.str "%a" Ident.pp vd.vd_name), vd.vd_loc) |> error
   | _ -> ok ()
 
-let higher_order_test vd =
+let no_functional_arg_or_returned_tuple vd =
   let open Reserr in
   let open Ppxlib in
   let rec contains_arrow ty =
@@ -27,6 +27,7 @@ let higher_order_test vd =
     | Ptyp_arrow (_, l, r) ->
         let* _ = contains_arrow l in
         aux r
+    | Ptyp_tuple _ -> error (Returned_tuple vd.vd_name.id_str, ty.ptyp_loc)
     | _ -> ok ()
   in
   aux vd.vd_type
@@ -188,19 +189,22 @@ let postcond spec =
 
 let val_desc config state vd =
   let open Reserr in
-  let* () = constant_test vd and* () = higher_order_test vd in
+  let* () = constant_test vd and* () = no_functional_arg_or_returned_tuple vd in
   let* inst = ty_var_substitution config vd
   and* spec =
     of_option ~default:(No_spec vd.vd_name.id_str, vd.vd_loc) vd.vd_spec
   in
   let* sut, args = split_args config vd spec.sp_args
   and* ret =
-    match spec.sp_ret with
-    | [ Lnone vs ] -> ok (Some vs.vs_name)
-    | [] -> ok None
-    | Lghost vs :: _ | _ :: Lghost vs :: _ ->
-        error (Ghost_values (vd.vd_name.id_str, `Ret), vs.vs_name.id_loc)
-    | _ -> failwith "shouldn't happen (more than one return OCaml value)"
+    let p = function
+      | Lnone vs -> ok vs.vs_name
+      | Lghost vs ->
+          error (Ghost_values (vd.vd_name.id_str, `Ret), vs.vs_name.id_loc)
+      | _ ->
+          failwith
+            "shouldn't happen (only non labelled and ghost value are returned)"
+    in
+    List.map p spec.sp_ret |> sequence
   in
   let* next_state = next_state sut state spec in
   let postcond = postcond spec in

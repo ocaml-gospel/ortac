@@ -47,6 +47,11 @@ File "all_warnings.mli", line 49, characters 6-7:
            ^
 Warning: Skipping ghost_returned_value: functions with a ghost returned value
          are not supported.
+File "all_warnings.mli", line 59, characters 27-36:
+59 | val return_tuple : 'a t -> 'a * bool
+                                ^^^^^^^^^
+Warning: Skipping return_tuple: functions returning tuples are not supported
+         yet.
 File "all_warnings.mli", line 37, characters 13-23:
 37 |     modifies t.contents *)
                   ^^^^^^^^^^

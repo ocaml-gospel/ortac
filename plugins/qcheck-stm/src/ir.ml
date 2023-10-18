@@ -32,7 +32,7 @@ type value = {
   sut_var : Ident.t;
   args : (Ppxlib.core_type * Ident.t option) list;
       (* arguments of unit types can be nameless *)
-  ret : Ident.t option;
+  ret : Ident.t list;
   next_state : next_state;
   precond : Tterm.term list;
   postcond : postcond;
