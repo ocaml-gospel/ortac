@@ -51,8 +51,9 @@ File "all_warnings.mli", line 37, characters 13-23:
 37 |     modifies t.contents *)
                   ^^^^^^^^^^
 Warning: Skipping ensures_not_found_for_next_state: model contents is
-         declared as modified by the function but no translatable ensures
-         clause was found.
+         declared as modified by the function but no suitable ensures clause
+         was found. Specifications should contain at least one "ensures
+         x.contents = ..." where x is the SUT.
 File "all_warnings.mli", line 53, characters 16-54:
 53 |     ensures b = forall a. List.mem a t.contents -> p a *)
                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
