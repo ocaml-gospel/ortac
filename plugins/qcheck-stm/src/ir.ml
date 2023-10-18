@@ -40,6 +40,7 @@ type value = {
 
 type init_state = {
   arguments : (Tast.lb_arg * Ppxlib.expression) list;
+  returned_sut : Ident.t;
   descriptions : new_state_formulae list;
 }
 

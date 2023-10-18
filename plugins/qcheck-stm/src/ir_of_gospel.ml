@@ -331,7 +331,7 @@ let init_state config state sigs =
     match ty.ptyp_desc with Ptyp_arrow (_, _, r) -> return_type r | _ -> ty
   in
   let ret_sut = Cfg.is_sut config (return_type value.vd_type) in
-  let* sut =
+  let* returned_sut =
     List.find_map
       (function Lnone vs when ret_sut -> Some vs.vs_name | _ -> None)
       spec.sp_ret
@@ -342,7 +342,7 @@ let init_state config state sigs =
                   (Fmt.str "%a" Gospel.Identifier.Ident.pp value.Tast.vd_name)),
              value.vd_loc )
   in
-  let is_t vs = Ident.equal sut vs.vs_name in
+  let is_t vs = Ident.equal returned_sut vs.vs_name in
   let descriptions =
     get_state_description_with_index is_t state spec |> List.map snd
   in
@@ -367,7 +367,7 @@ let init_state config state sigs =
               (No_appropriate_specifications (fct_str, missing_models)),
             spec.sp_loc )
   in
-  ok (fct_str, Ir.{ arguments; descriptions })
+  ok (fct_str, Ir.{ arguments; returned_sut; descriptions })
 
 let signature config init_fct state sigs =
   List.filter_map (sig_item config init_fct state) sigs |> Reserr.promote
