@@ -39,6 +39,8 @@ module type S = sig
     (** [report l] prints the content of [l] *)
   end
 
+  exception Partial_function of exn * location
+
   type integer
 
   module Gospelstdlib : sig

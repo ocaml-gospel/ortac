@@ -155,6 +155,13 @@ and term ~context (t : Tterm.term) : expression =
   | Ttrue -> [%expr true]
   | Tfalse -> [%expr false]
 
+let term_with_catch ~context t =
+  let exp = term ~context t in
+  [%expr
+    try [%e exp]
+    with e ->
+      raise (Ortac_runtime.Partial_function (e, [%e elocation t.t_loc]))]
+
 let core_type_of_ty_with_subst subst ty =
   let open Ttypes in
   let lident_of_tysymbol ts =

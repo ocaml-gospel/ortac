@@ -1,7 +1,29 @@
 open Conjunctive_clauses
 let set_contents c i a_1 =
-  Ortac_runtime.Gospelstdlib.List.mapi
-    (fun j -> fun x -> if i = j then a_1 else x) c
+  try
+    Ortac_runtime.Gospelstdlib.List.mapi
+      (fun j -> fun x -> if i = j then a_1 else x) c
+  with
+  | e ->
+      raise
+        (Ortac_runtime.Partial_function
+           (e,
+             {
+               Ortac_runtime.start =
+                 {
+                   pos_fname = "conjunctive_clauses.mli";
+                   pos_lnum = 9;
+                   pos_bol = 562;
+                   pos_cnum = 572
+                 };
+               Ortac_runtime.stop =
+                 {
+                   pos_fname = "conjunctive_clauses.mli";
+                   pos_lnum = 9;
+                   pos_bol = 562;
+                   pos_cnum = 619
+                 }
+             }))
 module Spec =
   struct
     open STM
@@ -21,8 +43,30 @@ module Spec =
       and a_3 = 'a' in
       {
         contents =
-          (Ortac_runtime.Gospelstdlib.List.init
-             (Ortac_runtime.Gospelstdlib.integer_of_int i_2) (fun _ -> a_3))
+          (try
+             Ortac_runtime.Gospelstdlib.List.init
+               (Ortac_runtime.Gospelstdlib.integer_of_int i_2) (fun _ -> a_3)
+           with
+           | e ->
+               raise
+                 (Ortac_runtime.Partial_function
+                    (e,
+                      {
+                        Ortac_runtime.start =
+                          {
+                            pos_fname = "conjunctive_clauses.mli";
+                            pos_lnum = 6;
+                            pos_bol = 277;
+                            pos_cnum = 318
+                          };
+                        Ortac_runtime.stop =
+                          {
+                            pos_fname = "conjunctive_clauses.mli";
+                            pos_lnum = 6;
+                            pos_bol = 277;
+                            pos_cnum = 342
+                          }
+                      })))
       }
     let init_sut () = make 42 'a'
     let cleanup _ = ()
@@ -38,8 +82,30 @@ module Spec =
       | Set (i_1, a_2) ->
           {
             contents =
-              (set_contents state__003_.contents
-                 (Ortac_runtime.Gospelstdlib.integer_of_int i_1) a_2)
+              ((try
+                  set_contents state__003_.contents
+                    (Ortac_runtime.Gospelstdlib.integer_of_int i_1) a_2
+                with
+                | e ->
+                    raise
+                      (Ortac_runtime.Partial_function
+                         (e,
+                           {
+                             Ortac_runtime.start =
+                               {
+                                 pos_fname = "conjunctive_clauses.mli";
+                                 pos_lnum = 14;
+                                 pos_bol = 821;
+                                 pos_cnum = 862
+                               };
+                             Ortac_runtime.stop =
+                               {
+                                 pos_fname = "conjunctive_clauses.mli";
+                                 pos_lnum = 14;
+                                 pos_bol = 821;
+                                 pos_cnum = 874
+                               }
+                           }))))
           }
     let precond cmd__008_ state__009_ =
       match cmd__008_ with | Set (i_1, a_2) -> true

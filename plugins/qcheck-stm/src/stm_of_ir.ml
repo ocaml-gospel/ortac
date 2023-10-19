@@ -82,7 +82,8 @@ let lazy_force =
 let ocaml_of_term cfg t =
   let open Ortac_core.Ocaml_of_gospel in
   let open Reserr in
-  try term ~context:cfg.Cfg.context t |> ok with W.Error e -> error e
+  try term_with_catch ~context:cfg.Cfg.context t |> ok
+  with W.Error e -> error e
 
 (** [subst_term state ~gos_t ?old_lz ~old_t ?new_lz ~new_t trm] will substitute
     occurrences of [gos_t] with [new_t] or [old_t] depending on whether the
