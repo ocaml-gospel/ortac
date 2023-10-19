@@ -245,7 +245,7 @@ let state config sigs =
   let open Ortac_core in
   let* subst =
     Fun.flip List.assoc_opt
-    <$> (Ocaml_of_gospel.core_type_of_tysymbol ty.td_ts
+    <$> (Ocaml_of_gospel.core_type_of_tysymbol ~context:config.context ty.td_ts
         |> unify (`Type ty) config.sut_core_type)
   in
   let* spec =
@@ -256,8 +256,9 @@ let state config sigs =
   let process_model (ls, _) =
     let open Symbols in
     ( ls.ls_name,
-      Option.get ls.ls_value |> Ocaml_of_gospel.core_type_of_ty_with_subst subst
-    )
+      Option.get ls.ls_value
+      |> Ocaml_of_gospel.core_type_of_ty_with_subst ~context:config.context
+           subst )
   in
   match spec.ty_fields with
   | [] -> error (No_models sut_name, spec.ty_loc)

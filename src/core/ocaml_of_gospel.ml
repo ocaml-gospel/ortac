@@ -162,11 +162,12 @@ let term_with_catch ~context t =
     with e ->
       raise (Ortac_runtime.Partial_function (e, [%e elocation t.t_loc]))]
 
-let core_type_of_ty_with_subst subst ty =
+let core_type_of_ty_with_subst ~context subst ty =
   let open Ttypes in
   let lident_of_tysymbol ts =
-    (if ty_equal ty_integer ty then "Ortac_runtime.integer"
-     else Fmt.str "%a" Ident.pp ts.ts_ident)
+    (match Context.translate_tystdlib ts context with
+    | Some ty -> ty
+    | None -> Fmt.str "%a" Ident.pp ts.ts_ident)
     |> Builder.lident
   in
   let rec aux ty =
@@ -181,13 +182,16 @@ let core_type_of_ty_with_subst subst ty =
   in
   aux ty
 
-let core_type_of_tysymbol (ts : Ttypes.tysymbol) : Ppxlib.core_type =
-  let lid = Fmt.str "%a" Ident.pp ts.ts_ident |> Builder.lident in
+let core_type_of_tysymbol ~context ts =
+  let lid =
+    (match Context.translate_tystdlib ts context with
+    | Some ty -> ty
+    | None -> Fmt.str "%a" Ident.pp ts.Ttypes.ts_ident)
+    |> Builder.lident
+  in
   let args =
     List.map
-      (fun tv ->
-        let open Ttypes in
-        Builder.ptyp_var (Fmt.str "%a" Ident.pp tv.tv_name))
+      (fun tv -> Builder.ptyp_var (Fmt.str "%a" Ident.pp tv.Ttypes.tv_name))
       ts.ts_args
   in
   Builder.ptyp_constr lid args

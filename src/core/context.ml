@@ -1,9 +1,11 @@
 open Gospel.Tmodule
 module L = Map.Make (Gospel.Symbols.LS)
+module T = Map.Make (Gospel.Ttypes.Ts)
 
 type t = {
   module_name : string;
   stdlib : string L.t;
+  tystdlib : string T.t;
   env : namespace;
   functions : string L.t;
 }
@@ -18,6 +20,7 @@ let get_env get ns path =
 
 let get_ls_env = get_env ns_find_ls
 let translate_stdlib ls t = L.find_opt ls t.stdlib
+let translate_tystdlib ts t = T.find_opt ts t.tystdlib
 let add_function ls i t = { t with functions = L.add ls i t.functions }
 let find_function ls t = L.find ls t.functions
 let is_function ls t = L.mem ls t.functions
@@ -31,6 +34,19 @@ let builtins =
     ([ "[]" ], "[]");
     ([ "infix ::" ], "(::)");
     ([ "infix =" ], "(=)");
+  ]
+
+let tybuiltins =
+  [
+    ([ "unit" ], "unit");
+    ([ "string" ], "string");
+    ([ "char" ], "char");
+    ([ "float" ], "float");
+    ([ "bool" ], "bool");
+    ([ "int" ], "int");
+    ([ "option" ], "option");
+    ([ "list" ], "list");
+    ([ "integer" ], "Ortac_runtime.integer");
   ]
 
 (** [unsupported_stdlib] contains all the entries of the Gospel Stdlib that
@@ -86,16 +102,16 @@ let process_name name =
     Some ("__mix_" ^ String.map convert_mix_symbol (drop p_mix))
   else Some name
 
-let fold_namespace f path ns v =
+let fold_namespace proj f path ns v =
   let rec aux path ns v =
-    let v = Gospel.Tmodule.Mstr.fold (f path) ns.ns_ls v in
+    let v = Gospel.Tmodule.Mstr.fold (f path) (proj ns) v in
     Gospel.Tmodule.Mstr.fold (fun s -> aux (path @ [ s ])) ns.ns_ns v
   in
   aux path ns v
 
 let init module_name env =
   let gostd = Gospel.Tmodule.Mstr.find "Gospelstdlib" env.ns_ns in
-  let process_gostd_entry path name ls lib =
+  let process_gostd_entry add path name sym lib =
     match process_name name with
     | None -> lib
     | Some name ->
@@ -103,7 +119,7 @@ let init module_name env =
         if Hashtbl.mem unsupported_stdlib fullpath then lib
         else
           let fullpath = "Ortac_runtime" :: fullpath in
-          L.add ls (String.concat "." fullpath) lib
+          add sym (String.concat "." fullpath) lib
   in
   let stdlib =
     List.fold_left
@@ -113,8 +129,24 @@ let init module_name env =
       L.empty builtins
   in
   let stdlib =
-    fold_namespace process_gostd_entry [ "Gospelstdlib" ] gostd stdlib
+    fold_namespace
+      (fun ns -> ns.ns_ls)
+      (process_gostd_entry L.add)
+      [ "Gospelstdlib" ] gostd stdlib
   in
-  { module_name; stdlib; env; functions = L.empty }
+  let tystdlib =
+    List.fold_left
+      (fun acc (path, ocaml) ->
+        let ts = get_env ns_find_ts env path in
+        T.add ts ocaml acc)
+      T.empty tybuiltins
+  in
+  let tystdlib =
+    fold_namespace
+      (fun ns -> ns.ns_ts)
+      (process_gostd_entry T.add)
+      [ "Gospelstdlib" ] gostd tystdlib
+  in
+  { module_name; stdlib; tystdlib; env; functions = L.empty }
 
 let module_name t = t.module_name
