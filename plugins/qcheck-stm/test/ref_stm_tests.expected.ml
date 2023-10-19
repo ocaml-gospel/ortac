@@ -12,7 +12,31 @@ module Spec =
       value: Ortac_runtime.integer }
     let init_state =
       let i_1 = 42 in
-      { value = (Ortac_runtime.Gospelstdlib.integer_of_int i_1) }
+      {
+        value =
+          (try Ortac_runtime.Gospelstdlib.integer_of_int i_1
+           with
+           | e ->
+               raise
+                 (Ortac_runtime.Partial_function
+                    (e,
+                      {
+                        Ortac_runtime.start =
+                          {
+                            pos_fname = "ref.mli";
+                            pos_lnum = 6;
+                            pos_bol = 211;
+                            pos_cnum = 233
+                          };
+                        Ortac_runtime.stop =
+                          {
+                            pos_fname = "ref.mli";
+                            pos_lnum = 6;
+                            pos_bol = 211;
+                            pos_cnum = 234
+                          }
+                      })))
+      }
     let init_sut () = make 42
     let cleanup _ = ()
     let arb_cmd _ =
@@ -25,8 +49,30 @@ module Spec =
       let new_state__007_ = lazy (next_state cmd__004_ state__005_) in
       match (cmd__004_, res__006_) with
       | (Get, Res ((Int, _), i)) ->
-          (Ortac_runtime.Gospelstdlib.integer_of_int i) =
-            (Lazy.force new_state__007_).value
+          (try
+             (Ortac_runtime.Gospelstdlib.integer_of_int i) =
+               (Lazy.force new_state__007_).value
+           with
+           | e ->
+               raise
+                 (Ortac_runtime.Partial_function
+                    (e,
+                      {
+                        Ortac_runtime.start =
+                          {
+                            pos_fname = "ref.mli";
+                            pos_lnum = 11;
+                            pos_bol = 346;
+                            pos_cnum = 358
+                          };
+                        Ortac_runtime.stop =
+                          {
+                            pos_fname = "ref.mli";
+                            pos_lnum = 11;
+                            pos_bol = 346;
+                            pos_cnum = 369
+                          }
+                      })))
       | _ -> true
     let run cmd__010_ sut__011_ =
       match cmd__010_ with | Get -> Res (int, (get sut__011_))

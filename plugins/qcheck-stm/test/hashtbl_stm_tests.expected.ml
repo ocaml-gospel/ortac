@@ -1,9 +1,31 @@
 open Hashtbl
 let rec remove_first x xs_1 =
-  match xs_1 with
-  | (a_1, b_1)::xs ->
-      if a_1 = x then xs else (a_1, b_1) :: (remove_first x xs)
-  | [] -> []
+  try
+    match xs_1 with
+    | (a_1, b_1)::xs ->
+        if a_1 = x then xs else (a_1, b_1) :: (remove_first x xs)
+    | [] -> []
+  with
+  | e ->
+      raise
+        (Ortac_runtime.Partial_function
+           (e,
+             {
+               Ortac_runtime.start =
+                 {
+                   pos_fname = "hashtbl.mli";
+                   pos_lnum = 49;
+                   pos_bol = 2390;
+                   pos_cnum = 2396
+                 };
+               Ortac_runtime.stop =
+                 {
+                   pos_fname = "hashtbl.mli";
+                   pos_lnum = 51;
+                   pos_bol = 2486;
+                   pos_cnum = 2502
+                 }
+             }))
 module Spec =
   struct
     open STM
@@ -41,8 +63,34 @@ module Spec =
       | Length -> Format.asprintf "%s" "length"
     type nonrec state = {
       contents: (char * int) list }
-    let init_state = let random = false
-                     and size = 16 in { contents = [] }
+    let init_state =
+      let random = false
+      and size = 16 in
+      {
+        contents =
+          (try []
+           with
+           | e ->
+               raise
+                 (Ortac_runtime.Partial_function
+                    (e,
+                      {
+                        Ortac_runtime.start =
+                          {
+                            pos_fname = "hashtbl.mli";
+                            pos_lnum = 7;
+                            pos_bol = 318;
+                            pos_cnum = 343
+                          };
+                        Ortac_runtime.stop =
+                          {
+                            pos_fname = "hashtbl.mli";
+                            pos_lnum = 7;
+                            pos_bol = 318;
+                            pos_cnum = 345
+                          }
+                      })))
+      }
     let init_sut () = create ~random:false 16
     let cleanup _ = ()
     let arb_cmd _ =
@@ -64,18 +112,139 @@ module Spec =
                pure Length])
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
-      | Clear -> { contents = [] }
-      | Reset -> { contents = [] }
-      | Add (a_2, b_2) -> { contents = ((a_2, b_2) :: state__003_.contents) }
+      | Clear ->
+          {
+            contents =
+              ((try []
+                with
+                | e ->
+                    raise
+                      (Ortac_runtime.Partial_function
+                         (e,
+                           {
+                             Ortac_runtime.start =
+                               {
+                                 pos_fname = "hashtbl.mli";
+                                 pos_lnum = 12;
+                                 pos_bol = 486;
+                                 pos_cnum = 511
+                               };
+                             Ortac_runtime.stop =
+                               {
+                                 pos_fname = "hashtbl.mli";
+                                 pos_lnum = 12;
+                                 pos_bol = 486;
+                                 pos_cnum = 513
+                               }
+                           }))))
+          }
+      | Reset ->
+          {
+            contents =
+              ((try []
+                with
+                | e ->
+                    raise
+                      (Ortac_runtime.Partial_function
+                         (e,
+                           {
+                             Ortac_runtime.start =
+                               {
+                                 pos_fname = "hashtbl.mli";
+                                 pos_lnum = 17;
+                                 pos_bol = 655;
+                                 pos_cnum = 680
+                               };
+                             Ortac_runtime.stop =
+                               {
+                                 pos_fname = "hashtbl.mli";
+                                 pos_lnum = 17;
+                                 pos_bol = 655;
+                                 pos_cnum = 682
+                               }
+                           }))))
+          }
+      | Add (a_2, b_2) ->
+          {
+            contents =
+              ((try (a_2, b_2) :: state__003_.contents
+                with
+                | e ->
+                    raise
+                      (Ortac_runtime.Partial_function
+                         (e,
+                           {
+                             Ortac_runtime.start =
+                               {
+                                 pos_fname = "hashtbl.mli";
+                                 pos_lnum = 26;
+                                 pos_bol = 1020;
+                                 pos_cnum = 1045
+                               };
+                             Ortac_runtime.stop =
+                               {
+                                 pos_fname = "hashtbl.mli";
+                                 pos_lnum = 26;
+                                 pos_bol = 1020;
+                                 pos_cnum = 1069
+                               }
+                           }))))
+          }
       | Find a_3 -> state__003_
       | Find_opt a_4 -> state__003_
       | Find_all a_5 -> state__003_
       | Mem a_6 -> state__003_
-      | Remove a_7 -> { contents = (remove_first a_7 state__003_.contents) }
+      | Remove a_7 ->
+          {
+            contents =
+              ((try remove_first a_7 state__003_.contents
+                with
+                | e ->
+                    raise
+                      (Ortac_runtime.Partial_function
+                         (e,
+                           {
+                             Ortac_runtime.start =
+                               {
+                                 pos_fname = "hashtbl.mli";
+                                 pos_lnum = 56;
+                                 pos_bol = 2643;
+                                 pos_cnum = 2668
+                               };
+                             Ortac_runtime.stop =
+                               {
+                                 pos_fname = "hashtbl.mli";
+                                 pos_lnum = 56;
+                                 pos_bol = 2643;
+                                 pos_cnum = 2680
+                               }
+                           }))))
+          }
       | Replace (a_8, b_3) ->
           {
             contents =
-              ((a_8, b_3) :: (remove_first a_8 state__003_.contents))
+              ((try (a_8, b_3) :: (remove_first a_8 state__003_.contents)
+                with
+                | e ->
+                    raise
+                      (Ortac_runtime.Partial_function
+                         (e,
+                           {
+                             Ortac_runtime.start =
+                               {
+                                 pos_fname = "hashtbl.mli";
+                                 pos_lnum = 61;
+                                 pos_bol = 2890;
+                                 pos_cnum = 2915
+                               };
+                             Ortac_runtime.stop =
+                               {
+                                 pos_fname = "hashtbl.mli";
+                                 pos_lnum = 61;
+                                 pos_bol = 2890;
+                                 pos_cnum = 2956
+                               }
+                           }))))
           }
       | Length -> state__003_
     let precond cmd__008_ state__009_ =
@@ -99,51 +268,183 @@ module Spec =
       | (Find a_3, Res ((Result (Int, Exn), _), b_4)) ->
           (match b_4 with
            | Ok b_4 ->
-               Ortac_runtime.Gospelstdlib.List.mem (a_3, b_4)
-                 (Lazy.force new_state__007_).contents
+               (try
+                  Ortac_runtime.Gospelstdlib.List.mem (a_3, b_4)
+                    (Lazy.force new_state__007_).contents
+                with
+                | e ->
+                    raise
+                      (Ortac_runtime.Partial_function
+                         (e,
+                           {
+                             Ortac_runtime.start =
+                               {
+                                 pos_fname = "hashtbl.mli";
+                                 pos_lnum = 32;
+                                 pos_bol = 1360;
+                                 pos_cnum = 1372
+                               };
+                             Ortac_runtime.stop =
+                               {
+                                 pos_fname = "hashtbl.mli";
+                                 pos_lnum = 32;
+                                 pos_bol = 1360;
+                                 pos_cnum = 1398
+                               }
+                           })))
            | Error (Not_found) ->
-               not
-                 (Ortac_runtime.Gospelstdlib.List.mem a_3
-                    (Ortac_runtime.Gospelstdlib.List.map
-                       Ortac_runtime.Gospelstdlib.fst
-                       (Lazy.force new_state__007_).contents))
+               (try
+                  not
+                    (Ortac_runtime.Gospelstdlib.List.mem a_3
+                       (Ortac_runtime.Gospelstdlib.List.map
+                          Ortac_runtime.Gospelstdlib.fst
+                          (Lazy.force new_state__007_).contents))
+                with
+                | e ->
+                    raise
+                      (Ortac_runtime.Partial_function
+                         (e,
+                           {
+                             Ortac_runtime.start =
+                               {
+                                 pos_fname = "hashtbl.mli";
+                                 pos_lnum = 31;
+                                 pos_bol = 1293;
+                                 pos_cnum = 1317
+                               };
+                             Ortac_runtime.stop =
+                               {
+                                 pos_fname = "hashtbl.mli";
+                                 pos_lnum = 31;
+                                 pos_bol = 1293;
+                                 pos_cnum = 1359
+                               }
+                           })))
            | _ -> false)
       | (Find_opt a_4, Res ((Option (Int), _), o)) ->
-          (match o with
-           | None ->
-               if
-                 not
-                   (Ortac_runtime.Gospelstdlib.List.mem a_4
-                      (Ortac_runtime.Gospelstdlib.List.map
-                         Ortac_runtime.Gospelstdlib.fst
-                         (Lazy.force new_state__007_).contents))
-               then true
-               else false
-           | Some b_5 ->
-               if
-                 Ortac_runtime.Gospelstdlib.List.mem (a_4, b_5)
-                   (Lazy.force new_state__007_).contents
-               then true
-               else false)
-            = true
+          (try
+             (match o with
+              | None ->
+                  if
+                    not
+                      (Ortac_runtime.Gospelstdlib.List.mem a_4
+                         (Ortac_runtime.Gospelstdlib.List.map
+                            Ortac_runtime.Gospelstdlib.fst
+                            (Lazy.force new_state__007_).contents))
+                  then true
+                  else false
+              | Some b_5 ->
+                  if
+                    Ortac_runtime.Gospelstdlib.List.mem (a_4, b_5)
+                      (Lazy.force new_state__007_).contents
+                  then true
+                  else false)
+               = true
+           with
+           | e ->
+               raise
+                 (Ortac_runtime.Partial_function
+                    (e,
+                      {
+                        Ortac_runtime.start =
+                          {
+                            pos_fname = "hashtbl.mli";
+                            pos_lnum = 36;
+                            pos_bol = 1559;
+                            pos_cnum = 1571
+                          };
+                        Ortac_runtime.stop =
+                          {
+                            pos_fname = "hashtbl.mli";
+                            pos_lnum = 38;
+                            pos_bol = 1643;
+                            pos_cnum = 1687
+                          }
+                      })))
       | (Find_all a_5, Res ((List (Int), _), bs)) ->
-          (Ortac_runtime.Gospelstdlib.List.to_seq bs) =
-            (Ortac_runtime.Gospelstdlib.Sequence.filter_map
-               (fun (x_1, y) -> if x_1 = a_5 then Some y else None)
-               (Ortac_runtime.Gospelstdlib.List.to_seq
-                  (Lazy.force new_state__007_).contents))
+          (try
+             (Ortac_runtime.Gospelstdlib.List.to_seq bs) =
+               (Ortac_runtime.Gospelstdlib.Sequence.filter_map
+                  (fun (x_1, y) -> if x_1 = a_5 then Some y else None)
+                  (Ortac_runtime.Gospelstdlib.List.to_seq
+                     (Lazy.force new_state__007_).contents))
+           with
+           | e ->
+               raise
+                 (Ortac_runtime.Partial_function
+                    (e,
+                      {
+                        Ortac_runtime.start =
+                          {
+                            pos_fname = "hashtbl.mli";
+                            pos_lnum = 42;
+                            pos_bol = 1853;
+                            pos_cnum = 1865
+                          };
+                        Ortac_runtime.stop =
+                          {
+                            pos_fname = "hashtbl.mli";
+                            pos_lnum = 42;
+                            pos_bol = 1853;
+                            pos_cnum = 1947
+                          }
+                      })))
       | (Mem a_6, Res ((Bool, _), b_6)) ->
-          (b_6 = true) =
-            (Ortac_runtime.Gospelstdlib.List.mem a_6
-               (Ortac_runtime.Gospelstdlib.List.map
-                  Ortac_runtime.Gospelstdlib.fst
-                  (Lazy.force new_state__007_).contents))
+          (try
+             (b_6 = true) =
+               (Ortac_runtime.Gospelstdlib.List.mem a_6
+                  (Ortac_runtime.Gospelstdlib.List.map
+                     Ortac_runtime.Gospelstdlib.fst
+                     (Lazy.force new_state__007_).contents))
+           with
+           | e ->
+               raise
+                 (Ortac_runtime.Partial_function
+                    (e,
+                      {
+                        Ortac_runtime.start =
+                          {
+                            pos_fname = "hashtbl.mli";
+                            pos_lnum = 46;
+                            pos_bol = 2149;
+                            pos_cnum = 2161
+                          };
+                        Ortac_runtime.stop =
+                          {
+                            pos_fname = "hashtbl.mli";
+                            pos_lnum = 46;
+                            pos_bol = 2149;
+                            pos_cnum = 2201
+                          }
+                      })))
       | (Remove a_7, Res ((Unit, _), _)) -> true
       | (Replace (a_8, b_3), Res ((Unit, _), _)) -> true
       | (Length, Res ((Int, _), i)) ->
-          (Ortac_runtime.Gospelstdlib.integer_of_int i) =
-            (Ortac_runtime.Gospelstdlib.List.length
-               (Lazy.force new_state__007_).contents)
+          (try
+             (Ortac_runtime.Gospelstdlib.integer_of_int i) =
+               (Ortac_runtime.Gospelstdlib.List.length
+                  (Lazy.force new_state__007_).contents)
+           with
+           | e ->
+               raise
+                 (Ortac_runtime.Partial_function
+                    (e,
+                      {
+                        Ortac_runtime.start =
+                          {
+                            pos_fname = "hashtbl.mli";
+                            pos_lnum = 76;
+                            pos_bol = 3727;
+                            pos_cnum = 3739
+                          };
+                        Ortac_runtime.stop =
+                          {
+                            pos_fname = "hashtbl.mli";
+                            pos_lnum = 76;
+                            pos_bol = 3727;
+                            pos_cnum = 3765
+                          }
+                      })))
       | _ -> true
     let run cmd__010_ sut__011_ =
       match cmd__010_ with
