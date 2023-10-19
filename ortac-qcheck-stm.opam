@@ -27,10 +27,11 @@ build: [
 
 depends: [
   "ocaml" {>= "4.11.0"}
-  "dune" {>= "3.0"}
+  "dune" {>= "3.8"}
   "cmdliner" {>= "1.1.0"}
   "fmt"
   "ppxlib" {>= "0.26.0"}
+  "mdx" {with-test}
   "gospel" {>= "0.2.0"}
   "qcheck-core" {with-test}
   "qcheck-stm" {with-test}

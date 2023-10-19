@@ -1,5 +1,7 @@
-(lang dune 3.0)
+(lang dune 3.8)
 (using dune_site 0.1)
+(using mdx 0.4)
+
 (name ortac)
 
 (package

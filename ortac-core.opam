@@ -29,7 +29,7 @@ build: [
 
 depends: [
   "ocaml" {>= "4.11.0"}
-  "dune" {>= "3.0"}
+  "dune" {>= "3.8"}
   "dune-site"
   "cmdliner" {>= "1.1.0"}
   "fmt"
