@@ -120,6 +120,24 @@ module Errors = struct
         raise (Error t)
 end
 
+exception Partial_function of exn * location
+
+let _ =
+  Printexc.register_printer (function
+    (* When the exception arises in [next_state] called from [postcond], say, it
+       will be wrapped twice *)
+    | Partial_function (Partial_function (e, l), _) | Partial_function (e, l) ->
+        Some
+          (Printf.sprintf
+             "Partial function in specification\n\
+              %s\n\
+              A partial function used in the specification was called out of \
+              its definition\n\
+              domain, raising the following exception:\n\
+              %s"
+             (str "%a" pp_loc l) (Printexc.to_string e))
+    | _ -> None)
+
 type integer = Z.t
 
 module Aux = struct
