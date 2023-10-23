@@ -18,6 +18,7 @@ authors: [
   "Samuel Hym <samuel.hym@rustyne.lautre.net>"
 ]
 homepage: "https://github.com/ocaml-gospel/ortac"
+doc: "https://ocaml-gospel.github.io/ortac/ortac-core/"
 bug-reports: "https://github.com/ocaml-gospel/ortac/issues"
 depends: [
   "ocaml" {>= "4.11.0"}
