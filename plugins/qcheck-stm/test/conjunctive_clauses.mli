@@ -10,5 +10,6 @@ val make : int -> 'a -> 'a t
 
 val set : 'a t -> int -> 'a -> unit
 (*@ set t i a
+    checks 0 <= i < List.length t.contents
     modifies t
     ensures true /\ true && t.contents = set_contents (old t.contents) i a *)
