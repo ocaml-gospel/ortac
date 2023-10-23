@@ -464,4 +464,4 @@ module STMTests = (STM_sequential.Make)(Spec)
 let _ =
   QCheck_base_runner.run_tests_main
     (let count = 1000 in
-     [STMTests.agree_test ~count ~name:"STM Lib test sequential"])
+     [STMTests.agree_test ~count ~name:"Hashtbl STM tests"])
