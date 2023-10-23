@@ -1,0 +1,25 @@
+name: documentation
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set-up OCaml 5.0
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: "5.0"
+          dune-cache: true
+
+      - name: Deploy documentation
+        uses: ocaml/setup-ocaml/deploy-doc@v2
