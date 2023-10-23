@@ -44,9 +44,6 @@ The easiest way to try `ortac` out is to `opam pin` it:
 opam pin add -y https://github.com/ocaml-gospel/ortac.git
 ```
 
-It requires a yet-unreleased version of Gospel because Gospel evolved
-quite a lot since its 0.1.0 release.
-
 This repository contains the following OPAM packages:
 
 - `ortac-core.opam` which provides the `ortac` command-line tool and the core
@@ -111,7 +108,7 @@ plugin to see how it can be used.
 The wrapper plugin can be used to generate a _wrapper_ module that
 will expose the same interface as the original module but
 instrumenting all function calls with assertions corresponding to the
-Gospel specifications. Look in the [dedicate README][wrapper README]
+Gospel specifications. Look in the [dedicated README][wrapper README]
 for the wrapper plugin to see how it can be used.
 
 
