@@ -111,7 +111,7 @@ plugin to see how it can be used.
 The wrapper plugin can be used to generate a _wrapper_ module that
 will expose the same interface as the original module but
 instrumenting all function calls with assertions corresponding to the
-Gospel specifications. Look in the [dedicate README][wrapper README]
+Gospel specifications. Look in the [dedicated README][wrapper README]
 for the wrapper plugin to see how it can be used.
 
 
