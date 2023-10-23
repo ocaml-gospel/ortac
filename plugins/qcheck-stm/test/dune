@@ -26,3 +26,19 @@
  (package ortac-qcheck-stm)
  (action
   (diff all_warnings_errors.expected all_warnings_errors)))
+
+(executable
+ (name dune_gen)
+ (modules dune_gen))
+
+(rule
+ (targets dune.inc.gen)
+ (action
+  (with-stdout-to
+   %{targets}
+   (run ./dune_gen.exe %{read-lines:dune_gen.args}))))
+
+(rule
+ (alias runtest)
+ (action
+  (diff dune.inc dune.inc.gen)))

@@ -1,0 +1,12 @@
+array
+"make 16 'a'" "char t"
+hashtbl
+"create ~random:false 16" "(char, int) t"
+record
+"make 42" "t"
+ref
+"make 42" "t"
+conjunctive_clauses
+"make 42 'a'" "char t"
+sequence_model
+"create ()" "char t"

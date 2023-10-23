@@ -2,9 +2,25 @@
  (name array)
  (modules array))
 
-(library
- (name hashtbl)
- (modules hashtbl))
+(rule
+ (target array_stm_tests.ml)
+ (package ortac-qcheck-stm)
+ (deps
+  (package ortac-core)
+  (package ortac-qcheck-stm))
+ (action
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   qcheck-stm
+   (with-stderr-to
+    array_errors
+    (run
+     ortac
+     qcheck-stm
+     %{dep:array.mli}
+     "make 16 'a'" "char t"
+     -o
+     %{target})))))
 
 (test
  (name array_stm_tests)
@@ -23,27 +39,6 @@
    "\n%{dep:array_stm_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))
 
 (rule
- (target array_stm_tests.ml)
- (package ortac-qcheck-stm)
- (deps
-  (package ortac-core)
-  (package ortac-qcheck-stm))
- (action
-  (setenv
-   ORTAC_ONLY_PLUGIN
-   qcheck-stm
-   (with-stderr-to
-    array_errors
-    (run
-     ortac
-     qcheck-stm
-     %{dep:array.mli}
-     "make 16 'a'"
-     "char t"
-     -o
-     %{target})))))
-
-(rule
  (alias runtest)
  (package ortac-qcheck-stm)
  (action
@@ -55,6 +50,30 @@
  (alias launchtests)
  (action
   (run %{dep:array_stm_tests.exe} -v)))
+
+(library
+ (name hashtbl)
+ (modules hashtbl))
+
+(rule
+ (target hashtbl_stm_tests.ml)
+ (package ortac-qcheck-stm)
+ (deps
+  (package ortac-core)
+  (package ortac-qcheck-stm))
+ (action
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   qcheck-stm
+   (with-stderr-to
+    hashtbl_errors
+    (run
+     ortac
+     qcheck-stm
+     %{dep:hashtbl.mli}
+     "create ~random:false 16" "(char, int) t"
+     -o
+     %{target})))))
 
 (test
  (name hashtbl_stm_tests)
@@ -73,27 +92,6 @@
    "\n%{dep:hashtbl_stm_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))
 
 (rule
- (target hashtbl_stm_tests.ml)
- (package ortac-qcheck-stm)
- (deps
-  (package ortac-core)
-  (package ortac-qcheck-stm))
- (action
-  (setenv
-   ORTAC_ONLY_PLUGIN
-   qcheck-stm
-   (with-stderr-to
-    hashtbl_errors
-    (run
-     ortac
-     qcheck-stm
-     %{dep:hashtbl.mli}
-     "create ~random:false 16"
-     "(char, int) t"
-     -o
-     %{target})))))
-
-(rule
  (alias runtest)
  (package ortac-qcheck-stm)
  (action
@@ -109,6 +107,26 @@
 (library
  (name record)
  (modules record))
+
+(rule
+ (target record_stm_tests.ml)
+ (package ortac-qcheck-stm)
+ (deps
+  (package ortac-core)
+  (package ortac-qcheck-stm))
+ (action
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   qcheck-stm
+   (with-stderr-to
+    record_errors
+    (run
+     ortac
+     qcheck-stm
+     %{dep:record.mli}
+     "make 42" "t"
+     -o
+     %{target})))))
 
 (test
  (name record_stm_tests)
@@ -127,20 +145,6 @@
    "\n%{dep:record_stm_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))
 
 (rule
- (target record_stm_tests.ml)
- (package ortac-qcheck-stm)
- (deps
-  (package ortac-core)
-  (package ortac-qcheck-stm))
- (action
-  (setenv
-   ORTAC_ONLY_PLUGIN
-   qcheck-stm
-   (with-stderr-to
-    record_errors
-    (run ortac qcheck-stm %{dep:record.mli} "make 42" "t" -o %{target})))))
-
-(rule
  (alias runtest)
  (package ortac-qcheck-stm)
  (action
@@ -156,6 +160,26 @@
 (library
  (name ref)
  (modules ref))
+
+(rule
+ (target ref_stm_tests.ml)
+ (package ortac-qcheck-stm)
+ (deps
+  (package ortac-core)
+  (package ortac-qcheck-stm))
+ (action
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   qcheck-stm
+   (with-stderr-to
+    ref_errors
+    (run
+     ortac
+     qcheck-stm
+     %{dep:ref.mli}
+     "make 42" "t"
+     -o
+     %{target})))))
 
 (test
  (name ref_stm_tests)
@@ -174,20 +198,6 @@
    "\n%{dep:ref_stm_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))
 
 (rule
- (target ref_stm_tests.ml)
- (package ortac-qcheck-stm)
- (deps
-  (package ortac-core)
-  (package ortac-qcheck-stm))
- (action
-  (setenv
-   ORTAC_ONLY_PLUGIN
-   qcheck-stm
-   (with-stderr-to
-    ref_errors
-    (run ortac qcheck-stm %{dep:ref.mli} "make 42" "t" -o %{target})))))
-
-(rule
  (alias runtest)
  (package ortac-qcheck-stm)
  (action
@@ -199,6 +209,10 @@
  (alias launchtests)
  (action
   (run %{dep:ref_stm_tests.exe} -v)))
+
+(library
+ (name conjunctive_clauses)
+ (modules conjunctive_clauses))
 
 (rule
  (target conjunctive_clauses_stm_tests.ml)
@@ -216,10 +230,25 @@
      ortac
      qcheck-stm
      %{dep:conjunctive_clauses.mli}
-     "make 42 'a'"
-     "char t"
+     "make 42 'a'" "char t"
      -o
      %{target})))))
+
+(test
+ (name conjunctive_clauses_stm_tests)
+ (package ortac-qcheck-stm)
+ (modules conjunctive_clauses_stm_tests)
+ (libraries
+  qcheck-core
+  qcheck-core.runner
+  qcheck-stm.stm
+  qcheck-stm.sequential
+  qcheck-multicoretests-util
+  ortac-runtime
+  conjunctive_clauses)
+ (action
+  (echo
+   "\n%{dep:conjunctive_clauses_stm_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))
 
 (rule
  (alias runtest)
@@ -227,9 +256,16 @@
  (action
   (progn
    (diff conjunctive_clauses_errors.expected conjunctive_clauses_errors)
-   (diff
-    conjunctive_clauses_stm_tests.expected.ml
-    conjunctive_clauses_stm_tests.ml))))
+   (diff conjunctive_clauses_stm_tests.expected.ml conjunctive_clauses_stm_tests.ml))))
+
+(rule
+ (alias launchtests)
+ (action
+  (run %{dep:conjunctive_clauses_stm_tests.exe} -v)))
+
+(library
+ (name sequence_model)
+ (modules sequence_model))
 
 (rule
  (target sequence_model_stm_tests.ml)
@@ -247,22 +283,9 @@
      ortac
      qcheck-stm
      %{dep:sequence_model.mli}
-     "create ()"
-     "char t"
+     "create ()" "char t"
      -o
      %{target})))))
-
-(rule
- (alias runtest)
- (package ortac-qcheck-stm)
- (action
-  (progn
-   (diff sequence_model_errors.expected sequence_model_errors)
-   (diff sequence_model_stm_tests.expected.ml sequence_model_stm_tests.ml))))
-
-(library
- (name sequence_model)
- (modules sequence_model))
 
 (test
  (name sequence_model_stm_tests)
@@ -281,6 +304,15 @@
    "\n%{dep:sequence_model_stm_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))
 
 (rule
+ (alias runtest)
+ (package ortac-qcheck-stm)
+ (action
+  (progn
+   (diff sequence_model_errors.expected sequence_model_errors)
+   (diff sequence_model_stm_tests.expected.ml sequence_model_stm_tests.ml))))
+
+(rule
  (alias launchtests)
  (action
   (run %{dep:sequence_model_stm_tests.exe} -v)))
+
