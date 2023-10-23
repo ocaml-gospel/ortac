@@ -44,9 +44,6 @@ The easiest way to try `ortac` out is to `opam pin` it:
 opam pin add -y https://github.com/ocaml-gospel/ortac.git
 ```
 
-It requires a yet-unreleased version of Gospel because Gospel evolved
-quite a lot since its 0.1.0 release.
-
 This repository contains the following OPAM packages:
 
 - `ortac-core.opam` which provides the `ortac` command-line tool and the core
