@@ -18,7 +18,7 @@ let () =
   | [] -> usage ()
   | cmds ->
       let doc = "Run ORTAC." in
-      let version = "ortac version 0.1.0" in
+      let version = "ortac version %%VERSION%%" in
       let info = Cmd.info "ortac" ~doc ~version in
       let group = Cmd.group info cmds in
       Stdlib.exit (Cmd.eval group)

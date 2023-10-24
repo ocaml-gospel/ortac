@@ -3,7 +3,6 @@
 (using mdx 0.4)
 
 (name ortac)
-(version 0.1.0)
 
 (package
  (name ortac-core)

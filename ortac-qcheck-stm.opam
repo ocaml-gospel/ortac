@@ -1,4 +1,3 @@
-version: "0.1.0"
 opam-version: "2.0"
 synopsis: "QCheck-STM plugin for Ortac"
 description: """\
