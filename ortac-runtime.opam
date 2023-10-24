@@ -1,6 +1,11 @@
 opam-version: "2.0"
-synopsis: "Runtime library for ortac"
-description: "Runtime library for ortac"
+synopsis: "Runtime support library for Ortac-generated code"
+description: """\
+The ortac-runtime library provides support for the code generated
+by the various Ortac plugins.
+
+Ortac (OCaml Runtime Assertion Checking) is a tool to turn
+executable Gospel specifications into code to test they hold."""
 maintainer: "Clément Pascutto <clement@pascutto.fr>"
 authors: [
   "Clément Pascutto <clement@pascutto.fr>"
@@ -8,7 +13,7 @@ authors: [
   "Samuel Hym <samuel.hym@rustyne.lautre.net>"
 ]
 homepage: "https://github.com/ocaml-gospel/ortac"
-doc: "https://pascutto.github.io/ortac/"
+doc: "https://ocaml-gospel.github.io/ortac/ortac-runtime/"
 bug-reports: "https://github.com/ocaml-gospel/ortac/issues"
 depends: [
   "ocaml" {>= "4.11.0"}
