@@ -1,7 +1,5 @@
 {0 Ortac/QCheck-STM}
 
-{1 Content}
-
 {1 Overview}
 
 The [qcheck-stm] plugin for [ortac] (called Ortac/QCheck-STM in order to avoid
