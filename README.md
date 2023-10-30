@@ -38,13 +38,14 @@ into OCaml code. This core functionality is used by all plugins.
 
 ## Installation
 
-The easiest way to try `ortac` out is to `opam pin` it:
+The easiest way to try `ortac` out is to `opam install` its main packages
+directly from the opam repository:
 
 ```
-opam pin add -y https://github.com/ocaml-gospel/ortac.git
+opam install ortac-qcheck-stm ortac-runtime
 ```
 
-This repository contains the following OPAM packages:
+This will install the following OPAM packages:
 
 - `ortac-core.opam` which provides the `ortac` command-line tool and the core
   functionality used by all plugins,
@@ -53,7 +54,15 @@ This repository contains the following OPAM packages:
 - `ortac-qcheck-stm.opam` which provides the QCheck-STM plugin for the
   `ortac` command-line tool.
 
-It also contains the following _experimental_ packages:
+Alternatively, you can install the packages directly from this repository using
+`opam pin`:
+
+```
+opam pin add -y https://github.com/ocaml-gospel/ortac.git
+```
+
+Besides the first three packages, this will also install the following
+_experimental_ packages:
 
 - `ortac-wrapper.opam` which provides the wrapper plugin for the `ortac`
   command-line tool,
@@ -62,8 +71,8 @@ It also contains the following _experimental_ packages:
 - `ortac-runtime-monolith.opam` which provides the support library for
   the code generated with the Monolith plugin.
 
-You can install only some of those packages by explicitly mentioning
-which package you want to install, for instance:
+Even using `opam pin`, you can install only some of those packages by explicitly
+mentioning which package you want to install, for instance:
 
 ```
 $ opam pin add ortac-core https://github.com/ocaml-gospel/ortac.git
