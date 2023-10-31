@@ -14,6 +14,7 @@ authors: [
   "Nicolas Osborne <nicolas.osborne@tarides.com>"
   "Samuel Hym <samuel.hym@rustyne.lautre.net>"
 ]
+license: "MIT"
 homepage: "https://github.com/ocaml-gospel/ortac"
 doc: "https://ocaml-gospel.github.io/ortac/ortac-qcheck-stm/"
 bug-reports: "https://github.com/ocaml-gospel/ortac/issues"
@@ -40,9 +41,14 @@ build: [
     name
     "-j"
     jobs
+    "--promote-install-files=false"
     "@install"
     "@runtest" {with-test}
     "@doc" {with-doc}
   ]
+  ["dune" "install" "-p" name "--create-install-files" name]
 ]
 dev-repo: "git+https://github.com/ocaml-gospel/ortac.git"
+conflicts: [
+  "result" { < "1.5" }
+]

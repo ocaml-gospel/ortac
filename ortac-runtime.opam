@@ -12,13 +12,14 @@ authors: [
   "Nicolas Osborne <nicolas.osborne@tarides.com>"
   "Samuel Hym <samuel.hym@rustyne.lautre.net>"
 ]
+license: "MIT"
 homepage: "https://github.com/ocaml-gospel/ortac"
 doc: "https://ocaml-gospel.github.io/ortac/ortac-runtime/"
 bug-reports: "https://github.com/ocaml-gospel/ortac/issues"
 depends: [
-  "ocaml" {>= "4.11.0"}
+  "ocaml" {>= "4.12.0"}
   "dune" {>= "3.8"}
-  "fmt"
+  "fmt" {>= "0.8.7"}
   "zarith"
   "monolith" {with-test}
 ]
@@ -31,9 +32,11 @@ build: [
     name
     "-j"
     jobs
+    "--promote-install-files=false"
     "@install"
     "@runtest" {with-test}
     "@doc" {with-doc}
   ]
+  ["dune" "install" "-p" name "--create-install-files" name]
 ]
 dev-repo: "git+https://github.com/ocaml-gospel/ortac.git"
