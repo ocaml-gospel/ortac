@@ -59,6 +59,13 @@ Warning: Skipping ensures_not_found_for_next_state: model contents is
          declared as modified by the function but no suitable ensures clause
          was found. Specifications should contain at least one "ensures
          x.contents = ..." where x is the SUT.
+File "all_warnings.mli", line 64, characters 13-23:
+64 |     modifies t.contents
+                  ^^^^^^^^^^
+Warning: Skipping term_refer_to_returned_value_next_state: model contents is
+         declared as modified by the function but no suitable ensures clause
+         was found. Specifications should contain at least one "ensures
+         x.contents = ..." where x is the SUT.
 File "all_warnings.mli", line 53, characters 16-54:
 53 |     ensures b = forall a. List.mem a t.contents -> p a *)
                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
