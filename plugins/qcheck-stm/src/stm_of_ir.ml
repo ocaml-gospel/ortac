@@ -82,7 +82,7 @@ let subst_term state ~gos_t ?(old_lz = false) ~old_t ?(new_lz = false) ~new_t
     term =
   let exception
     ImpossibleSubst of
-      (Gospel.Tterm.term * [ `Never | `New | `Old | `NotModel ])
+      (Gospel.Tterm.term * [ `Never | `New | `Old | `NotModel | `OutOfScope ])
   in
   let rec aux cur_lz cur_t term =
     let open Gospel.Tterm in

@@ -25,7 +25,8 @@ type W.kind +=
   | Sut_type_not_specified of string
   | No_models of string
   | No_spec of string
-  | Impossible_term_substitution of [ `Never | `New | `Old | `NotModel ]
+  | Impossible_term_substitution of
+      [ `Never | `New | `Old | `NotModel | `OutOfScope ]
   | Ignored_modifies
   | Ensures_not_found_for_next_state of (string * string)
   | Type_not_supported of string
@@ -129,6 +130,9 @@ let pp_kind ppf kind =
         | `New ->
             "occurrences of the SUT in clauses are not supported above old \
              operator"
+        | `OutOfScope ->
+            "occurrences of returned values that are out of scope in the \
+             next_state function"
       in
       pf ppf "Skipping clause:@ %a" text msg
   | Ignored_modifies ->
