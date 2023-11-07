@@ -105,6 +105,16 @@ let rec bounds ~context ~loc (var : Symbols.vsymbol) (t1 : Tterm.term)
   | Inf start, Sup stop | Sup stop, Inf start -> (start, stop)
   | _ -> unsupported ()
 
+and case ~context (p, g, t) =
+  let lhs, extra = pattern_ p in
+  let formulas =
+    match g with None -> extra | Some g -> term ~context g :: extra
+  in
+  let guard =
+    match formulas with [] -> None | _ -> list_and formulas |> Option.some
+  in
+  Builder.case ~lhs ~guard ~rhs:(term ~context t)
+
 and term ~context (t : Tterm.term) : expression =
   let term = term ~context in
   let loc = t.t_loc in
@@ -143,12 +153,7 @@ and term ~context (t : Tterm.term) : expression =
       [%expr
         let [%p pvar x] = [%e term t1] in
         [%e term t2]]
-  | Tcase (t, ptl) ->
-      List.map
-        (fun (p, g, t) ->
-          case ~guard:(Option.map term g) ~lhs:(pattern p) ~rhs:(term t))
-        ptl
-      |> pexp_match (term t)
+  | Tcase (t, ptl) -> List.map (case ~context) ptl |> pexp_match (term t)
   | Tlambda (ps, t) ->
       efun (List.map (fun p -> (Nolabel, pattern p)) ps) (term t)
   | Tquant
