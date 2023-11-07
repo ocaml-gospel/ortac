@@ -5,6 +5,32 @@ open Fmt
 open Builder
 module Ident = Identifier.Ident
 
+module M = struct
+  [@@@ocaml.warning "-32"]
+
+  let return a = (a, [])
+  let put a = ((), [ a ])
+  let value = fst
+
+  let ( let* ) (x, xs) f =
+    let y, ys = f x in
+    (y, xs @ ys)
+
+  let ( and* ) (x, xs) (y, ys) = ((x, y), xs @ ys)
+
+  let sequence =
+    let rec aux = function
+      | [] -> return []
+      | x :: xs ->
+          let* y = x and* ys = aux xs in
+          return (y :: ys)
+    in
+    aux
+
+  let map f xs = List.map f xs |> sequence
+  let some a = Some a |> return
+end
+
 let rec pattern p =
   let open Tterm in
   match p.p_node with
