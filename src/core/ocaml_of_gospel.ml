@@ -6,8 +6,6 @@ open Builder
 module Ident = Identifier.Ident
 
 module M = struct
-  [@@@ocaml.warning "-32"]
-
   let return a = (a, [])
   let put a = ((), [ a ])
   let value = fst
@@ -31,28 +29,51 @@ module M = struct
   let some a = Some a |> return
 end
 
-let rec pattern p =
+let rec pattern_ p =
   let open Tterm in
+  let open M in
   match p.p_node with
-  | Pwild -> ppat_any
-  | Pvar v -> pvar (str "%a" Ident.pp v.vs_name)
-  | Papp (l, pl) when Symbols.is_fs_tuple l -> ppat_tuple (List.map pattern pl)
+  | Pwild -> return ppat_any
+  | Pvar v -> pvar (str "%a" Ident.pp v.vs_name) |> return
+  | Papp (l, pl) when Symbols.is_fs_tuple l ->
+      let* pattern_s = map pattern_ pl in
+      ppat_tuple pattern_s |> return
   | Papp (l, pl) ->
-      let args =
+      let* args =
         match pl with
-        | [] -> None
-        | [ x ] -> Some (pattern x)
-        | _ -> Some (ppat_tuple (List.map pattern pl))
+        | [] -> return None
+        | [ x ] ->
+            let* p = pattern_ x in
+            some p
+        | _ ->
+            let* pattern_s = map pattern_ pl in
+            ppat_tuple pattern_s |> some
       in
       let name =
         if Ident.equal Identifier.cons l.ls_name then "::"
         else Fmt.str "%a" Ident.pp l.ls_name
       in
-      ppat_construct (lident name) args
-  | Por (p1, p2) -> ppat_or (pattern p1) (pattern p2)
-  | Pas (p, v) -> ppat_alias (pattern p) (noloc (str "%a" Ident.pp v.vs_name))
-  | Pinterval (c1, c2) -> ppat_interval (Pconst_char c1) (Pconst_char c2)
-  | Pconst c -> ppat_constant c
+      ppat_construct (lident name) args |> return
+  | Por (p1, p2) ->
+      let* p1 = pattern_ p1 and* p2 = pattern_ p2 in
+      ppat_or p1 p2 |> return
+  | Pas (p, v) ->
+      let* p = pattern_ p in
+      ppat_alias p (noloc (str "%a" Ident.pp v.vs_name)) |> return
+  | Pinterval (c1, c2) ->
+      ppat_interval (Pconst_char c1) (Pconst_char c2) |> return
+  | Pconst (Pconst_integer (_, _) as c) ->
+      let i = econst c and var = gen_symbol ~prefix:"__x" () in
+      let extra =
+        pexp_apply
+          (pexp_ident (lident "(=)"))
+          [ (Nolabel, evar var); (Nolabel, i) ]
+      in
+      let* () = put extra in
+      ppat_var (noloc var) |> return
+  | Pconst c -> ppat_constant c |> return
+
+let pattern p = pattern_ p |> M.value
 
 type bound = Inf of expression | Sup of expression
 
