@@ -38,3 +38,17 @@ let efun args expr =
     args expr
 
 let lident s = noloc (lident s)
+
+let list_fold_right1 op v xs =
+  let rec aux = function
+    | [ x ] -> x
+    | x :: xs -> op x (aux xs)
+    | _ -> failwith "The impossible happened in list_fold_right1"
+  in
+  match xs with [] -> v | _ -> aux xs
+
+let list_and xs =
+  let ( &&& ) e1 e2 =
+    pexp_apply (pexp_ident (lident "&&")) [ (Nolabel, e1); (Nolabel, e2) ]
+  and etrue = pexp_construct (lident "true") None in
+  list_fold_right1 ( &&& ) etrue xs
