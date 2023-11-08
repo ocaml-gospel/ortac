@@ -8,3 +8,4 @@ val econst : constant -> expression
 val elocation : location -> expression
 val efun : (arg_label * pattern) list -> expression -> expression
 val lident : label -> longident loc
+val list_and : expression list -> expression

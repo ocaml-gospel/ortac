@@ -5,28 +5,75 @@ open Fmt
 open Builder
 module Ident = Identifier.Ident
 
-let rec pattern p =
+module M = struct
+  let return a = (a, [])
+  let put a = ((), [ a ])
+  let value = fst
+
+  let ( let* ) (x, xs) f =
+    let y, ys = f x in
+    (y, xs @ ys)
+
+  let ( and* ) (x, xs) (y, ys) = ((x, y), xs @ ys)
+
+  let sequence =
+    let rec aux = function
+      | [] -> return []
+      | x :: xs ->
+          let* y = x and* ys = aux xs in
+          return (y :: ys)
+    in
+    aux
+
+  let map f xs = List.map f xs |> sequence
+  let some a = Some a |> return
+end
+
+let rec pattern_ p =
   let open Tterm in
+  let open M in
   match p.p_node with
-  | Pwild -> ppat_any
-  | Pvar v -> pvar (str "%a" Ident.pp v.vs_name)
-  | Papp (l, pl) when Symbols.is_fs_tuple l -> ppat_tuple (List.map pattern pl)
+  | Pwild -> return ppat_any
+  | Pvar v -> pvar (str "%a" Ident.pp v.vs_name) |> return
+  | Papp (l, pl) when Symbols.is_fs_tuple l ->
+      let* pattern_s = map pattern_ pl in
+      ppat_tuple pattern_s |> return
   | Papp (l, pl) ->
-      let args =
+      let* args =
         match pl with
-        | [] -> None
-        | [ x ] -> Some (pattern x)
-        | _ -> Some (ppat_tuple (List.map pattern pl))
+        | [] -> return None
+        | [ x ] ->
+            let* p = pattern_ x in
+            some p
+        | _ ->
+            let* pattern_s = map pattern_ pl in
+            ppat_tuple pattern_s |> some
       in
       let name =
         if Ident.equal Identifier.cons l.ls_name then "::"
         else Fmt.str "%a" Ident.pp l.ls_name
       in
-      ppat_construct (lident name) args
-  | Por (p1, p2) -> ppat_or (pattern p1) (pattern p2)
-  | Pas (p, v) -> ppat_alias (pattern p) (noloc (str "%a" Ident.pp v.vs_name))
-  | Pinterval (c1, c2) -> ppat_interval (Pconst_char c1) (Pconst_char c2)
-  | Pconst c -> ppat_constant c
+      ppat_construct (lident name) args |> return
+  | Por (p1, p2) ->
+      let* p1 = pattern_ p1 and* p2 = pattern_ p2 in
+      ppat_or p1 p2 |> return
+  | Pas (p, v) ->
+      let* p = pattern_ p in
+      ppat_alias p (noloc (str "%a" Ident.pp v.vs_name)) |> return
+  | Pinterval (c1, c2) ->
+      ppat_interval (Pconst_char c1) (Pconst_char c2) |> return
+  | Pconst (Pconst_integer (_, _) as c) ->
+      let i = econst c and var = gen_symbol ~prefix:"__x" () in
+      let extra =
+        pexp_apply
+          (pexp_ident (lident "(=)"))
+          [ (Nolabel, evar var); (Nolabel, i) ]
+      in
+      let* () = put extra in
+      ppat_var (noloc var) |> return
+  | Pconst c -> ppat_constant c |> return
+
+let pattern p = pattern_ p |> M.value
 
 type bound = Inf of expression | Sup of expression
 
@@ -57,6 +104,16 @@ let rec bounds ~context ~loc (var : Symbols.vsymbol) (t1 : Tterm.term)
   match (bound t1.t_node, bound t2.t_node) with
   | Inf start, Sup stop | Sup stop, Inf start -> (start, stop)
   | _ -> unsupported ()
+
+and case ~context (p, g, t) =
+  let lhs, extra = pattern_ p in
+  let formulas =
+    match g with None -> extra | Some g -> term ~context g :: extra
+  in
+  let guard =
+    match formulas with [] -> None | _ -> list_and formulas |> Option.some
+  in
+  Builder.case ~lhs ~guard ~rhs:(term ~context t)
 
 and term ~context (t : Tterm.term) : expression =
   let term = term ~context in
@@ -96,12 +153,7 @@ and term ~context (t : Tterm.term) : expression =
       [%expr
         let [%p pvar x] = [%e term t1] in
         [%e term t2]]
-  | Tcase (t, ptl) ->
-      List.map
-        (fun (p, g, t) ->
-          case ~guard:(Option.map term g) ~lhs:(pattern p) ~rhs:(term t))
-        ptl
-      |> pexp_match (term t)
+  | Tcase (t, ptl) -> List.map (case ~context) ptl |> pexp_match (term t)
   | Tlambda (ps, t) ->
       efun (List.map (fun p -> (Nolabel, pattern p)) ps) (term t)
   | Tquant

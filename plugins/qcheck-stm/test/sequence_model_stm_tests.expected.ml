@@ -1,4 +1,27 @@
 open Sequence_model
+let length_opt s =
+  try Some (Ortac_runtime.Gospelstdlib.Sequence.length s)
+  with
+  | e ->
+      raise
+        (Ortac_runtime.Partial_function
+           (e,
+             {
+               Ortac_runtime.start =
+                 {
+                   pos_fname = "sequence_model.mli";
+                   pos_lnum = 15;
+                   pos_bol = 750;
+                   pos_cnum = 756
+                 };
+               Ortac_runtime.stop =
+                 {
+                   pos_fname = "sequence_model.mli";
+                   pos_lnum = 15;
+                   pos_bol = 750;
+                   pos_cnum = 760
+                 }
+             }))
 module Spec =
   struct
     open STM
@@ -6,9 +29,13 @@ module Spec =
     type sut = char t
     type cmd =
       | Add of char 
+      | Remove 
+      | Remove_ 
     let show_cmd cmd__001_ =
       match cmd__001_ with
       | Add v -> Format.asprintf "%s %a" "add" (Util.Pp.pp_char true) v
+      | Remove -> Format.asprintf "%s" "remove"
+      | Remove_ -> Format.asprintf "%s" "remove_"
     type nonrec state = {
       contents: char Ortac_runtime.Gospelstdlib.sequence }
     let init_state =
@@ -43,7 +70,9 @@ module Spec =
     let arb_cmd _ =
       let open QCheck in
         make ~print:show_cmd
-          (let open Gen in oneof [(pure (fun v -> Add v)) <*> char])
+          (let open Gen in
+             oneof
+               [(pure (fun v -> Add v)) <*> char; pure Remove; pure Remove_])
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
       | Add v ->
@@ -74,14 +103,90 @@ module Spec =
                                }
                            }))))
           }
-    let precond cmd__008_ state__009_ = match cmd__008_ with | Add v -> true
-    let postcond cmd__004_ state__005_ res__006_ =
-      let new_state__007_ = lazy (next_state cmd__004_ state__005_) in
-      match (cmd__004_, res__006_) with
+      | Remove ->
+          {
+            contents =
+              ((try
+                  match Ortac_runtime.Gospelstdlib.Sequence.length
+                          state__003_.contents
+                  with
+                  | __x__004_ when
+                      (=) __x__004_
+                        (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+                      -> Ortac_runtime.Gospelstdlib.Sequence.empty
+                  | _ ->
+                      Ortac_runtime.Gospelstdlib.Sequence.tl
+                        state__003_.contents
+                with
+                | e ->
+                    raise
+                      (Ortac_runtime.Partial_function
+                         (e,
+                           {
+                             Ortac_runtime.start =
+                               {
+                                 pos_fname = "sequence_model.mli";
+                                 pos_lnum = 20;
+                                 pos_bol = 953;
+                                 pos_cnum = 978
+                               };
+                             Ortac_runtime.stop =
+                               {
+                                 pos_fname = "sequence_model.mli";
+                                 pos_lnum = 22;
+                                 pos_bol = 1070;
+                                 pos_cnum = 1131
+                               }
+                           }))))
+          }
+      | Remove_ ->
+          {
+            contents =
+              ((try
+                  match length_opt state__003_.contents with
+                  | Some __x__005_ when
+                      (=) __x__005_
+                        (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+                      -> Ortac_runtime.Gospelstdlib.Sequence.empty
+                  | _ ->
+                      Ortac_runtime.Gospelstdlib.Sequence.tl
+                        state__003_.contents
+                with
+                | e ->
+                    raise
+                      (Ortac_runtime.Partial_function
+                         (e,
+                           {
+                             Ortac_runtime.start =
+                               {
+                                 pos_fname = "sequence_model.mli";
+                                 pos_lnum = 27;
+                                 pos_bol = 1337;
+                                 pos_cnum = 1362
+                               };
+                             Ortac_runtime.stop =
+                               {
+                                 pos_fname = "sequence_model.mli";
+                                 pos_lnum = 29;
+                                 pos_bol = 1454;
+                                 pos_cnum = 1515
+                               }
+                           }))))
+          }
+    let precond cmd__010_ state__011_ =
+      match cmd__010_ with | Add v -> true | Remove -> true | Remove_ -> true
+    let postcond cmd__006_ state__007_ res__008_ =
+      let new_state__009_ = lazy (next_state cmd__006_ state__007_) in
+      match (cmd__006_, res__008_) with
       | (Add v, Res ((Unit, _), _)) -> true
+      | (Remove, Res ((Option (Char), _), o)) -> true
+      | (Remove_, Res ((Option (Char), _), o_1)) -> true
       | _ -> true
-    let run cmd__010_ sut__011_ =
-      match cmd__010_ with | Add v -> Res (unit, (add v sut__011_))
+    let run cmd__012_ sut__013_ =
+      match cmd__012_ with
+      | Add v -> Res (unit, (add v sut__013_))
+      | Remove -> Res ((option char), (remove sut__013_))
+      | Remove_ -> Res ((option char), (remove_ sut__013_))
   end
 module STMTests = (STM_sequential.Make)(Spec)
 let _ =
