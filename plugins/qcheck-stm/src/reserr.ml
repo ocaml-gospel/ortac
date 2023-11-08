@@ -143,7 +143,8 @@ let pp_kind ppf kind =
         "is declared as modified by the function but no suitable ensures \
          clause was found."
         text "Specifications should contain at least one \"ensures x." m text
-        " = ...\" where x is the SUT"
+        " = expr\" where x is the SUT and expr can refer to the SUT only under \
+         an old operator and can't refer to the returned value"
   | Functional_argument f ->
       pf ppf "Skipping %s:@ %a" f text
         "functions are not supported yet as arguments"

@@ -228,7 +228,8 @@ File "example_next_state.mli", line 15, characters 13-23:
 Warning: Skipping ensures_not_found_for_next_state: model contents is
          declared as modified by the function but no suitable ensures clause
          was found. Specifications should contain at least one "ensures
-         x.contents = ..." where x is the SUT.
+         x.contents = expr" where x is the SUT and expr can refer to the SUT
+         only under an old operator and can't refer to the returned value.
 ]}
 
 Note that you don't have to rewrite the clause. Maybe it contains information
