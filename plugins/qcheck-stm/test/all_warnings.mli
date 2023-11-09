@@ -58,3 +58,10 @@ val record_not_model_field : 'a t -> bool
 
 val return_tuple : 'a t -> 'a * bool
 (*@ (a, b) = return_tuple t *)
+
+val term_refer_to_returned_value_next_state : 'a t -> 'a option
+(*@ o = term_refer_to_returned_value_next_state t
+    modifies t.contents
+    ensures t.contents = match o with
+                        | None -> old t.contents
+                        | Some _ -> old t.contents *)

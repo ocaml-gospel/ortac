@@ -78,11 +78,11 @@ let ocaml_of_term cfg t =
     always be in a position in which it is applied to one of its model fields.
     Calling [subst_term] with [new_t] and [old_t] as None will check that the
     term does not contain [gos_t] *)
-let subst_term state ~gos_t ?(old_lz = false) ~old_t ?(new_lz = false) ~new_t
-    term =
+let subst_term state ?(out_of_scope = []) ~gos_t ?(old_lz = false) ~old_t
+    ?(new_lz = false) ~new_t term =
   let exception
     ImpossibleSubst of
-      (Gospel.Tterm.term * [ `Never | `New | `Old | `NotModel ])
+      (Gospel.Tterm.term * [ `Never | `New | `Old | `NotModel | `OutOfScope ])
   in
   let rec aux cur_lz cur_t term =
     let open Gospel.Tterm in
@@ -112,6 +112,9 @@ let subst_term state ~gos_t ?(old_lz = false) ~old_t ?(new_lz = false) ~new_t
        access one of its model fields, so we error out *)
     | Tvar { vs_name; _ } when Ident.equal vs_name gos_t ->
         raise (ImpossibleSubst (term, `NotModel))
+    (* Then, we check if the variable is not out_of_scope in the function we are building *)
+    | Tvar { vs_name; _ } when List.exists (Ident.equal vs_name) out_of_scope ->
+        raise (ImpossibleSubst (term, `OutOfScope))
     | Tconst _ -> term
     | Tvar _ -> term
     | Tapp (ls, terms) -> { term with t_node = Tapp (ls, List.map next terms) }
@@ -331,8 +334,8 @@ let next_state_case state config state_ident nb_models value =
     let descriptions =
       List.filter_map
         (fun (i, { model; description }) ->
-          subst_term state ~gos_t:value.sut_var ~old_t:(Some state_ident)
-            ~new_t:None description
+          subst_term ~out_of_scope:value.ret state ~gos_t:value.sut_var
+            ~old_t:(Some state_ident) ~new_t:None description
           >>= ocaml_of_term config
           |> to_option
           |> Option.map (fun description -> (i, model, description)))
