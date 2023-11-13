@@ -155,7 +155,7 @@
   (cmdliner (>= 1.1.0))
   fmt
   (ppxlib (>= 0.26.0))
-  (mdx :with-test)
+  (mdx (and :with-test (>= 2.3.0)))
   (gospel (>= 0.2.0))
   (qcheck-core :with-test)
   (qcheck-stm :with-test)
