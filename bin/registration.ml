@@ -25,6 +25,9 @@ let output_file =
         ~doc:
           "Print the generated code in OUTPUT. Overwrite the file if it exists.")
 
+let quiet =
+  Arg.(value & flag & info [ "q"; "quiet" ] ~doc:"Don't print any warnings.")
+
 let ocaml_file =
   let parse s =
     match Sys.file_exists s with
