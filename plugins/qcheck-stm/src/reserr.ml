@@ -220,12 +220,13 @@ let pp_kind ppf kind =
 
 let pp_errors = W.pp_param pp_kind level |> Fmt.list
 
-let pp pp_ok ppf r =
+let pp quiet pp_ok ppf r =
   let open Fmt in
   match r with
   | Ok a, warns -> (
       pf ppf "%a@." pp_ok a;
-      match warns with [] -> () | warns -> pf stderr "%a@." pp_errors warns)
+      if not quiet then
+        match warns with [] -> () | warns -> pf stderr "%a@." pp_errors warns)
   | Error errs, warns -> pf stderr "%a@." pp_errors (errs @ warns)
 
 let sequence r =

@@ -66,4 +66,4 @@ val fmap : ('a -> 'b) -> 'a reserr -> 'b reserr
 val ( <$> ) : ('a -> 'b) -> 'a reserr -> 'b reserr
 val app : ('a -> 'b) reserr -> 'a reserr -> 'b reserr
 val ( <*> ) : ('a -> 'b) reserr -> 'a reserr -> 'b reserr
-val pp : 'a Fmt.t -> 'a reserr Fmt.t
+val pp : bool -> 'a Fmt.t -> 'a reserr Fmt.t
