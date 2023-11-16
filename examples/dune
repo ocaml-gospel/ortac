@@ -42,3 +42,110 @@
  (package ortac-examples)
  (action
   (run %{test} --verbose)))
+
+(library
+ (name varray_incl)
+ (modules varray_incl)
+ (libraries qcheck-stm.sequential qcheck-multicoretests-util varray_spec))
+
+(rule
+ (enabled_if %{bin-available:awk})
+ (deps
+  (:sig varray_sig.ml))
+ (targets varray_spec.mli)
+ (action
+  (with-stdout-to
+   %{targets}
+   (run
+    awk
+    "/module type S = sig/,/^end/ { if ($0 != \"module type S = sig\" && $0 != \"end\") print }"
+    %{sig}))))
+
+(library
+ (name varray_spec)
+ (modules varray_spec)
+ (libraries varray)
+ (package ortac-examples))
+
+(rule
+ (mode promote)
+ (alias runtest)
+ (package ortac-examples)
+ (deps
+  (package ortac-qcheck-stm)
+  varray_incl.ml)
+ (targets varray_tests.ml)
+ (action
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   qcheck-stm
+   (with-stdout-to
+    %{targets}
+    (run
+     ortac
+     qcheck-stm
+     varray_spec.mli
+     "make 42 'a'"
+     "char t"
+     --include=varray_incl
+     --quiet)))))
+
+(test
+ (name varray_tests)
+ (modules varray_tests)
+ (libraries
+  varray_incl
+  varray_spec
+  qcheck-stm.stm
+  qcheck-stm.sequential
+  qcheck-multicoretests-util
+  ortac-runtime)
+ (package ortac-examples)
+ (action
+  (run %{test} --verbose)))
+
+(rule
+ (copy varray_spec.mli varray_circular_spec.mli))
+
+(library
+ (name varray_circular_spec)
+ (modules varray_circular_spec)
+ (libraries varray)
+ (package ortac-examples))
+
+(rule
+ (mode promote)
+ (alias runtest)
+ (package ortac-examples)
+ (deps
+  (package ortac-qcheck-stm)
+  varray_incl.ml)
+ (targets varray_circular_tests.ml)
+ (action
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   qcheck-stm
+   (with-stdout-to
+    %{targets}
+    (run
+     ortac
+     qcheck-stm
+     varray_circular_spec.mli
+     "make 42 'a'"
+     "char t"
+     --include=varray_incl
+     --quiet)))))
+
+(test
+ (name varray_circular_tests)
+ (modules varray_circular_tests)
+ (libraries
+  varray_incl
+  varray_circular_spec
+  qcheck-stm.stm
+  qcheck-stm.sequential
+  qcheck-multicoretests-util
+  ortac-runtime)
+ (package ortac-examples)
+ (action
+  (run %{test} --verbose)))

@@ -2,3 +2,4 @@ plugins/*/test/generated/*.expected.ml
 plugins/qcheck-stm/test/*.expected.ml
 examples/*spec.mli
 examples/*tests.ml
+examples/*sig.ml

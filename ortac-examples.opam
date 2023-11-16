@@ -17,6 +17,7 @@ depends: [
   "ortac-runtime"
   "qcheck-stm"
   "lwt-dllist"
+  "varray" {>= "0.2"}
   "odoc" {with-doc}
 ]
 build: [
