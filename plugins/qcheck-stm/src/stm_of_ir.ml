@@ -770,10 +770,22 @@ let ghost_functions config =
   in
   aux config []
 
-let stm config ir =
+let stm include_ config ir =
   let open Reserr in
   let* config, ghost_functions = ghost_functions config ir.ghost_functions in
   let warn = [%stri [@@@ocaml.warning "-26-27"]] in
+  let incl =
+    Option.map
+      (fun m ->
+        let open Ast_helper in
+        String.capitalize_ascii m
+        |> lident
+        |> Mod.ident
+        |> Incl.mk
+        |> pstr_include)
+      include_
+    |> Option.to_list
+  in
   let sut = sut_type config in
   let cmd = cmd_type ir in
   let* cmd_show = cmd_show ir in
@@ -797,22 +809,22 @@ let stm config ir =
   let open_mod m = pstr_open Ast_helper.(Opn.mk (Mod.ident (lident m))) in
   let spec_expr =
     pmod_structure
-      [
-        open_mod "STM";
-        warn;
-        sut;
-        cmd;
-        cmd_show;
-        state;
-        init_state;
-        init_sut;
-        cleanup;
-        arb_cmd;
-        next_state;
-        precond;
-        postcond;
-        run;
-      ]
+      ([ open_mod "STM"; warn ]
+      @ incl
+      @ [
+          sut;
+          cmd;
+          cmd_show;
+          state;
+          init_state;
+          init_sut;
+          cleanup;
+          arb_cmd;
+          next_state;
+          precond;
+          postcond;
+          run;
+        ])
   in
   let stm_spec =
     pstr_module (module_binding ~name:(noloc (Some "Spec")) ~expr:spec_expr)

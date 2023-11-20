@@ -1,5 +1,7 @@
 # Unreleased
 
+- Add an include option to qcheck-stm cli
+  [\#181](https://github.com/ocaml-gospel/ortac/pull/181)
 - Add a quiet flag
   [\#179](https://github.com/ocaml-gospel/ortac/pull/179)
 - Check for out of scope variables
