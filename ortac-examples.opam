@@ -16,6 +16,7 @@ depends: [
   "ortac-qcheck-stm"
   "ortac-runtime"
   "qcheck-stm"
+  "lwt-dllist"
   "odoc" {with-doc}
 ]
 build: [
