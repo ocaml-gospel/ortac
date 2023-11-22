@@ -1,0 +1,44 @@
+(rule
+ (copy %{lib:lwt-dllist:lwt_dllist.ml} lwt_dllist_spec.ml))
+
+(library
+ (name lwt_dllist_spec)
+ (modules lwt_dllist_spec)
+ (flags
+  (:standard -w -69))
+ (package ortac-examples))
+
+(rule
+ (alias runtest)
+ (mode promote)
+ (package ortac-examples)
+ (deps
+  (package ortac-qcheck-stm)
+  lwt_dllist_incl.ml)
+ (targets lwt_dllist_tests.ml)
+ (action
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   qcheck-stm
+   (with-stdout-to
+    %{targets}
+    (run
+     ortac
+     qcheck-stm
+     lwt_dllist_spec.mli
+     "create ()"
+     "int t"
+     --include=lwt_dllist_incl
+     --quiet)))))
+
+(test
+ (name lwt_dllist_tests)
+ (modules lwt_dllist_tests lwt_dllist_incl)
+ (libraries
+  lwt_dllist_spec
+  qcheck-stm.stm
+  qcheck-stm.sequential
+  ortac-runtime)
+ (package ortac-examples)
+ (action
+  (run %{test} --verbose)))
