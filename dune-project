@@ -179,5 +179,6 @@
   ortac-qcheck-stm
   ortac-runtime
   qcheck-stm
-  lwt-dllist))
+  lwt-dllist
+  (varray (>= 0.2))))
 
