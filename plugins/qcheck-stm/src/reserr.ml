@@ -278,6 +278,18 @@ let promote_opt r =
       let* _ = warns ws and* _ = filter_errs errs in
       ok None
 
+let rec fold_left (f : 'a -> 'b -> 'a reserr) (acc : 'a) : 'b list -> 'a reserr
+    = function
+  | [] -> ok acc
+  | x :: xs -> (
+      match f acc x with
+      | (Ok _, _) as acc ->
+          let* acc = acc in
+          fold_left f acc xs
+      | Error errs, ws ->
+          let* _ = warns ws and* _ = filter_errs errs in
+          fold_left f acc xs)
+
 let of_option ~default = Option.fold ~none:(error default) ~some:ok
 let to_option = function Ok x, _ -> Some x | _ -> None
 let map f l = List.map f l |> promote
