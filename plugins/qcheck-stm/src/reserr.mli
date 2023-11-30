@@ -59,6 +59,7 @@ val promote : 'a reserr list -> 'a list reserr
 val promote_opt : 'a reserr -> 'a option reserr
 (** [promote_opt r] is [promote] for a unique value *)
 
+val fold_left : ('a -> 'b -> 'a reserr) -> 'a -> 'b list -> 'a reserr
 val of_option : default:W.t -> 'a option -> 'a reserr
 val to_option : 'a reserr -> 'a option
 val map : ('a -> 'b reserr) -> 'a list -> 'b list reserr
