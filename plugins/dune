@@ -3,4 +3,5 @@
  (deps
   (alias monolith/default)
   (alias qcheck-stm/default)
+  (alias dune-rules/default)
   (alias wrapper/default)))
