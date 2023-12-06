@@ -25,7 +25,7 @@
     (run
      ortac
      qcheck-stm
-     lwt_dllist_spec.mli
+     %{dep:lwt_dllist_spec.mli}
      "create ()"
      "int t"
      --include=lwt_dllist_incl
@@ -84,7 +84,7 @@
     (run
      ortac
      qcheck-stm
-     varray_spec.mli
+     %{dep:varray_spec.mli}
      "make 42 'a'"
      "char t"
      --include=varray_incl
@@ -130,7 +130,7 @@
     (run
      ortac
      qcheck-stm
-     varray_circular_spec.mli
+     %{dep:varray_circular_spec.mli}
      "make 42 'a'"
      "char t"
      --include=varray_incl
