@@ -20,7 +20,6 @@ bug-reports: "https://github.com/ocaml-gospel/ortac/issues"
 depends: [
   "dune" {>= "3.8"}
   "ocaml" {>= "4.11.0"}
-  "dune-site"
   "cmdliner" {>= "1.1.0"}
   "fmt"
   "ppxlib" {>= "0.26.0"}
