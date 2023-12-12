@@ -21,5 +21,20 @@ jobs:
           ocaml-compiler: "5.0"
           dune-cache: true
 
-      - name: Deploy documentation
-        uses: ocaml/setup-ocaml/deploy-doc@v2
+      - name: Install dependencies
+        run: opam install . --deps-only --with-doc
+
+      - name: Build documentation
+        run: opam exec -- dune build @doc
+
+      - name: Set-up Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: _build/default/_doc/_html
+
+      - name: Deploy odoc to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v3
