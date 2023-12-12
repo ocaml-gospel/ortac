@@ -74,7 +74,6 @@
  (maintainers "Clément Pascutto <clement@pascutto.fr>")
  (depends
   (ocaml (>= 4.11.0))
-  dune-site
   (cmdliner (>= 1.1.0))
   fmt
   (ppxlib (>= 0.26.0))
