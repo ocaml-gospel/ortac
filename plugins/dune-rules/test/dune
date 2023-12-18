@@ -1,0 +1,6 @@
+(cram
+ (package ortac-dune)
+ (deps
+  (package ortac-core)
+  (package ortac-qcheck-stm)
+  (package ortac-dune)))
