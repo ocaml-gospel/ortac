@@ -59,7 +59,7 @@ module Spec =
   struct
     open STM
     [@@@ocaml.warning "-26-27"]
-    include Varray_incl
+    include Varray_circular_incl
     type sut = char t
     type cmd =
       | Push_back of char elt 

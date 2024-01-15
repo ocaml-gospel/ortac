@@ -36,6 +36,13 @@ The generated code can be found in `lwt_dllist_tests.ml`. You can run the test
 either with `dune runtest examples/` or by directly running the compiled
 executable that you will find in your `_build` directory.
 
+Dune rules have been generated using the `dune-rules` plugin, providing the
+`dune` subcommand:
+
+```sh
+$ ortac dune qcheck-stm lwt_dllist_spec "create ()" "int t" lwt_dllist_tests --include=lwt_dllist_incl --package=ortac-examples --with-stdout-to=dune.lwt_dllist.inc
+```
+
 ## `varray` library
 
 This is an example of a library exposing a Functor. In order to test a Functor,
@@ -55,8 +62,18 @@ dune-generated `mli` files hidden in the `_build` folder.
 Here again, as for the previous example, we need to include some code. That is
 the extension of the `STM.ty` type. But also a `QCheck` generator for the `'a
 elt` type, as some functions of the library take arguments of this type. You
-can find these extensions in the `varray_incl.ml` file.
+can find these extensions in the `varray_incl.ml` and `varray_circular_incl.ml`
+files.
 
 The generated code can be found in the respective `varray*tests.ml` files. They
 have been promoted in the source tree in order to be easily accessible for
 reading and curiosity purposes, but this is not necessary for testing purposes.
+
+Dune rules have been generated again using the `dune-rules` plugin with the
+following command for `varray_spec.mli` and an adapted version for
+`varray_circular_spec.mli`:
+
+```sh
+$ ortac dune qcheck-stm varray_spec "make 42 'a'" "char t" varray_tests --include=varray_incl --package=ortac-examples --with-stdout-to=dune.varray.inc
+```
+

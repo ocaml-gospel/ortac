@@ -8,45 +8,7 @@
   (:standard -w -69))
  (package ortac-examples))
 
-(rule
- (alias runtest)
- (mode promote)
- (package ortac-examples)
- (deps
-  (package ortac-qcheck-stm)
-  lwt_dllist_incl.ml)
- (targets lwt_dllist_tests.ml)
- (action
-  (setenv
-   ORTAC_ONLY_PLUGIN
-   qcheck-stm
-   (with-stdout-to
-    %{targets}
-    (run
-     ortac
-     qcheck-stm
-     %{dep:lwt_dllist_spec.mli}
-     "create ()"
-     "int t"
-     --include=lwt_dllist_incl
-     --quiet)))))
-
-(test
- (name lwt_dllist_tests)
- (modules lwt_dllist_tests lwt_dllist_incl)
- (libraries
-  lwt_dllist_spec
-  qcheck-stm.stm
-  qcheck-stm.sequential
-  ortac-runtime)
- (package ortac-examples)
- (action
-  (run %{test} --verbose)))
-
-(library
- (name varray_incl)
- (modules varray_incl)
- (libraries qcheck-stm.sequential qcheck-multicoretests-util varray_spec))
+(include dune.lwt_dllist.inc)
 
 (rule
  (enabled_if %{bin-available:awk})
@@ -67,42 +29,7 @@
  (libraries varray)
  (package ortac-examples))
 
-(rule
- (mode promote)
- (alias runtest)
- (package ortac-examples)
- (deps
-  (package ortac-qcheck-stm)
-  varray_incl.ml)
- (targets varray_tests.ml)
- (action
-  (setenv
-   ORTAC_ONLY_PLUGIN
-   qcheck-stm
-   (with-stdout-to
-    %{targets}
-    (run
-     ortac
-     qcheck-stm
-     %{dep:varray_spec.mli}
-     "make 42 'a'"
-     "char t"
-     --include=varray_incl
-     --quiet)))))
-
-(test
- (name varray_tests)
- (modules varray_tests)
- (libraries
-  varray_incl
-  varray_spec
-  qcheck-stm.stm
-  qcheck-stm.sequential
-  qcheck-multicoretests-util
-  ortac-runtime)
- (package ortac-examples)
- (action
-  (run %{test} --verbose)))
+(include dune.varray.inc)
 
 (rule
  (copy varray_spec.mli varray_circular_spec.mli))
@@ -113,39 +40,4 @@
  (libraries varray)
  (package ortac-examples))
 
-(rule
- (mode promote)
- (alias runtest)
- (package ortac-examples)
- (deps
-  (package ortac-qcheck-stm)
-  varray_incl.ml)
- (targets varray_circular_tests.ml)
- (action
-  (setenv
-   ORTAC_ONLY_PLUGIN
-   qcheck-stm
-   (with-stdout-to
-    %{targets}
-    (run
-     ortac
-     qcheck-stm
-     %{dep:varray_circular_spec.mli}
-     "make 42 'a'"
-     "char t"
-     --include=varray_incl
-     --quiet)))))
-
-(test
- (name varray_circular_tests)
- (modules varray_circular_tests)
- (libraries
-  varray_incl
-  varray_circular_spec
-  qcheck-stm.stm
-  qcheck-stm.sequential
-  qcheck-multicoretests-util
-  ortac-runtime)
- (package ortac-examples)
- (action
-  (run %{test} --verbose)))
+(include dune.varray_circular.inc)

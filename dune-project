@@ -191,6 +191,7 @@
   (ocaml (>= 4.11.0))
   ortac-core
   ortac-qcheck-stm
+  ortac-dune
   ortac-runtime
   qcheck-stm
   lwt-dllist
