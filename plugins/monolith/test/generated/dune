@@ -31,7 +31,7 @@
   (package ortac-monolith))
  (action
   (setenv
-   ORTAC_ONLY_PLUGIN
+   ORTAC_PLUGINS
    monolith
    (with-stderr-to
     errors

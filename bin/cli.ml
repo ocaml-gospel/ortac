@@ -1,7 +1,9 @@
 let () =
-  match Sys.getenv_opt "ORTAC_ONLY_PLUGIN" with
+  match Sys.getenv_opt "ORTAC_PLUGINS" with
   | None -> Sites.Plugins.Plugins.load_all ()
-  | Some plug -> Sites.Plugins.Plugins.load plug
+  | Some plug ->
+      let plugs = String.split_on_char ',' plug in
+      List.iter Sites.Plugins.Plugins.load plugs
 
 open Cmdliner
 

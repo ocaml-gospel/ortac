@@ -1,5 +1,7 @@
 # Unreleased
 
+- Change `ORTAC_ONLY_PLUGIN` to `ORTAC_PLUGINS`
+  [\#195](https://github.com/ocaml-gospel/ortac/pull/195)
 - Add an include option to qcheck-stm cli
   [\#181](https://github.com/ocaml-gospel/ortac/pull/181)
 - Add a quiet flag

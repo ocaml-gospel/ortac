@@ -14,7 +14,7 @@
   (package ortac-qcheck-stm))
  (action
   (setenv
-   ORTAC_ONLY_PLUGIN
+   ORTAC_PLUGINS
    qcheck-stm
    (ignore-stdout
     (with-stderr-to

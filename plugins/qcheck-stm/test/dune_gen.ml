@@ -23,7 +23,7 @@ let rec print_rules pos =
   (package ortac-qcheck-stm))
  (action
   (setenv
-   ORTAC_ONLY_PLUGIN
+   ORTAC_PLUGINS
    qcheck-stm
    (with-stderr-to
     %s_errors
