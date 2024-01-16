@@ -95,16 +95,15 @@ let subst_invariant_fields var (t : Tterm.term) =
 
 let invariant ~context ~term_printer self (invariant : Tterm.term) =
   let function_name = gen_symbol ~prefix:"__invariant_" () in
-  let instance_id =
-    match self with
-    | None -> Ident.create ~loc (gen_symbol ~prefix:"__self_" ())
-    | Some self -> self.Symbols.vs_name
+  let instance_arg =
+    (Nolabel, pvar (Fmt.str "%a" Ident.pp self.Symbols.vs_name))
   in
-  let instance_arg = (Nolabel, pvar (Fmt.str "%a" Ident.pp instance_id)) in
   let instance_term =
     (* XXX This is not the correct type or location, but it doesn't matter for
        the translation *)
-    Tterm_helper.t_var { vs_name = instance_id; vs_ty = Ttypes.ty_unit } loc
+    Tterm_helper.t_var
+      { vs_name = self.Symbols.vs_name; vs_ty = Ttypes.ty_unit }
+      loc
   in
 
   let register_name = gen_symbol ~prefix:"__error_" () in
@@ -131,11 +130,14 @@ let invariant ~context ~term_printer self (invariant : Tterm.term) =
   in
   { txt; loc; translation }
 
-let with_invariants ~context ~term_printer (self, invariants) (type_ : type_) =
-  let invariants =
-    List.map (invariant ~context ~term_printer self) invariants
-  in
-  { type_ with invariants }
+let with_invariants ~context ~term_printer invariants (type_ : type_) =
+  Option.fold ~none:type_
+    ~some:(fun (self, invariants) ->
+      let invariants =
+        List.map (invariant ~context ~term_printer self) invariants
+      in
+      { type_ with invariants })
+    invariants
 
 let with_consumes consumes (value : value) =
   let name (t : Tterm.term) =
