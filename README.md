@@ -70,6 +70,7 @@ _experimental_ packages:
   `ortac` command-line tool,
 - `ortac-runtime-monolith.opam` which provides the support library for
   the code generated with the Monolith plugin.
+- `ortac-dune.opam` which provides a dune rule generator.
 
 Even using `opam pin`, you can install only some of those packages by explicitly
 mentioning which package you want to install, for instance:
