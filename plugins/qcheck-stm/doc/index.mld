@@ -146,7 +146,7 @@ you indicate the file you want to test, the function call to build a value of
 the type indicated in the third argument. You can write the generated code into
 a file, using the [-o] option.
 
-{@sh set-ORTAC_ONLY_PLUGIN=qcheck-stm[
+{@sh set-ORTAC_PLUGINS=qcheck-stm[
 $ ortac qcheck-stm example.mli "make 42 'a'" "char t" -o stm_example.ml
 ]}
 

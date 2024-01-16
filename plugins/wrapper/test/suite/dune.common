@@ -6,7 +6,7 @@
   (package ortac-wrapper))
  (action
   (setenv
-   ORTAC_ONLY_PLUGIN
+   ORTAC_PLUGINS
    wrapper
    (with-stdout-to
     %{target}

@@ -10,7 +10,7 @@
   (package ortac-qcheck-stm))
  (action
   (setenv
-   ORTAC_ONLY_PLUGIN
+   ORTAC_PLUGINS
    qcheck-stm
    (with-stderr-to
     array_errors
@@ -63,7 +63,7 @@
   (package ortac-qcheck-stm))
  (action
   (setenv
-   ORTAC_ONLY_PLUGIN
+   ORTAC_PLUGINS
    qcheck-stm
    (with-stderr-to
     hashtbl_errors
@@ -116,7 +116,7 @@
   (package ortac-qcheck-stm))
  (action
   (setenv
-   ORTAC_ONLY_PLUGIN
+   ORTAC_PLUGINS
    qcheck-stm
    (with-stderr-to
     record_errors
@@ -169,7 +169,7 @@
   (package ortac-qcheck-stm))
  (action
   (setenv
-   ORTAC_ONLY_PLUGIN
+   ORTAC_PLUGINS
    qcheck-stm
    (with-stderr-to
     ref_errors
@@ -222,7 +222,7 @@
   (package ortac-qcheck-stm))
  (action
   (setenv
-   ORTAC_ONLY_PLUGIN
+   ORTAC_PLUGINS
    qcheck-stm
    (with-stderr-to
     conjunctive_clauses_errors
@@ -275,7 +275,7 @@
   (package ortac-qcheck-stm))
  (action
   (setenv
-   ORTAC_ONLY_PLUGIN
+   ORTAC_PLUGINS
    qcheck-stm
    (with-stderr-to
     sequence_model_errors

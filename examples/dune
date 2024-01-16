@@ -18,7 +18,7 @@
  (targets lwt_dllist_tests.ml)
  (action
   (setenv
-   ORTAC_ONLY_PLUGIN
+   ORTAC_PLUGINS
    qcheck-stm
    (with-stdout-to
     %{targets}
@@ -77,7 +77,7 @@
  (targets varray_tests.ml)
  (action
   (setenv
-   ORTAC_ONLY_PLUGIN
+   ORTAC_PLUGINS
    qcheck-stm
    (with-stdout-to
     %{targets}
@@ -123,7 +123,7 @@
  (targets varray_circular_tests.ml)
  (action
   (setenv
-   ORTAC_ONLY_PLUGIN
+   ORTAC_PLUGINS
    qcheck-stm
    (with-stdout-to
     %{targets}
