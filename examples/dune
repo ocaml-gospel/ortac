@@ -34,6 +34,13 @@
 (rule
  (copy varray_spec.mli varray_circular_spec.mli))
 
+(rule
+ (alias runtest)
+ (package ortac-examples)
+ (targets varray_circular_spec.gospel)
+ (action
+  (run %{bin:gospel} check %{dep:varray_circular_spec.mli})))
+
 (library
  (name varray_circular_spec)
  (modules varray_circular_spec)
