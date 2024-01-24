@@ -9,9 +9,8 @@ val module_name_of_path : string -> string
     corresponding OCaml module identifier *)
 
 val type_check :
-  string list ->
-  string ->
-  Gospel.Uast.s_signature_item list ->
-  Gospel.Tmodule.namespace list * Gospel.Tast.signature
-(** [type_check load_path name sigs] call the Gospel typechecker on the file
-    [name] *)
+  string list -> string -> Gospel.Tmodule.namespace list * Gospel.Tast.signature
+(** [type_check load_path name] call the Gospel typechecker on the file [name] *)
+
+val read_gospel_file :
+  string -> Gospel.Tmodule.namespace list * Gospel.Tast.signature
