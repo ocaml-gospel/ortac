@@ -79,7 +79,12 @@ let init path init_sut_txt sut_str =
   let open Reserr in
   try
     let module_name = Utils.module_name_of_path path
-    and env, sigs = Utils.type_check [] path in
+    and env, sigs =
+      match Filename.extension path with
+      | ".mli" -> Utils.type_check [] path
+      | ".gospel" -> Utils.read_gospel_file path
+      | _ -> invalid_arg "init"
+    in
     assert (List.length env = 1);
     let namespace = List.hd env in
     let context = Context.init module_name namespace in
