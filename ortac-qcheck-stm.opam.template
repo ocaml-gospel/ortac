@@ -1,0 +1,3 @@
+pin-depends: [
+  [ "gospel.0.2+dev" "git+https://github.com/n-osborne/gospel#c198f143c6502a9c231cdd21906d825613d6a454" ]
+]
