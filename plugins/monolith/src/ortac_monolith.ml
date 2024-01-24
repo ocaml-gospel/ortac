@@ -132,12 +132,9 @@ let standalone module_name env s =
   :: specs
 
 let generate path fmt =
-  let module_name = Ortac_core.Utils.module_name_of_path path in
-  Gospel.Parser_frontend.parse_ocaml_gospel path
-  |> Ortac_core.Utils.type_check [] path
-  |> fun (env, sigs) ->
-  assert (List.length env = 1);
-  standalone module_name (List.hd env) sigs
+  let open Ortac_core.Utils in
+  let { module_name; namespace; ast } = check path in
+  standalone module_name namespace ast
   |> Fmt.pf fmt "%a@." Ppxlib_ast.Pprintast.structure;
   W.report ()
 

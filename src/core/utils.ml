@@ -12,11 +12,36 @@ let module_name_of_path p =
   let filename = Filename.basename p in
   String.index filename '.' |> String.sub filename 0 |> String.capitalize_ascii
 
-let type_check load_path name sigs =
-  let md = Tmodule.init_muc name in
-  let penv =
+open Gospel
+
+type checked = {
+  module_name : string;
+  namespace : Tmodule.namespace;
+  ast : Tast.signature;
+}
+
+let type_check load_path name =
+  let sigs = Parser_frontend.parse_ocaml_gospel name
+  and md = Tmodule.init_muc name
+  and penv =
     module_name_of_path name |> Utils.Sstr.singleton |> Typing.penv load_path
   in
   let gfile = List.fold_left (Typing.type_sig_item penv) md sigs in
   let sigs = Tmodule.wrap_up_muc gfile |> fun file -> file.fl_sigs in
   (gfile.muc_import, sigs)
+
+let read_gospel_file filename =
+  let open Tmodule in
+  let gfile : module_uc = read_gospel_file filename in
+  let sigs = Tmodule.wrap_up_muc gfile |> fun file -> file.fl_sigs in
+  (gfile.muc_import, sigs)
+
+let check filename =
+  let module_name = module_name_of_path filename
+  and env, ast =
+    match Filename.extension filename with
+    | ".mli" -> type_check [] filename
+    | ".gospel" -> read_gospel_file filename
+    | _ -> invalid_arg "check"
+  in
+  { module_name; namespace = List.hd env; ast }
