@@ -219,7 +219,7 @@ let sig_item config init_fct state s =
       else Some (val_desc config state vd)
   | _ -> None
 
-let state config sigs =
+let state_and_invariants config sigs =
   let sut_name = Cfg.get_sut_type_name_str config in
   let is_sut_decl s =
     let p t = t.td_ts.ts_ident.id_str = sut_name in
@@ -248,9 +248,15 @@ let state config sigs =
       |> Ocaml_of_gospel.core_type_of_ty_with_subst ~context:config.context
            subst )
   in
-  match spec.ty_fields with
-  | [] -> error (No_models sut_name, spec.ty_loc)
-  | xs -> List.map process_model xs |> ok
+  let* state =
+    match spec.ty_fields with
+    | [] -> error (No_models sut_name, spec.ty_loc)
+    | xs -> List.map process_model xs |> ok
+  in
+  let invariants =
+    Option.map (fun (vs, xs) -> (vs.Symbols.vs_name, xs)) spec.ty_invariants
+  in
+  ok (state, invariants)
 
 let init_state config state sigs =
   let open Cfg in
@@ -371,8 +377,8 @@ let ghost_functions =
 let run sigs config =
   let open Reserr in
   let open Ir in
-  let* state = state config sigs in
+  let* state, invariants = state_and_invariants config sigs in
   let* init_fct, init_state = init_state config state sigs in
   let ghost_functions = ghost_functions sigs in
   let* values = signature config init_fct state sigs in
-  ok { state; init_state; ghost_functions; values }
+  ok { state; invariants; init_state; ghost_functions; values }
