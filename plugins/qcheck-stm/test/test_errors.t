@@ -43,6 +43,10 @@ Or forget its argument:
       ^^^^^^^^^
   Error: Incompatible declaration of SUT type: the declaration of the SUT type
          is incompatible with the configured one: t.
+  File "foo.mli", line 1, characters 0-9:
+  1 | type 'a t
+      ^^^^^^^^^
+  Error: Missing specification for the SUT type t.
 
 We can forget to instantiate the type parameter of the system under test:
 

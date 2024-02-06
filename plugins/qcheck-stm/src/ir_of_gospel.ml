@@ -224,34 +224,22 @@ let state config sigs =
   let is_sut_decl s =
     let p t = t.td_ts.ts_ident.id_str = sut_name in
     match s.sig_desc with
-    | Sig_type (_, ts, _) -> (
-        List.filter p ts |> function
-        | [] -> None
-        | [ t ] -> Some t
-        (* As multiple type declarations with the same name is illegal, last
-           case can't happen *)
-        | _ -> assert false)
+    | Sig_type (_, ts, _) -> List.find_opt p ts
     | _ -> None
   in
   let open Reserr in
   let* ty =
-    match List.filter_map is_sut_decl sigs with
-    | [] -> error (No_sut_type sut_name, Ppxlib.Location.none)
-    | [ ty ] -> ok ty
-    (* As multiple type declarations with the same name is illegal, last
-       case can't happen *)
-    | _ -> assert false
+    List.filter_map is_sut_decl sigs
+    |> Fun.flip List.nth_opt 0
+    |> of_option ~default:(No_sut_type sut_name, Ppxlib.Location.none)
   in
   let open Ortac_core in
   let* subst =
     Fun.flip List.assoc_opt
     <$> (Ocaml_of_gospel.core_type_of_tysymbol ~context:config.context ty.td_ts
         |> unify (`Type ty) config.sut_core_type)
-  in
-  let* spec =
-    match ty.td_spec with
-    | None -> error (Sut_type_not_specified sut_name, ty.td_loc)
-    | Some spec -> ok spec
+  and* spec =
+    of_option ~default:(Sut_type_not_specified sut_name, ty.td_loc) ty.td_spec
   in
   let process_model (ls, _) =
     let open Symbols in
