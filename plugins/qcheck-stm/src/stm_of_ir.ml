@@ -419,11 +419,16 @@ let precond config ir =
   in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
-let postcond_case config state idx state_ident new_state_ident value =
+let postcond_case config state invariants idx state_ident new_state_ident value
+    =
   let open Reserr in
   let translate_postcond t =
     subst_term state ~gos_t:value.sut_var ~old_t:(Some state_ident) ~new_lz:true
       ~new_t:(Some new_state_ident) t
+    >>= ocaml_of_term config
+  and translate_invariants id t =
+    subst_term state ~gos_t:id ~old_t:None ~new_t:(Some new_state_ident)
+      ~new_lz:true t
     >>= ocaml_of_term config
   in
   let idx = List.sort Int.compare idx in
@@ -475,7 +480,13 @@ let postcond_case config state idx state_ident new_state_ident value =
       in
       aux idx value.postcond.normal
     in
-    list_and <$> map translate_postcond normal
+    let* postcond = map translate_postcond normal
+    and* invariants =
+      Option.fold ~none:(ok [])
+        ~some:(fun (id, xs) -> map (translate_invariants id) xs)
+        invariants
+    in
+    list_and (postcond @ invariants) |> ok
   in
   let res, pat_ret =
     match value.ret with
@@ -558,8 +569,8 @@ let postcond config idx ir =
     (Fun.flip ( @ )) [ case ~lhs:ppat_any ~guard:None ~rhs:(ebool true) ]
     <$> map
           (fun v ->
-            postcond_case config ir.state (List.assoc v.id idx) state_ident
-              new_state_ident v)
+            postcond_case config ir.state ir.invariants (List.assoc v.id idx)
+              state_ident new_state_ident v)
           ir.values
   in
   let body =
