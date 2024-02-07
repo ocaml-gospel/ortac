@@ -316,3 +316,56 @@
  (action
   (run %{dep:sequence_model_stm_tests.exe} -v)))
 
+(library
+ (name invariants)
+ (modules invariants))
+
+(rule
+ (target invariants_stm_tests.ml)
+ (package ortac-qcheck-stm)
+ (deps
+  (package ortac-core)
+  (package ortac-qcheck-stm))
+ (action
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   qcheck-stm
+   (with-stderr-to
+    invariants_errors
+    (run
+     ortac
+     qcheck-stm
+     %{dep:invariants.mli}
+     "create 42" "int t"
+     -o
+     %{target})))))
+
+(test
+ (name invariants_stm_tests)
+ (package ortac-qcheck-stm)
+ (modules invariants_stm_tests)
+ (libraries
+  qcheck-core
+  qcheck-core.runner
+  qcheck-stm.stm
+  qcheck-stm.sequential
+  qcheck-multicoretests-util
+  ortac-runtime
+  invariants)
+ (action
+  (echo
+   "\n%{dep:invariants_stm_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))
+
+(rule
+ (alias runtest)
+ (package ortac-qcheck-stm)
+ (action
+  (progn
+   (diff invariants_errors.expected invariants_errors)
+   (diff invariants_stm_tests.expected.ml invariants_stm_tests.ml))))
+
+(rule
+ (alias launchtests)
+ (action
+  (run %{dep:invariants_stm_tests.exe} -v)))
+

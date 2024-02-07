@@ -191,7 +191,10 @@ module Spec =
       | Remove_ -> Res ((option char), (remove_ sut__013_))
   end
 module STMTests = (STM_sequential.Make)(Spec)
+let check_init_state () = ()
+let agree_prop cs = check_init_state (); STMTests.agree_prop cs
 let _ =
   QCheck_base_runner.run_tests_main
     (let count = 1000 in
-     [STMTests.agree_test ~count ~name:"Sequence_model STM tests"])
+     [QCheck.Test.make ~count ~name:"Sequence_model STM tests"
+        (STMTests.arb_cmds Spec.init_state) agree_prop])

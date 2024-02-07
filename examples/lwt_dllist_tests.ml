@@ -546,7 +546,10 @@ module Spec =
       | Take_opt_r -> Res ((option int), (take_opt_r sut__016_))
   end
 module STMTests = (STM_sequential.Make)(Spec)
+let check_init_state () = ()
+let agree_prop cs = check_init_state (); STMTests.agree_prop cs
 let _ =
   QCheck_base_runner.run_tests_main
     (let count = 1000 in
-     [STMTests.agree_test ~count ~name:"Lwt_dllist_spec STM tests"])
+     [QCheck.Test.make ~count ~name:"Lwt_dllist_spec STM tests"
+        (STMTests.arb_cmds Spec.init_state) agree_prop])

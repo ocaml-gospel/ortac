@@ -195,7 +195,10 @@ module Spec =
               (protect (fun () -> set sut__015_ i_1 a_2) ()))
   end
 module STMTests = (STM_sequential.Make)(Spec)
+let check_init_state () = ()
+let agree_prop cs = check_init_state (); STMTests.agree_prop cs
 let _ =
   QCheck_base_runner.run_tests_main
     (let count = 1000 in
-     [STMTests.agree_test ~count ~name:"Conjunctive_clauses STM tests"])
+     [QCheck.Test.make ~count ~name:"Conjunctive_clauses STM tests"
+        (STMTests.arb_cmds Spec.init_state) agree_prop])

@@ -10,3 +10,5 @@ conjunctive_clauses
 "make 42 'a'" "char t"
 sequence_model
 "create ()" "char t"
+invariants
+"create 42" "int t"
