@@ -164,6 +164,21 @@
  (conflicts
   (result (< 1.5))))
 
+; Dune plugin
+(package
+ (name ortac-dune)
+ (synopsis "Generate dune rules for other ortac plugins")
+ (description "Generate dune rules for other ortac plugins")
+ (authors
+  "Nicolas Osborne <nicolas.osborne@tarides.com>")
+ (maintainers "Nicolas Osborne <nicolas.osborne@tarides.com>")
+ (depends
+  (ocaml (>= 4.11.0))
+  fmt
+  (cmdliner (>= 1.1.0))
+  ortac-core
+  (ortac-qcheck-stm :with-test)))
+
 (package
  (name ortac-examples)
  (synopsis
@@ -176,6 +191,7 @@
   (ocaml (>= 4.11.0))
   ortac-core
   ortac-qcheck-stm
+  ortac-dune
   ortac-runtime
   qcheck-stm
   lwt-dllist

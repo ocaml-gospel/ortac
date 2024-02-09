@@ -38,13 +38,6 @@ end = struct
              system under test."
           ~docv:"INIT")
 
-  let include_ =
-    Arg.(
-      value
-      & opt (some string) None
-      & info [ "i"; "include" ] ~docv:"MODULE"
-          ~doc:"Include MODULE in the generated code.")
-
   let term =
     let open Registration in
     Term.(

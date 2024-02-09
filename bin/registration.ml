@@ -12,6 +12,13 @@ let setup_log =
   let init style_renderer = Fmt_tty.setup_std_outputs ?style_renderer () in
   Term.(const init $ Fmt_cli.style_renderer ())
 
+let include_ =
+  Arg.(
+    value
+    & opt (some string) None
+    & info [ "i"; "include" ] ~docv:"MODULE"
+        ~doc:"Include MODULE in the generated code.")
+
 let output_file =
   let parse s =
     match Sys.is_directory s with

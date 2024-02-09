@@ -1,0 +1,11 @@
+(library
+ (public_name ortac-dune.plugin)
+ (name ortac_dune)
+ (libraries cmdliner fmt ortac-core.register))
+
+(plugin
+ (name dune-rules)
+ (package ortac-dune)
+ (libraries ortac-dune.plugin)
+ (site
+  (ortac-core plugins)))
