@@ -168,24 +168,34 @@ let next_state sut state spec =
   ok Ir.{ formulae; modifies }
 
 let postcond spec =
-  let normal = List.mapi (fun i x -> (i, x)) spec.sp_post
+  let normal = List.mapi (fun i x -> (i, Ir.term_val spec x)) spec.sp_post
   and exceptional =
     List.concat_map
       (fun (x, l) ->
         match l with
-        | [] -> [ (x, None, Tterm_helper.t_true Ppxlib.Location.none) ]
+        | [] ->
+            [
+              ( x,
+                None,
+                Ir.
+                  {
+                    term = Tterm_helper.t_true Ppxlib.Location.none;
+                    text = "true";
+                  } );
+            ]
         | _ ->
             List.rev_map
               (fun (p, t) ->
                 let open Tterm in
                 match p.p_node with
                 | Papp (ls, []) when Symbols.(ls_equal ls (fs_tuple 0)) ->
-                    (x, None, t)
-                | _ -> (x, Some p, t))
+                    (x, None, Ir.term_val spec t)
+                | _ -> (x, Some p, Ir.term_val spec t))
               l)
       spec.sp_xpost
   in
-  Ir.{ normal; exceptional; checks = spec.sp_checks }
+  Ir.
+    { normal; exceptional; checks = List.map (Ir.term_val spec) spec.sp_checks }
 
 let val_desc config state vd =
   let open Reserr in
@@ -254,7 +264,9 @@ let state_and_invariants config sigs =
     | xs -> List.map process_model xs |> ok
   in
   let invariants =
-    Option.map (fun (vs, xs) -> (vs.Symbols.vs_name, xs)) spec.ty_invariants
+    Option.map
+      (fun (vs, xs) -> (vs.Symbols.vs_name, List.map (Ir.term_type spec) xs))
+      spec.ty_invariants
   in
   ok (state, invariants)
 

@@ -138,7 +138,7 @@ let subst_term state ?(out_of_scope = []) ~gos_t ?(old_lz = false) ~old_t
 let translate_checks config state value state_ident t =
   let open Reserr in
   subst_term state ~gos_t:value.sut_var ~old_t:(Some state_ident)
-    ~new_t:(Some state_ident) t
+    ~new_t:(Some state_ident) t.term
   >>= ocaml_of_term config
 
 let str_of_ident = Fmt.str "%a" Ident.pp
@@ -424,11 +424,11 @@ let postcond_case config state invariants idx state_ident new_state_ident value
   let open Reserr in
   let translate_postcond t =
     subst_term state ~gos_t:value.sut_var ~old_t:(Some state_ident) ~new_lz:true
-      ~new_t:(Some new_state_ident) t
+      ~new_t:(Some new_state_ident) t.term
     >>= ocaml_of_term config
   and translate_invariants id t =
     subst_term state ~gos_t:id ~old_t:None ~new_t:(Some new_state_ident)
-      ~new_lz:true t
+      ~new_lz:true t.term
     >>= ocaml_of_term config
   in
   let idx = List.sort Int.compare idx in
@@ -737,7 +737,7 @@ let check_init_state config ir =
   and state_id = Ident.create ~loc:Location.none state_name in
   let translate_invariants id t =
     enot
-    <$> (subst_term ir.state ~gos_t:id ~old_t:None ~new_t:(Some state_id) t
+    <$> (subst_term ir.state ~gos_t:id ~old_t:None ~new_t:(Some state_id) t.term
         >>= ocaml_of_term config)
   and msg =
     let f = qualify [ "QCheck"; "Test" ] "fail_report"
