@@ -1,14 +1,26 @@
 open Gospel
 module Ident = Identifier.Ident
 
-type xpost = Ttypes.xsymbol * Tterm.pattern option * Tterm.term
+type term = { term : Tterm.term; text : string }
+
+let term ~prj_txt ~prj_loc spec term =
+  let text = Ortac_core.Utils.term_printer (prj_txt spec) (prj_loc spec) term in
+  { term; text }
+
+let term_val =
+  term ~prj_txt:(fun s -> s.Tast.sp_text) ~prj_loc:(fun s -> s.Tast.sp_loc)
+
+let term_type =
+  term ~prj_txt:(fun s -> s.Tast.ty_text) ~prj_loc:(fun s -> s.Tast.ty_loc)
+
+type xpost = Ttypes.xsymbol * Tterm.pattern option * term
 
 type new_state_formulae = {
   model : Ident.t; (* the name of the model's field *)
   description : Tterm.term; (* the new value for the model's field *)
 }
 
-type term = int * Tterm.term
+type indexed_term = int * term
 
 (* XXX TODO decide whether we need checks here (if checks is false, state does
    not change) *)
@@ -20,9 +32,9 @@ type next_state = {
 }
 
 type postcond = {
-  normal : term list;
+  normal : indexed_term list;
   exceptional : xpost list;
-  checks : Tterm.term list;
+  checks : term list;
 }
 
 type value = {
@@ -56,7 +68,7 @@ let value id ty inst sut_var args ret next_state precond postcond =
 
 type t = {
   state : (Ident.t * Ppxlib.core_type) list;
-  invariants : (Ident.t * Tterm.term list) option;
+  invariants : (Ident.t * term list) option;
   init_state : init_state;
   ghost_functions : Tast.function_ list;
   values : value list;
