@@ -6,7 +6,6 @@ module Ortac_runtime = Ortac_runtime_qcheck_stm
 module Spec =
   struct
     open STM
-    [@@@ocaml.warning "-26-27"]
     include Lwt_dllist_incl
     type sut = int t
     type cmd =
@@ -286,254 +285,7 @@ module Spec =
       | Take_r -> true
       | Take_opt_l -> true
       | Take_opt_r -> true
-    let postcond cmd__005_ state__006_ res__007_ =
-      let new_state__008_ = lazy (next_state cmd__005_ state__006_) in
-      match (cmd__005_, res__007_) with
-      | (Is_empty, Res ((Bool, _), b)) ->
-          (try
-             (b = true) =
-               ((Lazy.force new_state__008_).contents =
-                  Ortac_runtime.Gospelstdlib.Sequence.empty)
-           with
-           | e ->
-               raise
-                 (Ortac_runtime.Partial_function
-                    (e,
-                      {
-                        Ortac_runtime.start =
-                          {
-                            pos_fname = "lwt_dllist_spec.mli";
-                            pos_lnum = 51;
-                            pos_bol = 2194;
-                            pos_cnum = 2208
-                          };
-                        Ortac_runtime.stop =
-                          {
-                            pos_fname = "lwt_dllist_spec.mli";
-                            pos_lnum = 51;
-                            pos_bol = 2194;
-                            pos_cnum = 2241
-                          }
-                      })))
-      | (Length, Res ((Int, _), l_1)) ->
-          (try
-             (Ortac_runtime.Gospelstdlib.integer_of_int l_1) =
-               (Ortac_runtime.Gospelstdlib.Sequence.length
-                  (Lazy.force new_state__008_).contents)
-           with
-           | e ->
-               raise
-                 (Ortac_runtime.Partial_function
-                    (e,
-                      {
-                        Ortac_runtime.start =
-                          {
-                            pos_fname = "lwt_dllist_spec.mli";
-                            pos_lnum = 58;
-                            pos_bol = 2649;
-                            pos_cnum = 2663
-                          };
-                        Ortac_runtime.stop =
-                          {
-                            pos_fname = "lwt_dllist_spec.mli";
-                            pos_lnum = 58;
-                            pos_bol = 2649;
-                            pos_cnum = 2693
-                          }
-                      })))
-      | (Add_l a_1, Res ((Node (Int), _), n)) -> true
-      | (Add_r a_2, Res ((Node (Int), _), n_1)) -> true
-      | (Take_l, Res ((Result (Int, Exn), _), a_3)) ->
-          (match a_3 with
-           | Ok a_3 ->
-               (try
-                  if
-                    state__006_.contents =
-                      Ortac_runtime.Gospelstdlib.Sequence.empty
-                  then false
-                  else
-                    a_3 =
-                      (Ortac_runtime.Gospelstdlib.Sequence.hd
-                         state__006_.contents)
-                with
-                | e ->
-                    raise
-                      (Ortac_runtime.Partial_function
-                         (e,
-                           {
-                             Ortac_runtime.start =
-                               {
-                                 pos_fname = "lwt_dllist_spec.mli";
-                                 pos_lnum = 85;
-                                 pos_bol = 4320;
-                                 pos_cnum = 4334
-                               };
-                             Ortac_runtime.stop =
-                               {
-                                 pos_fname = "lwt_dllist_spec.mli";
-                                 pos_lnum = 87;
-                                 pos_bol = 4394;
-                                 pos_cnum = 4445
-                               }
-                           })))
-           | Error (Empty) ->
-               (try
-                  let __t1__009_ =
-                    state__006_.contents =
-                      Ortac_runtime.Gospelstdlib.Sequence.empty in
-                  let __t2__010_ =
-                    Ortac_runtime.Gospelstdlib.Sequence.empty =
-                      (Lazy.force new_state__008_).contents in
-                  __t1__009_ && __t2__010_
-                with
-                | e ->
-                    raise
-                      (Ortac_runtime.Partial_function
-                         (e,
-                           {
-                             Ortac_runtime.start =
-                               {
-                                 pos_fname = "lwt_dllist_spec.mli";
-                                 pos_lnum = 88;
-                                 pos_bol = 4446;
-                                 pos_cnum = 4468
-                               };
-                             Ortac_runtime.stop =
-                               {
-                                 pos_fname = "lwt_dllist_spec.mli";
-                                 pos_lnum = 88;
-                                 pos_bol = 4446;
-                                 pos_cnum = 4512
-                               }
-                           })))
-           | _ -> false)
-      | (Take_r, Res ((Result (Int, Exn), _), a_4)) ->
-          (match a_4 with
-           | Ok a_4 ->
-               (try
-                  if
-                    state__006_.contents =
-                      Ortac_runtime.Gospelstdlib.Sequence.empty
-                  then false
-                  else
-                    a_4 =
-                      (Ortac_runtime.Gospelstdlib.__mix_Bub
-                         state__006_.contents
-                         (Ortac_runtime.Gospelstdlib.(-)
-                            (Ortac_runtime.Gospelstdlib.Sequence.length
-                               state__006_.contents)
-                            (Ortac_runtime.Gospelstdlib.integer_of_int 1)))
-                with
-                | e ->
-                    raise
-                      (Ortac_runtime.Partial_function
-                         (e,
-                           {
-                             Ortac_runtime.start =
-                               {
-                                 pos_fname = "lwt_dllist_spec.mli";
-                                 pos_lnum = 99;
-                                 pos_bol = 5153;
-                                 pos_cnum = 5167
-                               };
-                             Ortac_runtime.stop =
-                               {
-                                 pos_fname = "lwt_dllist_spec.mli";
-                                 pos_lnum = 101;
-                                 pos_bol = 5227;
-                                 pos_cnum = 5304
-                               }
-                           })))
-           | Error (Empty) ->
-               (try
-                  let __t1__011_ =
-                    state__006_.contents =
-                      Ortac_runtime.Gospelstdlib.Sequence.empty in
-                  let __t2__012_ =
-                    Ortac_runtime.Gospelstdlib.Sequence.empty =
-                      (Lazy.force new_state__008_).contents in
-                  __t1__011_ && __t2__012_
-                with
-                | e ->
-                    raise
-                      (Ortac_runtime.Partial_function
-                         (e,
-                           {
-                             Ortac_runtime.start =
-                               {
-                                 pos_fname = "lwt_dllist_spec.mli";
-                                 pos_lnum = 102;
-                                 pos_bol = 5305;
-                                 pos_cnum = 5327
-                               };
-                             Ortac_runtime.stop =
-                               {
-                                 pos_fname = "lwt_dllist_spec.mli";
-                                 pos_lnum = 102;
-                                 pos_bol = 5305;
-                                 pos_cnum = 5371
-                               }
-                           })))
-           | _ -> false)
-      | (Take_opt_l, Res ((Option (Int), _), o)) ->
-          (try
-             state__006_.contents =
-               (match o with
-                | None -> Ortac_runtime.Gospelstdlib.Sequence.empty
-                | Some a_5 ->
-                    Ortac_runtime.Gospelstdlib.Sequence.cons a_5
-                      (Lazy.force new_state__008_).contents)
-           with
-           | e ->
-               raise
-                 (Ortac_runtime.Partial_function
-                    (e,
-                      {
-                        Ortac_runtime.start =
-                          {
-                            pos_fname = "lwt_dllist_spec.mli";
-                            pos_lnum = 112;
-                            pos_bol = 6030;
-                            pos_cnum = 6044
-                          };
-                        Ortac_runtime.stop =
-                          {
-                            pos_fname = "lwt_dllist_spec.mli";
-                            pos_lnum = 114;
-                            pos_bol = 6131;
-                            pos_cnum = 6201
-                          }
-                      })))
-      | (Take_opt_r, Res ((Option (Int), _), o_1)) ->
-          (try
-             state__006_.contents =
-               (match o_1 with
-                | None -> Ortac_runtime.Gospelstdlib.Sequence.empty
-                | Some a_6 ->
-                    Ortac_runtime.Gospelstdlib.Sequence.snoc
-                      (Lazy.force new_state__008_).contents a_6)
-           with
-           | e ->
-               raise
-                 (Ortac_runtime.Partial_function
-                    (e,
-                      {
-                        Ortac_runtime.start =
-                          {
-                            pos_fname = "lwt_dllist_spec.mli";
-                            pos_lnum = 124;
-                            pos_bol = 6869;
-                            pos_cnum = 6883
-                          };
-                        Ortac_runtime.stop =
-                          {
-                            pos_fname = "lwt_dllist_spec.mli";
-                            pos_lnum = 126;
-                            pos_bol = 6970;
-                            pos_cnum = 7040
-                          }
-                      })))
-      | _ -> true
+    let postcond _ _ _ = true
     let run cmd__015_ sut__016_ =
       match cmd__015_ with
       | Is_empty -> Res (bool, (is_empty sut__016_))
@@ -549,6 +301,432 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
+let ortac_postcond cmd__005_ state__006_ res__007_ =
+  let open Spec in
+    let open STM in
+      let new_state__008_ = lazy (next_state cmd__005_ state__006_) in
+      match (cmd__005_, res__007_) with
+      | (Is_empty, Res ((Bool, _), b)) ->
+          if
+            (try
+               (b = true) =
+                 ((Lazy.force new_state__008_).contents =
+                    Ortac_runtime.Gospelstdlib.Sequence.empty)
+             with
+             | e ->
+                 raise
+                   (Ortac_runtime.Partial_function
+                      (e,
+                        {
+                          Ortac_runtime.start =
+                            {
+                              pos_fname = "lwt_dllist_spec.mli";
+                              pos_lnum = 51;
+                              pos_bol = 2194;
+                              pos_cnum = 2208
+                            };
+                          Ortac_runtime.stop =
+                            {
+                              pos_fname = "lwt_dllist_spec.mli";
+                              pos_lnum = 51;
+                              pos_bol = 2194;
+                              pos_cnum = 2241
+                            }
+                        })))
+          then None
+          else
+            Some
+              (Ortac_runtime.report "is_empty"
+                 [("b <-> s.contents = Sequence.empty",
+                    {
+                      Ortac_runtime.start =
+                        {
+                          pos_fname = "lwt_dllist_spec.mli";
+                          pos_lnum = 51;
+                          pos_bol = 2194;
+                          pos_cnum = 2208
+                        };
+                      Ortac_runtime.stop =
+                        {
+                          pos_fname = "lwt_dllist_spec.mli";
+                          pos_lnum = 51;
+                          pos_bol = 2194;
+                          pos_cnum = 2241
+                        }
+                    })])
+      | (Length, Res ((Int, _), l_1)) ->
+          if
+            (try
+               (Ortac_runtime.Gospelstdlib.integer_of_int l_1) =
+                 (Ortac_runtime.Gospelstdlib.Sequence.length
+                    (Lazy.force new_state__008_).contents)
+             with
+             | e ->
+                 raise
+                   (Ortac_runtime.Partial_function
+                      (e,
+                        {
+                          Ortac_runtime.start =
+                            {
+                              pos_fname = "lwt_dllist_spec.mli";
+                              pos_lnum = 58;
+                              pos_bol = 2649;
+                              pos_cnum = 2663
+                            };
+                          Ortac_runtime.stop =
+                            {
+                              pos_fname = "lwt_dllist_spec.mli";
+                              pos_lnum = 58;
+                              pos_bol = 2649;
+                              pos_cnum = 2693
+                            }
+                        })))
+          then None
+          else
+            Some
+              (Ortac_runtime.report "length"
+                 [("l = Sequence.length s.contents",
+                    {
+                      Ortac_runtime.start =
+                        {
+                          pos_fname = "lwt_dllist_spec.mli";
+                          pos_lnum = 58;
+                          pos_bol = 2649;
+                          pos_cnum = 2663
+                        };
+                      Ortac_runtime.stop =
+                        {
+                          pos_fname = "lwt_dllist_spec.mli";
+                          pos_lnum = 58;
+                          pos_bol = 2649;
+                          pos_cnum = 2693
+                        }
+                    })])
+      | (Add_l a_1, Res ((Node (Int), _), n)) -> None
+      | (Add_r a_2, Res ((Node (Int), _), n_1)) -> None
+      | (Take_l, Res ((Result (Int, Exn), _), a_3)) ->
+          (match a_3 with
+           | Ok a_3 ->
+               if
+                 (try
+                    if
+                      state__006_.contents =
+                        Ortac_runtime.Gospelstdlib.Sequence.empty
+                    then false
+                    else
+                      a_3 =
+                        (Ortac_runtime.Gospelstdlib.Sequence.hd
+                           state__006_.contents)
+                  with
+                  | e ->
+                      raise
+                        (Ortac_runtime.Partial_function
+                           (e,
+                             {
+                               Ortac_runtime.start =
+                                 {
+                                   pos_fname = "lwt_dllist_spec.mli";
+                                   pos_lnum = 85;
+                                   pos_bol = 4320;
+                                   pos_cnum = 4334
+                                 };
+                               Ortac_runtime.stop =
+                                 {
+                                   pos_fname = "lwt_dllist_spec.mli";
+                                   pos_lnum = 87;
+                                   pos_bol = 4394;
+                                   pos_cnum = 4445
+                                 }
+                             })))
+               then None
+               else
+                 Some
+                   (Ortac_runtime.report "take_l"
+                      [("if old s.contents = Sequence.empty\n              then false\n              else a = Sequence.hd (old s.contents)",
+                         {
+                           Ortac_runtime.start =
+                             {
+                               pos_fname = "lwt_dllist_spec.mli";
+                               pos_lnum = 85;
+                               pos_bol = 4320;
+                               pos_cnum = 4334
+                             };
+                           Ortac_runtime.stop =
+                             {
+                               pos_fname = "lwt_dllist_spec.mli";
+                               pos_lnum = 87;
+                               pos_bol = 4394;
+                               pos_cnum = 4445
+                             }
+                         })])
+           | Error (Empty) ->
+               if
+                 (try
+                    let __t1__009_ =
+                      state__006_.contents =
+                        Ortac_runtime.Gospelstdlib.Sequence.empty in
+                    let __t2__010_ =
+                      Ortac_runtime.Gospelstdlib.Sequence.empty =
+                        (Lazy.force new_state__008_).contents in
+                    __t1__009_ && __t2__010_
+                  with
+                  | e ->
+                      raise
+                        (Ortac_runtime.Partial_function
+                           (e,
+                             {
+                               Ortac_runtime.start =
+                                 {
+                                   pos_fname = "lwt_dllist_spec.mli";
+                                   pos_lnum = 88;
+                                   pos_bol = 4446;
+                                   pos_cnum = 4468
+                                 };
+                               Ortac_runtime.stop =
+                                 {
+                                   pos_fname = "lwt_dllist_spec.mli";
+                                   pos_lnum = 88;
+                                   pos_bol = 4446;
+                                   pos_cnum = 4512
+                                 }
+                             })))
+               then None
+               else
+                 Some
+                   (Ortac_runtime.report "take_l"
+                      [("old s.contents = Sequence.empty = s.contents",
+                         {
+                           Ortac_runtime.start =
+                             {
+                               pos_fname = "lwt_dllist_spec.mli";
+                               pos_lnum = 88;
+                               pos_bol = 4446;
+                               pos_cnum = 4468
+                             };
+                           Ortac_runtime.stop =
+                             {
+                               pos_fname = "lwt_dllist_spec.mli";
+                               pos_lnum = 88;
+                               pos_bol = 4446;
+                               pos_cnum = 4512
+                             }
+                         })])
+           | _ -> None)
+      | (Take_r, Res ((Result (Int, Exn), _), a_4)) ->
+          (match a_4 with
+           | Ok a_4 ->
+               if
+                 (try
+                    if
+                      state__006_.contents =
+                        Ortac_runtime.Gospelstdlib.Sequence.empty
+                    then false
+                    else
+                      a_4 =
+                        (Ortac_runtime.Gospelstdlib.__mix_Bub
+                           state__006_.contents
+                           (Ortac_runtime.Gospelstdlib.(-)
+                              (Ortac_runtime.Gospelstdlib.Sequence.length
+                                 state__006_.contents)
+                              (Ortac_runtime.Gospelstdlib.integer_of_int 1)))
+                  with
+                  | e ->
+                      raise
+                        (Ortac_runtime.Partial_function
+                           (e,
+                             {
+                               Ortac_runtime.start =
+                                 {
+                                   pos_fname = "lwt_dllist_spec.mli";
+                                   pos_lnum = 99;
+                                   pos_bol = 5153;
+                                   pos_cnum = 5167
+                                 };
+                               Ortac_runtime.stop =
+                                 {
+                                   pos_fname = "lwt_dllist_spec.mli";
+                                   pos_lnum = 101;
+                                   pos_bol = 5227;
+                                   pos_cnum = 5304
+                                 }
+                             })))
+               then None
+               else
+                 Some
+                   (Ortac_runtime.report "take_r"
+                      [("if old s.contents = Sequence.empty\n              then false\n              else a = (old s.contents)[Sequence.length (old s.contents) - 1]",
+                         {
+                           Ortac_runtime.start =
+                             {
+                               pos_fname = "lwt_dllist_spec.mli";
+                               pos_lnum = 99;
+                               pos_bol = 5153;
+                               pos_cnum = 5167
+                             };
+                           Ortac_runtime.stop =
+                             {
+                               pos_fname = "lwt_dllist_spec.mli";
+                               pos_lnum = 101;
+                               pos_bol = 5227;
+                               pos_cnum = 5304
+                             }
+                         })])
+           | Error (Empty) ->
+               if
+                 (try
+                    let __t1__011_ =
+                      state__006_.contents =
+                        Ortac_runtime.Gospelstdlib.Sequence.empty in
+                    let __t2__012_ =
+                      Ortac_runtime.Gospelstdlib.Sequence.empty =
+                        (Lazy.force new_state__008_).contents in
+                    __t1__011_ && __t2__012_
+                  with
+                  | e ->
+                      raise
+                        (Ortac_runtime.Partial_function
+                           (e,
+                             {
+                               Ortac_runtime.start =
+                                 {
+                                   pos_fname = "lwt_dllist_spec.mli";
+                                   pos_lnum = 102;
+                                   pos_bol = 5305;
+                                   pos_cnum = 5327
+                                 };
+                               Ortac_runtime.stop =
+                                 {
+                                   pos_fname = "lwt_dllist_spec.mli";
+                                   pos_lnum = 102;
+                                   pos_bol = 5305;
+                                   pos_cnum = 5371
+                                 }
+                             })))
+               then None
+               else
+                 Some
+                   (Ortac_runtime.report "take_r"
+                      [("old s.contents = Sequence.empty = s.contents",
+                         {
+                           Ortac_runtime.start =
+                             {
+                               pos_fname = "lwt_dllist_spec.mli";
+                               pos_lnum = 102;
+                               pos_bol = 5305;
+                               pos_cnum = 5327
+                             };
+                           Ortac_runtime.stop =
+                             {
+                               pos_fname = "lwt_dllist_spec.mli";
+                               pos_lnum = 102;
+                               pos_bol = 5305;
+                               pos_cnum = 5371
+                             }
+                         })])
+           | _ -> None)
+      | (Take_opt_l, Res ((Option (Int), _), o)) ->
+          if
+            (try
+               state__006_.contents =
+                 (match o with
+                  | None -> Ortac_runtime.Gospelstdlib.Sequence.empty
+                  | Some a_5 ->
+                      Ortac_runtime.Gospelstdlib.Sequence.cons a_5
+                        (Lazy.force new_state__008_).contents)
+             with
+             | e ->
+                 raise
+                   (Ortac_runtime.Partial_function
+                      (e,
+                        {
+                          Ortac_runtime.start =
+                            {
+                              pos_fname = "lwt_dllist_spec.mli";
+                              pos_lnum = 112;
+                              pos_bol = 6030;
+                              pos_cnum = 6044
+                            };
+                          Ortac_runtime.stop =
+                            {
+                              pos_fname = "lwt_dllist_spec.mli";
+                              pos_lnum = 114;
+                              pos_bol = 6131;
+                              pos_cnum = 6201
+                            }
+                        })))
+          then None
+          else
+            Some
+              (Ortac_runtime.report "take_opt_l"
+                 [("old s.contents = match o with\n                                | None -> Sequence.empty\n                                | Some a -> Sequence.cons a s.contents",
+                    {
+                      Ortac_runtime.start =
+                        {
+                          pos_fname = "lwt_dllist_spec.mli";
+                          pos_lnum = 112;
+                          pos_bol = 6030;
+                          pos_cnum = 6044
+                        };
+                      Ortac_runtime.stop =
+                        {
+                          pos_fname = "lwt_dllist_spec.mli";
+                          pos_lnum = 114;
+                          pos_bol = 6131;
+                          pos_cnum = 6201
+                        }
+                    })])
+      | (Take_opt_r, Res ((Option (Int), _), o_1)) ->
+          if
+            (try
+               state__006_.contents =
+                 (match o_1 with
+                  | None -> Ortac_runtime.Gospelstdlib.Sequence.empty
+                  | Some a_6 ->
+                      Ortac_runtime.Gospelstdlib.Sequence.snoc
+                        (Lazy.force new_state__008_).contents a_6)
+             with
+             | e ->
+                 raise
+                   (Ortac_runtime.Partial_function
+                      (e,
+                        {
+                          Ortac_runtime.start =
+                            {
+                              pos_fname = "lwt_dllist_spec.mli";
+                              pos_lnum = 124;
+                              pos_bol = 6869;
+                              pos_cnum = 6883
+                            };
+                          Ortac_runtime.stop =
+                            {
+                              pos_fname = "lwt_dllist_spec.mli";
+                              pos_lnum = 126;
+                              pos_bol = 6970;
+                              pos_cnum = 7040
+                            }
+                        })))
+          then None
+          else
+            Some
+              (Ortac_runtime.report "take_opt_r"
+                 [("old s.contents = match o with\n                                | None -> Sequence.empty\n                                | Some a -> Sequence.snoc s.contents a",
+                    {
+                      Ortac_runtime.start =
+                        {
+                          pos_fname = "lwt_dllist_spec.mli";
+                          pos_lnum = 124;
+                          pos_bol = 6869;
+                          pos_cnum = 6883
+                        };
+                      Ortac_runtime.stop =
+                        {
+                          pos_fname = "lwt_dllist_spec.mli";
+                          pos_lnum = 126;
+                          pos_bol = 6970;
+                          pos_cnum = 7040
+                        }
+                    })])
+      | _ -> None
 let _ =
   QCheck_base_runner.run_tests_main
     (let count = 1000 in

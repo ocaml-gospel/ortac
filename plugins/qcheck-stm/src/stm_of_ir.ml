@@ -8,6 +8,7 @@ let ty_default = Ptyp_constr (noloc (Lident "char"), [])
 let pat_default = ppat_construct (lident "Char") None
 let exp_default = evar "char"
 let res_default = Ident.create ~loc:Location.none "res"
+let list_append = list_fold_expr (qualify [ "Ortac_runtime" ] "append") "None"
 
 let may_raise_exception v =
   match (v.postcond.exceptional, v.postcond.checks) with
@@ -430,6 +431,16 @@ let postcond_case config state invariants idx state_ident new_state_ident value
     subst_term state ~gos_t:id ~old_t:None ~new_t:(Some new_state_ident)
       ~new_lz:true t.term
     >>= ocaml_of_term config
+  and wrap_check t e =
+    let term = estring t.text
+    and cmd = Fmt.str "%a" Ident.pp value.id |> estring
+    and l = t.Ir.term.Gospel.Tterm.t_loc |> elocation in
+    pexp_ifthenelse e enone
+      (Some
+         (esome
+         @@ pexp_apply
+              (qualify [ "Ortac_runtime" ] "report")
+              [ (Nolabel, cmd); (Nolabel, elist [ pexp_tuple [ term; l ] ]) ]))
   in
   let idx = List.sort Int.compare idx in
   let lhs0 = mk_cmd_pattern value in
@@ -480,13 +491,14 @@ let postcond_case config state invariants idx state_ident new_state_ident value
       in
       aux idx value.postcond.normal
     in
-    let* postcond = map translate_postcond normal
+    let* postcond = map (fun t -> wrap_check t <$> translate_postcond t) normal
     and* invariants =
       Option.fold ~none:(ok [])
-        ~some:(fun (id, xs) -> map (translate_invariants id) xs)
+        ~some:(fun (id, xs) ->
+          map (fun t -> wrap_check t <$> translate_invariants id t) xs)
         invariants
     in
-    list_and (postcond @ invariants) |> ok
+    list_append (postcond @ invariants) |> ok
   in
   let res, pat_ret =
     match value.ret with
@@ -505,7 +517,7 @@ let postcond_case config state invariants idx state_ident new_state_ident value
         case ~lhs:(ppat_construct (lident "Ok") (Some pat_ret)) ~guard:None ~rhs
       in
       let* cases_error =
-        Fun.flip ( @ ) [ case ~lhs:ppat_any ~guard:None ~rhs:(ebool false) ]
+        Fun.flip ( @ ) [ case ~lhs:ppat_any ~guard:None ~rhs:enone ]
         <$> map
               (fun (x, p, t) ->
                 let lhs =
@@ -514,7 +526,7 @@ let postcond_case config state invariants idx state_ident new_state_ident value
                     (Option.map Ortac_core.Ocaml_of_gospel.pattern p)
                 in
                 let lhs = ppat_construct (lident "Error") (Some lhs) in
-                let* rhs = translate_postcond t in
+                let* rhs = wrap_check t <$> translate_postcond t in
                 case ~lhs ~guard:None ~rhs |> ok)
               value.postcond.exceptional
       in
@@ -523,22 +535,29 @@ let postcond_case config state invariants idx state_ident new_state_ident value
   in
   let* rhs =
     let translate_checks = translate_checks config state value state_ident in
-    let* checks = map translate_checks value.postcond.checks in
+    let* checks =
+      map (fun t -> wrap_check t <$> translate_checks t) value.postcond.checks
+    in
     match checks with
     | [] -> ok rhs
     | _ ->
         let inv_arg =
           ppat_construct (lident "Invalid_argument") (Some ppat_any)
         in
-        pexp_ifthenelse (list_and checks) rhs
-          (Some
-             (pexp_match res
-                [
-                  case
-                    ~lhs:(ppat_construct (lident "Error") (Some inv_arg))
-                    ~guard:None ~rhs:(ebool true);
-                  case ~lhs:ppat_any ~guard:None ~rhs:(ebool false);
-                ]))
+        let validate_inv_arg =
+          pexp_match res
+            [
+              case
+                ~lhs:(ppat_construct (lident "Error") (Some inv_arg))
+                ~guard:None ~rhs:enone;
+              case ~lhs:ppat_any ~guard:None ~rhs:(list_append checks);
+            ]
+        in
+        pexp_match (list_append checks)
+          [
+            case ~lhs:(ppat_construct (lident "None") None) ~guard:None ~rhs;
+            case ~lhs:ppat_any ~guard:None ~rhs:validate_inv_arg;
+          ]
         |> ok
   in
   ok (case ~lhs ~guard:None ~rhs)
@@ -566,7 +585,7 @@ let postcond config idx ir =
   let new_state_ident = Ident.create ~loc:Location.none new_state_name in
   let open Reserr in
   let* cases =
-    (Fun.flip ( @ )) [ case ~lhs:ppat_any ~guard:None ~rhs:(ebool true) ]
+    (Fun.flip ( @ )) [ case ~lhs:ppat_any ~guard:None ~rhs:enone ]
     <$> map
           (fun v ->
             postcond_case config ir.state ir.invariants (List.assoc v.id idx)
@@ -574,10 +593,14 @@ let postcond config idx ir =
           ir.values
   in
   let body =
-    pexp_match (pexp_tuple [ evar cmd_name; evar res_name ]) cases
-    |> new_state_let
+    pexp_open
+      Ast_helper.(Opn.mk (Mod.ident (lident "Spec")))
+      (pexp_open
+         Ast_helper.(Opn.mk (Mod.ident (lident "STM")))
+         (pexp_match (pexp_tuple [ evar cmd_name; evar res_name ]) cases
+         |> new_state_let))
   in
-  let pat = pvar "postcond" in
+  let pat = pvar "ortac_postcond" in
   let expr =
     efun
       [
@@ -588,6 +611,14 @@ let postcond config idx ir =
       body
   in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
+
+let dummy_postcond =
+  let expr =
+    efun
+      [ (Nolabel, ppat_any); (Nolabel, ppat_any); (Nolabel, ppat_any) ]
+      (ebool true)
+  and pat = pvar "postcond" in
+  pstr_value Nonrecursive [ value_binding ~pat ~expr ]
 
 let cmd_constructor value =
   let name = String.capitalize_ascii value.id.Ident.id_str |> noloc in
@@ -845,8 +876,7 @@ let stm include_ config ir =
   let open_mod m = pstr_open Ast_helper.(Opn.mk (Mod.ident (lident m))) in
   let spec_expr =
     pmod_structure
-      ([ open_mod "STM"; warn ]
-      @ incl
+      ((open_mod "STM" :: incl)
       @ [
           sut;
           cmd;
@@ -858,7 +888,7 @@ let stm include_ config ir =
           arb_cmd;
           next_state;
           precond;
-          postcond;
+          dummy_postcond;
           run;
         ])
   in
@@ -891,4 +921,4 @@ let stm include_ config ir =
      :: open_mod module_name
      :: [%stri module Ortac_runtime = Ortac_runtime_qcheck_stm]
      :: ghost_functions
-    @ [ stm_spec; tests; check_init_state; call_tests ])
+    @ [ stm_spec; tests; check_init_state; postcond; call_tests ])

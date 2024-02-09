@@ -62,7 +62,6 @@ let proj e =
 module Spec =
   struct
     open STM
-    [@@@ocaml.warning "-26-27"]
     include Varray_circular_incl
     type sut = char t
     type cmd =
@@ -670,488 +669,7 @@ module Spec =
       | Length -> true
       | Is_empty -> true
       | Fill (pos, len, x_3) -> true
-    let postcond cmd__016_ state__017_ res__018_ =
-      let new_state__019_ = lazy (next_state cmd__016_ state__017_) in
-      match (cmd__016_, res__018_) with
-      | (Push_back x, Res ((Unit, _), _)) -> true
-      | (Pop_back, Res ((Result (Elt (Char), Exn), _), x_4)) ->
-          (match x_4 with
-           | Ok x_4 ->
-               (try
-                  if
-                    state__017_.contents =
-                      Ortac_runtime.Gospelstdlib.Sequence.empty
-                  then false
-                  else
-                    (proj x_4) =
-                      (Ortac_runtime.Gospelstdlib.__mix_Bub
-                         state__017_.contents
-                         (Ortac_runtime.Gospelstdlib.(-)
-                            (Ortac_runtime.Gospelstdlib.Sequence.length
-                               state__017_.contents)
-                            (Ortac_runtime.Gospelstdlib.integer_of_int 1)))
-                with
-                | e ->
-                    raise
-                      (Ortac_runtime.Partial_function
-                         (e,
-                           {
-                             Ortac_runtime.start =
-                               {
-                                 pos_fname = "varray_circular_spec.mli";
-                                 pos_lnum = 33;
-                                 pos_bol = 2340;
-                                 pos_cnum = 2354
-                               };
-                             Ortac_runtime.stop =
-                               {
-                                 pos_fname = "varray_circular_spec.mli";
-                                 pos_lnum = 35;
-                                 pos_bol = 2414;
-                                 pos_cnum = 2496
-                               }
-                           })))
-           | Error (Not_found) ->
-               (try
-                  let __t1__020_ =
-                    (Lazy.force new_state__019_).contents =
-                      state__017_.contents in
-                  let __t2__021_ =
-                    state__017_.contents =
-                      Ortac_runtime.Gospelstdlib.Sequence.empty in
-                  __t1__020_ && __t2__021_
-                with
-                | e ->
-                    raise
-                      (Ortac_runtime.Partial_function
-                         (e,
-                           {
-                             Ortac_runtime.start =
-                               {
-                                 pos_fname = "varray_circular_spec.mli";
-                                 pos_lnum = 36;
-                                 pos_bol = 2497;
-                                 pos_cnum = 2523
-                               };
-                             Ortac_runtime.stop =
-                               {
-                                 pos_fname = "varray_circular_spec.mli";
-                                 pos_lnum = 36;
-                                 pos_bol = 2497;
-                                 pos_cnum = 2567
-                               }
-                           })))
-           | _ -> false)
-      | (Push_front x_1, Res ((Unit, _), _)) -> true
-      | (Pop_front, Res ((Result (Elt (Char), Exn), _), x_5)) ->
-          (match x_5 with
-           | Ok x_5 ->
-               (try
-                  if
-                    state__017_.contents =
-                      Ortac_runtime.Gospelstdlib.Sequence.empty
-                  then false
-                  else
-                    (proj x_5) =
-                      (Ortac_runtime.Gospelstdlib.Sequence.hd
-                         state__017_.contents)
-                with
-                | e ->
-                    raise
-                      (Ortac_runtime.Partial_function
-                         (e,
-                           {
-                             Ortac_runtime.start =
-                               {
-                                 pos_fname = "varray_circular_spec.mli";
-                                 pos_lnum = 56;
-                                 pos_bol = 3884;
-                                 pos_cnum = 3898
-                               };
-                             Ortac_runtime.stop =
-                               {
-                                 pos_fname = "varray_circular_spec.mli";
-                                 pos_lnum = 58;
-                                 pos_bol = 3958;
-                                 pos_cnum = 4014
-                               }
-                           })))
-           | Error (Not_found) ->
-               (try
-                  let __t1__022_ =
-                    (Lazy.force new_state__019_).contents =
-                      state__017_.contents in
-                  let __t2__023_ =
-                    state__017_.contents =
-                      Ortac_runtime.Gospelstdlib.Sequence.empty in
-                  __t1__022_ && __t2__023_
-                with
-                | e ->
-                    raise
-                      (Ortac_runtime.Partial_function
-                         (e,
-                           {
-                             Ortac_runtime.start =
-                               {
-                                 pos_fname = "varray_circular_spec.mli";
-                                 pos_lnum = 59;
-                                 pos_bol = 4015;
-                                 pos_cnum = 4041
-                               };
-                             Ortac_runtime.stop =
-                               {
-                                 pos_fname = "varray_circular_spec.mli";
-                                 pos_lnum = 59;
-                                 pos_bol = 4015;
-                                 pos_cnum = 4085
-                               }
-                           })))
-           | _ -> false)
-      | (Insert_at (i_1, x_2), Res ((Result (Unit, Exn), _), res)) ->
-          if
-            (try
-               let __t1__024_ =
-                 Ortac_runtime.Gospelstdlib.(<=)
-                   (Ortac_runtime.Gospelstdlib.integer_of_int 0)
-                   (Ortac_runtime.Gospelstdlib.integer_of_int i_1) in
-               let __t2__025_ =
-                 Ortac_runtime.Gospelstdlib.(<=)
-                   (Ortac_runtime.Gospelstdlib.integer_of_int i_1)
-                   (Ortac_runtime.Gospelstdlib.Sequence.length
-                      state__017_.contents) in
-               __t1__024_ && __t2__025_
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 72;
-                              pos_bol = 4784;
-                              pos_cnum = 4797
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 72;
-                              pos_bol = 4784;
-                              pos_cnum = 4833
-                            }
-                        })))
-          then (match res with | Ok _ -> true | _ -> false)
-          else
-            (match res with | Error (Invalid_argument _) -> true | _ -> false)
-      | (Pop_at i_2, Res ((Result (Elt (Char), Exn), _), x_6)) ->
-          if
-            (try
-               (inside (Ortac_runtime.Gospelstdlib.integer_of_int i_2)
-                  state__017_.contents)
-                 = true
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 89;
-                              pos_bol = 5727;
-                              pos_cnum = 5740
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 89;
-                              pos_bol = 5727;
-                              pos_cnum = 5759
-                            }
-                        })))
-          then
-            (match x_6 with
-             | Ok x_6 ->
-                 (try
-                    (proj x_6) =
-                      (Ortac_runtime.Gospelstdlib.__mix_Bub
-                         state__017_.contents
-                         (Ortac_runtime.Gospelstdlib.integer_of_int i_2))
-                  with
-                  | e ->
-                      raise
-                        (Ortac_runtime.Partial_function
-                           (e,
-                             {
-                               Ortac_runtime.start =
-                                 {
-                                   pos_fname = "varray_circular_spec.mli";
-                                   pos_lnum = 92;
-                                   pos_bol = 5864;
-                                   pos_cnum = 5878
-                                 };
-                               Ortac_runtime.stop =
-                                 {
-                                   pos_fname = "varray_circular_spec.mli";
-                                   pos_lnum = 92;
-                                   pos_bol = 5864;
-                                   pos_cnum = 5906
-                                 }
-                             })))
-             | _ -> false)
-          else
-            (match x_6 with | Error (Invalid_argument _) -> true | _ -> false)
-      | (Delete_at i_3, Res ((Result (Unit, Exn), _), res)) ->
-          if
-            (try
-               (inside (Ortac_runtime.Gospelstdlib.integer_of_int i_3)
-                  state__017_.contents)
-                 = true
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 102;
-                              pos_bol = 6426;
-                              pos_cnum = 6439
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 102;
-                              pos_bol = 6426;
-                              pos_cnum = 6458
-                            }
-                        })))
-          then
-            (match res with
-             | Ok _ ->
-                 (try
-                    (Ortac_runtime.Gospelstdlib.Sequence.length
-                       (Lazy.force new_state__019_).contents)
-                      =
-                      (Ortac_runtime.Gospelstdlib.(-)
-                         (Ortac_runtime.Gospelstdlib.Sequence.length
-                            state__017_.contents)
-                         (Ortac_runtime.Gospelstdlib.integer_of_int 1))
-                  with
-                  | e ->
-                      raise
-                        (Ortac_runtime.Partial_function
-                           (e,
-                             {
-                               Ortac_runtime.start =
-                                 {
-                                   pos_fname = "varray_circular_spec.mli";
-                                   pos_lnum = 105;
-                                   pos_bol = 6563;
-                                   pos_cnum = 6577
-                                 };
-                               Ortac_runtime.stop =
-                                 {
-                                   pos_fname = "varray_circular_spec.mli";
-                                   pos_lnum = 105;
-                                   pos_bol = 6563;
-                                   pos_cnum = 6642
-                                 }
-                             })))
-             | _ -> false)
-          else
-            (match res with | Error (Invalid_argument _) -> true | _ -> false)
-      | (Get i_4, Res ((Result (Elt (Char), Exn), _), x_7)) ->
-          if
-            (try
-               (inside (Ortac_runtime.Gospelstdlib.integer_of_int i_4)
-                  state__017_.contents)
-                 = true
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 128;
-                              pos_bol = 7616;
-                              pos_cnum = 7629
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 128;
-                              pos_bol = 7616;
-                              pos_cnum = 7648
-                            }
-                        })))
-          then
-            (match x_7 with
-             | Ok x_7 ->
-                 (try
-                    (proj x_7) =
-                      (Ortac_runtime.Gospelstdlib.__mix_Bub
-                         (Lazy.force new_state__019_).contents
-                         (Ortac_runtime.Gospelstdlib.integer_of_int i_4))
-                  with
-                  | e ->
-                      raise
-                        (Ortac_runtime.Partial_function
-                           (e,
-                             {
-                               Ortac_runtime.start =
-                                 {
-                                   pos_fname = "varray_circular_spec.mli";
-                                   pos_lnum = 127;
-                                   pos_bol = 7577;
-                                   pos_cnum = 7591
-                                 };
-                               Ortac_runtime.stop =
-                                 {
-                                   pos_fname = "varray_circular_spec.mli";
-                                   pos_lnum = 127;
-                                   pos_bol = 7577;
-                                   pos_cnum = 7615
-                                 }
-                             })))
-             | _ -> false)
-          else
-            (match x_7 with | Error (Invalid_argument _) -> true | _ -> false)
-      | (Set (i_5, v), Res ((Result (Unit, Exn), _), res)) ->
-          if
-            (try
-               (inside (Ortac_runtime.Gospelstdlib.integer_of_int i_5)
-                  state__017_.contents)
-                 = true
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 137;
-                              pos_bol = 8077;
-                              pos_cnum = 8090
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 137;
-                              pos_bol = 8077;
-                              pos_cnum = 8109
-                            }
-                        })))
-          then (match res with | Ok _ -> true | _ -> false)
-          else
-            (match res with | Error (Invalid_argument _) -> true | _ -> false)
-      | (Length, Res ((Int, _), l)) ->
-          (try
-             (Ortac_runtime.Gospelstdlib.integer_of_int l) =
-               (Ortac_runtime.Gospelstdlib.Sequence.length
-                  (Lazy.force new_state__019_).contents)
-           with
-           | e ->
-               raise
-                 (Ortac_runtime.Partial_function
-                    (e,
-                      {
-                        Ortac_runtime.start =
-                          {
-                            pos_fname = "varray_circular_spec.mli";
-                            pos_lnum = 144;
-                            pos_bol = 8634;
-                            pos_cnum = 8648
-                          };
-                        Ortac_runtime.stop =
-                          {
-                            pos_fname = "varray_circular_spec.mli";
-                            pos_lnum = 144;
-                            pos_bol = 8634;
-                            pos_cnum = 8678
-                          }
-                      })))
-      | (Is_empty, Res ((Bool, _), b)) ->
-          (try
-             (b = true) =
-               ((Lazy.force new_state__019_).contents =
-                  Ortac_runtime.Gospelstdlib.Sequence.empty)
-           with
-           | e ->
-               raise
-                 (Ortac_runtime.Partial_function
-                    (e,
-                      {
-                        Ortac_runtime.start =
-                          {
-                            pos_fname = "varray_circular_spec.mli";
-                            pos_lnum = 171;
-                            pos_bol = 10238;
-                            pos_cnum = 10252
-                          };
-                        Ortac_runtime.stop =
-                          {
-                            pos_fname = "varray_circular_spec.mli";
-                            pos_lnum = 171;
-                            pos_bol = 10238;
-                            pos_cnum = 10285
-                          }
-                      })))
-      | (Fill (pos, len, x_3), Res ((Result (Unit, Exn), _), res)) ->
-          if
-            (try
-               let __t1__026_ =
-                 Ortac_runtime.Gospelstdlib.(<=)
-                   (Ortac_runtime.Gospelstdlib.integer_of_int 0)
-                   (Ortac_runtime.Gospelstdlib.integer_of_int pos) in
-               let __t2__027_ =
-                 let __t1__028_ =
-                   Ortac_runtime.Gospelstdlib.(<=)
-                     (Ortac_runtime.Gospelstdlib.integer_of_int 0)
-                     (Ortac_runtime.Gospelstdlib.integer_of_int len) in
-                 let __t2__029_ =
-                   Ortac_runtime.Gospelstdlib.(<)
-                     (Ortac_runtime.Gospelstdlib.(+)
-                        (Ortac_runtime.Gospelstdlib.integer_of_int pos)
-                        (Ortac_runtime.Gospelstdlib.integer_of_int len))
-                     (Ortac_runtime.Gospelstdlib.Sequence.length
-                        state__017_.contents) in
-                 __t1__028_ && __t2__029_ in
-               __t1__026_ && __t2__027_
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 211;
-                              pos_bol = 12981;
-                              pos_cnum = 12994
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 211;
-                              pos_bol = 12981;
-                              pos_cnum = 13056
-                            }
-                        })))
-          then (match res with | Ok _ -> true | _ -> false)
-          else
-            (match res with | Error (Invalid_argument _) -> true | _ -> false)
-      | _ -> true
+    let postcond _ _ _ = true
     let run cmd__032_ sut__033_ =
       match cmd__032_ with
       | Push_back x -> Res (unit, (push_back sut__033_ x))
@@ -1192,6 +710,1160 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
+let ortac_postcond cmd__016_ state__017_ res__018_ =
+  let open Spec in
+    let open STM in
+      let new_state__019_ = lazy (next_state cmd__016_ state__017_) in
+      match (cmd__016_, res__018_) with
+      | (Push_back x, Res ((Unit, _), _)) -> None
+      | (Pop_back, Res ((Result (Elt (Char), Exn), _), x_4)) ->
+          (match x_4 with
+           | Ok x_4 ->
+               if
+                 (try
+                    if
+                      state__017_.contents =
+                        Ortac_runtime.Gospelstdlib.Sequence.empty
+                    then false
+                    else
+                      (proj x_4) =
+                        (Ortac_runtime.Gospelstdlib.__mix_Bub
+                           state__017_.contents
+                           (Ortac_runtime.Gospelstdlib.(-)
+                              (Ortac_runtime.Gospelstdlib.Sequence.length
+                                 state__017_.contents)
+                              (Ortac_runtime.Gospelstdlib.integer_of_int 1)))
+                  with
+                  | e ->
+                      raise
+                        (Ortac_runtime.Partial_function
+                           (e,
+                             {
+                               Ortac_runtime.start =
+                                 {
+                                   pos_fname = "varray_circular_spec.mli";
+                                   pos_lnum = 33;
+                                   pos_bol = 2340;
+                                   pos_cnum = 2354
+                                 };
+                               Ortac_runtime.stop =
+                                 {
+                                   pos_fname = "varray_circular_spec.mli";
+                                   pos_lnum = 35;
+                                   pos_bol = 2414;
+                                   pos_cnum = 2496
+                                 }
+                             })))
+               then None
+               else
+                 Some
+                   (Ortac_runtime.report "pop_back"
+                      [("if old t.contents = Sequence.empty\n              then false\n              else proj x = (old t.contents)[Sequence.length (old t.contents) - 1]",
+                         {
+                           Ortac_runtime.start =
+                             {
+                               pos_fname = "varray_circular_spec.mli";
+                               pos_lnum = 33;
+                               pos_bol = 2340;
+                               pos_cnum = 2354
+                             };
+                           Ortac_runtime.stop =
+                             {
+                               pos_fname = "varray_circular_spec.mli";
+                               pos_lnum = 35;
+                               pos_bol = 2414;
+                               pos_cnum = 2496
+                             }
+                         })])
+           | Error (Not_found) ->
+               if
+                 (try
+                    let __t1__020_ =
+                      (Lazy.force new_state__019_).contents =
+                        state__017_.contents in
+                    let __t2__021_ =
+                      state__017_.contents =
+                        Ortac_runtime.Gospelstdlib.Sequence.empty in
+                    __t1__020_ && __t2__021_
+                  with
+                  | e ->
+                      raise
+                        (Ortac_runtime.Partial_function
+                           (e,
+                             {
+                               Ortac_runtime.start =
+                                 {
+                                   pos_fname = "varray_circular_spec.mli";
+                                   pos_lnum = 36;
+                                   pos_bol = 2497;
+                                   pos_cnum = 2523
+                                 };
+                               Ortac_runtime.stop =
+                                 {
+                                   pos_fname = "varray_circular_spec.mli";
+                                   pos_lnum = 36;
+                                   pos_bol = 2497;
+                                   pos_cnum = 2567
+                                 }
+                             })))
+               then None
+               else
+                 Some
+                   (Ortac_runtime.report "pop_back"
+                      [("t.contents = old t.contents = Sequence.empty",
+                         {
+                           Ortac_runtime.start =
+                             {
+                               pos_fname = "varray_circular_spec.mli";
+                               pos_lnum = 36;
+                               pos_bol = 2497;
+                               pos_cnum = 2523
+                             };
+                           Ortac_runtime.stop =
+                             {
+                               pos_fname = "varray_circular_spec.mli";
+                               pos_lnum = 36;
+                               pos_bol = 2497;
+                               pos_cnum = 2567
+                             }
+                         })])
+           | _ -> None)
+      | (Push_front x_1, Res ((Unit, _), _)) -> None
+      | (Pop_front, Res ((Result (Elt (Char), Exn), _), x_5)) ->
+          (match x_5 with
+           | Ok x_5 ->
+               if
+                 (try
+                    if
+                      state__017_.contents =
+                        Ortac_runtime.Gospelstdlib.Sequence.empty
+                    then false
+                    else
+                      (proj x_5) =
+                        (Ortac_runtime.Gospelstdlib.Sequence.hd
+                           state__017_.contents)
+                  with
+                  | e ->
+                      raise
+                        (Ortac_runtime.Partial_function
+                           (e,
+                             {
+                               Ortac_runtime.start =
+                                 {
+                                   pos_fname = "varray_circular_spec.mli";
+                                   pos_lnum = 56;
+                                   pos_bol = 3884;
+                                   pos_cnum = 3898
+                                 };
+                               Ortac_runtime.stop =
+                                 {
+                                   pos_fname = "varray_circular_spec.mli";
+                                   pos_lnum = 58;
+                                   pos_bol = 3958;
+                                   pos_cnum = 4014
+                                 }
+                             })))
+               then None
+               else
+                 Some
+                   (Ortac_runtime.report "pop_front"
+                      [("if old t.contents = Sequence.empty\n              then false\n              else proj x = Sequence.hd (old t.contents)",
+                         {
+                           Ortac_runtime.start =
+                             {
+                               pos_fname = "varray_circular_spec.mli";
+                               pos_lnum = 56;
+                               pos_bol = 3884;
+                               pos_cnum = 3898
+                             };
+                           Ortac_runtime.stop =
+                             {
+                               pos_fname = "varray_circular_spec.mli";
+                               pos_lnum = 58;
+                               pos_bol = 3958;
+                               pos_cnum = 4014
+                             }
+                         })])
+           | Error (Not_found) ->
+               if
+                 (try
+                    let __t1__022_ =
+                      (Lazy.force new_state__019_).contents =
+                        state__017_.contents in
+                    let __t2__023_ =
+                      state__017_.contents =
+                        Ortac_runtime.Gospelstdlib.Sequence.empty in
+                    __t1__022_ && __t2__023_
+                  with
+                  | e ->
+                      raise
+                        (Ortac_runtime.Partial_function
+                           (e,
+                             {
+                               Ortac_runtime.start =
+                                 {
+                                   pos_fname = "varray_circular_spec.mli";
+                                   pos_lnum = 59;
+                                   pos_bol = 4015;
+                                   pos_cnum = 4041
+                                 };
+                               Ortac_runtime.stop =
+                                 {
+                                   pos_fname = "varray_circular_spec.mli";
+                                   pos_lnum = 59;
+                                   pos_bol = 4015;
+                                   pos_cnum = 4085
+                                 }
+                             })))
+               then None
+               else
+                 Some
+                   (Ortac_runtime.report "pop_front"
+                      [("t.contents = old t.contents = Sequence.empty",
+                         {
+                           Ortac_runtime.start =
+                             {
+                               pos_fname = "varray_circular_spec.mli";
+                               pos_lnum = 59;
+                               pos_bol = 4015;
+                               pos_cnum = 4041
+                             };
+                           Ortac_runtime.stop =
+                             {
+                               pos_fname = "varray_circular_spec.mli";
+                               pos_lnum = 59;
+                               pos_bol = 4015;
+                               pos_cnum = 4085
+                             }
+                         })])
+           | _ -> None)
+      | (Insert_at (i_1, x_2), Res ((Result (Unit, Exn), _), res)) ->
+          (match if
+                   try
+                     let __t1__024_ =
+                       Ortac_runtime.Gospelstdlib.(<=)
+                         (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+                         (Ortac_runtime.Gospelstdlib.integer_of_int i_1) in
+                     let __t2__025_ =
+                       Ortac_runtime.Gospelstdlib.(<=)
+                         (Ortac_runtime.Gospelstdlib.integer_of_int i_1)
+                         (Ortac_runtime.Gospelstdlib.Sequence.length
+                            state__017_.contents) in
+                     __t1__024_ && __t2__025_
+                   with
+                   | e ->
+                       raise
+                         (Ortac_runtime.Partial_function
+                            (e,
+                              {
+                                Ortac_runtime.start =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 72;
+                                    pos_bol = 4784;
+                                    pos_cnum = 4797
+                                  };
+                                Ortac_runtime.stop =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 72;
+                                    pos_bol = 4784;
+                                    pos_cnum = 4833
+                                  }
+                              }))
+                 then None
+                 else
+                   Some
+                     (Ortac_runtime.report "insert_at"
+                        [("0 <= i <= Sequence.length t.contents",
+                           {
+                             Ortac_runtime.start =
+                               {
+                                 pos_fname = "varray_circular_spec.mli";
+                                 pos_lnum = 72;
+                                 pos_bol = 4784;
+                                 pos_cnum = 4797
+                               };
+                             Ortac_runtime.stop =
+                               {
+                                 pos_fname = "varray_circular_spec.mli";
+                                 pos_lnum = 72;
+                                 pos_bol = 4784;
+                                 pos_cnum = 4833
+                               }
+                           })])
+           with
+           | None -> (match res with | Ok _ -> None | _ -> None)
+           | _ ->
+               (match res with
+                | Error (Invalid_argument _) -> None
+                | _ ->
+                    if
+                      (try
+                         let __t1__024_ =
+                           Ortac_runtime.Gospelstdlib.(<=)
+                             (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+                             (Ortac_runtime.Gospelstdlib.integer_of_int i_1) in
+                         let __t2__025_ =
+                           Ortac_runtime.Gospelstdlib.(<=)
+                             (Ortac_runtime.Gospelstdlib.integer_of_int i_1)
+                             (Ortac_runtime.Gospelstdlib.Sequence.length
+                                state__017_.contents) in
+                         __t1__024_ && __t2__025_
+                       with
+                       | e ->
+                           raise
+                             (Ortac_runtime.Partial_function
+                                (e,
+                                  {
+                                    Ortac_runtime.start =
+                                      {
+                                        pos_fname =
+                                          "varray_circular_spec.mli";
+                                        pos_lnum = 72;
+                                        pos_bol = 4784;
+                                        pos_cnum = 4797
+                                      };
+                                    Ortac_runtime.stop =
+                                      {
+                                        pos_fname =
+                                          "varray_circular_spec.mli";
+                                        pos_lnum = 72;
+                                        pos_bol = 4784;
+                                        pos_cnum = 4833
+                                      }
+                                  })))
+                    then None
+                    else
+                      Some
+                        (Ortac_runtime.report "insert_at"
+                           [("0 <= i <= Sequence.length t.contents",
+                              {
+                                Ortac_runtime.start =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 72;
+                                    pos_bol = 4784;
+                                    pos_cnum = 4797
+                                  };
+                                Ortac_runtime.stop =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 72;
+                                    pos_bol = 4784;
+                                    pos_cnum = 4833
+                                  }
+                              })])))
+      | (Pop_at i_2, Res ((Result (Elt (Char), Exn), _), x_6)) ->
+          (match if
+                   try
+                     (inside (Ortac_runtime.Gospelstdlib.integer_of_int i_2)
+                        state__017_.contents)
+                       = true
+                   with
+                   | e ->
+                       raise
+                         (Ortac_runtime.Partial_function
+                            (e,
+                              {
+                                Ortac_runtime.start =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 89;
+                                    pos_bol = 5727;
+                                    pos_cnum = 5740
+                                  };
+                                Ortac_runtime.stop =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 89;
+                                    pos_bol = 5727;
+                                    pos_cnum = 5759
+                                  }
+                              }))
+                 then None
+                 else
+                   Some
+                     (Ortac_runtime.report "pop_at"
+                        [("inside i t.contents",
+                           {
+                             Ortac_runtime.start =
+                               {
+                                 pos_fname = "varray_circular_spec.mli";
+                                 pos_lnum = 89;
+                                 pos_bol = 5727;
+                                 pos_cnum = 5740
+                               };
+                             Ortac_runtime.stop =
+                               {
+                                 pos_fname = "varray_circular_spec.mli";
+                                 pos_lnum = 89;
+                                 pos_bol = 5727;
+                                 pos_cnum = 5759
+                               }
+                           })])
+           with
+           | None ->
+               (match x_6 with
+                | Ok x_6 ->
+                    if
+                      (try
+                         (proj x_6) =
+                           (Ortac_runtime.Gospelstdlib.__mix_Bub
+                              state__017_.contents
+                              (Ortac_runtime.Gospelstdlib.integer_of_int i_2))
+                       with
+                       | e ->
+                           raise
+                             (Ortac_runtime.Partial_function
+                                (e,
+                                  {
+                                    Ortac_runtime.start =
+                                      {
+                                        pos_fname =
+                                          "varray_circular_spec.mli";
+                                        pos_lnum = 92;
+                                        pos_bol = 5864;
+                                        pos_cnum = 5878
+                                      };
+                                    Ortac_runtime.stop =
+                                      {
+                                        pos_fname =
+                                          "varray_circular_spec.mli";
+                                        pos_lnum = 92;
+                                        pos_bol = 5864;
+                                        pos_cnum = 5906
+                                      }
+                                  })))
+                    then None
+                    else
+                      Some
+                        (Ortac_runtime.report "pop_at"
+                           [("(proj x) = old t.contents[i]",
+                              {
+                                Ortac_runtime.start =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 92;
+                                    pos_bol = 5864;
+                                    pos_cnum = 5878
+                                  };
+                                Ortac_runtime.stop =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 92;
+                                    pos_bol = 5864;
+                                    pos_cnum = 5906
+                                  }
+                              })])
+                | _ -> None)
+           | _ ->
+               (match x_6 with
+                | Error (Invalid_argument _) -> None
+                | _ ->
+                    if
+                      (try
+                         (inside
+                            (Ortac_runtime.Gospelstdlib.integer_of_int i_2)
+                            state__017_.contents)
+                           = true
+                       with
+                       | e ->
+                           raise
+                             (Ortac_runtime.Partial_function
+                                (e,
+                                  {
+                                    Ortac_runtime.start =
+                                      {
+                                        pos_fname =
+                                          "varray_circular_spec.mli";
+                                        pos_lnum = 89;
+                                        pos_bol = 5727;
+                                        pos_cnum = 5740
+                                      };
+                                    Ortac_runtime.stop =
+                                      {
+                                        pos_fname =
+                                          "varray_circular_spec.mli";
+                                        pos_lnum = 89;
+                                        pos_bol = 5727;
+                                        pos_cnum = 5759
+                                      }
+                                  })))
+                    then None
+                    else
+                      Some
+                        (Ortac_runtime.report "pop_at"
+                           [("inside i t.contents",
+                              {
+                                Ortac_runtime.start =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 89;
+                                    pos_bol = 5727;
+                                    pos_cnum = 5740
+                                  };
+                                Ortac_runtime.stop =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 89;
+                                    pos_bol = 5727;
+                                    pos_cnum = 5759
+                                  }
+                              })])))
+      | (Delete_at i_3, Res ((Result (Unit, Exn), _), res)) ->
+          (match if
+                   try
+                     (inside (Ortac_runtime.Gospelstdlib.integer_of_int i_3)
+                        state__017_.contents)
+                       = true
+                   with
+                   | e ->
+                       raise
+                         (Ortac_runtime.Partial_function
+                            (e,
+                              {
+                                Ortac_runtime.start =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 102;
+                                    pos_bol = 6426;
+                                    pos_cnum = 6439
+                                  };
+                                Ortac_runtime.stop =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 102;
+                                    pos_bol = 6426;
+                                    pos_cnum = 6458
+                                  }
+                              }))
+                 then None
+                 else
+                   Some
+                     (Ortac_runtime.report "delete_at"
+                        [("inside i t.contents",
+                           {
+                             Ortac_runtime.start =
+                               {
+                                 pos_fname = "varray_circular_spec.mli";
+                                 pos_lnum = 102;
+                                 pos_bol = 6426;
+                                 pos_cnum = 6439
+                               };
+                             Ortac_runtime.stop =
+                               {
+                                 pos_fname = "varray_circular_spec.mli";
+                                 pos_lnum = 102;
+                                 pos_bol = 6426;
+                                 pos_cnum = 6458
+                               }
+                           })])
+           with
+           | None ->
+               (match res with
+                | Ok _ ->
+                    if
+                      (try
+                         (Ortac_runtime.Gospelstdlib.Sequence.length
+                            (Lazy.force new_state__019_).contents)
+                           =
+                           (Ortac_runtime.Gospelstdlib.(-)
+                              (Ortac_runtime.Gospelstdlib.Sequence.length
+                                 state__017_.contents)
+                              (Ortac_runtime.Gospelstdlib.integer_of_int 1))
+                       with
+                       | e ->
+                           raise
+                             (Ortac_runtime.Partial_function
+                                (e,
+                                  {
+                                    Ortac_runtime.start =
+                                      {
+                                        pos_fname =
+                                          "varray_circular_spec.mli";
+                                        pos_lnum = 105;
+                                        pos_bol = 6563;
+                                        pos_cnum = 6577
+                                      };
+                                    Ortac_runtime.stop =
+                                      {
+                                        pos_fname =
+                                          "varray_circular_spec.mli";
+                                        pos_lnum = 105;
+                                        pos_bol = 6563;
+                                        pos_cnum = 6642
+                                      }
+                                  })))
+                    then None
+                    else
+                      Some
+                        (Ortac_runtime.report "delete_at"
+                           [("Sequence.length t.contents = Sequence.length (old t.contents) - 1",
+                              {
+                                Ortac_runtime.start =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 105;
+                                    pos_bol = 6563;
+                                    pos_cnum = 6577
+                                  };
+                                Ortac_runtime.stop =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 105;
+                                    pos_bol = 6563;
+                                    pos_cnum = 6642
+                                  }
+                              })])
+                | _ -> None)
+           | _ ->
+               (match res with
+                | Error (Invalid_argument _) -> None
+                | _ ->
+                    if
+                      (try
+                         (inside
+                            (Ortac_runtime.Gospelstdlib.integer_of_int i_3)
+                            state__017_.contents)
+                           = true
+                       with
+                       | e ->
+                           raise
+                             (Ortac_runtime.Partial_function
+                                (e,
+                                  {
+                                    Ortac_runtime.start =
+                                      {
+                                        pos_fname =
+                                          "varray_circular_spec.mli";
+                                        pos_lnum = 102;
+                                        pos_bol = 6426;
+                                        pos_cnum = 6439
+                                      };
+                                    Ortac_runtime.stop =
+                                      {
+                                        pos_fname =
+                                          "varray_circular_spec.mli";
+                                        pos_lnum = 102;
+                                        pos_bol = 6426;
+                                        pos_cnum = 6458
+                                      }
+                                  })))
+                    then None
+                    else
+                      Some
+                        (Ortac_runtime.report "delete_at"
+                           [("inside i t.contents",
+                              {
+                                Ortac_runtime.start =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 102;
+                                    pos_bol = 6426;
+                                    pos_cnum = 6439
+                                  };
+                                Ortac_runtime.stop =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 102;
+                                    pos_bol = 6426;
+                                    pos_cnum = 6458
+                                  }
+                              })])))
+      | (Get i_4, Res ((Result (Elt (Char), Exn), _), x_7)) ->
+          (match if
+                   try
+                     (inside (Ortac_runtime.Gospelstdlib.integer_of_int i_4)
+                        state__017_.contents)
+                       = true
+                   with
+                   | e ->
+                       raise
+                         (Ortac_runtime.Partial_function
+                            (e,
+                              {
+                                Ortac_runtime.start =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 128;
+                                    pos_bol = 7616;
+                                    pos_cnum = 7629
+                                  };
+                                Ortac_runtime.stop =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 128;
+                                    pos_bol = 7616;
+                                    pos_cnum = 7648
+                                  }
+                              }))
+                 then None
+                 else
+                   Some
+                     (Ortac_runtime.report "get"
+                        [("inside i t.contents",
+                           {
+                             Ortac_runtime.start =
+                               {
+                                 pos_fname = "varray_circular_spec.mli";
+                                 pos_lnum = 128;
+                                 pos_bol = 7616;
+                                 pos_cnum = 7629
+                               };
+                             Ortac_runtime.stop =
+                               {
+                                 pos_fname = "varray_circular_spec.mli";
+                                 pos_lnum = 128;
+                                 pos_bol = 7616;
+                                 pos_cnum = 7648
+                               }
+                           })])
+           with
+           | None ->
+               (match x_7 with
+                | Ok x_7 ->
+                    if
+                      (try
+                         (proj x_7) =
+                           (Ortac_runtime.Gospelstdlib.__mix_Bub
+                              (Lazy.force new_state__019_).contents
+                              (Ortac_runtime.Gospelstdlib.integer_of_int i_4))
+                       with
+                       | e ->
+                           raise
+                             (Ortac_runtime.Partial_function
+                                (e,
+                                  {
+                                    Ortac_runtime.start =
+                                      {
+                                        pos_fname =
+                                          "varray_circular_spec.mli";
+                                        pos_lnum = 127;
+                                        pos_bol = 7577;
+                                        pos_cnum = 7591
+                                      };
+                                    Ortac_runtime.stop =
+                                      {
+                                        pos_fname =
+                                          "varray_circular_spec.mli";
+                                        pos_lnum = 127;
+                                        pos_bol = 7577;
+                                        pos_cnum = 7615
+                                      }
+                                  })))
+                    then None
+                    else
+                      Some
+                        (Ortac_runtime.report "get"
+                           [("(proj x) = t.contents[i]",
+                              {
+                                Ortac_runtime.start =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 127;
+                                    pos_bol = 7577;
+                                    pos_cnum = 7591
+                                  };
+                                Ortac_runtime.stop =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 127;
+                                    pos_bol = 7577;
+                                    pos_cnum = 7615
+                                  }
+                              })])
+                | _ -> None)
+           | _ ->
+               (match x_7 with
+                | Error (Invalid_argument _) -> None
+                | _ ->
+                    if
+                      (try
+                         (inside
+                            (Ortac_runtime.Gospelstdlib.integer_of_int i_4)
+                            state__017_.contents)
+                           = true
+                       with
+                       | e ->
+                           raise
+                             (Ortac_runtime.Partial_function
+                                (e,
+                                  {
+                                    Ortac_runtime.start =
+                                      {
+                                        pos_fname =
+                                          "varray_circular_spec.mli";
+                                        pos_lnum = 128;
+                                        pos_bol = 7616;
+                                        pos_cnum = 7629
+                                      };
+                                    Ortac_runtime.stop =
+                                      {
+                                        pos_fname =
+                                          "varray_circular_spec.mli";
+                                        pos_lnum = 128;
+                                        pos_bol = 7616;
+                                        pos_cnum = 7648
+                                      }
+                                  })))
+                    then None
+                    else
+                      Some
+                        (Ortac_runtime.report "get"
+                           [("inside i t.contents",
+                              {
+                                Ortac_runtime.start =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 128;
+                                    pos_bol = 7616;
+                                    pos_cnum = 7629
+                                  };
+                                Ortac_runtime.stop =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 128;
+                                    pos_bol = 7616;
+                                    pos_cnum = 7648
+                                  }
+                              })])))
+      | (Set (i_5, v), Res ((Result (Unit, Exn), _), res)) ->
+          (match if
+                   try
+                     (inside (Ortac_runtime.Gospelstdlib.integer_of_int i_5)
+                        state__017_.contents)
+                       = true
+                   with
+                   | e ->
+                       raise
+                         (Ortac_runtime.Partial_function
+                            (e,
+                              {
+                                Ortac_runtime.start =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 137;
+                                    pos_bol = 8077;
+                                    pos_cnum = 8090
+                                  };
+                                Ortac_runtime.stop =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 137;
+                                    pos_bol = 8077;
+                                    pos_cnum = 8109
+                                  }
+                              }))
+                 then None
+                 else
+                   Some
+                     (Ortac_runtime.report "set"
+                        [("inside i t.contents",
+                           {
+                             Ortac_runtime.start =
+                               {
+                                 pos_fname = "varray_circular_spec.mli";
+                                 pos_lnum = 137;
+                                 pos_bol = 8077;
+                                 pos_cnum = 8090
+                               };
+                             Ortac_runtime.stop =
+                               {
+                                 pos_fname = "varray_circular_spec.mli";
+                                 pos_lnum = 137;
+                                 pos_bol = 8077;
+                                 pos_cnum = 8109
+                               }
+                           })])
+           with
+           | None -> (match res with | Ok _ -> None | _ -> None)
+           | _ ->
+               (match res with
+                | Error (Invalid_argument _) -> None
+                | _ ->
+                    if
+                      (try
+                         (inside
+                            (Ortac_runtime.Gospelstdlib.integer_of_int i_5)
+                            state__017_.contents)
+                           = true
+                       with
+                       | e ->
+                           raise
+                             (Ortac_runtime.Partial_function
+                                (e,
+                                  {
+                                    Ortac_runtime.start =
+                                      {
+                                        pos_fname =
+                                          "varray_circular_spec.mli";
+                                        pos_lnum = 137;
+                                        pos_bol = 8077;
+                                        pos_cnum = 8090
+                                      };
+                                    Ortac_runtime.stop =
+                                      {
+                                        pos_fname =
+                                          "varray_circular_spec.mli";
+                                        pos_lnum = 137;
+                                        pos_bol = 8077;
+                                        pos_cnum = 8109
+                                      }
+                                  })))
+                    then None
+                    else
+                      Some
+                        (Ortac_runtime.report "set"
+                           [("inside i t.contents",
+                              {
+                                Ortac_runtime.start =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 137;
+                                    pos_bol = 8077;
+                                    pos_cnum = 8090
+                                  };
+                                Ortac_runtime.stop =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 137;
+                                    pos_bol = 8077;
+                                    pos_cnum = 8109
+                                  }
+                              })])))
+      | (Length, Res ((Int, _), l)) ->
+          if
+            (try
+               (Ortac_runtime.Gospelstdlib.integer_of_int l) =
+                 (Ortac_runtime.Gospelstdlib.Sequence.length
+                    (Lazy.force new_state__019_).contents)
+             with
+             | e ->
+                 raise
+                   (Ortac_runtime.Partial_function
+                      (e,
+                        {
+                          Ortac_runtime.start =
+                            {
+                              pos_fname = "varray_circular_spec.mli";
+                              pos_lnum = 144;
+                              pos_bol = 8634;
+                              pos_cnum = 8648
+                            };
+                          Ortac_runtime.stop =
+                            {
+                              pos_fname = "varray_circular_spec.mli";
+                              pos_lnum = 144;
+                              pos_bol = 8634;
+                              pos_cnum = 8678
+                            }
+                        })))
+          then None
+          else
+            Some
+              (Ortac_runtime.report "length"
+                 [("l = Sequence.length t.contents",
+                    {
+                      Ortac_runtime.start =
+                        {
+                          pos_fname = "varray_circular_spec.mli";
+                          pos_lnum = 144;
+                          pos_bol = 8634;
+                          pos_cnum = 8648
+                        };
+                      Ortac_runtime.stop =
+                        {
+                          pos_fname = "varray_circular_spec.mli";
+                          pos_lnum = 144;
+                          pos_bol = 8634;
+                          pos_cnum = 8678
+                        }
+                    })])
+      | (Is_empty, Res ((Bool, _), b)) ->
+          if
+            (try
+               (b = true) =
+                 ((Lazy.force new_state__019_).contents =
+                    Ortac_runtime.Gospelstdlib.Sequence.empty)
+             with
+             | e ->
+                 raise
+                   (Ortac_runtime.Partial_function
+                      (e,
+                        {
+                          Ortac_runtime.start =
+                            {
+                              pos_fname = "varray_circular_spec.mli";
+                              pos_lnum = 171;
+                              pos_bol = 10238;
+                              pos_cnum = 10252
+                            };
+                          Ortac_runtime.stop =
+                            {
+                              pos_fname = "varray_circular_spec.mli";
+                              pos_lnum = 171;
+                              pos_bol = 10238;
+                              pos_cnum = 10285
+                            }
+                        })))
+          then None
+          else
+            Some
+              (Ortac_runtime.report "is_empty"
+                 [("b <-> t.contents = Sequence.empty",
+                    {
+                      Ortac_runtime.start =
+                        {
+                          pos_fname = "varray_circular_spec.mli";
+                          pos_lnum = 171;
+                          pos_bol = 10238;
+                          pos_cnum = 10252
+                        };
+                      Ortac_runtime.stop =
+                        {
+                          pos_fname = "varray_circular_spec.mli";
+                          pos_lnum = 171;
+                          pos_bol = 10238;
+                          pos_cnum = 10285
+                        }
+                    })])
+      | (Fill (pos, len, x_3), Res ((Result (Unit, Exn), _), res)) ->
+          (match if
+                   try
+                     let __t1__026_ =
+                       Ortac_runtime.Gospelstdlib.(<=)
+                         (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+                         (Ortac_runtime.Gospelstdlib.integer_of_int pos) in
+                     let __t2__027_ =
+                       let __t1__028_ =
+                         Ortac_runtime.Gospelstdlib.(<=)
+                           (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+                           (Ortac_runtime.Gospelstdlib.integer_of_int len) in
+                       let __t2__029_ =
+                         Ortac_runtime.Gospelstdlib.(<)
+                           (Ortac_runtime.Gospelstdlib.(+)
+                              (Ortac_runtime.Gospelstdlib.integer_of_int pos)
+                              (Ortac_runtime.Gospelstdlib.integer_of_int len))
+                           (Ortac_runtime.Gospelstdlib.Sequence.length
+                              state__017_.contents) in
+                       __t1__028_ && __t2__029_ in
+                     __t1__026_ && __t2__027_
+                   with
+                   | e ->
+                       raise
+                         (Ortac_runtime.Partial_function
+                            (e,
+                              {
+                                Ortac_runtime.start =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 211;
+                                    pos_bol = 12981;
+                                    pos_cnum = 12994
+                                  };
+                                Ortac_runtime.stop =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 211;
+                                    pos_bol = 12981;
+                                    pos_cnum = 13056
+                                  }
+                              }))
+                 then None
+                 else
+                   Some
+                     (Ortac_runtime.report "fill"
+                        [("0 <= pos /\\ 0 <= len /\\ pos + len < Sequence.length t.contents",
+                           {
+                             Ortac_runtime.start =
+                               {
+                                 pos_fname = "varray_circular_spec.mli";
+                                 pos_lnum = 211;
+                                 pos_bol = 12981;
+                                 pos_cnum = 12994
+                               };
+                             Ortac_runtime.stop =
+                               {
+                                 pos_fname = "varray_circular_spec.mli";
+                                 pos_lnum = 211;
+                                 pos_bol = 12981;
+                                 pos_cnum = 13056
+                               }
+                           })])
+           with
+           | None -> (match res with | Ok _ -> None | _ -> None)
+           | _ ->
+               (match res with
+                | Error (Invalid_argument _) -> None
+                | _ ->
+                    if
+                      (try
+                         let __t1__026_ =
+                           Ortac_runtime.Gospelstdlib.(<=)
+                             (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+                             (Ortac_runtime.Gospelstdlib.integer_of_int pos) in
+                         let __t2__027_ =
+                           let __t1__028_ =
+                             Ortac_runtime.Gospelstdlib.(<=)
+                               (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+                               (Ortac_runtime.Gospelstdlib.integer_of_int len) in
+                           let __t2__029_ =
+                             Ortac_runtime.Gospelstdlib.(<)
+                               (Ortac_runtime.Gospelstdlib.(+)
+                                  (Ortac_runtime.Gospelstdlib.integer_of_int
+                                     pos)
+                                  (Ortac_runtime.Gospelstdlib.integer_of_int
+                                     len))
+                               (Ortac_runtime.Gospelstdlib.Sequence.length
+                                  state__017_.contents) in
+                           __t1__028_ && __t2__029_ in
+                         __t1__026_ && __t2__027_
+                       with
+                       | e ->
+                           raise
+                             (Ortac_runtime.Partial_function
+                                (e,
+                                  {
+                                    Ortac_runtime.start =
+                                      {
+                                        pos_fname =
+                                          "varray_circular_spec.mli";
+                                        pos_lnum = 211;
+                                        pos_bol = 12981;
+                                        pos_cnum = 12994
+                                      };
+                                    Ortac_runtime.stop =
+                                      {
+                                        pos_fname =
+                                          "varray_circular_spec.mli";
+                                        pos_lnum = 211;
+                                        pos_bol = 12981;
+                                        pos_cnum = 13056
+                                      }
+                                  })))
+                    then None
+                    else
+                      Some
+                        (Ortac_runtime.report "fill"
+                           [("0 <= pos /\\ 0 <= len /\\ pos + len < Sequence.length t.contents",
+                              {
+                                Ortac_runtime.start =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 211;
+                                    pos_bol = 12981;
+                                    pos_cnum = 12994
+                                  };
+                                Ortac_runtime.stop =
+                                  {
+                                    pos_fname = "varray_circular_spec.mli";
+                                    pos_lnum = 211;
+                                    pos_bol = 12981;
+                                    pos_cnum = 13056
+                                  }
+                              })])))
+      | _ -> None
 let _ =
   QCheck_base_runner.run_tests_main
     (let count = 1000 in

@@ -29,7 +29,6 @@ let length_opt s =
 module Spec =
   struct
     open STM
-    [@@@ocaml.warning "-26-27"]
     type sut = char t
     type cmd =
       | Add of char 
@@ -179,13 +178,7 @@ module Spec =
           }
     let precond cmd__010_ state__011_ =
       match cmd__010_ with | Add v -> true | Remove -> true | Remove_ -> true
-    let postcond cmd__006_ state__007_ res__008_ =
-      let new_state__009_ = lazy (next_state cmd__006_ state__007_) in
-      match (cmd__006_, res__008_) with
-      | (Add v, Res ((Unit, _), _)) -> true
-      | (Remove, Res ((Option (Char), _), o)) -> true
-      | (Remove_, Res ((Option (Char), _), o_1)) -> true
-      | _ -> true
+    let postcond _ _ _ = true
     let run cmd__012_ sut__013_ =
       match cmd__012_ with
       | Add v -> Res (unit, (add v sut__013_))
@@ -194,6 +187,15 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
+let ortac_postcond cmd__006_ state__007_ res__008_ =
+  let open Spec in
+    let open STM in
+      let new_state__009_ = lazy (next_state cmd__006_ state__007_) in
+      match (cmd__006_, res__008_) with
+      | (Add v, Res ((Unit, _), _)) -> None
+      | (Remove, Res ((Option (Char), _), o)) -> None
+      | (Remove_, Res ((Option (Char), _), o_1)) -> None
+      | _ -> None
 let _ =
   QCheck_base_runner.run_tests_main
     (let count = 1000 in

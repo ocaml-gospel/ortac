@@ -31,7 +31,6 @@ let set_contents c i a_1 =
 module Spec =
   struct
     open STM
-    [@@@ocaml.warning "-26-27"]
     type sut = char t
     type cmd =
       | Set of int * char 
@@ -148,47 +147,7 @@ module Spec =
           else state__003_
     let precond cmd__012_ state__013_ =
       match cmd__012_ with | Set (i_1, a_2) -> true
-    let postcond cmd__006_ state__007_ res__008_ =
-      let new_state__009_ = lazy (next_state cmd__006_ state__007_) in
-      match (cmd__006_, res__008_) with
-      | (Set (i_1, a_2), Res ((Result (Unit, Exn), _), res)) ->
-          if
-            (try
-               let __t1__010_ =
-                 Ortac_runtime.Gospelstdlib.(<=)
-                   (Ortac_runtime.Gospelstdlib.integer_of_int 0)
-                   (Ortac_runtime.Gospelstdlib.integer_of_int i_1) in
-               let __t2__011_ =
-                 Ortac_runtime.Gospelstdlib.(<)
-                   (Ortac_runtime.Gospelstdlib.integer_of_int i_1)
-                   (Ortac_runtime.Gospelstdlib.List.length
-                      state__007_.contents) in
-               __t1__010_ && __t2__011_
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "conjunctive_clauses.mli";
-                              pos_lnum = 13;
-                              pos_bol = 806;
-                              pos_cnum = 817
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "conjunctive_clauses.mli";
-                              pos_lnum = 13;
-                              pos_bol = 806;
-                              pos_cnum = 848
-                            }
-                        })))
-          then (match res with | Ok _ -> true | _ -> false)
-          else
-            (match res with | Error (Invalid_argument _) -> true | _ -> false)
-      | _ -> true
+    let postcond _ _ _ = true
     let run cmd__014_ sut__015_ =
       match cmd__014_ with
       | Set (i_1, a_2) ->
@@ -198,6 +157,127 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
+let ortac_postcond cmd__006_ state__007_ res__008_ =
+  let open Spec in
+    let open STM in
+      let new_state__009_ = lazy (next_state cmd__006_ state__007_) in
+      match (cmd__006_, res__008_) with
+      | (Set (i_1, a_2), Res ((Result (Unit, Exn), _), res)) ->
+          (match if
+                   try
+                     let __t1__010_ =
+                       Ortac_runtime.Gospelstdlib.(<=)
+                         (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+                         (Ortac_runtime.Gospelstdlib.integer_of_int i_1) in
+                     let __t2__011_ =
+                       Ortac_runtime.Gospelstdlib.(<)
+                         (Ortac_runtime.Gospelstdlib.integer_of_int i_1)
+                         (Ortac_runtime.Gospelstdlib.List.length
+                            state__007_.contents) in
+                     __t1__010_ && __t2__011_
+                   with
+                   | e ->
+                       raise
+                         (Ortac_runtime.Partial_function
+                            (e,
+                              {
+                                Ortac_runtime.start =
+                                  {
+                                    pos_fname = "conjunctive_clauses.mli";
+                                    pos_lnum = 13;
+                                    pos_bol = 806;
+                                    pos_cnum = 817
+                                  };
+                                Ortac_runtime.stop =
+                                  {
+                                    pos_fname = "conjunctive_clauses.mli";
+                                    pos_lnum = 13;
+                                    pos_bol = 806;
+                                    pos_cnum = 848
+                                  }
+                              }))
+                 then None
+                 else
+                   Some
+                     (Ortac_runtime.report "set"
+                        [("0 <= i < List.length t.contents",
+                           {
+                             Ortac_runtime.start =
+                               {
+                                 pos_fname = "conjunctive_clauses.mli";
+                                 pos_lnum = 13;
+                                 pos_bol = 806;
+                                 pos_cnum = 817
+                               };
+                             Ortac_runtime.stop =
+                               {
+                                 pos_fname = "conjunctive_clauses.mli";
+                                 pos_lnum = 13;
+                                 pos_bol = 806;
+                                 pos_cnum = 848
+                               }
+                           })])
+           with
+           | None -> (match res with | Ok _ -> None | _ -> None)
+           | _ ->
+               (match res with
+                | Error (Invalid_argument _) -> None
+                | _ ->
+                    if
+                      (try
+                         let __t1__010_ =
+                           Ortac_runtime.Gospelstdlib.(<=)
+                             (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+                             (Ortac_runtime.Gospelstdlib.integer_of_int i_1) in
+                         let __t2__011_ =
+                           Ortac_runtime.Gospelstdlib.(<)
+                             (Ortac_runtime.Gospelstdlib.integer_of_int i_1)
+                             (Ortac_runtime.Gospelstdlib.List.length
+                                state__007_.contents) in
+                         __t1__010_ && __t2__011_
+                       with
+                       | e ->
+                           raise
+                             (Ortac_runtime.Partial_function
+                                (e,
+                                  {
+                                    Ortac_runtime.start =
+                                      {
+                                        pos_fname = "conjunctive_clauses.mli";
+                                        pos_lnum = 13;
+                                        pos_bol = 806;
+                                        pos_cnum = 817
+                                      };
+                                    Ortac_runtime.stop =
+                                      {
+                                        pos_fname = "conjunctive_clauses.mli";
+                                        pos_lnum = 13;
+                                        pos_bol = 806;
+                                        pos_cnum = 848
+                                      }
+                                  })))
+                    then None
+                    else
+                      Some
+                        (Ortac_runtime.report "set"
+                           [("0 <= i < List.length t.contents",
+                              {
+                                Ortac_runtime.start =
+                                  {
+                                    pos_fname = "conjunctive_clauses.mli";
+                                    pos_lnum = 13;
+                                    pos_bol = 806;
+                                    pos_cnum = 817
+                                  };
+                                Ortac_runtime.stop =
+                                  {
+                                    pos_fname = "conjunctive_clauses.mli";
+                                    pos_lnum = 13;
+                                    pos_bol = 806;
+                                    pos_cnum = 848
+                                  }
+                              })])))
+      | _ -> None
 let _ =
   QCheck_base_runner.run_tests_main
     (let count = 1000 in
