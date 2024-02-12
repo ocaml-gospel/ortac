@@ -870,7 +870,7 @@ let stm include_ config ir =
       (module_binding ~name:(noloc (Some "STMTests"))
          ~expr:
            (pmod_apply
-              (pmod_ident (Ldot (Lident "STM_sequential", "Make") |> noloc))
+              (pmod_ident (Ldot (Lident "Ortac_runtime", "Make") |> noloc))
               (pmod_ident (lident "Spec"))))
   in
   let module_name = Ortac_core.Context.module_name config.context in
@@ -882,12 +882,13 @@ let stm include_ config ir =
         QCheck_base_runner.run_tests_main
           (let count = 1000 in
            [
-             QCheck.Test.make ~count ~name:[%e descr]
-               (STMTests.arb_cmds Spec.init_state)
-               agree_prop;
+             STMTests.agree_test ~count ~name:[%e descr] check_init_state
+               ortac_postcond;
            ])]
   in
   ok
-    ([ open_mod module_name ]
-    @ ghost_functions
-    @ [ stm_spec; tests; check_init_state; agree_prop; call_tests ])
+    (warn
+     :: open_mod module_name
+     :: [%stri module Ortac_runtime = Ortac_runtime_qcheck_stm]
+     :: ghost_functions
+    @ [ stm_spec; tests; check_init_state; call_tests ])

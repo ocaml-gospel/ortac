@@ -57,7 +57,7 @@ generated.
     qcheck-stm.stm
     qcheck-stm.sequential
     qcheck-multicoretests-util
-    ortac-runtime)
+    ortac-runtime-qcheck-stm)
    (package my_package)
    (action
     (run
@@ -127,7 +127,7 @@ this fact.
     qcheck-stm.stm
     qcheck-stm.sequential
     qcheck-multicoretests-util
-    ortac-runtime)
+    ortac-runtime-qcheck-stm)
    (package my_package)
    (action
     (run

@@ -61,7 +61,7 @@ let libraries =
   let k ppf config =
     pf ppf
       "libraries@ %s@ qcheck-stm.stm@ qcheck-stm.sequential@ \
-       qcheck-multicoretests-util@ ortac-runtime"
+       qcheck-multicoretests-util@ ortac-runtime-qcheck-stm"
       config.interface_file
   in
   stanza k

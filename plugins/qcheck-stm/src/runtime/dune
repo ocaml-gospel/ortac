@@ -1,0 +1,10 @@
+(library
+ (name ortac_runtime_qcheck_stm)
+ (public_name ortac-runtime-qcheck-stm)
+ (libraries
+  qcheck-core
+  qcheck-core.runner
+  qcheck-stm.stm
+  qcheck-stm.sequential
+  qcheck-multicoretests-util
+  ortac-runtime))

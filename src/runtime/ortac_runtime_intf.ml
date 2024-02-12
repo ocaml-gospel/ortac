@@ -22,6 +22,7 @@ module type S = sig
     mutable errors : error list;
   }
 
+  val pp_loc : Format.formatter -> location -> unit
   val pp_error_report : Format.formatter -> error_report -> unit
 
   exception Error of error_report
