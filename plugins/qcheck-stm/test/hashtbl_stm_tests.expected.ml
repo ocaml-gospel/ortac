@@ -47,23 +47,25 @@ module Spec =
       | Length 
     let show_cmd cmd__001_ =
       match cmd__001_ with
-      | Clear -> Format.asprintf "%s" "clear"
-      | Reset -> Format.asprintf "%s" "reset"
+      | Clear -> Format.asprintf "%s sut" "clear"
+      | Reset -> Format.asprintf "%s sut" "reset"
       | Add (a_2, b_2) ->
-          Format.asprintf "%s %a %a" "add" (Util.Pp.pp_char true) a_2
+          Format.asprintf "%s sut %a %a" "add" (Util.Pp.pp_char true) a_2
             (Util.Pp.pp_int true) b_2
-      | Find a_3 -> Format.asprintf "%s %a" "find" (Util.Pp.pp_char true) a_3
+      | Find a_3 ->
+          Format.asprintf "%s sut %a" "find" (Util.Pp.pp_char true) a_3
       | Find_opt a_4 ->
-          Format.asprintf "%s %a" "find_opt" (Util.Pp.pp_char true) a_4
+          Format.asprintf "%s sut %a" "find_opt" (Util.Pp.pp_char true) a_4
       | Find_all a_5 ->
-          Format.asprintf "%s %a" "find_all" (Util.Pp.pp_char true) a_5
-      | Mem a_6 -> Format.asprintf "%s %a" "mem" (Util.Pp.pp_char true) a_6
+          Format.asprintf "%s sut %a" "find_all" (Util.Pp.pp_char true) a_5
+      | Mem a_6 ->
+          Format.asprintf "%s sut %a" "mem" (Util.Pp.pp_char true) a_6
       | Remove a_7 ->
-          Format.asprintf "%s %a" "remove" (Util.Pp.pp_char true) a_7
+          Format.asprintf "%s sut %a" "remove" (Util.Pp.pp_char true) a_7
       | Replace (a_8, b_3) ->
-          Format.asprintf "%s %a %a" "replace" (Util.Pp.pp_char true) a_8
+          Format.asprintf "%s sut %a %a" "replace" (Util.Pp.pp_char true) a_8
             (Util.Pp.pp_int true) b_3
-      | Length -> Format.asprintf "%s" "length"
+      | Length -> Format.asprintf "%s sut" "length"
     type nonrec state = {
       contents: (char * int) list }
     let init_state =
@@ -318,7 +320,7 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "find"
+                   (Ortac_runtime.report "Hashtbl" "find"
                       [("List.mem (a, b) h.contents",
                          {
                            Ortac_runtime.start =
@@ -368,7 +370,7 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "find"
+                   (Ortac_runtime.report "Hashtbl" "find"
                       [("not (List.mem a (List.map fst h.contents))",
                          {
                            Ortac_runtime.start =
@@ -431,7 +433,7 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
           then None
           else
             Some
-              (Ortac_runtime.report "find_opt"
+              (Ortac_runtime.report "Hashtbl" "find_opt"
                  [("match o with\n      | None -> not (List.mem a (List.map fst h.contents))\n      | Some b -> List.mem (a, b) h.contents",
                     {
                       Ortac_runtime.start =
@@ -481,7 +483,7 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
           then None
           else
             Some
-              (Ortac_runtime.report "find_all"
+              (Ortac_runtime.report "Hashtbl" "find_all"
                  [("bs = Sequence.filter_map (fun (x, y) -> if x = a then Some y else None) h.contents",
                     {
                       Ortac_runtime.start =
@@ -531,7 +533,7 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
           then None
           else
             Some
-              (Ortac_runtime.report "mem"
+              (Ortac_runtime.report "Hashtbl" "mem"
                  [("b = List.mem a (List.map fst h.contents)",
                     {
                       Ortac_runtime.start =
@@ -581,7 +583,7 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
           then None
           else
             Some
-              (Ortac_runtime.report "length"
+              (Ortac_runtime.report "Hashtbl" "length"
                  [("i = List.length h.contents",
                     {
                       Ortac_runtime.start =

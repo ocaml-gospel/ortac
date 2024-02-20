@@ -1,27 +1,35 @@
 open STM
 include Ortac_runtime
 
-type report = { cmd : string; terms : (string * location) list }
+type report = {
+  mod_name : string;
+  cmd : string;
+  terms : (string * location) list;
+}
 
-let report cmd terms = { cmd; terms }
+let report mod_name cmd terms = { mod_name; cmd; terms }
 
 let append a b =
   match (a, b) with
   | None, None -> None
   | Some _, None -> a
   | None, Some _ -> b
-  | Some { cmd = cmd0; terms = terms0 }, Some { cmd = cmd1; terms = terms1 } ->
-      assert (cmd0 = cmd1);
-      Some (report cmd0 (terms0 @ terms1))
+  | Some r0, Some r1 ->
+      assert (r0.cmd = r1.cmd);
+      Some { r0 with terms = r0.terms @ r1.terms }
 
 module Make (Spec : Spec) = struct
   open QCheck
   module Internal = Internal.Make (Spec) [@alert "-internal"]
 
-  let pp_trace ppf trace =
+  let pp_trace ppf (trace, mod_name) =
     let open Fmt in
-    let pp_aux ppf (c, r) = pf ppf "%s : %s" (Spec.show_cmd c) (show_res r) in
-    pf ppf "@[%a@]" (list ~sep:(any "@\n") pp_aux) trace
+    let pp_aux ppf (c, r) =
+      pf ppf "let _ = (%s)@\n(* returned %s *)" (Spec.show_cmd c) (show_res r)
+    in
+    pf ppf "@[open %s@\nlet sut = init_sut@\n%a@]" mod_name
+      (list ~sep:(any "@\n") pp_aux)
+      trace
 
   let pp_terms ppf err =
     let open Fmt in
@@ -35,7 +43,8 @@ module Make (Spec : Spec) = struct
       \  @[%a@]@\n\
        when executing the following sequence of operations:@\n\
        @;\
-      \  @[%a@]@." report.cmd pp_terms report.terms pp_trace trace
+      \  @[%a@]@." report.cmd pp_terms report.terms pp_trace
+      (trace, report.mod_name)
 
   let rec check_disagree postcond s sut cs =
     match cs with

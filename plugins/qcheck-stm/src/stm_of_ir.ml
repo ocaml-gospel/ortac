@@ -440,7 +440,12 @@ let postcond_case config state invariants idx state_ident new_state_ident value
          (esome
          @@ pexp_apply
               (qualify [ "Ortac_runtime" ] "report")
-              [ (Nolabel, cmd); (Nolabel, elist [ pexp_tuple [ term; l ] ]) ]))
+              [
+                ( Nolabel,
+                  estring @@ Ortac_core.Context.module_name config.context );
+                (Nolabel, cmd);
+                (Nolabel, elist [ pexp_tuple [ term; l ] ]);
+              ]))
   in
   let idx = List.sort Int.compare idx in
   let lhs0 = mk_cmd_pattern value in
@@ -651,7 +656,7 @@ let cmd_type ir =
   in
   pstr_type Recursive [ td ]
 
-let pp_cmd_case value =
+let pp_cmd_case config value =
   let lhs = mk_cmd_pattern value in
   let qualify_pp = qualify [ "Util"; "Pp" ] in
   let get_name =
@@ -676,18 +681,25 @@ let pp_cmd_case value =
   in
   let* rhs =
     let name = str_of_ident value.id in
-    let* pp_args =
-      concat_map
-        (fun (ty, id) ->
+    let rec aux ty args =
+      match (ty.ptyp_desc, args) with
+      | Ptyp_arrow (_, l, r), xs when Cfg.is_sut config l ->
+          let* fmt, pps = aux r xs in
+          ok ("sut" :: fmt, pps)
+      | Ptyp_arrow (_, _, r), (ty, id) :: xs ->
           let ty = subst_core_type value.inst ty in
-          let* pp = pp_of_ty ty in
-          ok [ pexp_apply pp [ (Nolabel, ebool true) ]; get_name id ])
-        value.args
+          let* pp = pp_of_ty ty and* fmt, pps = aux r xs in
+          ok
+            ( "%a" :: fmt,
+              pexp_apply pp [ (Nolabel, ebool true) ] :: get_name id :: pps )
+      | _, [] -> ok ([], [])
+      | _, _ ->
+          failwith
+            "shouldn't happen (list of arguments should be consistent with \
+             type)"
     in
-    let fmt =
-      String.concat " " ("%s" :: List.map (Fun.const "%a") value.args)
-      |> estring
-    in
+    let* fmt, pp_args = aux value.ty value.args in
+    let fmt = String.concat " " ("%s" :: fmt) |> estring in
     let args =
       List.map (fun x -> (Nolabel, x)) (fmt :: estring name :: pp_args)
     in
@@ -695,10 +707,10 @@ let pp_cmd_case value =
   in
   case ~lhs ~guard:None ~rhs |> ok
 
-let cmd_show ir =
+let cmd_show config ir =
   let cmd_name = gen_symbol ~prefix:"cmd" () in
   let open Reserr in
-  let* cases = map pp_cmd_case ir.values in
+  let* cases = map (pp_cmd_case config) ir.values in
   let body = pexp_match (evar cmd_name) cases in
   let pat = pvar "show_cmd" in
   let expr = efun [ (Nolabel, pvar cmd_name) ] body in
@@ -854,7 +866,7 @@ let stm include_ config ir =
   in
   let sut = sut_type config in
   let cmd = cmd_type ir in
-  let* cmd_show = cmd_show ir in
+  let* cmd_show = cmd_show config ir in
   let state = state_type ir in
   let* idx, next_state = next_state config ir in
   let* postcond = postcond config idx ir in

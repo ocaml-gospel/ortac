@@ -37,7 +37,7 @@ module Spec =
     let show_cmd cmd__001_ =
       match cmd__001_ with
       | Set (i_1, a_2) ->
-          Format.asprintf "%s %a %a" "set" (Util.Pp.pp_int true) i_1
+          Format.asprintf "%s sut %a %a" "set" (Util.Pp.pp_int true) i_1
             (Util.Pp.pp_char true) a_2
     type nonrec state = {
       contents: char list }
@@ -199,7 +199,7 @@ let ortac_postcond cmd__006_ state__007_ res__008_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "set"
+                     (Ortac_runtime.report "Conjunctive_clauses" "set"
                         [("0 <= i < List.length t.contents",
                            {
                              Ortac_runtime.start =
@@ -259,7 +259,7 @@ let ortac_postcond cmd__006_ state__007_ res__008_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "set"
+                        (Ortac_runtime.report "Conjunctive_clauses" "set"
                            [("0 <= i < List.length t.contents",
                               {
                                 Ortac_runtime.start =

@@ -19,16 +19,16 @@ module Spec =
       | Take_opt_r 
     let show_cmd cmd__001_ =
       match cmd__001_ with
-      | Is_empty -> Format.asprintf "%s" "is_empty"
-      | Length -> Format.asprintf "%s" "length"
+      | Is_empty -> Format.asprintf "%s sut" "is_empty"
+      | Length -> Format.asprintf "%s sut" "length"
       | Add_l a_1 ->
-          Format.asprintf "%s %a" "add_l" (Util.Pp.pp_int true) a_1
+          Format.asprintf "%s %a sut" "add_l" (Util.Pp.pp_int true) a_1
       | Add_r a_2 ->
-          Format.asprintf "%s %a" "add_r" (Util.Pp.pp_int true) a_2
-      | Take_l -> Format.asprintf "%s" "take_l"
-      | Take_r -> Format.asprintf "%s" "take_r"
-      | Take_opt_l -> Format.asprintf "%s" "take_opt_l"
-      | Take_opt_r -> Format.asprintf "%s" "take_opt_r"
+          Format.asprintf "%s %a sut" "add_r" (Util.Pp.pp_int true) a_2
+      | Take_l -> Format.asprintf "%s sut" "take_l"
+      | Take_r -> Format.asprintf "%s sut" "take_r"
+      | Take_opt_l -> Format.asprintf "%s sut" "take_opt_l"
+      | Take_opt_r -> Format.asprintf "%s sut" "take_opt_r"
     type nonrec state = {
       contents: int Ortac_runtime.Gospelstdlib.sequence }
     let init_state =
@@ -336,7 +336,7 @@ let ortac_postcond cmd__005_ state__006_ res__007_ =
           then None
           else
             Some
-              (Ortac_runtime.report "is_empty"
+              (Ortac_runtime.report "Lwt_dllist_spec" "is_empty"
                  [("b <-> s.contents = Sequence.empty",
                     {
                       Ortac_runtime.start =
@@ -384,7 +384,7 @@ let ortac_postcond cmd__005_ state__006_ res__007_ =
           then None
           else
             Some
-              (Ortac_runtime.report "length"
+              (Ortac_runtime.report "Lwt_dllist_spec" "length"
                  [("l = Sequence.length s.contents",
                     {
                       Ortac_runtime.start =
@@ -441,7 +441,7 @@ let ortac_postcond cmd__005_ state__006_ res__007_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "take_l"
+                   (Ortac_runtime.report "Lwt_dllist_spec" "take_l"
                       [("if old s.contents = Sequence.empty\n              then false\n              else a = Sequence.hd (old s.contents)",
                          {
                            Ortac_runtime.start =
@@ -493,7 +493,7 @@ let ortac_postcond cmd__005_ state__006_ res__007_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "take_l"
+                   (Ortac_runtime.report "Lwt_dllist_spec" "take_l"
                       [("old s.contents = Sequence.empty = s.contents",
                          {
                            Ortac_runtime.start =
@@ -553,7 +553,7 @@ let ortac_postcond cmd__005_ state__006_ res__007_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "take_r"
+                   (Ortac_runtime.report "Lwt_dllist_spec" "take_r"
                       [("if old s.contents = Sequence.empty\n              then false\n              else a = (old s.contents)[Sequence.length (old s.contents) - 1]",
                          {
                            Ortac_runtime.start =
@@ -605,7 +605,7 @@ let ortac_postcond cmd__005_ state__006_ res__007_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "take_r"
+                   (Ortac_runtime.report "Lwt_dllist_spec" "take_r"
                       [("old s.contents = Sequence.empty = s.contents",
                          {
                            Ortac_runtime.start =
@@ -657,7 +657,7 @@ let ortac_postcond cmd__005_ state__006_ res__007_ =
           then None
           else
             Some
-              (Ortac_runtime.report "take_opt_l"
+              (Ortac_runtime.report "Lwt_dllist_spec" "take_opt_l"
                  [("old s.contents = match o with\n                                | None -> Sequence.empty\n                                | Some a -> Sequence.cons a s.contents",
                     {
                       Ortac_runtime.start =
@@ -708,7 +708,7 @@ let ortac_postcond cmd__005_ state__006_ res__007_ =
           then None
           else
             Some
-              (Ortac_runtime.report "take_opt_r"
+              (Ortac_runtime.report "Lwt_dllist_spec" "take_opt_r"
                  [("old s.contents = match o with\n                                | None -> Sequence.empty\n                                | Some a -> Sequence.snoc s.contents a",
                     {
                       Ortac_runtime.start =

@@ -80,28 +80,29 @@ module Spec =
     let show_cmd cmd__003_ =
       match cmd__003_ with
       | Push_back x ->
-          Format.asprintf "%s %a" "push_back"
+          Format.asprintf "%s sut %a" "push_back"
             (Util.Pp.pp_elt Util.Pp.pp_char true) x
-      | Pop_back -> Format.asprintf "%s" "pop_back"
+      | Pop_back -> Format.asprintf "%s sut" "pop_back"
       | Push_front x_1 ->
-          Format.asprintf "%s %a" "push_front"
+          Format.asprintf "%s sut %a" "push_front"
             (Util.Pp.pp_elt Util.Pp.pp_char true) x_1
-      | Pop_front -> Format.asprintf "%s" "pop_front"
+      | Pop_front -> Format.asprintf "%s sut" "pop_front"
       | Insert_at (i_1, x_2) ->
-          Format.asprintf "%s %a %a" "insert_at" (Util.Pp.pp_int true) i_1
-            (Util.Pp.pp_elt Util.Pp.pp_char true) x_2
+          Format.asprintf "%s sut %a %a" "insert_at" (Util.Pp.pp_int true)
+            i_1 (Util.Pp.pp_elt Util.Pp.pp_char true) x_2
       | Pop_at i_2 ->
-          Format.asprintf "%s %a" "pop_at" (Util.Pp.pp_int true) i_2
+          Format.asprintf "%s sut %a" "pop_at" (Util.Pp.pp_int true) i_2
       | Delete_at i_3 ->
-          Format.asprintf "%s %a" "delete_at" (Util.Pp.pp_int true) i_3
-      | Get i_4 -> Format.asprintf "%s %a" "get" (Util.Pp.pp_int true) i_4
+          Format.asprintf "%s sut %a" "delete_at" (Util.Pp.pp_int true) i_3
+      | Get i_4 ->
+          Format.asprintf "%s sut %a" "get" (Util.Pp.pp_int true) i_4
       | Set (i_5, v) ->
-          Format.asprintf "%s %a %a" "set" (Util.Pp.pp_int true) i_5
+          Format.asprintf "%s sut %a %a" "set" (Util.Pp.pp_int true) i_5
             (Util.Pp.pp_elt Util.Pp.pp_char true) v
-      | Length -> Format.asprintf "%s" "length"
-      | Is_empty -> Format.asprintf "%s" "is_empty"
+      | Length -> Format.asprintf "%s sut" "length"
+      | Is_empty -> Format.asprintf "%s sut" "is_empty"
       | Fill (pos, len, x_3) ->
-          Format.asprintf "%s %a %a %a" "fill" (Util.Pp.pp_int true) pos
+          Format.asprintf "%s sut %a %a %a" "fill" (Util.Pp.pp_int true) pos
             (Util.Pp.pp_int true) len (Util.Pp.pp_elt Util.Pp.pp_char true)
             x_3
     type nonrec state = {
@@ -757,7 +758,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "pop_back"
+                   (Ortac_runtime.report "Varray_circular_spec" "pop_back"
                       [("if old t.contents = Sequence.empty\n              then false\n              else proj x = (old t.contents)[Sequence.length (old t.contents) - 1]",
                          {
                            Ortac_runtime.start =
@@ -809,7 +810,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "pop_back"
+                   (Ortac_runtime.report "Varray_circular_spec" "pop_back"
                       [("t.contents = old t.contents = Sequence.empty",
                          {
                            Ortac_runtime.start =
@@ -866,7 +867,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "pop_front"
+                   (Ortac_runtime.report "Varray_circular_spec" "pop_front"
                       [("if old t.contents = Sequence.empty\n              then false\n              else proj x = Sequence.hd (old t.contents)",
                          {
                            Ortac_runtime.start =
@@ -918,7 +919,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "pop_front"
+                   (Ortac_runtime.report "Varray_circular_spec" "pop_front"
                       [("t.contents = old t.contents = Sequence.empty",
                          {
                            Ortac_runtime.start =
@@ -974,7 +975,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "insert_at"
+                     (Ortac_runtime.report "Varray_circular_spec" "insert_at"
                         [("0 <= i <= Sequence.length t.contents",
                            {
                              Ortac_runtime.start =
@@ -1036,7 +1037,8 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "insert_at"
+                        (Ortac_runtime.report "Varray_circular_spec"
+                           "insert_at"
                            [("0 <= i <= Sequence.length t.contents",
                               {
                                 Ortac_runtime.start =
@@ -1084,7 +1086,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "pop_at"
+                     (Ortac_runtime.report "Varray_circular_spec" "pop_at"
                         [("inside i t.contents",
                            {
                              Ortac_runtime.start =
@@ -1138,7 +1140,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "pop_at"
+                        (Ortac_runtime.report "Varray_circular_spec" "pop_at"
                            [("(proj x) = old t.contents[i]",
                               {
                                 Ortac_runtime.start =
@@ -1193,7 +1195,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "pop_at"
+                        (Ortac_runtime.report "Varray_circular_spec" "pop_at"
                            [("inside i t.contents",
                               {
                                 Ortac_runtime.start =
@@ -1241,7 +1243,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "delete_at"
+                     (Ortac_runtime.report "Varray_circular_spec" "delete_at"
                         [("inside i t.contents",
                            {
                              Ortac_runtime.start =
@@ -1298,7 +1300,8 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "delete_at"
+                        (Ortac_runtime.report "Varray_circular_spec"
+                           "delete_at"
                            [("Sequence.length t.contents = Sequence.length (old t.contents) - 1",
                               {
                                 Ortac_runtime.start =
@@ -1353,7 +1356,8 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "delete_at"
+                        (Ortac_runtime.report "Varray_circular_spec"
+                           "delete_at"
                            [("inside i t.contents",
                               {
                                 Ortac_runtime.start =
@@ -1401,7 +1405,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "get"
+                     (Ortac_runtime.report "Varray_circular_spec" "get"
                         [("inside i t.contents",
                            {
                              Ortac_runtime.start =
@@ -1455,7 +1459,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "get"
+                        (Ortac_runtime.report "Varray_circular_spec" "get"
                            [("(proj x) = t.contents[i]",
                               {
                                 Ortac_runtime.start =
@@ -1510,7 +1514,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "get"
+                        (Ortac_runtime.report "Varray_circular_spec" "get"
                            [("inside i t.contents",
                               {
                                 Ortac_runtime.start =
@@ -1558,7 +1562,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "set"
+                     (Ortac_runtime.report "Varray_circular_spec" "set"
                         [("inside i t.contents",
                            {
                              Ortac_runtime.start =
@@ -1614,7 +1618,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "set"
+                        (Ortac_runtime.report "Varray_circular_spec" "set"
                            [("inside i t.contents",
                               {
                                 Ortac_runtime.start =
@@ -1662,7 +1666,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
           then None
           else
             Some
-              (Ortac_runtime.report "length"
+              (Ortac_runtime.report "Varray_circular_spec" "length"
                  [("l = Sequence.length t.contents",
                     {
                       Ortac_runtime.start =
@@ -1710,7 +1714,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
           then None
           else
             Some
-              (Ortac_runtime.report "is_empty"
+              (Ortac_runtime.report "Varray_circular_spec" "is_empty"
                  [("b <-> t.contents = Sequence.empty",
                     {
                       Ortac_runtime.start =
@@ -1773,7 +1777,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "fill"
+                     (Ortac_runtime.report "Varray_circular_spec" "fill"
                         [("0 <= pos /\\ 0 <= len /\\ pos + len < Sequence.length t.contents",
                            {
                              Ortac_runtime.start =
@@ -1845,7 +1849,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "fill"
+                        (Ortac_runtime.report "Varray_circular_spec" "fill"
                            [("0 <= pos /\\ 0 <= len /\\ pos + len < Sequence.length t.contents",
                               {
                                 Ortac_runtime.start =

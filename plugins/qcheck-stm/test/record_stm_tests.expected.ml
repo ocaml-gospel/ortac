@@ -35,7 +35,7 @@ module Spec =
     type cmd =
       | Get 
     let show_cmd cmd__001_ =
-      match cmd__001_ with | Get -> Format.asprintf "%s" "get"
+      match cmd__001_ with | Get -> Format.asprintf "%s sut" "get"
     type nonrec state = {
       value: Ortac_runtime.integer }
     let init_state =
@@ -114,7 +114,7 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
              then None
              else
                Some
-                 (Ortac_runtime.report "get"
+                 (Ortac_runtime.report "Record" "get"
                     [("i = r.value",
                        {
                          Ortac_runtime.start =
@@ -164,7 +164,7 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
                 then None
                 else
                   Some
-                    (Ortac_runtime.report "get"
+                    (Ortac_runtime.report "Record" "get"
                        [("plus1 i = i + 1",
                           {
                             Ortac_runtime.start =
@@ -212,7 +212,7 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
                 then None
                 else
                   Some
-                    (Ortac_runtime.report "get"
+                    (Ortac_runtime.report "Record" "get"
                        [("plus2 i = i + 2",
                           {
                             Ortac_runtime.start =
