@@ -1,5 +1,7 @@
 # Unreleased
 
+- Add a comment warning that the file is generated
+  [\#198](https://github.com/ocaml-gospel/ortac/pull/198)
 - Add an include option to qcheck-stm cli
   [\#181](https://github.com/ocaml-gospel/ortac/pull/181)
 - Add a quiet flag
