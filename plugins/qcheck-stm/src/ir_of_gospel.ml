@@ -167,6 +167,25 @@ let next_state sut state spec =
   in
   ok Ir.{ formulae; modifies }
 
+(* returns the list of terms [t] such that [ret = t] appears in the [ensures] of
+   the [spec] *)
+let returned_value_description spec ret =
+  let open Tterm in
+  let is_ret vs =
+    let open Symbols in
+    Ident.equal ret vs.vs_name
+  in
+  let rec pred t =
+    match t.t_node with
+    (* match [ret = term] and return [term] *)
+    | Tapp (ls, [ { t_node = Tvar vs; _ }; right ])
+      when Symbols.(ls_equal ps_equ ls) && is_ret vs ->
+        [ Ir.term_val spec right ]
+    | Tbinop ((Tand | Tand_asym), l, r) -> pred l @ pred r
+    | _ -> []
+  in
+  List.concat_map pred spec.sp_post
+
 let postcond spec =
   let normal = List.mapi (fun i x -> (i, Ir.term_val spec x)) spec.sp_post
   and exceptional =
@@ -216,10 +235,11 @@ let val_desc config state vd =
     in
     List.map p spec.sp_ret |> sequence
   in
+  let ret_values = List.map (returned_value_description spec) ret in
   let* next_state = next_state sut state spec in
   let postcond = postcond spec in
-  Ir.value vd.vd_name vd.vd_type inst sut args ret next_state spec.sp_pre
-    postcond
+  Ir.value vd.vd_name vd.vd_type inst sut args ret ret_values next_state
+    spec.sp_pre postcond
   |> ok
 
 let sig_item config init_fct state s =
