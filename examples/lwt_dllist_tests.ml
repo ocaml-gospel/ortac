@@ -336,7 +336,8 @@ let ortac_postcond cmd__005_ state__006_ res__007_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Lwt_dllist_spec" "is_empty"
+              (Ortac_runtime.report "Lwt_dllist_spec"
+                 (Some (Res (Ortac_runtime.dummy, ()))) "is_empty"
                  [("b <-> s.contents = Sequence.empty",
                     {
                       Ortac_runtime.start =
@@ -384,7 +385,8 @@ let ortac_postcond cmd__005_ state__006_ res__007_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Lwt_dllist_spec" "length"
+              (Ortac_runtime.report "Lwt_dllist_spec"
+                 (Some (Res (Ortac_runtime.dummy, ()))) "length"
                  [("l = Sequence.length s.contents",
                     {
                       Ortac_runtime.start =
@@ -441,7 +443,8 @@ let ortac_postcond cmd__005_ state__006_ res__007_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "Lwt_dllist_spec" "take_l"
+                   (Ortac_runtime.report "Lwt_dllist_spec"
+                      (Some (Res (Ortac_runtime.dummy, ()))) "take_l"
                       [("if old s.contents = Sequence.empty\n              then false\n              else a = Sequence.hd (old s.contents)",
                          {
                            Ortac_runtime.start =
@@ -493,7 +496,7 @@ let ortac_postcond cmd__005_ state__006_ res__007_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "Lwt_dllist_spec" "take_l"
+                   (Ortac_runtime.report "Lwt_dllist_spec" None "take_l"
                       [("old s.contents = Sequence.empty = s.contents",
                          {
                            Ortac_runtime.start =
@@ -553,7 +556,8 @@ let ortac_postcond cmd__005_ state__006_ res__007_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "Lwt_dllist_spec" "take_r"
+                   (Ortac_runtime.report "Lwt_dllist_spec"
+                      (Some (Res (Ortac_runtime.dummy, ()))) "take_r"
                       [("if old s.contents = Sequence.empty\n              then false\n              else a = (old s.contents)[Sequence.length (old s.contents) - 1]",
                          {
                            Ortac_runtime.start =
@@ -605,7 +609,7 @@ let ortac_postcond cmd__005_ state__006_ res__007_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "Lwt_dllist_spec" "take_r"
+                   (Ortac_runtime.report "Lwt_dllist_spec" None "take_r"
                       [("old s.contents = Sequence.empty = s.contents",
                          {
                            Ortac_runtime.start =
@@ -657,7 +661,8 @@ let ortac_postcond cmd__005_ state__006_ res__007_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Lwt_dllist_spec" "take_opt_l"
+              (Ortac_runtime.report "Lwt_dllist_spec"
+                 (Some (Res (Ortac_runtime.dummy, ()))) "take_opt_l"
                  [("old s.contents = match o with\n                                | None -> Sequence.empty\n                                | Some a -> Sequence.cons a s.contents",
                     {
                       Ortac_runtime.start =
@@ -708,7 +713,8 @@ let ortac_postcond cmd__005_ state__006_ res__007_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Lwt_dllist_spec" "take_opt_r"
+              (Ortac_runtime.report "Lwt_dllist_spec"
+                 (Some (Res (Ortac_runtime.dummy, ()))) "take_opt_r"
                  [("old s.contents = match o with\n                                | None -> Sequence.empty\n                                | Some a -> Sequence.snoc s.contents a",
                     {
                       Ortac_runtime.start =

@@ -758,7 +758,8 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "Varray_spec" "pop_back"
+                   (Ortac_runtime.report "Varray_spec"
+                      (Some (Res (Ortac_runtime.dummy, ()))) "pop_back"
                       [("if old t.contents = Sequence.empty\n              then false\n              else proj x = (old t.contents)[Sequence.length (old t.contents) - 1]",
                          {
                            Ortac_runtime.start =
@@ -810,7 +811,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "Varray_spec" "pop_back"
+                   (Ortac_runtime.report "Varray_spec" None "pop_back"
                       [("t.contents = old t.contents = Sequence.empty",
                          {
                            Ortac_runtime.start =
@@ -867,7 +868,8 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "Varray_spec" "pop_front"
+                   (Ortac_runtime.report "Varray_spec"
+                      (Some (Res (Ortac_runtime.dummy, ()))) "pop_front"
                       [("if old t.contents = Sequence.empty\n              then false\n              else proj x = Sequence.hd (old t.contents)",
                          {
                            Ortac_runtime.start =
@@ -919,7 +921,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "Varray_spec" "pop_front"
+                   (Ortac_runtime.report "Varray_spec" None "pop_front"
                       [("t.contents = old t.contents = Sequence.empty",
                          {
                            Ortac_runtime.start =
@@ -975,7 +977,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "Varray_spec" "insert_at"
+                     (Ortac_runtime.report "Varray_spec" None "insert_at"
                         [("0 <= i <= Sequence.length t.contents",
                            {
                              Ortac_runtime.start =
@@ -1035,7 +1037,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Varray_spec" "insert_at"
+                        (Ortac_runtime.report "Varray_spec" None "insert_at"
                            [("0 <= i <= Sequence.length t.contents",
                               {
                                 Ortac_runtime.start =
@@ -1083,7 +1085,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "Varray_spec" "pop_at"
+                     (Ortac_runtime.report "Varray_spec" None "pop_at"
                         [("inside i t.contents",
                            {
                              Ortac_runtime.start =
@@ -1135,7 +1137,8 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Varray_spec" "pop_at"
+                        (Ortac_runtime.report "Varray_spec"
+                           (Some (Res (Ortac_runtime.dummy, ()))) "pop_at"
                            [("(proj x) = old t.contents[i]",
                               {
                                 Ortac_runtime.start =
@@ -1188,7 +1191,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Varray_spec" "pop_at"
+                        (Ortac_runtime.report "Varray_spec" None "pop_at"
                            [("inside i t.contents",
                               {
                                 Ortac_runtime.start =
@@ -1236,7 +1239,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "Varray_spec" "delete_at"
+                     (Ortac_runtime.report "Varray_spec" None "delete_at"
                         [("inside i t.contents",
                            {
                              Ortac_runtime.start =
@@ -1291,7 +1294,8 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Varray_spec" "delete_at"
+                        (Ortac_runtime.report "Varray_spec"
+                           (Some (Res (unit, ()))) "delete_at"
                            [("Sequence.length t.contents = Sequence.length (old t.contents) - 1",
                               {
                                 Ortac_runtime.start =
@@ -1344,7 +1348,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Varray_spec" "delete_at"
+                        (Ortac_runtime.report "Varray_spec" None "delete_at"
                            [("inside i t.contents",
                               {
                                 Ortac_runtime.start =
@@ -1392,7 +1396,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "Varray_spec" "get"
+                     (Ortac_runtime.report "Varray_spec" None "get"
                         [("inside i t.contents",
                            {
                              Ortac_runtime.start =
@@ -1444,7 +1448,8 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Varray_spec" "get"
+                        (Ortac_runtime.report "Varray_spec"
+                           (Some (Res (Ortac_runtime.dummy, ()))) "get"
                            [("(proj x) = t.contents[i]",
                               {
                                 Ortac_runtime.start =
@@ -1497,7 +1502,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Varray_spec" "get"
+                        (Ortac_runtime.report "Varray_spec" None "get"
                            [("inside i t.contents",
                               {
                                 Ortac_runtime.start =
@@ -1545,7 +1550,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "Varray_spec" "set"
+                     (Ortac_runtime.report "Varray_spec" None "set"
                         [("inside i t.contents",
                            {
                              Ortac_runtime.start =
@@ -1599,7 +1604,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Varray_spec" "set"
+                        (Ortac_runtime.report "Varray_spec" None "set"
                            [("inside i t.contents",
                               {
                                 Ortac_runtime.start =
@@ -1647,7 +1652,8 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Varray_spec" "length"
+              (Ortac_runtime.report "Varray_spec"
+                 (Some (Res (Ortac_runtime.dummy, ()))) "length"
                  [("l = Sequence.length t.contents",
                     {
                       Ortac_runtime.start =
@@ -1695,7 +1701,8 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Varray_spec" "is_empty"
+              (Ortac_runtime.report "Varray_spec"
+                 (Some (Res (Ortac_runtime.dummy, ()))) "is_empty"
                  [("b <-> t.contents = Sequence.empty",
                     {
                       Ortac_runtime.start =
@@ -1758,7 +1765,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "Varray_spec" "fill"
+                     (Ortac_runtime.report "Varray_spec" None "fill"
                         [("0 <= pos /\\ 0 <= len /\\ pos + len < Sequence.length t.contents",
                            {
                              Ortac_runtime.start =
@@ -1828,7 +1835,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Varray_spec" "fill"
+                        (Ortac_runtime.report "Varray_spec" None "fill"
                            [("0 <= pos /\\ 0 <= len /\\ pos + len < Sequence.length t.contents",
                               {
                                 Ortac_runtime.start =

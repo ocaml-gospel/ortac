@@ -115,7 +115,36 @@ File "hashtbl.mli", line 106, characters 0-54:
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping seeded_hash_param: functions without specifications cannot
          be tested.
+File "hashtbl.mli", line 28, characters 0-226:
+28 | val find : ('a, 'b) t -> 'a -> 'b
+29 | (*@ b = find h a
+30 |     raises Not_found -> forall x. not (List.mem (a, x) h.contents)
+31 |     raises Not_found -> not (List.mem a (List.map fst h.contents))
+32 |     ensures List.mem (a, b) h.contents *)
+Warning: Incomplete computation of the returned value in the specification of find. Failure message won't be able to display the expected returned value.
 File "hashtbl.mli", line 30, characters 24-66:
 30 |     raises Not_found -> forall x. not (List.mem (a, x) h.contents)
                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping clause: unsupported quantification.
+File "hashtbl.mli", line 34, characters 0-197:
+34 | val find_opt : ('a, 'b) t -> 'a -> 'b option
+35 | (*@ o = find_opt h a
+36 |     ensures match o with
+37 |       | None -> not (List.mem a (List.map fst h.contents))
+38 |       | Some b -> List.mem (a, b) h.contents *)
+Warning: Incomplete computation of the returned value in the specification of find_opt. Failure message won't be able to display the expected returned value.
+File "hashtbl.mli", line 40, characters 0-162:
+40 | val find_all : ('a, 'b) t -> 'a -> 'b list
+41 | (*@ bs = find_all h a
+42 |     ensures bs = Sequence.filter_map (fun (x, y) -> if x = a then Some y else None) h.contents *)
+Warning: Incomplete computation of the returned value in the specification of find_all. Failure message won't be able to display the expected returned value.
+File "hashtbl.mli", line 44, characters 0-106:
+44 | val mem : ('a, 'b) t -> 'a -> bool
+45 | (*@ b = mem h a
+46 |     ensures b = List.mem a (List.map fst h.contents) *)
+Warning: Incomplete computation of the returned value in the specification of mem. Failure message won't be able to display the expected returned value.
+File "hashtbl.mli", line 74, characters 0-89:
+74 | val length : ('a, 'b) t -> int
+75 | (*@ i = length h
+76 |     ensures i = List.length h.contents *)
+Warning: Incomplete computation of the returned value in the specification of length. Failure message won't be able to display the expected returned value.

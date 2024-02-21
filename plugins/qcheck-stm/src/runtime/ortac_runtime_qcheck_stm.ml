@@ -3,11 +3,12 @@ include Ortac_runtime
 
 type report = {
   mod_name : string;
+  ret : res option;
   cmd : string;
   terms : (string * location) list;
 }
 
-let report mod_name cmd terms = { mod_name; cmd; terms }
+let report mod_name ret cmd terms = { mod_name; ret; cmd; terms }
 
 let append a b =
   match (a, b) with
@@ -18,18 +19,33 @@ let append a b =
       assert (r0.cmd = r1.cmd);
       Some { r0 with terms = r0.terms @ r1.terms }
 
+type _ ty += Dummy : _ ty
+
+let dummy = (Dummy, fun _ -> Printf.sprintf "unknown value")
+let is_dummy = function Res ((Dummy, _), _) -> true | _ -> false
+
 module Make (Spec : Spec) = struct
   open QCheck
   module Internal = Internal.Make (Spec) [@alert "-internal"]
 
-  let pp_trace ppf (trace, mod_name) =
+  let pp_trace ppf (trace, mod_name, ret) =
     let open Fmt in
-    let pp_aux ppf (c, r) =
-      pf ppf "let _ = (%s)@\n(* returned %s *)" (Spec.show_cmd c) (show_res r)
+    let pp_expected ppf = function
+      | Some ret when not @@ is_dummy ret ->
+          pf ppf "assert (r = %s)@\n" (show_res ret)
+      | _ -> ()
     in
-    pf ppf "@[open %s@\nlet sut = init_sut@\n%a@]" mod_name
-      (list ~sep:(any "@\n") pp_aux)
-      trace
+    let rec aux ppf = function
+      | [ (c, r) ] ->
+          pf ppf "let r = %s@\n%a(* returned %s *)@\n" (Spec.show_cmd c)
+            pp_expected ret (show_res r)
+      | (c, r) :: xs ->
+          pf ppf "let _ = %s@\n(* returned %s *)@\n" (Spec.show_cmd c)
+            (show_res r);
+          aux ppf xs
+      | _ -> assert false
+    in
+    pf ppf "@[open %s@\nlet sut = init_sut@\n%a@]" mod_name aux trace
 
   let pp_terms ppf err =
     let open Fmt in
@@ -44,7 +60,7 @@ module Make (Spec : Spec) = struct
        when executing the following sequence of operations:@\n\
        @;\
       \  @[%a@]@." report.cmd pp_terms report.terms pp_trace
-      (trace, report.mod_name)
+      (trace, report.mod_name, report.ret)
 
   let rec check_disagree postcond s sut cs =
     match cs with

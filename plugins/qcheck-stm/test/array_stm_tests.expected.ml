@@ -364,7 +364,32 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Array" "length"
+              (Ortac_runtime.report "Array"
+                 (Some
+                    (Res
+                       (int,
+                         (try (Lazy.force new_state__011_).size
+                          with
+                          | e ->
+                              raise
+                                (Ortac_runtime.Partial_function
+                                   (e,
+                                     {
+                                       Ortac_runtime.start =
+                                         {
+                                           pos_fname = "array.mli";
+                                           pos_lnum = 7;
+                                           pos_bol = 238;
+                                           pos_cnum = 254
+                                         };
+                                       Ortac_runtime.stop =
+                                         {
+                                           pos_fname = "array.mli";
+                                           pos_lnum = 7;
+                                           pos_bol = 238;
+                                           pos_cnum = 260
+                                         }
+                                     })))))) "length"
                  [("i = t.size",
                     {
                       Ortac_runtime.start =
@@ -419,7 +444,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "Array" "get"
+                     (Ortac_runtime.report "Array" None "get"
                         [("0 <= i < t.size",
                            {
                              Ortac_runtime.start =
@@ -471,7 +496,36 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Array" "get"
+                        (Ortac_runtime.report "Array"
+                           (Some
+                              (Res
+                                 (char,
+                                   (try
+                                      Ortac_runtime.Gospelstdlib.List.nth
+                                        (Lazy.force new_state__011_).contents
+                                        (Ortac_runtime.Gospelstdlib.integer_of_int
+                                           i)
+                                    with
+                                    | e ->
+                                        raise
+                                          (Ortac_runtime.Partial_function
+                                             (e,
+                                               {
+                                                 Ortac_runtime.start =
+                                                   {
+                                                     pos_fname = "array.mli";
+                                                     pos_lnum = 12;
+                                                     pos_bol = 405;
+                                                     pos_cnum = 421
+                                                   };
+                                                 Ortac_runtime.stop =
+                                                   {
+                                                     pos_fname = "array.mli";
+                                                     pos_lnum = 12;
+                                                     pos_bol = 405;
+                                                     pos_cnum = 442
+                                                   }
+                                               })))))) "get"
                            [("a = List.nth t.contents i",
                               {
                                 Ortac_runtime.start =
@@ -530,7 +584,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Array" "get"
+                        (Ortac_runtime.report "Array" None "get"
                            [("0 <= i < t.size",
                               {
                                 Ortac_runtime.start =
@@ -585,7 +639,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "Array" "set"
+                     (Ortac_runtime.report "Array" None "set"
                         [("0 <= i < t.size",
                            {
                              Ortac_runtime.start =
@@ -645,7 +699,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Array" "set"
+                        (Ortac_runtime.report "Array" None "set"
                            [("0 <= i < t.size",
                               {
                                 Ortac_runtime.start =
@@ -694,7 +748,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Array" "fill"
+                        (Ortac_runtime.report "Array" None "fill"
                            [("0 <= i",
                               {
                                 Ortac_runtime.start =
@@ -742,7 +796,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                        then None
                        else
                          Some
-                           (Ortac_runtime.report "Array" "fill"
+                           (Ortac_runtime.report "Array" None "fill"
                               [("0 <= j",
                                  {
                                    Ortac_runtime.start =
@@ -793,7 +847,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                        then None
                        else
                          Some
-                           (Ortac_runtime.report "Array" "fill"
+                           (Ortac_runtime.report "Array" None "fill"
                               [("i + j <= t.size",
                                  {
                                    Ortac_runtime.start =
@@ -847,7 +901,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                        then None
                        else
                          Some
-                           (Ortac_runtime.report "Array" "fill"
+                           (Ortac_runtime.report "Array" None "fill"
                               [("0 <= i",
                                  {
                                    Ortac_runtime.start =
@@ -895,7 +949,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                           then None
                           else
                             Some
-                              (Ortac_runtime.report "Array" "fill"
+                              (Ortac_runtime.report "Array" None "fill"
                                  [("0 <= j",
                                     {
                                       Ortac_runtime.start =
@@ -947,7 +1001,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                           then None
                           else
                             Some
-                              (Ortac_runtime.report "Array" "fill"
+                              (Ortac_runtime.report "Array" None "fill"
                                  [("i + j <= t.size",
                                     {
                                       Ortac_runtime.start =
@@ -992,7 +1046,32 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Array" "to_list"
+              (Ortac_runtime.report "Array"
+                 (Some
+                    (Res
+                       ((list char),
+                         (try (Lazy.force new_state__011_).contents
+                          with
+                          | e ->
+                              raise
+                                (Ortac_runtime.Partial_function
+                                   (e,
+                                     {
+                                       Ortac_runtime.start =
+                                         {
+                                           pos_fname = "array.mli";
+                                           pos_lnum = 36;
+                                           pos_bol = 1559;
+                                           pos_cnum = 1575
+                                         };
+                                       Ortac_runtime.stop =
+                                         {
+                                           pos_fname = "array.mli";
+                                           pos_lnum = 36;
+                                           pos_bol = 1559;
+                                           pos_cnum = 1585
+                                         }
+                                     })))))) "to_list"
                  [("l = t.contents",
                     {
                       Ortac_runtime.start =
@@ -1040,7 +1119,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Array" "mem"
+              (Ortac_runtime.report "Array"
+                 (Some (Res (Ortac_runtime.dummy, ()))) "mem"
                  [("b = List.mem a t.contents",
                     {
                       Ortac_runtime.start =
