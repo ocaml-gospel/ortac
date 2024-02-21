@@ -35,6 +35,7 @@ type W.kind +=
   | Returned_tuple of string
   | Ghost_values of (string * [ `Arg | `Ret ])
   | Incompatible_sut of string
+  | Incomplete_ret_val_computation of string
 
 let level kind =
   match kind with
@@ -42,7 +43,8 @@ let level kind =
   | Multiple_sut_arguments _ | Incompatible_type _ | No_spec _
   | Impossible_term_substitution _ | Ignored_modifies
   | Ensures_not_found_for_next_state _ | Type_not_supported _
-  | Functional_argument _ | Returned_tuple _ | Ghost_values _ ->
+  | Functional_argument _ | Returned_tuple _ | Ghost_values _
+  | Incomplete_ret_val_computation _ ->
       W.Warning
   | No_sut_type _ | No_init_function _ | Syntax_error_in_type _
   | Sut_type_not_supported _ | Type_not_supported_for_sut_parameter _
@@ -216,6 +218,12 @@ let pp_kind ppf kind =
         "the declaration of the SUT type is incompatible with the configured \
          one: "
         t
+  | Incomplete_ret_val_computation fct ->
+      pf ppf
+        "Incomplete computation of the returned value in the specification of \
+         %s. Failure message won't be able to display the expected returned \
+         value"
+        fct
   | _ -> W.pp_kind ppf kind
 
 let pp_errors = W.pp_param pp_kind level |> Fmt.list

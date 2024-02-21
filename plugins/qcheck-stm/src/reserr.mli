@@ -35,6 +35,7 @@ type W.kind +=
   | Returned_tuple of string
   | Ghost_values of (string * [ `Arg | `Ret ])
   | Incompatible_sut of string
+  | Incomplete_ret_val_computation of string
 
 type 'a reserr
 
