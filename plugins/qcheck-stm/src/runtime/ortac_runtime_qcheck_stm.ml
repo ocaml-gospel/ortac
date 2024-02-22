@@ -3,12 +3,14 @@ include Ortac_runtime
 
 type report = {
   mod_name : string;
+  init_sut : string;
   ret : res option;
   cmd : string;
   terms : (string * location) list;
 }
 
-let report mod_name ret cmd terms = { mod_name; ret; cmd; terms }
+let report mod_name init_sut ret cmd terms =
+  { mod_name; init_sut; ret; cmd; terms }
 
 let append a b =
   match (a, b) with
@@ -28,7 +30,7 @@ module Make (Spec : Spec) = struct
   open QCheck
   module Internal = Internal.Make (Spec) [@alert "-internal"]
 
-  let pp_trace ppf (trace, mod_name, ret) =
+  let pp_trace ppf (trace, mod_name, init_sut, ret) =
     let open Fmt in
     let pp_expected ppf = function
       | Some ret when not @@ is_dummy ret ->
@@ -45,7 +47,7 @@ module Make (Spec : Spec) = struct
           aux ppf xs
       | _ -> assert false
     in
-    pf ppf "@[open %s@\nlet sut = init_sut@\n%a@]" mod_name aux trace
+    pf ppf "@[open %s@\nlet sut = %s@\n%a@]" mod_name init_sut aux trace
 
   let pp_terms ppf err =
     let open Fmt in
@@ -60,7 +62,7 @@ module Make (Spec : Spec) = struct
        when executing the following sequence of operations:@\n\
        @;\
       \  @[%a@]@." report.cmd pp_terms report.terms pp_trace
-      (trace, report.mod_name, report.ret)
+      (trace, report.mod_name, report.init_sut, report.ret)
 
   let rec check_disagree postcond s sut cs =
     match cs with

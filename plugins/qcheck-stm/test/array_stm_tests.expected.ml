@@ -364,7 +364,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Array"
+              (Ortac_runtime.report "Array" "make 16 'a'"
                  (Some
                     (Res
                        (int,
@@ -444,7 +444,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "Array" None "get"
+                     (Ortac_runtime.report "Array" "make 16 'a'" None "get"
                         [("0 <= i < t.size",
                            {
                              Ortac_runtime.start =
@@ -496,7 +496,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Array"
+                        (Ortac_runtime.report "Array" "make 16 'a'"
                            (Some
                               (Res
                                  (char,
@@ -584,7 +584,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Array" None "get"
+                        (Ortac_runtime.report "Array" "make 16 'a'" None
+                           "get"
                            [("0 <= i < t.size",
                               {
                                 Ortac_runtime.start =
@@ -639,7 +640,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "Array" None "set"
+                     (Ortac_runtime.report "Array" "make 16 'a'" None "set"
                         [("0 <= i < t.size",
                            {
                              Ortac_runtime.start =
@@ -699,7 +700,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Array" None "set"
+                        (Ortac_runtime.report "Array" "make 16 'a'" None
+                           "set"
                            [("0 <= i < t.size",
                               {
                                 Ortac_runtime.start =
@@ -748,7 +750,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Array" None "fill"
+                        (Ortac_runtime.report "Array" "make 16 'a'" None
+                           "fill"
                            [("0 <= i",
                               {
                                 Ortac_runtime.start =
@@ -796,7 +799,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                        then None
                        else
                          Some
-                           (Ortac_runtime.report "Array" None "fill"
+                           (Ortac_runtime.report "Array" "make 16 'a'" None
+                              "fill"
                               [("0 <= j",
                                  {
                                    Ortac_runtime.start =
@@ -847,7 +851,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                        then None
                        else
                          Some
-                           (Ortac_runtime.report "Array" None "fill"
+                           (Ortac_runtime.report "Array" "make 16 'a'" None
+                              "fill"
                               [("i + j <= t.size",
                                  {
                                    Ortac_runtime.start =
@@ -901,7 +906,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                        then None
                        else
                          Some
-                           (Ortac_runtime.report "Array" None "fill"
+                           (Ortac_runtime.report "Array" "make 16 'a'" None
+                              "fill"
                               [("0 <= i",
                                  {
                                    Ortac_runtime.start =
@@ -949,7 +955,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                           then None
                           else
                             Some
-                              (Ortac_runtime.report "Array" None "fill"
+                              (Ortac_runtime.report "Array" "make 16 'a'"
+                                 None "fill"
                                  [("0 <= j",
                                     {
                                       Ortac_runtime.start =
@@ -1001,7 +1008,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                           then None
                           else
                             Some
-                              (Ortac_runtime.report "Array" None "fill"
+                              (Ortac_runtime.report "Array" "make 16 'a'"
+                                 None "fill"
                                  [("i + j <= t.size",
                                     {
                                       Ortac_runtime.start =
@@ -1046,7 +1054,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Array"
+              (Ortac_runtime.report "Array" "make 16 'a'"
                  (Some
                     (Res
                        ((list char),
@@ -1119,7 +1127,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Array"
+              (Ortac_runtime.report "Array" "make 16 'a'"
                  (Some (Res (Ortac_runtime.dummy, ()))) "mem"
                  [("b = List.mem a t.contents",
                     {

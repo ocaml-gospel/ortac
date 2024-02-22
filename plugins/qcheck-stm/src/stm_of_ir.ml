@@ -485,6 +485,7 @@ let postcond_case config state invariants idx state_ident new_state_ident value
               [
                 ( Nolabel,
                   estring @@ Ortac_core.Context.module_name config.context );
+                (Nolabel, estring config.init_sut_txt);
                 (* we report the expected returned value only for normal behaviour *)
                 (Nolabel, if normal then ret_val else enone);
                 (Nolabel, cmd);

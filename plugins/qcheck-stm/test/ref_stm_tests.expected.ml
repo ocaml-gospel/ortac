@@ -88,7 +88,7 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Ref"
+              (Ortac_runtime.report "Ref" "make 42"
                  (Some (Res (Ortac_runtime.dummy, ()))) "get"
                  [("i = r.value",
                     {

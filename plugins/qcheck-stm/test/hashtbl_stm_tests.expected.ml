@@ -320,7 +320,7 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "Hashtbl"
+                   (Ortac_runtime.report "Hashtbl" "create ~random:false 16"
                       (Some (Res (Ortac_runtime.dummy, ()))) "find"
                       [("List.mem (a, b) h.contents",
                          {
@@ -371,7 +371,8 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "Hashtbl" None "find"
+                   (Ortac_runtime.report "Hashtbl" "create ~random:false 16"
+                      None "find"
                       [("not (List.mem a (List.map fst h.contents))",
                          {
                            Ortac_runtime.start =
@@ -434,7 +435,7 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Hashtbl"
+              (Ortac_runtime.report "Hashtbl" "create ~random:false 16"
                  (Some (Res (Ortac_runtime.dummy, ()))) "find_opt"
                  [("match o with\n      | None -> not (List.mem a (List.map fst h.contents))\n      | Some b -> List.mem (a, b) h.contents",
                     {
@@ -485,7 +486,7 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Hashtbl"
+              (Ortac_runtime.report "Hashtbl" "create ~random:false 16"
                  (Some (Res (Ortac_runtime.dummy, ()))) "find_all"
                  [("bs = Sequence.filter_map (fun (x, y) -> if x = a then Some y else None) h.contents",
                     {
@@ -536,7 +537,7 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Hashtbl"
+              (Ortac_runtime.report "Hashtbl" "create ~random:false 16"
                  (Some (Res (Ortac_runtime.dummy, ()))) "mem"
                  [("b = List.mem a (List.map fst h.contents)",
                     {
@@ -587,7 +588,7 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Hashtbl"
+              (Ortac_runtime.report "Hashtbl" "create ~random:false 16"
                  (Some (Res (Ortac_runtime.dummy, ()))) "length"
                  [("i = List.length h.contents",
                     {

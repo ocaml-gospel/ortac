@@ -149,8 +149,8 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Invariants" (Some (Res (unit, ())))
-                 "push"
+              (Ortac_runtime.report "Invariants" "create 42"
+                 (Some (Res (unit, ()))) "push"
                  [("List.length x.contents > 0",
                     {
                       Ortac_runtime.start =
