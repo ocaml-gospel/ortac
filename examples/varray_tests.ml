@@ -82,29 +82,33 @@ module Spec =
       | Push_back x ->
           Format.asprintf "%s sut %a" "push_back"
             (Util.Pp.pp_elt Util.Pp.pp_char true) x
-      | Pop_back -> Format.asprintf "%s sut" "pop_back"
+      | Pop_back -> Format.asprintf "protect (fun () -> %s sut)" "pop_back"
       | Push_front x_1 ->
           Format.asprintf "%s sut %a" "push_front"
             (Util.Pp.pp_elt Util.Pp.pp_char true) x_1
-      | Pop_front -> Format.asprintf "%s sut" "pop_front"
+      | Pop_front -> Format.asprintf "protect (fun () -> %s sut)" "pop_front"
       | Insert_at (i_1, x_2) ->
-          Format.asprintf "%s sut %a %a" "insert_at" (Util.Pp.pp_int true)
-            i_1 (Util.Pp.pp_elt Util.Pp.pp_char true) x_2
+          Format.asprintf "protect (fun () -> %s sut %a %a)" "insert_at"
+            (Util.Pp.pp_int true) i_1 (Util.Pp.pp_elt Util.Pp.pp_char true)
+            x_2
       | Pop_at i_2 ->
-          Format.asprintf "%s sut %a" "pop_at" (Util.Pp.pp_int true) i_2
+          Format.asprintf "protect (fun () -> %s sut %a)" "pop_at"
+            (Util.Pp.pp_int true) i_2
       | Delete_at i_3 ->
-          Format.asprintf "%s sut %a" "delete_at" (Util.Pp.pp_int true) i_3
+          Format.asprintf "protect (fun () -> %s sut %a)" "delete_at"
+            (Util.Pp.pp_int true) i_3
       | Get i_4 ->
-          Format.asprintf "%s sut %a" "get" (Util.Pp.pp_int true) i_4
+          Format.asprintf "protect (fun () -> %s sut %a)" "get"
+            (Util.Pp.pp_int true) i_4
       | Set (i_5, v) ->
-          Format.asprintf "%s sut %a %a" "set" (Util.Pp.pp_int true) i_5
-            (Util.Pp.pp_elt Util.Pp.pp_char true) v
+          Format.asprintf "protect (fun () -> %s sut %a %a)" "set"
+            (Util.Pp.pp_int true) i_5 (Util.Pp.pp_elt Util.Pp.pp_char true) v
       | Length -> Format.asprintf "%s sut" "length"
       | Is_empty -> Format.asprintf "%s sut" "is_empty"
       | Fill (pos, len, x_3) ->
-          Format.asprintf "%s sut %a %a %a" "fill" (Util.Pp.pp_int true) pos
-            (Util.Pp.pp_int true) len (Util.Pp.pp_elt Util.Pp.pp_char true)
-            x_3
+          Format.asprintf "protect (fun () -> %s sut %a %a %a)" "fill"
+            (Util.Pp.pp_int true) pos (Util.Pp.pp_int true) len
+            (Util.Pp.pp_elt Util.Pp.pp_char true) x_3
     type nonrec state = {
       contents: char Ortac_runtime.Gospelstdlib.sequence }
     let init_state =

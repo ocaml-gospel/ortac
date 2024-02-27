@@ -37,8 +37,8 @@ module Spec =
     let show_cmd cmd__001_ =
       match cmd__001_ with
       | Set (i_1, a_2) ->
-          Format.asprintf "%s sut %a %a" "set" (Util.Pp.pp_int true) i_1
-            (Util.Pp.pp_char true) a_2
+          Format.asprintf "protect (fun () -> %s sut %a %a)" "set"
+            (Util.Pp.pp_int true) i_1 (Util.Pp.pp_char true) a_2
     type nonrec state = {
       contents: char list }
     let init_state =

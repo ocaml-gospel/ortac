@@ -748,9 +748,13 @@ let pp_cmd_case config value =
              type)"
     in
     let* fmt, pp_args = aux value.ty value.args in
-    let fmt = String.concat " " ("%s" :: fmt) |> estring in
+    let fmt =
+      let call = String.concat " " ("%s" :: fmt) in
+      if may_raise_exception value then "protect (fun () -> " ^ call ^ ")"
+      else call
+    in
     let args =
-      List.map (fun x -> (Nolabel, x)) (fmt :: estring name :: pp_args)
+      List.map (fun x -> (Nolabel, x)) (estring fmt :: estring name :: pp_args)
     in
     pexp_apply (qualify [ "Format" ] "asprintf") args |> ok
   in

@@ -47,7 +47,12 @@ module Make (Spec : Spec) = struct
           aux ppf xs
       | _ -> assert false
     in
-    pf ppf "@[open %s@\nlet sut = %s@\n%a@]" mod_name init_sut aux trace
+    pf ppf
+      "@[open %s@\n\
+       let protect f = try Ok (f ()) with e -> Error e@\n\
+       let sut = %s@\n\
+       %a@]"
+      mod_name init_sut aux trace
 
   let pp_terms ppf err =
     let open Fmt in

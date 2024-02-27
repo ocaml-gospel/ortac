@@ -17,13 +17,16 @@ module Spec =
     let show_cmd cmd__001_ =
       match cmd__001_ with
       | Length -> Format.asprintf "%s sut" "length"
-      | Get i -> Format.asprintf "%s sut %a" "get" (Util.Pp.pp_int true) i
+      | Get i ->
+          Format.asprintf "protect (fun () -> %s sut %a)" "get"
+            (Util.Pp.pp_int true) i
       | Set (i_1, a_1) ->
-          Format.asprintf "%s sut %a %a" "set" (Util.Pp.pp_int true) i_1
-            (Util.Pp.pp_char true) a_1
+          Format.asprintf "protect (fun () -> %s sut %a %a)" "set"
+            (Util.Pp.pp_int true) i_1 (Util.Pp.pp_char true) a_1
       | Fill (i_2, j, a_2) ->
-          Format.asprintf "%s sut %a %a %a" "fill" (Util.Pp.pp_int true) i_2
-            (Util.Pp.pp_int true) j (Util.Pp.pp_char true) a_2
+          Format.asprintf "protect (fun () -> %s sut %a %a %a)" "fill"
+            (Util.Pp.pp_int true) i_2 (Util.Pp.pp_int true) j
+            (Util.Pp.pp_char true) a_2
       | To_list -> Format.asprintf "%s sut" "to_list"
       | Mem a_3 ->
           Format.asprintf "%s %a sut" "mem" (Util.Pp.pp_char true) a_3

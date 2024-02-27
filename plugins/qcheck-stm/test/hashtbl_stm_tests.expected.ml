@@ -53,7 +53,8 @@ module Spec =
           Format.asprintf "%s sut %a %a" "add" (Util.Pp.pp_char true) a_2
             (Util.Pp.pp_int true) b_2
       | Find a_3 ->
-          Format.asprintf "%s sut %a" "find" (Util.Pp.pp_char true) a_3
+          Format.asprintf "protect (fun () -> %s sut %a)" "find"
+            (Util.Pp.pp_char true) a_3
       | Find_opt a_4 ->
           Format.asprintf "%s sut %a" "find_opt" (Util.Pp.pp_char true) a_4
       | Find_all a_5 ->

@@ -25,8 +25,8 @@ module Spec =
           Format.asprintf "%s %a sut" "add_l" (Util.Pp.pp_int true) a_1
       | Add_r a_2 ->
           Format.asprintf "%s %a sut" "add_r" (Util.Pp.pp_int true) a_2
-      | Take_l -> Format.asprintf "%s sut" "take_l"
-      | Take_r -> Format.asprintf "%s sut" "take_r"
+      | Take_l -> Format.asprintf "protect (fun () -> %s sut)" "take_l"
+      | Take_r -> Format.asprintf "protect (fun () -> %s sut)" "take_r"
       | Take_opt_l -> Format.asprintf "%s sut" "take_opt_l"
       | Take_opt_r -> Format.asprintf "%s sut" "take_opt_r"
     type nonrec state = {
