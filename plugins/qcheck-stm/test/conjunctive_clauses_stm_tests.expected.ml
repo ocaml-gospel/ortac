@@ -200,7 +200,7 @@ let ortac_postcond cmd__006_ state__007_ res__008_ =
                  else
                    Some
                      (Ortac_runtime.report "Conjunctive_clauses"
-                        "make 42 'a'" None "set"
+                        "make 42 'a'" (Either.left "Invalid_argument") "set"
                         [("0 <= i < List.length t.contents",
                            {
                              Ortac_runtime.start =
@@ -261,7 +261,8 @@ let ortac_postcond cmd__006_ state__007_ res__008_ =
                     else
                       Some
                         (Ortac_runtime.report "Conjunctive_clauses"
-                           "make 42 'a'" None "set"
+                           "make 42 'a'" (Either.left "Invalid_argument")
+                           "set"
                            [("0 <= i < List.length t.contents",
                               {
                                 Ortac_runtime.start =

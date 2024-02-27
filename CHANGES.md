@@ -2,7 +2,8 @@
 
 - Improve test-failure message
   [\#202](https://github.com/ocaml-gospel/ortac/pull/202) and
-  [\#204](https://github.com/ocaml-gospel/ortac/pull/204)
+  [\#204](https://github.com/ocaml-gospel/ortac/pull/204) and
+  [\#206](https://github.com/ocaml-gospel/ortac/pull/206)
 - Add a comment warning that the file is generated
   [\#198](https://github.com/ocaml-gospel/ortac/pull/198)
 - Add support for type invariants

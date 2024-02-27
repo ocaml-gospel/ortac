@@ -115,7 +115,7 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
              else
                Some
                  (Ortac_runtime.report "Record" "make 42"
-                    (Some (Res (Ortac_runtime.dummy, ()))) "get"
+                    (Either.right (Res (Ortac_runtime.dummy, ()))) "get"
                     [("i = r.value",
                        {
                          Ortac_runtime.start =
@@ -166,7 +166,7 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
                 else
                   Some
                     (Ortac_runtime.report "Record" "make 42"
-                       (Some (Res (Ortac_runtime.dummy, ()))) "get"
+                       (Either.right (Res (Ortac_runtime.dummy, ()))) "get"
                        [("plus1 i = i + 1",
                           {
                             Ortac_runtime.start =
@@ -215,7 +215,7 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
                 else
                   Some
                     (Ortac_runtime.report "Record" "make 42"
-                       (Some (Res (Ortac_runtime.dummy, ()))) "get"
+                       (Either.right (Res (Ortac_runtime.dummy, ()))) "get"
                        [("plus2 i = i + 2",
                           {
                             Ortac_runtime.start =

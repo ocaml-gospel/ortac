@@ -11,6 +11,16 @@ let res_default = Ident.create ~loc:Location.none "res"
 let list_append = list_fold_expr (qualify [ "Ortac_runtime" ] "append") "None"
 let res = lident "Res"
 
+let eeither case e =
+  pexp_construct (noloc (Ldot (Lident "Either", case))) (Some e)
+
+let eleft = eeither "left"
+let eright = eeither "right"
+
+let eprotect call =
+  let lazy_call = efun [ (Nolabel, punit) ] call in
+  pexp_apply (evar "protect") [ (Nolabel, lazy_call); (Nolabel, eunit) ]
+
 let may_raise_exception v =
   match (v.postcond.exceptional, v.postcond.checks) with
   | [], [] -> false
@@ -295,12 +305,7 @@ let run_case config sut_name value =
       in
       pexp_apply efun (aux value.ty (List.map snd value.args))
     in
-    let call =
-      if may_raise_exception value then
-        let lazy_call = efun [ (Nolabel, punit) ] call in
-        pexp_apply (evar "protect") [ (Nolabel, lazy_call); (Nolabel, eunit) ]
-      else call
-    in
+    let call = if may_raise_exception value then eprotect call else call in
     let args = Some (pexp_tuple [ ty_show; call ]) in
     pexp_construct res args |> ok
   in
@@ -470,13 +475,16 @@ let postcond_case config state invariants idx state_ident new_state_ident value
             ( Incomplete_ret_val_computation (Fmt.str "%a" Ident.pp value.id),
               value.id.id_loc )
         in
-        ok @@ esome dummy
-    | Some e -> ok @@ esome e
+        ok dummy
+    | Some e -> ok e
   in
-  let wrap_check ?(normal = false) t e =
+  let wrap_check ?(exn = None) t e =
     let term = estring t.text
     and cmd = Fmt.str "%a" Ident.pp value.id |> estring
-    and l = t.Ir.term.Gospel.Tterm.t_loc |> elocation in
+    and l = t.Ir.term.Gospel.Tterm.t_loc |> elocation
+    and ret_val =
+      match exn with Some e -> eleft @@ estring e | None -> eright ret_val
+    in
     pexp_ifthenelse e enone
       (Some
          (esome
@@ -486,8 +494,7 @@ let postcond_case config state invariants idx state_ident new_state_ident value
                 ( Nolabel,
                   estring @@ Ortac_core.Context.module_name config.context );
                 (Nolabel, estring config.init_sut_txt);
-                (* we report the expected returned value only for normal behaviour *)
-                (Nolabel, if normal then ret_val else enone);
+                (Nolabel, ret_val);
                 (Nolabel, cmd);
                 (Nolabel, elist [ pexp_tuple [ term; l ] ]);
               ]))
@@ -542,14 +549,11 @@ let postcond_case config state invariants idx state_ident new_state_ident value
       aux idx value.postcond.normal
     in
     (* [postcond] and [invariants] are specification of normal behaviour *)
-    let* postcond =
-      map (fun t -> wrap_check ~normal:true t <$> translate_postcond t) normal
+    let* postcond = map (fun t -> wrap_check t <$> translate_postcond t) normal
     and* invariants =
       Option.fold ~none:(ok [])
         ~some:(fun (id, xs) ->
-          map
-            (fun t -> wrap_check ~normal:true t <$> translate_invariants id t)
-            xs)
+          map (fun t -> wrap_check t <$> translate_invariants id t) xs)
         invariants
     in
     list_append (postcond @ invariants) |> ok
@@ -574,13 +578,15 @@ let postcond_case config state invariants idx state_ident new_state_ident value
         Fun.flip ( @ ) [ case ~lhs:ppat_any ~guard:None ~rhs:enone ]
         <$> map
               (fun (x, p, t) ->
+                let xstr = Fmt.str "%a" Ident.pp x.Gospel.Ttypes.xs_ident in
                 let lhs =
-                  ppat_construct
-                    (Fmt.str "%a" Ident.pp x.Gospel.Ttypes.xs_ident |> lident)
+                  ppat_construct (lident xstr)
                     (Option.map Ortac_core.Ocaml_of_gospel.pattern p)
                 in
                 let lhs = ppat_construct (lident "Error") (Some lhs) in
-                let* rhs = wrap_check t <$> translate_postcond t in
+                let* rhs =
+                  wrap_check ~exn:(Some xstr) t <$> translate_postcond t
+                in
                 case ~lhs ~guard:None ~rhs |> ok)
               value.postcond.exceptional
       in
@@ -590,7 +596,10 @@ let postcond_case config state invariants idx state_ident new_state_ident value
   let* rhs =
     let translate_checks = translate_checks config state value state_ident in
     let* checks =
-      map (fun t -> wrap_check t <$> translate_checks t) value.postcond.checks
+      map
+        (fun t ->
+          wrap_check ~exn:(Some "Invalid_argument") t <$> translate_checks t)
+        value.postcond.checks
     in
     match checks with
     | [] -> ok rhs

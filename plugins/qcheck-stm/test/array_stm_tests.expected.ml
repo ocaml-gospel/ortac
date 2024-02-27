@@ -368,7 +368,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
           else
             Some
               (Ortac_runtime.report "Array" "make 16 'a'"
-                 (Some
+                 (Either.right
                     (Res
                        (int,
                          (try (Lazy.force new_state__011_).size
@@ -447,7 +447,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "Array" "make 16 'a'" None "get"
+                     (Ortac_runtime.report "Array" "make 16 'a'"
+                        (Either.left "Invalid_argument") "get"
                         [("0 <= i < t.size",
                            {
                              Ortac_runtime.start =
@@ -500,7 +501,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                     else
                       Some
                         (Ortac_runtime.report "Array" "make 16 'a'"
-                           (Some
+                           (Either.right
                               (Res
                                  (char,
                                    (try
@@ -587,8 +588,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Array" "make 16 'a'" None
-                           "get"
+                        (Ortac_runtime.report "Array" "make 16 'a'"
+                           (Either.left "Invalid_argument") "get"
                            [("0 <= i < t.size",
                               {
                                 Ortac_runtime.start =
@@ -643,7 +644,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "Array" "make 16 'a'" None "set"
+                     (Ortac_runtime.report "Array" "make 16 'a'"
+                        (Either.left "Invalid_argument") "set"
                         [("0 <= i < t.size",
                            {
                              Ortac_runtime.start =
@@ -703,8 +705,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Array" "make 16 'a'" None
-                           "set"
+                        (Ortac_runtime.report "Array" "make 16 'a'"
+                           (Either.left "Invalid_argument") "set"
                            [("0 <= i < t.size",
                               {
                                 Ortac_runtime.start =
@@ -753,8 +755,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Array" "make 16 'a'" None
-                           "fill"
+                        (Ortac_runtime.report "Array" "make 16 'a'"
+                           (Either.left "Invalid_argument") "fill"
                            [("0 <= i",
                               {
                                 Ortac_runtime.start =
@@ -802,8 +804,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                        then None
                        else
                          Some
-                           (Ortac_runtime.report "Array" "make 16 'a'" None
-                              "fill"
+                           (Ortac_runtime.report "Array" "make 16 'a'"
+                              (Either.left "Invalid_argument") "fill"
                               [("0 <= j",
                                  {
                                    Ortac_runtime.start =
@@ -854,8 +856,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                        then None
                        else
                          Some
-                           (Ortac_runtime.report "Array" "make 16 'a'" None
-                              "fill"
+                           (Ortac_runtime.report "Array" "make 16 'a'"
+                              (Either.left "Invalid_argument") "fill"
                               [("i + j <= t.size",
                                  {
                                    Ortac_runtime.start =
@@ -909,8 +911,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                        then None
                        else
                          Some
-                           (Ortac_runtime.report "Array" "make 16 'a'" None
-                              "fill"
+                           (Ortac_runtime.report "Array" "make 16 'a'"
+                              (Either.left "Invalid_argument") "fill"
                               [("0 <= i",
                                  {
                                    Ortac_runtime.start =
@@ -959,7 +961,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                           else
                             Some
                               (Ortac_runtime.report "Array" "make 16 'a'"
-                                 None "fill"
+                                 (Either.left "Invalid_argument") "fill"
                                  [("0 <= j",
                                     {
                                       Ortac_runtime.start =
@@ -1012,7 +1014,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                           else
                             Some
                               (Ortac_runtime.report "Array" "make 16 'a'"
-                                 None "fill"
+                                 (Either.left "Invalid_argument") "fill"
                                  [("i + j <= t.size",
                                     {
                                       Ortac_runtime.start =
@@ -1058,7 +1060,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
           else
             Some
               (Ortac_runtime.report "Array" "make 16 'a'"
-                 (Some
+                 (Either.right
                     (Res
                        ((list char),
                          (try (Lazy.force new_state__011_).contents
@@ -1131,7 +1133,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
           else
             Some
               (Ortac_runtime.report "Array" "make 16 'a'"
-                 (Some (Res (Ortac_runtime.dummy, ()))) "mem"
+                 (Either.right (Res (Ortac_runtime.dummy, ()))) "mem"
                  [("b = List.mem a t.contents",
                     {
                       Ortac_runtime.start =
