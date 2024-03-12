@@ -14,16 +14,6 @@ let may_raise_exception v =
   | [], [] -> false
   | _, _ -> true
 
-let qualify ms v =
-  let lid =
-    match ms with
-    | [] -> Lident v
-    | m :: ms ->
-        let pref = List.fold_left (fun acc x -> Ldot (acc, x)) (Lident m) ms in
-        Ldot (pref, v)
-  in
-  Ast_helper.Exp.ident (noloc lid)
-
 let subst_core_type inst ty =
   let rec aux ty =
     {
