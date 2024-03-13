@@ -14,16 +14,6 @@ let may_raise_exception v =
   | [], [] -> false
   | _, _ -> true
 
-let qualify ms v =
-  let lid =
-    match ms with
-    | [] -> Lident v
-    | m :: ms ->
-        let pref = List.fold_left (fun acc x -> Ldot (acc, x)) (Lident m) ms in
-        Ldot (pref, v)
-  in
-  Ast_helper.Exp.ident (noloc lid)
-
 let subst_core_type inst ty =
   let rec aux ty =
     {
@@ -429,11 +419,16 @@ let precond config ir =
   in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
-let postcond_case config state idx state_ident new_state_ident value =
+let postcond_case config state invariants idx state_ident new_state_ident value
+    =
   let open Reserr in
   let translate_postcond t =
     subst_term state ~gos_t:value.sut_var ~old_t:(Some state_ident) ~new_lz:true
       ~new_t:(Some new_state_ident) t
+    >>= ocaml_of_term config
+  and translate_invariants id t =
+    subst_term state ~gos_t:id ~old_t:None ~new_t:(Some new_state_ident)
+      ~new_lz:true t
     >>= ocaml_of_term config
   in
   let idx = List.sort Int.compare idx in
@@ -485,7 +480,13 @@ let postcond_case config state idx state_ident new_state_ident value =
       in
       aux idx value.postcond.normal
     in
-    list_and <$> map translate_postcond normal
+    let* postcond = map translate_postcond normal
+    and* invariants =
+      Option.fold ~none:(ok [])
+        ~some:(fun (id, xs) -> map (translate_invariants id) xs)
+        invariants
+    in
+    list_and (postcond @ invariants) |> ok
   in
   let res, pat_ret =
     match value.ret with
@@ -568,8 +569,8 @@ let postcond config idx ir =
     (Fun.flip ( @ )) [ case ~lhs:ppat_any ~guard:None ~rhs:(ebool true) ]
     <$> map
           (fun v ->
-            postcond_case config ir.state (List.assoc v.id idx) state_ident
-              new_state_ident v)
+            postcond_case config ir.state ir.invariants (List.assoc v.id idx)
+              state_ident new_state_ident v)
           ir.values
   in
   let body =
@@ -725,8 +726,36 @@ let init_state config ir =
                      Ppxlib.Location.none )))
       ir.state
   in
-  let expr = pexp_record fields None |> bindings in
-  let pat = pvar "init_state" in
+  let expr = pexp_record fields None |> bindings and pat = pvar "init_state" in
+  pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
+
+let check_init_state config ir =
+  let init_state = qualify [ "Spec" ] "init_state" in
+  let open Reserr in
+  let state_name = gen_symbol ~prefix:"__state" () in
+  let state_pat = pvar state_name
+  and state_id = Ident.create ~loc:Location.none state_name in
+  let translate_invariants id t =
+    enot
+    <$> (subst_term ir.state ~gos_t:id ~old_t:None ~new_t:(Some state_id) t
+        >>= ocaml_of_term config)
+  and msg =
+    let f = qualify [ "QCheck"; "Test" ] "fail_report"
+    and s = estring "INIT_SUT violates type invariants for SUT" in
+    eapply f [ s ]
+  in
+  let* expr =
+    (function
+      | [] -> eunit
+      | xs ->
+          pexp_let Nonrecursive
+            [ value_binding ~pat:state_pat ~expr:init_state ]
+            (pexp_ifthenelse (list_or xs) msg None))
+    <$> Option.fold ~none:(ok [])
+          ~some:(fun (id, xs) -> map (translate_invariants id) xs)
+          ir.invariants
+  in
+  let pat = pvar "check_init_state" and expr = efun [ (Nolabel, punit) ] expr in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
 let ghost_function config fct =
@@ -770,6 +799,12 @@ let ghost_functions config =
   in
   aux config []
 
+let agree_prop =
+  [%stri
+    let agree_prop cs =
+      check_init_state ();
+      STMTests.agree_prop cs]
+
 let stm include_ config ir =
   let open Reserr in
   let* config, ghost_functions = ghost_functions config ir.ghost_functions in
@@ -796,6 +831,7 @@ let stm include_ config ir =
   let* run = run config ir in
   let* arb_cmd = arb_cmd ir in
   let* init_state = init_state config ir in
+  let* check_init_state = check_init_state config ir in
   let cleanup =
     let pat = pvar "cleanup" in
     let expr = efun [ (Nolabel, ppat_any) ] eunit in
@@ -845,9 +881,13 @@ let stm include_ config ir =
       let _ =
         QCheck_base_runner.run_tests_main
           (let count = 1000 in
-           [ STMTests.agree_test ~count ~name:[%e descr] ])]
+           [
+             QCheck.Test.make ~count ~name:[%e descr]
+               (STMTests.arb_cmds Spec.init_state)
+               agree_prop;
+           ])]
   in
   ok
     ([ open_mod module_name ]
     @ ghost_functions
-    @ [ stm_spec; tests; call_tests ])
+    @ [ stm_spec; tests; check_init_state; agree_prop; call_tests ])

@@ -5,13 +5,33 @@ include Ast_builder.Make (struct
 end)
 
 let noloc txt = { txt; loc = Location.none }
-let epred e = eapply (evar "Ortac_runtime.Gospelstdlib.pred") [ e ]
-let esucc e = eapply (evar "Ortac_runtime.Gospelstdlib.succ") [ e ]
+let lident s = noloc (lident s)
+
+let qualify ms v =
+  let lid =
+    match ms with
+    | [] -> Lident v
+    | m :: ms ->
+        let pref = List.fold_left (fun acc x -> Ldot (acc, x)) (Lident m) ms in
+        Ldot (pref, v)
+  in
+  Ast_helper.Exp.ident (noloc lid)
+
+let epred e =
+  let f = qualify [ "Ortac_runtime"; "Gospelstdlib" ] "pred" in
+  eapply f [ e ]
+
+let esucc e =
+  let f = qualify [ "Ortac_runtime"; "Gospelstdlib" ] "succ" in
+  eapply f [ e ]
+
+let enot e = eapply (pexp_ident (lident "not")) [ e ]
 
 let econst = function
   | Pconst_integer (c, o) ->
       Pconst_integer (c, o) |> pexp_constant |> fun e ->
-      eapply (evar "Ortac_runtime.Gospelstdlib.integer_of_int") [ e ]
+      let f = qualify [ "Ortac_runtime"; "Gospelstdlib" ] "integer_of_int" in
+      eapply f [ e ]
   | _ as e -> pexp_constant e
 
 let eposition pos =
@@ -37,8 +57,6 @@ let efun args expr =
       pexp_fun label None p)
     args expr
 
-let lident s = noloc (lident s)
-
 let list_fold_right1 op v xs =
   let rec aux = function
     | [ x ] -> x
@@ -52,3 +70,9 @@ let list_and xs =
     pexp_apply (pexp_ident (lident "&&")) [ (Nolabel, e1); (Nolabel, e2) ]
   and etrue = pexp_construct (lident "true") None in
   list_fold_right1 ( &&& ) etrue xs
+
+let list_or xs =
+  let ( ||| ) e1 e2 =
+    pexp_apply (pexp_ident (lident "||")) [ (Nolabel, e1); (Nolabel, e2) ]
+  and efalse = pexp_construct (lident "false") None in
+  list_fold_right1 ( ||| ) efalse xs

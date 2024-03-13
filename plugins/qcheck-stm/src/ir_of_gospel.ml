@@ -219,39 +219,27 @@ let sig_item config init_fct state s =
       else Some (val_desc config state vd)
   | _ -> None
 
-let state config sigs =
+let state_and_invariants config sigs =
   let sut_name = Cfg.get_sut_type_name_str config in
   let is_sut_decl s =
     let p t = t.td_ts.ts_ident.id_str = sut_name in
     match s.sig_desc with
-    | Sig_type (_, ts, _) -> (
-        List.filter p ts |> function
-        | [] -> None
-        | [ t ] -> Some t
-        (* As multiple type declarations with the same name is illegal, last
-           case can't happen *)
-        | _ -> assert false)
+    | Sig_type (_, ts, _) -> List.find_opt p ts
     | _ -> None
   in
   let open Reserr in
   let* ty =
-    match List.filter_map is_sut_decl sigs with
-    | [] -> error (No_sut_type sut_name, Ppxlib.Location.none)
-    | [ ty ] -> ok ty
-    (* As multiple type declarations with the same name is illegal, last
-       case can't happen *)
-    | _ -> assert false
+    List.filter_map is_sut_decl sigs
+    |> Fun.flip List.nth_opt 0
+    |> of_option ~default:(No_sut_type sut_name, Ppxlib.Location.none)
   in
   let open Ortac_core in
   let* subst =
     Fun.flip List.assoc_opt
     <$> (Ocaml_of_gospel.core_type_of_tysymbol ~context:config.context ty.td_ts
         |> unify (`Type ty) config.sut_core_type)
-  in
-  let* spec =
-    match ty.td_spec with
-    | None -> error (Sut_type_not_specified sut_name, ty.td_loc)
-    | Some spec -> ok spec
+  and* spec =
+    of_option ~default:(Sut_type_not_specified sut_name, ty.td_loc) ty.td_spec
   in
   let process_model (ls, _) =
     let open Symbols in
@@ -260,9 +248,15 @@ let state config sigs =
       |> Ocaml_of_gospel.core_type_of_ty_with_subst ~context:config.context
            subst )
   in
-  match spec.ty_fields with
-  | [] -> error (No_models sut_name, spec.ty_loc)
-  | xs -> List.map process_model xs |> ok
+  let* state =
+    match spec.ty_fields with
+    | [] -> error (No_models sut_name, spec.ty_loc)
+    | xs -> List.map process_model xs |> ok
+  in
+  let invariants =
+    Option.map (fun (vs, xs) -> (vs.Symbols.vs_name, xs)) spec.ty_invariants
+  in
+  ok (state, invariants)
 
 let init_state config state sigs =
   let open Cfg in
@@ -383,8 +377,8 @@ let ghost_functions =
 let run sigs config =
   let open Reserr in
   let open Ir in
-  let* state = state config sigs in
+  let* state, invariants = state_and_invariants config sigs in
   let* init_fct, init_state = init_state config state sigs in
   let ghost_functions = ghost_functions sigs in
   let* values = signature config init_fct state sigs in
-  ok { state; init_state; ghost_functions; values }
+  ok { state; invariants; init_state; ghost_functions; values }
