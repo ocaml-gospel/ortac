@@ -65,14 +65,12 @@ let list_fold_right1 op v xs =
   in
   match xs with [] -> v | _ -> aux xs
 
-let list_and xs =
-  let ( &&& ) e1 e2 =
-    pexp_apply (pexp_ident (lident "&&")) [ (Nolabel, e1); (Nolabel, e2) ]
-  and etrue = pexp_construct (lident "true") None in
-  list_fold_right1 ( &&& ) etrue xs
+let list_fold_expr op base =
+  let ( ** ) e1 e2 = pexp_apply op [ (Nolabel, e1); (Nolabel, e2) ]
+  and ebase = pexp_construct (lident base) None in
+  list_fold_right1 ( ** ) ebase
 
-let list_or xs =
-  let ( ||| ) e1 e2 =
-    pexp_apply (pexp_ident (lident "||")) [ (Nolabel, e1); (Nolabel, e2) ]
-  and efalse = pexp_construct (lident "false") None in
-  list_fold_right1 ( ||| ) efalse xs
+let list_and = list_fold_expr (pexp_ident (lident "&&")) "true"
+let list_or = list_fold_expr (pexp_ident (lident "||")) "false"
+let enone = pexp_construct (lident "None") None
+let esome e = pexp_construct (lident "Some") (Some e)

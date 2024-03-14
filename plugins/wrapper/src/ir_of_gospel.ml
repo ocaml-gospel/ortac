@@ -7,6 +7,7 @@ open Ir
 open Ppxlib
 open Ortac_core.Builder
 module Ident = Identifier.Ident
+open Ortac_core.Utils
 
 let term ~context fail t =
   try
@@ -312,13 +313,6 @@ module P = struct
 end
 
 let register_name = gen_symbol ~prefix:"__error"
-
-let term_printer text global_loc (t : Tterm.term) =
-  try
-    String.sub text
-      (t.t_loc.loc_start.pos_cnum - global_loc.loc_start.pos_cnum)
-      (t.t_loc.loc_end.pos_cnum - t.t_loc.loc_start.pos_cnum)
-  with Invalid_argument _ -> Fmt.str "%a" Tterm_printer.print_term t
 
 let type_of_ty ~ir (ty : Ttypes.ty) =
   match ty.ty_node with

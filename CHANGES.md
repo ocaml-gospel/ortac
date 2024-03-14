@@ -1,5 +1,7 @@
 # Unreleased
 
+- Improve test-failure message
+  [\#202](https://github.com/ocaml-gospel/ortac/pull/202)
 - Add a comment warning that the file is generated
   [\#198](https://github.com/ocaml-gospel/ortac/pull/198)
 - Add support for type invariants

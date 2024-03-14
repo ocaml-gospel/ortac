@@ -56,7 +56,7 @@
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime)
+  ortac-runtime-qcheck-stm)
  (package ortac-examples)
  (action
   (run
