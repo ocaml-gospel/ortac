@@ -1,6 +1,6 @@
 This file test the behaviour of the `qcheck-stm` sub-command of the `dune` plugin.
 
-$ export ORTAC_ONLY_PLUGIN=dune-rules
+  $ export ORTAC_ONLY_PLUGIN=dune-rules
 
 Without the optional output argument (for the dune rules, output for the generated OCaml
 have to be set), the rules are printed on stdout. This is useful to check what will be
