@@ -45,6 +45,7 @@ type value = {
   args : (Ppxlib.core_type * Ident.t option) list;
       (* arguments of unit types can be nameless *)
   ret : Ident.t list;
+  ret_values : term list list;
   next_state : next_state;
   precond : Tterm.term list;
   postcond : postcond;
@@ -63,8 +64,19 @@ let get_return_type value =
   in
   aux value.ty
 
-let value id ty inst sut_var args ret next_state precond postcond =
-  { id; ty; inst; sut_var; args; ret; next_state; precond; postcond }
+let value id ty inst sut_var args ret ret_values next_state precond postcond =
+  {
+    id;
+    ty;
+    inst;
+    sut_var;
+    args;
+    ret;
+    ret_values;
+    next_state;
+    precond;
+    postcond;
+  }
 
 type t = {
   state : (Ident.t * Ppxlib.core_type) list;

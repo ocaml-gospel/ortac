@@ -11,7 +11,8 @@ module Spec =
       | Push of int 
     let show_cmd cmd__001_ =
       match cmd__001_ with
-      | Push a_1 -> Format.asprintf "%s %a" "push" (Util.Pp.pp_int true) a_1
+      | Push a_1 ->
+          Format.asprintf "%s %a sut" "push" (Util.Pp.pp_int true) a_1
     type nonrec state = {
       contents: int list }
     let init_state =
@@ -148,7 +149,8 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
           then None
           else
             Some
-              (Ortac_runtime.report "push"
+              (Ortac_runtime.report "Invariants" "create 42"
+                 (Some (Res (unit, ()))) "push"
                  [("List.length x.contents > 0",
                     {
                       Ortac_runtime.start =

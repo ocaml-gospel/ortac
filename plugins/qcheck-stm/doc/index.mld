@@ -263,6 +263,10 @@ val type_not_supported : new_type -> 'a t -> new_type
 
 {@sh[
 $ ortac qcheck-stm example_unknown_type.mli "make 42 'a'" "char t" -o foo.ml
+File "example_unknown_type.mli", line 15, characters 0-87:
+15 | val type_not_supported : new_type -> 'a t -> new_type
+16 | (*@ y = type_not_supported x t *)
+Warning: Incomplete computation of the returned value in the specification of type_not_supported. Failure message won't be able to display the expected returned value.
 $ grep -A 1 "type cmd" foo.ml
     type cmd =
       | Type_not_supported of new_type
@@ -348,6 +352,11 @@ the command will generate the following warning:
 
 {@sh[
 $ ortac qcheck-stm example_ill_formed_quantification.mli "make 42 'a'" "char t" -o foo.ml
+File "example_ill_formed_quantification.mli", line 13, characters 0-142:
+13 | val unsupported_quantification : 'a t -> bool
+14 | (*@ b = unsupported_quantification t
+15 |     ensures b = forall a. List.mem a t.contents -> a = a *)
+Warning: Incomplete computation of the returned value in the specification of unsupported_quantification. Failure message won't be able to display the expected returned value.
 File "example_ill_formed_quantification.mli", line 15, characters 16-56:
 15 |     ensures b = forall a. List.mem a t.contents -> a = a *)
                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -422,6 +431,10 @@ File "example_limitations.mli", line 28, characters 15-25:
 28 | val for_all : ('a -> bool) -> 'a t -> bool
                     ^^^^^^^^^^
 Warning: Skipping for_all: functions are not supported yet as arguments.
+File "example_limitations.mli", line 22, characters 0-50:
+22 | val g : int * int -> 'a t -> bool
+23 | (*@ b = g x t *)
+Warning: Incomplete computation of the returned value in the specification of g. Failure message won't be able to display the expected returned value.
 File "example_limitations.mli", line 22, characters 8-17:
 22 | val g : int * int -> 'a t -> bool
              ^^^^^^^^^

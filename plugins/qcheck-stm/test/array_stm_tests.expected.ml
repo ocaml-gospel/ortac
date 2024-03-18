@@ -16,16 +16,17 @@ module Spec =
       | Mem of char 
     let show_cmd cmd__001_ =
       match cmd__001_ with
-      | Length -> Format.asprintf "%s" "length"
-      | Get i -> Format.asprintf "%s %a" "get" (Util.Pp.pp_int true) i
+      | Length -> Format.asprintf "%s sut" "length"
+      | Get i -> Format.asprintf "%s sut %a" "get" (Util.Pp.pp_int true) i
       | Set (i_1, a_1) ->
-          Format.asprintf "%s %a %a" "set" (Util.Pp.pp_int true) i_1
+          Format.asprintf "%s sut %a %a" "set" (Util.Pp.pp_int true) i_1
             (Util.Pp.pp_char true) a_1
       | Fill (i_2, j, a_2) ->
-          Format.asprintf "%s %a %a %a" "fill" (Util.Pp.pp_int true) i_2
+          Format.asprintf "%s sut %a %a %a" "fill" (Util.Pp.pp_int true) i_2
             (Util.Pp.pp_int true) j (Util.Pp.pp_char true) a_2
-      | To_list -> Format.asprintf "%s" "to_list"
-      | Mem a_3 -> Format.asprintf "%s %a" "mem" (Util.Pp.pp_char true) a_3
+      | To_list -> Format.asprintf "%s sut" "to_list"
+      | Mem a_3 ->
+          Format.asprintf "%s %a sut" "mem" (Util.Pp.pp_char true) a_3
     type nonrec state = {
       size: int ;
       contents: char list }
@@ -363,7 +364,32 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
           then None
           else
             Some
-              (Ortac_runtime.report "length"
+              (Ortac_runtime.report "Array" "make 16 'a'"
+                 (Some
+                    (Res
+                       (int,
+                         (try (Lazy.force new_state__011_).size
+                          with
+                          | e ->
+                              raise
+                                (Ortac_runtime.Partial_function
+                                   (e,
+                                     {
+                                       Ortac_runtime.start =
+                                         {
+                                           pos_fname = "array.mli";
+                                           pos_lnum = 7;
+                                           pos_bol = 238;
+                                           pos_cnum = 254
+                                         };
+                                       Ortac_runtime.stop =
+                                         {
+                                           pos_fname = "array.mli";
+                                           pos_lnum = 7;
+                                           pos_bol = 238;
+                                           pos_cnum = 260
+                                         }
+                                     })))))) "length"
                  [("i = t.size",
                     {
                       Ortac_runtime.start =
@@ -418,7 +444,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "get"
+                     (Ortac_runtime.report "Array" "make 16 'a'" None "get"
                         [("0 <= i < t.size",
                            {
                              Ortac_runtime.start =
@@ -470,7 +496,36 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "get"
+                        (Ortac_runtime.report "Array" "make 16 'a'"
+                           (Some
+                              (Res
+                                 (char,
+                                   (try
+                                      Ortac_runtime.Gospelstdlib.List.nth
+                                        (Lazy.force new_state__011_).contents
+                                        (Ortac_runtime.Gospelstdlib.integer_of_int
+                                           i)
+                                    with
+                                    | e ->
+                                        raise
+                                          (Ortac_runtime.Partial_function
+                                             (e,
+                                               {
+                                                 Ortac_runtime.start =
+                                                   {
+                                                     pos_fname = "array.mli";
+                                                     pos_lnum = 12;
+                                                     pos_bol = 405;
+                                                     pos_cnum = 421
+                                                   };
+                                                 Ortac_runtime.stop =
+                                                   {
+                                                     pos_fname = "array.mli";
+                                                     pos_lnum = 12;
+                                                     pos_bol = 405;
+                                                     pos_cnum = 442
+                                                   }
+                                               })))))) "get"
                            [("a = List.nth t.contents i",
                               {
                                 Ortac_runtime.start =
@@ -529,7 +584,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "get"
+                        (Ortac_runtime.report "Array" "make 16 'a'" None
+                           "get"
                            [("0 <= i < t.size",
                               {
                                 Ortac_runtime.start =
@@ -584,7 +640,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "set"
+                     (Ortac_runtime.report "Array" "make 16 'a'" None "set"
                         [("0 <= i < t.size",
                            {
                              Ortac_runtime.start =
@@ -644,7 +700,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "set"
+                        (Ortac_runtime.report "Array" "make 16 'a'" None
+                           "set"
                            [("0 <= i < t.size",
                               {
                                 Ortac_runtime.start =
@@ -693,7 +750,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "fill"
+                        (Ortac_runtime.report "Array" "make 16 'a'" None
+                           "fill"
                            [("0 <= i",
                               {
                                 Ortac_runtime.start =
@@ -741,7 +799,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                        then None
                        else
                          Some
-                           (Ortac_runtime.report "fill"
+                           (Ortac_runtime.report "Array" "make 16 'a'" None
+                              "fill"
                               [("0 <= j",
                                  {
                                    Ortac_runtime.start =
@@ -792,7 +851,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                        then None
                        else
                          Some
-                           (Ortac_runtime.report "fill"
+                           (Ortac_runtime.report "Array" "make 16 'a'" None
+                              "fill"
                               [("i + j <= t.size",
                                  {
                                    Ortac_runtime.start =
@@ -846,7 +906,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                        then None
                        else
                          Some
-                           (Ortac_runtime.report "fill"
+                           (Ortac_runtime.report "Array" "make 16 'a'" None
+                              "fill"
                               [("0 <= i",
                                  {
                                    Ortac_runtime.start =
@@ -894,7 +955,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                           then None
                           else
                             Some
-                              (Ortac_runtime.report "fill"
+                              (Ortac_runtime.report "Array" "make 16 'a'"
+                                 None "fill"
                                  [("0 <= j",
                                     {
                                       Ortac_runtime.start =
@@ -946,7 +1008,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                           then None
                           else
                             Some
-                              (Ortac_runtime.report "fill"
+                              (Ortac_runtime.report "Array" "make 16 'a'"
+                                 None "fill"
                                  [("i + j <= t.size",
                                     {
                                       Ortac_runtime.start =
@@ -991,7 +1054,32 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
           then None
           else
             Some
-              (Ortac_runtime.report "to_list"
+              (Ortac_runtime.report "Array" "make 16 'a'"
+                 (Some
+                    (Res
+                       ((list char),
+                         (try (Lazy.force new_state__011_).contents
+                          with
+                          | e ->
+                              raise
+                                (Ortac_runtime.Partial_function
+                                   (e,
+                                     {
+                                       Ortac_runtime.start =
+                                         {
+                                           pos_fname = "array.mli";
+                                           pos_lnum = 36;
+                                           pos_bol = 1559;
+                                           pos_cnum = 1575
+                                         };
+                                       Ortac_runtime.stop =
+                                         {
+                                           pos_fname = "array.mli";
+                                           pos_lnum = 36;
+                                           pos_bol = 1559;
+                                           pos_cnum = 1585
+                                         }
+                                     })))))) "to_list"
                  [("l = t.contents",
                     {
                       Ortac_runtime.start =
@@ -1039,7 +1127,8 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
           then None
           else
             Some
-              (Ortac_runtime.report "mem"
+              (Ortac_runtime.report "Array" "make 16 'a'"
+                 (Some (Res (Ortac_runtime.dummy, ()))) "mem"
                  [("b = List.mem a t.contents",
                     {
                       Ortac_runtime.start =

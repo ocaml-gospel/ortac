@@ -68,10 +68,32 @@ Warning: Skipping term_refer_to_returned_value_next_state: model contents is
          was found. Specifications should contain at least one "ensures
          x.contents = expr" where x is the SUT and expr can refer to the SUT
          only under an old operator and can't refer to the returned value.
+File "all_warnings.mli", line 39, characters 0-66:
+39 | val type_not_supported : 'a t -> s
+40 | (*@ s = type_not_supported t *)
+Warning: Incomplete computation of the returned value in the specification of type_not_supported. Failure message won't be able to display the expected returned value.
+File "all_warnings.mli", line 51, characters 0-140:
+51 | val unsupported_quantification : 'a t -> bool
+52 | (*@ b = unsupported_quantification t
+53 |     ensures b = forall a. List.mem a t.contents -> p a *)
+Warning: Incomplete computation of the returned value in the specification of unsupported_quantification. Failure message won't be able to display the expected returned value.
 File "all_warnings.mli", line 53, characters 16-54:
 53 |     ensures b = forall a. List.mem a t.contents -> p a *)
                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping clause: unsupported quantification.
+File "all_warnings.mli", line 55, characters 0-111:
+55 | val record_not_model_field : 'a t -> bool
+56 | (*@ b = record_not_model_field t
+57 |     requires Array.length t.v > 0 *)
+Warning: Incomplete computation of the returned value in the specification of record_not_model_field. Failure message won't be able to display the expected returned value.
+File "all_warnings.mli", line 62, characters 0-278:
+62 | val term_refer_to_returned_value_next_state : 'a t -> 'a option
+63 | (*@ o = term_refer_to_returned_value_next_state t
+64 |     modifies t.contents
+65 |     ensures t.contents = match o with
+66 |                         | None -> old t.contents
+67 |                         | Some _ -> old t.contents *)
+Warning: Incomplete computation of the returned value in the specification of term_refer_to_returned_value_next_state. Failure message won't be able to display the expected returned value.
 File "all_warnings.mli", line 57, characters 26-29:
 57 |     requires Array.length t.v > 0 *)
                                ^^^

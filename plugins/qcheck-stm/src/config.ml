@@ -6,6 +6,7 @@ type t = {
   context : Context.t;
   sut_core_type : Ppxlib.core_type;
   init_sut : Ppxlib.expression;
+  init_sut_txt : string;
 }
 
 let get_sut_type_name config =
@@ -74,7 +75,7 @@ let init_sut_from_string str =
   try Parse.expression (Lexing.from_string str) |> Reserr.ok
   with _ -> Reserr.(error (Syntax_error_in_init_sut str, Location.none))
 
-let init path init_sut sut_str =
+let init path init_sut_txt sut_str =
   let open Reserr in
   try
     let module_name = Utils.module_name_of_path path in
@@ -96,7 +97,7 @@ let init path init_sut sut_str =
     in
     let context = List.fold_left add context sigs in
     let* sut_core_type = sut_core_type sut_str
-    and* init_sut = init_sut_from_string init_sut in
-    ok (sigs, { context; sut_core_type; init_sut })
+    and* init_sut = init_sut_from_string init_sut_txt in
+    ok (sigs, { context; sut_core_type; init_sut; init_sut_txt })
   with Gospel.Warnings.Error (l, k) ->
     error (Ortac_core.Warnings.GospelError k, l)

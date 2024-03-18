@@ -36,9 +36,9 @@ module Spec =
       | Remove_ 
     let show_cmd cmd__001_ =
       match cmd__001_ with
-      | Add v -> Format.asprintf "%s %a" "add" (Util.Pp.pp_char true) v
-      | Remove -> Format.asprintf "%s" "remove"
-      | Remove_ -> Format.asprintf "%s" "remove_"
+      | Add v -> Format.asprintf "%s %a sut" "add" (Util.Pp.pp_char true) v
+      | Remove -> Format.asprintf "%s sut" "remove"
+      | Remove_ -> Format.asprintf "%s sut" "remove_"
     type nonrec state = {
       contents: char Ortac_runtime.Gospelstdlib.sequence }
     let init_state =

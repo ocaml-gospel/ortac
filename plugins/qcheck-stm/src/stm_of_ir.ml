@@ -9,6 +9,7 @@ let pat_default = ppat_construct (lident "Char") None
 let exp_default = evar "char"
 let res_default = Ident.create ~loc:Location.none "res"
 let list_append = list_fold_expr (qualify [ "Ortac_runtime" ] "append") "None"
+let res = lident "Res"
 
 let may_raise_exception v =
   match (v.postcond.exceptional, v.postcond.checks) with
@@ -272,7 +273,6 @@ let run_case config sut_name value =
   let lhs = mk_cmd_pattern value in
   let open Reserr in
   let* rhs =
-    let res = lident "Res" in
     let* ty_show = exp_of_core_type value.inst (Ir.get_return_type value) in
     let ty_show =
       if may_raise_exception value then
@@ -420,6 +420,30 @@ let precond config ir =
   in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
+let expected_returned_value translate_postcond value =
+  let open Reserr in
+  let ty_ret = Ir.get_return_type value in
+  let ret_val =
+    match (ty_ret.ptyp_desc, value.ret_values) with
+    | Ptyp_constr ({ txt = Lident "unit"; _ }, _), _ -> Some eunit
+    | Ptyp_tuple _, _ ->
+        failwith
+          "shouldn't happen (functions returning tuples are filtered out \
+           before)"
+    | _, [ xs ] ->
+        Option.bind
+          (to_option @@ map translate_postcond xs)
+          (Fun.flip List.nth_opt 0)
+    (* type of the returned value will be checked later with a proper error *)
+    | _, _ -> None
+  in
+  let ty_show = to_option @@ exp_of_core_type value.inst ty_ret in
+  match (ty_show, ret_val) with
+  | Some ty_show, Some ret_value ->
+      let args = pexp_tuple_opt [ ty_show; ret_value ] in
+      Some (pexp_construct res args)
+  | _, _ -> None
+
 let postcond_case config state invariants idx state_ident new_state_ident value
     =
   let open Reserr in
@@ -431,7 +455,25 @@ let postcond_case config state invariants idx state_ident new_state_ident value
     subst_term state ~gos_t:id ~old_t:None ~new_t:(Some new_state_ident)
       ~new_lz:true t.term
     >>= ocaml_of_term config
-  and wrap_check t e =
+  and dummy =
+    let ty_show = qualify [ "Ortac_runtime" ] "dummy" and value = eunit in
+    let args = pexp_tuple_opt [ ty_show; value ] in
+    pexp_construct res args
+  in
+  let* ret_val =
+    (* simply warn the user if we can't compute the expected returned value,
+       don't skip the function *)
+    match expected_returned_value translate_postcond value with
+    | None ->
+        let* () =
+          warn
+            ( Incomplete_ret_val_computation (Fmt.str "%a" Ident.pp value.id),
+              value.id.id_loc )
+        in
+        ok @@ esome dummy
+    | Some e -> ok @@ esome e
+  in
+  let wrap_check ?(normal = false) t e =
     let term = estring t.text
     and cmd = Fmt.str "%a" Ident.pp value.id |> estring
     and l = t.Ir.term.Gospel.Tterm.t_loc |> elocation in
@@ -440,7 +482,15 @@ let postcond_case config state invariants idx state_ident new_state_ident value
          (esome
          @@ pexp_apply
               (qualify [ "Ortac_runtime" ] "report")
-              [ (Nolabel, cmd); (Nolabel, elist [ pexp_tuple [ term; l ] ]) ]))
+              [
+                ( Nolabel,
+                  estring @@ Ortac_core.Context.module_name config.context );
+                (Nolabel, estring config.init_sut_txt);
+                (* we report the expected returned value only for normal behaviour *)
+                (Nolabel, if normal then ret_val else enone);
+                (Nolabel, cmd);
+                (Nolabel, elist [ pexp_tuple [ term; l ] ]);
+              ]))
   in
   let idx = List.sort Int.compare idx in
   let lhs0 = mk_cmd_pattern value in
@@ -491,11 +541,15 @@ let postcond_case config state invariants idx state_ident new_state_ident value
       in
       aux idx value.postcond.normal
     in
-    let* postcond = map (fun t -> wrap_check t <$> translate_postcond t) normal
+    (* [postcond] and [invariants] are specification of normal behaviour *)
+    let* postcond =
+      map (fun t -> wrap_check ~normal:true t <$> translate_postcond t) normal
     and* invariants =
       Option.fold ~none:(ok [])
         ~some:(fun (id, xs) ->
-          map (fun t -> wrap_check t <$> translate_invariants id t) xs)
+          map
+            (fun t -> wrap_check ~normal:true t <$> translate_invariants id t)
+            xs)
         invariants
     in
     list_append (postcond @ invariants) |> ok
@@ -651,7 +705,7 @@ let cmd_type ir =
   in
   pstr_type Recursive [ td ]
 
-let pp_cmd_case value =
+let pp_cmd_case config value =
   let lhs = mk_cmd_pattern value in
   let qualify_pp = qualify [ "Util"; "Pp" ] in
   let get_name =
@@ -676,18 +730,25 @@ let pp_cmd_case value =
   in
   let* rhs =
     let name = str_of_ident value.id in
-    let* pp_args =
-      concat_map
-        (fun (ty, id) ->
+    let rec aux ty args =
+      match (ty.ptyp_desc, args) with
+      | Ptyp_arrow (_, l, r), xs when Cfg.is_sut config l ->
+          let* fmt, pps = aux r xs in
+          ok ("sut" :: fmt, pps)
+      | Ptyp_arrow (_, _, r), (ty, id) :: xs ->
           let ty = subst_core_type value.inst ty in
-          let* pp = pp_of_ty ty in
-          ok [ pexp_apply pp [ (Nolabel, ebool true) ]; get_name id ])
-        value.args
+          let* pp = pp_of_ty ty and* fmt, pps = aux r xs in
+          ok
+            ( "%a" :: fmt,
+              pexp_apply pp [ (Nolabel, ebool true) ] :: get_name id :: pps )
+      | _, [] -> ok ([], [])
+      | _, _ ->
+          failwith
+            "shouldn't happen (list of arguments should be consistent with \
+             type)"
     in
-    let fmt =
-      String.concat " " ("%s" :: List.map (Fun.const "%a") value.args)
-      |> estring
-    in
+    let* fmt, pp_args = aux value.ty value.args in
+    let fmt = String.concat " " ("%s" :: fmt) |> estring in
     let args =
       List.map (fun x -> (Nolabel, x)) (fmt :: estring name :: pp_args)
     in
@@ -695,10 +756,10 @@ let pp_cmd_case value =
   in
   case ~lhs ~guard:None ~rhs |> ok
 
-let cmd_show ir =
+let cmd_show config ir =
   let cmd_name = gen_symbol ~prefix:"cmd" () in
   let open Reserr in
-  let* cases = map pp_cmd_case ir.values in
+  let* cases = map (pp_cmd_case config) ir.values in
   let body = pexp_match (evar cmd_name) cases in
   let pat = pvar "show_cmd" in
   let expr = efun [ (Nolabel, pvar cmd_name) ] body in
@@ -854,7 +915,7 @@ let stm include_ config ir =
   in
   let sut = sut_type config in
   let cmd = cmd_type ir in
-  let* cmd_show = cmd_show ir in
+  let* cmd_show = cmd_show config ir in
   let state = state_type ir in
   let* idx, next_state = next_state config ir in
   let* postcond = postcond config idx ir in
