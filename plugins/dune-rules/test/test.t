@@ -1,10 +1,12 @@
-This file test the behaviour of the `qcheck-stm` sub-command of the `dune` plugin.
+This file tests the behaviour of the `qcheck-stm` sub-command of the `dune` command
+(provided by the `dune-rules` plugin).
 
-$ export ORTAC_ONLY_PLUGIN=dune-rules
+  $ export ORTAC_ONLY_PLUGIN=dune-rules
 
 Without the optional output argument (for the dune rules, output for the generated OCaml
-have to be set), the rules are printed on stdout. This is useful to check what will be
+has to be set), the rules are printed on stdout. This is useful to check what will be
 generated.
+
   $ ortac dune qcheck-stm intf_spec "init_sut ()" "int sut" test --include=included --package=my_package
   (rule
    (alias runtest)
