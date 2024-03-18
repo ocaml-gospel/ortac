@@ -82,29 +82,33 @@ module Spec =
       | Push_back x ->
           Format.asprintf "%s sut %a" "push_back"
             (Util.Pp.pp_elt Util.Pp.pp_char true) x
-      | Pop_back -> Format.asprintf "%s sut" "pop_back"
+      | Pop_back -> Format.asprintf "protect (fun () -> %s sut)" "pop_back"
       | Push_front x_1 ->
           Format.asprintf "%s sut %a" "push_front"
             (Util.Pp.pp_elt Util.Pp.pp_char true) x_1
-      | Pop_front -> Format.asprintf "%s sut" "pop_front"
+      | Pop_front -> Format.asprintf "protect (fun () -> %s sut)" "pop_front"
       | Insert_at (i_1, x_2) ->
-          Format.asprintf "%s sut %a %a" "insert_at" (Util.Pp.pp_int true)
-            i_1 (Util.Pp.pp_elt Util.Pp.pp_char true) x_2
+          Format.asprintf "protect (fun () -> %s sut %a %a)" "insert_at"
+            (Util.Pp.pp_int true) i_1 (Util.Pp.pp_elt Util.Pp.pp_char true)
+            x_2
       | Pop_at i_2 ->
-          Format.asprintf "%s sut %a" "pop_at" (Util.Pp.pp_int true) i_2
+          Format.asprintf "protect (fun () -> %s sut %a)" "pop_at"
+            (Util.Pp.pp_int true) i_2
       | Delete_at i_3 ->
-          Format.asprintf "%s sut %a" "delete_at" (Util.Pp.pp_int true) i_3
+          Format.asprintf "protect (fun () -> %s sut %a)" "delete_at"
+            (Util.Pp.pp_int true) i_3
       | Get i_4 ->
-          Format.asprintf "%s sut %a" "get" (Util.Pp.pp_int true) i_4
+          Format.asprintf "protect (fun () -> %s sut %a)" "get"
+            (Util.Pp.pp_int true) i_4
       | Set (i_5, v) ->
-          Format.asprintf "%s sut %a %a" "set" (Util.Pp.pp_int true) i_5
-            (Util.Pp.pp_elt Util.Pp.pp_char true) v
+          Format.asprintf "protect (fun () -> %s sut %a %a)" "set"
+            (Util.Pp.pp_int true) i_5 (Util.Pp.pp_elt Util.Pp.pp_char true) v
       | Length -> Format.asprintf "%s sut" "length"
       | Is_empty -> Format.asprintf "%s sut" "is_empty"
       | Fill (pos, len, x_3) ->
-          Format.asprintf "%s sut %a %a %a" "fill" (Util.Pp.pp_int true) pos
-            (Util.Pp.pp_int true) len (Util.Pp.pp_elt Util.Pp.pp_char true)
-            x_3
+          Format.asprintf "protect (fun () -> %s sut %a %a %a)" "fill"
+            (Util.Pp.pp_int true) pos (Util.Pp.pp_int true) len
+            (Util.Pp.pp_elt Util.Pp.pp_char true) x_3
     type nonrec state = {
       contents: char Ortac_runtime.Gospelstdlib.sequence }
     let init_state =
@@ -759,7 +763,8 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                else
                  Some
                    (Ortac_runtime.report "Varray_circular_spec" "make 42 'a'"
-                      (Some (Res (Ortac_runtime.dummy, ()))) "pop_back"
+                      (Either.right (Res (Ortac_runtime.dummy, ())))
+                      "pop_back"
                       [("if old t.contents = Sequence.empty\n              then false\n              else proj x = (old t.contents)[Sequence.length (old t.contents) - 1]",
                          {
                            Ortac_runtime.start =
@@ -812,7 +817,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                else
                  Some
                    (Ortac_runtime.report "Varray_circular_spec" "make 42 'a'"
-                      None "pop_back"
+                      (Either.left "Not_found") "pop_back"
                       [("t.contents = old t.contents = Sequence.empty",
                          {
                            Ortac_runtime.start =
@@ -870,7 +875,8 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                else
                  Some
                    (Ortac_runtime.report "Varray_circular_spec" "make 42 'a'"
-                      (Some (Res (Ortac_runtime.dummy, ()))) "pop_front"
+                      (Either.right (Res (Ortac_runtime.dummy, ())))
+                      "pop_front"
                       [("if old t.contents = Sequence.empty\n              then false\n              else proj x = Sequence.hd (old t.contents)",
                          {
                            Ortac_runtime.start =
@@ -923,7 +929,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                else
                  Some
                    (Ortac_runtime.report "Varray_circular_spec" "make 42 'a'"
-                      None "pop_front"
+                      (Either.left "Not_found") "pop_front"
                       [("t.contents = old t.contents = Sequence.empty",
                          {
                            Ortac_runtime.start =
@@ -980,7 +986,8 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                  else
                    Some
                      (Ortac_runtime.report "Varray_circular_spec"
-                        "make 42 'a'" None "insert_at"
+                        "make 42 'a'" (Either.left "Invalid_argument")
+                        "insert_at"
                         [("0 <= i <= Sequence.length t.contents",
                            {
                              Ortac_runtime.start =
@@ -1043,7 +1050,8 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     else
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
-                           "make 42 'a'" None "insert_at"
+                           "make 42 'a'" (Either.left "Invalid_argument")
+                           "insert_at"
                            [("0 <= i <= Sequence.length t.contents",
                               {
                                 Ortac_runtime.start =
@@ -1092,7 +1100,8 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                  else
                    Some
                      (Ortac_runtime.report "Varray_circular_spec"
-                        "make 42 'a'" None "pop_at"
+                        "make 42 'a'" (Either.left "Invalid_argument")
+                        "pop_at"
                         [("inside i t.contents",
                            {
                              Ortac_runtime.start =
@@ -1148,7 +1157,8 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Some (Res (Ortac_runtime.dummy, ()))) "pop_at"
+                           (Either.right (Res (Ortac_runtime.dummy, ())))
+                           "pop_at"
                            [("(proj x) = old t.contents[i]",
                               {
                                 Ortac_runtime.start =
@@ -1204,7 +1214,8 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     else
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
-                           "make 42 'a'" None "pop_at"
+                           "make 42 'a'" (Either.left "Invalid_argument")
+                           "pop_at"
                            [("inside i t.contents",
                               {
                                 Ortac_runtime.start =
@@ -1253,7 +1264,8 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                  else
                    Some
                      (Ortac_runtime.report "Varray_circular_spec"
-                        "make 42 'a'" None "delete_at"
+                        "make 42 'a'" (Either.left "Invalid_argument")
+                        "delete_at"
                         [("inside i t.contents",
                            {
                              Ortac_runtime.start =
@@ -1311,7 +1323,8 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     else
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
-                           "make 42 'a'" (Some (Res (unit, ()))) "delete_at"
+                           "make 42 'a'" (Either.right (Res (unit, ())))
+                           "delete_at"
                            [("Sequence.length t.contents = Sequence.length (old t.contents) - 1",
                               {
                                 Ortac_runtime.start =
@@ -1367,7 +1380,8 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     else
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
-                           "make 42 'a'" None "delete_at"
+                           "make 42 'a'" (Either.left "Invalid_argument")
+                           "delete_at"
                            [("inside i t.contents",
                               {
                                 Ortac_runtime.start =
@@ -1416,7 +1430,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                  else
                    Some
                      (Ortac_runtime.report "Varray_circular_spec"
-                        "make 42 'a'" None "get"
+                        "make 42 'a'" (Either.left "Invalid_argument") "get"
                         [("inside i t.contents",
                            {
                              Ortac_runtime.start =
@@ -1472,7 +1486,8 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Some (Res (Ortac_runtime.dummy, ()))) "get"
+                           (Either.right (Res (Ortac_runtime.dummy, ())))
+                           "get"
                            [("(proj x) = t.contents[i]",
                               {
                                 Ortac_runtime.start =
@@ -1528,7 +1543,8 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     else
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
-                           "make 42 'a'" None "get"
+                           "make 42 'a'" (Either.left "Invalid_argument")
+                           "get"
                            [("inside i t.contents",
                               {
                                 Ortac_runtime.start =
@@ -1577,7 +1593,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                  else
                    Some
                      (Ortac_runtime.report "Varray_circular_spec"
-                        "make 42 'a'" None "set"
+                        "make 42 'a'" (Either.left "Invalid_argument") "set"
                         [("inside i t.contents",
                            {
                              Ortac_runtime.start =
@@ -1634,7 +1650,8 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     else
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
-                           "make 42 'a'" None "set"
+                           "make 42 'a'" (Either.left "Invalid_argument")
+                           "set"
                            [("inside i t.contents",
                               {
                                 Ortac_runtime.start =
@@ -1683,7 +1700,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
           else
             Some
               (Ortac_runtime.report "Varray_circular_spec" "make 42 'a'"
-                 (Some (Res (Ortac_runtime.dummy, ()))) "length"
+                 (Either.right (Res (Ortac_runtime.dummy, ()))) "length"
                  [("l = Sequence.length t.contents",
                     {
                       Ortac_runtime.start =
@@ -1732,7 +1749,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
           else
             Some
               (Ortac_runtime.report "Varray_circular_spec" "make 42 'a'"
-                 (Some (Res (Ortac_runtime.dummy, ()))) "is_empty"
+                 (Either.right (Res (Ortac_runtime.dummy, ()))) "is_empty"
                  [("b <-> t.contents = Sequence.empty",
                     {
                       Ortac_runtime.start =
@@ -1796,7 +1813,7 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                  else
                    Some
                      (Ortac_runtime.report "Varray_circular_spec"
-                        "make 42 'a'" None "fill"
+                        "make 42 'a'" (Either.left "Invalid_argument") "fill"
                         [("0 <= pos /\\ 0 <= len /\\ pos + len < Sequence.length t.contents",
                            {
                              Ortac_runtime.start =
@@ -1869,7 +1886,8 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
                     else
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
-                           "make 42 'a'" None "fill"
+                           "make 42 'a'" (Either.left "Invalid_argument")
+                           "fill"
                            [("0 <= pos /\\ 0 <= len /\\ pos + len < Sequence.length t.contents",
                               {
                                 Ortac_runtime.start =

@@ -4,7 +4,7 @@ include Ortac_runtime
 type report = {
   mod_name : string;
   init_sut : string;
-  ret : res option;
+  ret : (string, res) Either.t;
   cmd : string;
   terms : (string * location) list;
 }
@@ -33,8 +33,14 @@ module Make (Spec : Spec) = struct
   let pp_trace ppf (trace, mod_name, init_sut, ret) =
     let open Fmt in
     let pp_expected ppf = function
-      | Some ret when not @@ is_dummy ret ->
+      | Either.Right ret when not @@ is_dummy ret ->
           pf ppf "assert (r = %s)@\n" (show_res ret)
+      | Either.Left exn ->
+          pf ppf
+            "assert (@[match r with@\n\
+            \  @[| Error (%s _) -> true@\n\
+             | _ -> false@]@])@\n"
+            exn
       | _ -> ()
     in
     let rec aux ppf = function
@@ -47,7 +53,12 @@ module Make (Spec : Spec) = struct
           aux ppf xs
       | _ -> assert false
     in
-    pf ppf "@[open %s@\nlet sut = %s@\n%a@]" mod_name init_sut aux trace
+    pf ppf
+      "@[open %s@\n\
+       let protect f = try Ok (f ()) with e -> Error e@\n\
+       let sut = %s@\n\
+       %a@]"
+      mod_name init_sut aux trace
 
   let pp_terms ppf err =
     let open Fmt in
