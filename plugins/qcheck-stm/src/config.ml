@@ -88,7 +88,7 @@ let scan_config cfg_uc config_mod =
   in
   let lb = Lexing.from_channel ic in
   let () = Lexing.set_filename lb config_mod in
-  let* _ast =
+  let* ast =
     try ok @@ Ppxlib.Parse.implementation lb
     with _ ->
       error
@@ -101,7 +101,25 @@ let scan_config cfg_uc config_mod =
             } )
   in
   close_in ic;
-  ok cfg_uc
+  let aux cfg_uc (str : structure_item) =
+    match str.pstr_desc with
+    | Pstr_eval (_, _) -> ok cfg_uc
+    | Pstr_value (_, _) -> ok cfg_uc
+    | Pstr_primitive _ -> ok cfg_uc
+    | Pstr_type (_, _) -> ok cfg_uc
+    | Pstr_typext _ -> ok cfg_uc
+    | Pstr_exception _ -> ok cfg_uc
+    | Pstr_module _ -> ok cfg_uc
+    | Pstr_recmodule _ -> ok cfg_uc
+    | Pstr_modtype _ -> ok cfg_uc
+    | Pstr_open _ -> ok cfg_uc
+    | Pstr_class _ -> ok cfg_uc
+    | Pstr_class_type _ -> ok cfg_uc
+    | Pstr_include _ -> ok cfg_uc
+    | Pstr_attribute _ -> ok cfg_uc
+    | Pstr_extension (_, _) -> ok cfg_uc
+  in
+  fold_left aux cfg_uc ast
 
 let init gospel config_module =
   let open Reserr in
