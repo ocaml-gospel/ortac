@@ -42,7 +42,7 @@ end = struct
     let open Registration in
     Term.(
       const main
-      $ ocaml_file
+      $ input_file
       $ init
       $ sut
       $ include_

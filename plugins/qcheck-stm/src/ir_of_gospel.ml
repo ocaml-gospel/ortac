@@ -207,7 +207,8 @@ let postcond spec =
               (fun (p, t) ->
                 let open Tterm in
                 match p.p_node with
-                | Papp (ls, []) when Symbols.(ls_equal ls (fs_tuple 0)) ->
+                (* When the exception doesn't take any argument, gospel type-checker add a dummy pattern here *)
+                | Papp (_, []) when Ttypes.(x.xs_type = Exn_tuple []) ->
                     (x, None, Ir.term_val spec t)
                 | _ -> (x, Some p, Ir.term_val spec t))
               l)

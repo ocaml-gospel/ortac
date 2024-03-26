@@ -2,9 +2,8 @@ module Ir = Ortac_wrapper__Ir
 module Utils = Ortac_core__Utils
 
 let translate path =
-  let module_name = Utils.module_name_of_path path in
-  Gospel.Parser_frontend.parse_ocaml_gospel path |> Utils.type_check [] path
-  |> fun (env, sigs) ->
+  let module_name = Utils.module_name_of_path path
+  and env, sigs = Utils.type_check [] path in
   assert (List.length env = 1);
   let context = Ortac_core.Context.init module_name (List.hd env) in
   Ortac_wrapper__Ir_of_gospel.signature ~context sigs

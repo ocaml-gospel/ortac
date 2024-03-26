@@ -132,10 +132,8 @@ let standalone module_name env s =
   :: specs
 
 let generate path fmt =
-  let module_name = Ortac_core.Utils.module_name_of_path path in
-  Gospel.Parser_frontend.parse_ocaml_gospel path
-  |> Ortac_core.Utils.type_check [] path
-  |> fun (env, sigs) ->
+  let module_name = Ortac_core.Utils.module_name_of_path path
+  and env, sigs = Ortac_core.Utils.type_check [] path in
   assert (List.length env = 1);
   standalone module_name (List.hd env) sigs
   |> Fmt.pf fmt "%a@." Ppxlib_ast.Pprintast.structure;
@@ -159,7 +157,7 @@ end = struct
     Cmd.info "monolith"
       ~doc:"Generate Monolith test file according to Gospel specifications."
 
-  let term = Term.(const main $ ocaml_file $ output_file $ setup_log)
+  let term = Term.(const main $ input_file $ output_file $ setup_log)
   let cmd = Cmd.v info term
 end
 
