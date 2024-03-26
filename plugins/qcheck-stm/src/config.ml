@@ -80,6 +80,21 @@ let core_type_is_a_well_formed_sut (core_type : Ppxlib.core_type) =
       let str = Fmt.str "%a" Ppxlib_ast.Pprintast.core_type core_type in
       error (Sut_type_not_supported str, Location.none)
 
+(* Inspect value definition in config module in order to collect information
+   about:
+   - the definition of the [init_sut] function *)
+let value_bindings cfg_uc =
+  let open Reserr in
+  let aux cfg_uc vb =
+    let open Ppxlib in
+    match vb.pvb_pat.ppat_desc with
+    | Ppat_var s when String.equal "init_sut" s.txt ->
+        let init_sut' = Some vb.pvb_expr in
+        ok { cfg_uc with init_sut' }
+    | _ -> ok cfg_uc
+  in
+  fold_left aux cfg_uc
+
 let scan_config cfg_uc config_mod =
   let open Reserr in
   let* ic =
@@ -104,7 +119,7 @@ let scan_config cfg_uc config_mod =
   let aux cfg_uc (str : structure_item) =
     match str.pstr_desc with
     | Pstr_eval (_, _) -> ok cfg_uc
-    | Pstr_value (_, _) -> ok cfg_uc
+    | Pstr_value (_, xs) -> value_bindings cfg_uc xs
     | Pstr_primitive _ -> ok cfg_uc
     | Pstr_type (_, _) -> ok cfg_uc
     | Pstr_typext _ -> ok cfg_uc
