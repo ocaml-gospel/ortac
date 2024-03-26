@@ -23,6 +23,7 @@ type W.kind +=
   | Incomplete_ret_val_computation of string
   | Incomplete_configuration_module of [ `Init_sut | `Sut ]
   | Multiple_sut_arguments of string
+  | No_configuration_file of string
   | No_init_function of string
   | No_models of string
   | No_spec of string
@@ -32,8 +33,7 @@ type W.kind +=
   | Returning_sut of string
   | Sut_type_not_specified of string
   | Sut_type_not_supported of string
-  | Syntax_error_in_init_sut of string
-  | Syntax_error_in_type of string
+  | Syntax_error_in_config_module of string
   | Type_not_supported of string
   | Type_not_supported_for_sut_parameter of string
   | Type_parameter_not_instantiated of string
@@ -48,9 +48,9 @@ let level kind =
   | Type_not_supported _ ->
       W.Warning
   | Impossible_init_state_generation _ | Incompatible_sut _
-  | Incomplete_configuration_module _ | No_init_function _ | No_models _
-  | No_sut_type _ | Sut_type_not_specified _ | Sut_type_not_supported _
-  | Syntax_error_in_init_sut _ | Syntax_error_in_type _
+  | Incomplete_configuration_module _ | No_configuration_file _
+  | No_init_function _ | No_models _ | No_sut_type _ | Sut_type_not_specified _
+  | Sut_type_not_supported _ | Syntax_error_in_config_module _
   | Type_not_supported_for_sut_parameter _ | Type_parameter_not_instantiated _
     ->
       W.Error
@@ -166,8 +166,8 @@ let pp_kind ppf kind =
   (* Errors *)
   | No_sut_type ty -> pf ppf "Type %s not declared in the module" ty
   | No_init_function f -> pf ppf "Function %s not declared in the module" f
-  | Syntax_error_in_type t -> pf ppf "Syntax error in type %s" t
-  | Syntax_error_in_init_sut s -> pf ppf "Syntax error in OCaml expression %s" s
+  | Syntax_error_in_config_module s ->
+      pf ppf "Syntax error in OCaml configuration module %s" s
   | Sut_type_not_supported ty ->
       pf ppf "Unsupported SUT type %s:@ %a" ty text
         "SUT type must be a type constructor, possibly applied to type \
@@ -181,6 +181,7 @@ let pp_kind ppf kind =
          type"
   | Sut_type_not_specified ty ->
       pf ppf "Missing specification for the SUT type %s" ty
+  | No_configuration_file file -> pf ppf "Missing configuration file %s" file
   | No_models ty -> pf ppf "Missing model(s) for the SUT type %s" ty
   | Impossible_init_state_generation (Not_a_function_call fct) ->
       pf ppf "Unsupported INIT expression %s:@ %a" fct text
