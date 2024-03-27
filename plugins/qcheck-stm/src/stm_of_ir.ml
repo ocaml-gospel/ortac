@@ -932,12 +932,29 @@ let agree_prop =
       check_init_state ();
       STMTests.agree_prop cs]
 
+let qcheck config =
+  match config.Cfg.gen_mod with
+  | None -> []
+  | Some structure ->
+      let open Ast_helper in
+      let name = noloc (Some "Gen")
+      and expr =
+        pmod_structure
+          ((lident "Gen" |> Mod.ident |> Incl.mk |> pstr_include) :: structure)
+      in
+      let structure = [ pstr_module (module_binding ~name ~expr) ] in
+      let expr =
+        pmod_structure
+          ((lident "QCheck" |> Mod.ident |> Incl.mk |> pstr_include)
+          :: structure)
+      in
+      [ pstr_module (module_binding ~name:(noloc (Some "QCheck")) ~expr) ]
+
 let stm config ir =
   let open Reserr in
   let* ghost_types = ghost_types config ir.ghost_types in
   let* config, ghost_functions = ghost_functions config ir.ghost_functions in
   let warn = [%stri [@@@ocaml.warning "-26-27"]] in
-  let incl = [] in
   let sut = sut_type config in
   let cmd = cmd_type ir in
   let* cmd_show = cmd_show config ir in
@@ -962,7 +979,7 @@ let stm config ir =
   let open_mod m = pstr_open Ast_helper.(Opn.mk (Mod.ident (lident m))) in
   let spec_expr =
     pmod_structure
-      ((open_mod "STM" :: incl)
+      ((open_mod "STM" :: qcheck config)
       @ [
           sut;
           cmd;
