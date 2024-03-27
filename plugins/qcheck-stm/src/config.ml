@@ -73,9 +73,9 @@ let core_type_is_a_well_formed_sut (core_type : Ppxlib.core_type) =
   let open Ppxlib in
   let open Reserr in
   match core_type.ptyp_desc with
-  | Ptyp_constr (lid, cts) ->
+  | Ptyp_constr (_lid, cts) ->
       let* _ = map acceptable_type_parameter cts in
-      ok (lid, cts)
+      ok ()
   | _ ->
       let str = Fmt.str "%a" Ppxlib_ast.Pprintast.core_type core_type in
       error (Sut_type_not_supported str, Location.none)
@@ -92,6 +92,27 @@ let value_bindings cfg_uc =
         let init_sut' = Some vb.pvb_expr in
         ok { cfg_uc with init_sut' }
     | _ -> ok cfg_uc
+  in
+  fold_left aux cfg_uc
+
+(* Inspect type definition in config module in order to collect information
+   about:
+   - the definition of the [sut] type *)
+let type_declarations cfg_uc =
+  let open Reserr in
+  let aux cfg_uc (td : type_declaration) =
+    let open Ppxlib in
+    if String.equal "sut" td.ptype_name.txt then
+      let* manifest =
+        of_option
+          ~default:
+            ( Sut_type_not_supported (Fmt.str "%a" Pprintast.type_declaration td),
+              td.ptype_loc )
+          td.ptype_manifest
+      in
+      let* () = core_type_is_a_well_formed_sut manifest in
+      ok { cfg_uc with sut_core_type' = Some manifest }
+    else ok cfg_uc
   in
   fold_left aux cfg_uc
 
@@ -121,7 +142,7 @@ let scan_config cfg_uc config_mod =
     | Pstr_eval (_, _) -> ok cfg_uc
     | Pstr_value (_, xs) -> value_bindings cfg_uc xs
     | Pstr_primitive _ -> ok cfg_uc
-    | Pstr_type (_, _) -> ok cfg_uc
+    | Pstr_type (_, xs) -> type_declarations cfg_uc xs
     | Pstr_typext _ -> ok cfg_uc
     | Pstr_exception _ -> ok cfg_uc
     | Pstr_module _ -> ok cfg_uc
