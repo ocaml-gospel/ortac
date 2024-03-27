@@ -29,6 +29,7 @@ type W.kind +=
   | No_spec of string
   | No_sut_argument of string
   | No_sut_type of string
+  | Not_a_structure of string
   | Returned_tuple of string
   | Returning_sut of string
   | Sut_type_not_specified of string
@@ -49,10 +50,10 @@ let level kind =
       W.Warning
   | Impossible_init_state_generation _ | Incompatible_sut _
   | Incomplete_configuration_module _ | No_configuration_file _
-  | No_init_function _ | No_models _ | No_sut_type _ | Sut_type_not_specified _
-  | Sut_type_not_supported _ | Syntax_error_in_config_module _
-  | Type_not_supported_for_sut_parameter _ | Type_parameter_not_instantiated _
-    ->
+  | No_init_function _ | No_models _ | No_sut_type _ | Not_a_structure _
+  | Sut_type_not_specified _ | Sut_type_not_supported _
+  | Syntax_error_in_config_module _ | Type_not_supported_for_sut_parameter _
+  | Type_parameter_not_instantiated _ ->
       W.Error
   | _ -> W.level kind
 
@@ -183,6 +184,9 @@ let pp_kind ppf kind =
       pf ppf "Missing specification for the SUT type %s" ty
   | No_configuration_file file -> pf ppf "Missing configuration file %s" file
   | No_models ty -> pf ppf "Missing model(s) for the SUT type %s" ty
+  | Not_a_structure mod_name ->
+      pf ppf "Unsupported %s module definition:@ %a" mod_name text
+        "only structures are allowed as module definition here"
   | Impossible_init_state_generation (Not_a_function_call fct) ->
       pf ppf "Unsupported INIT expression %s:@ %a" fct text
         "the INIT expression is expected to be a function call (the \

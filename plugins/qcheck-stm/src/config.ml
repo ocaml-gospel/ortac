@@ -6,16 +6,23 @@ type config_under_construction = {
   sut_core_type' : Ppxlib.core_type option;
   init_sut' : Ppxlib.expression option;
   init_sut_txt' : string option;
+  gen_mod' : Ppxlib.structure option;
 }
 
 let config_under_construction =
-  { sut_core_type' = None; init_sut' = None; init_sut_txt' = None }
+  {
+    sut_core_type' = None;
+    init_sut' = None;
+    init_sut_txt' = None;
+    gen_mod' = None;
+  }
 
 type t = {
   context : Context.t;
   sut_core_type : Ppxlib.core_type;
   init_sut : Ppxlib.expression;
   init_sut_txt : string;
+  gen_mod : Ppxlib.structure option;
 }
 
 let mk_config context cfg_uc =
@@ -31,8 +38,9 @@ let mk_config context cfg_uc =
   in
   (* if we've come so far, there is no reason why the [init_sut_txt'] should
      be empty and we want to avoid raising twice the same error *)
-  let init_sut_txt = Option.get cfg_uc.init_sut_txt' in
-  ok { context; sut_core_type; init_sut; init_sut_txt }
+  let init_sut_txt = Option.get cfg_uc.init_sut_txt'
+  and gen_mod = cfg_uc.gen_mod' in
+  ok { context; sut_core_type; init_sut; init_sut_txt; gen_mod }
 
 let get_sut_type_name config =
   let open Ppxlib in
@@ -117,6 +125,22 @@ let type_declarations cfg_uc =
   in
   fold_left aux cfg_uc
 
+let module_binding cfg_uc (mb : Ppxlib.module_binding) =
+  let open Reserr in
+  match mb.pmb_name.txt with
+  | Some name when String.equal "Gen" name ->
+      let* content =
+        match mb.pmb_expr.pmod_desc with
+        | Pmod_structure structure
+        (* there is no need to go further, module constraints of module
+           constraints doesn't make sense *)
+        | Pmod_constraint ({ pmod_desc = Pmod_structure structure; _ }, _) ->
+            ok structure
+        | _ -> error (Not_a_structure name, Location.none)
+      in
+      ok { cfg_uc with gen_mod' = Some content }
+  | _ -> ok cfg_uc
+
 let scan_config cfg_uc config_mod =
   let open Reserr in
   let* ic =
@@ -145,7 +169,7 @@ let scan_config cfg_uc config_mod =
     | Pstr_type (_, xs) -> type_declarations cfg_uc xs
     | Pstr_typext _ -> ok cfg_uc
     | Pstr_exception _ -> ok cfg_uc
-    | Pstr_module _ -> ok cfg_uc
+    | Pstr_module mb -> module_binding cfg_uc mb
     | Pstr_recmodule _ -> ok cfg_uc
     | Pstr_modtype _ -> ok cfg_uc
     | Pstr_open _ -> ok cfg_uc
