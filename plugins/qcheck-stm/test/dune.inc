@@ -18,7 +18,7 @@
      ortac
      qcheck-stm
      %{dep:array.mli}
-     "make 16 'a'" "char t"
+     %{dep:array_config.ml}
      -o
      %{target})))))
 
@@ -71,7 +71,7 @@
      ortac
      qcheck-stm
      %{dep:hashtbl.mli}
-     "create ~random:false 16" "(char, int) t"
+     %{dep:hashtbl_config.ml}
      -o
      %{target})))))
 
@@ -124,7 +124,7 @@
      ortac
      qcheck-stm
      %{dep:record.mli}
-     "make 42" "t"
+     %{dep:record_config.ml}
      -o
      %{target})))))
 
@@ -177,7 +177,7 @@
      ortac
      qcheck-stm
      %{dep:ref.mli}
-     "make 42" "t"
+     %{dep:ref_config.ml}
      -o
      %{target})))))
 
@@ -230,7 +230,7 @@
      ortac
      qcheck-stm
      %{dep:conjunctive_clauses.mli}
-     "make 42 'a'" "char t"
+     %{dep:conjunctive_clauses_config.ml}
      -o
      %{target})))))
 
@@ -283,7 +283,7 @@
      ortac
      qcheck-stm
      %{dep:sequence_model.mli}
-     "create ()" "char t"
+     %{dep:sequence_model_config.ml}
      -o
      %{target})))))
 
@@ -336,7 +336,7 @@
      ortac
      qcheck-stm
      %{dep:invariants.mli}
-     "create 42" "int t"
+     %{dep:invariants_config.ml}
      -o
      %{target})))))
 
@@ -373,26 +373,6 @@
  (name integer_in_model)
  (modules integer_in_model))
 
-(rule
- (target integer_in_model_stm_tests.ml)
- (package ortac-qcheck-stm)
- (deps
-  (package ortac-core)
-  (package ortac-qcheck-stm))
- (action
-  (setenv
-   ORTAC_ONLY_PLUGIN
-   qcheck-stm
-   (with-stderr-to
-    integer_in_model_errors
-    (run
-     ortac
-     qcheck-stm
-     %{dep:integer_in_model.mli}
-     "create ()" "t"
-     -o
-     %{target})))))
-
 (test
  (name integer_in_model_stm_tests)
  (package ortac-qcheck-stm)
@@ -426,25 +406,6 @@
  (name ghost_as_model)
  (modules ghost_as_model))
 
-(rule
- (target ghost_as_model_stm_tests.ml)
- (package ortac-qcheck-stm)
- (deps
-  (package ortac-core)
-  (package ortac-qcheck-stm))
- (action
-  (setenv
-   ORTAC_ONLY_PLUGIN
-   qcheck-stm
-   (with-stderr-to
-    ghost_as_model_errors
-    (run
-     ortac
-     qcheck-stm
-     %{dep:ghost_as_model.mli}
-     "create ()" "t"
-     -o
-     %{target})))))
 
 (test
  (name ghost_as_model_stm_tests)

@@ -1,15 +1,16 @@
 (* Generates the boiler-plater dune configuration for tests
 
-     dune_gen.exe array "\"make 16 'a'\" \"char t\"" ...
-   will generate the dune rules for the array module. *)
+     dune_gen.exe array array_config ...
+   will generate the dune rules for the array module with the array_config
+   configuration. *)
 
 let usage () =
-  Printf.fprintf stderr "Usage: %s [MODULE INIT_SUT] ..." Sys.argv.(0);
+  Printf.fprintf stderr "Usage: %s [MODULE CONFIGURATION] ..." Sys.argv.(0);
   exit 1
 
 let rec print_rules pos =
   if pos < Array.length Sys.argv then (
-    let m = Sys.argv.(pos) and init_sut = Sys.argv.(pos + 1) in
+    let m = Sys.argv.(pos) and config = Sys.argv.(pos + 1) in
     Printf.printf
       {|(library
  (name %s)
@@ -31,7 +32,7 @@ let rec print_rules pos =
      ortac
      qcheck-stm
      %%{dep:%s.mli}
-     %s
+     %%{dep:%s.ml}
      -o
      %%{target})))))
 
@@ -65,7 +66,7 @@ let rec print_rules pos =
   (run %%{dep:%s_stm_tests.exe} -v)))
 
 |}
-      m m m m m init_sut m m m m m m m m m;
+      m m m m m config m m m m m m m m m;
     print_rules (pos + 2))
 
 let () =
