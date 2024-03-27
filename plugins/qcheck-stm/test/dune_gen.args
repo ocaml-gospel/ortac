@@ -16,3 +16,5 @@ integer_in_model
 integer_in_model_config
 ghost_as_model
 ghost_as_model_config
+custom_config
+custom_config_config

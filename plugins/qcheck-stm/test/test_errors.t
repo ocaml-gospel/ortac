@@ -255,3 +255,21 @@ We shouldn't be able to define a model by itsef in the `make` function:
                             ^
   Warning: Skipping clause: impossible to define the initial value of the model
            with a recursive expression.
+
+If we add some custom generators, we should do so in a `Gen` module that is implemented (functor application or reference to another module are not supported):
+  $ cat > foo.mli << EOF
+  > type 'a t
+  > (*@ mutable model value : 'a *)
+  > val make : 'a -> 'a t
+  > (*@ t = make a
+  >     ensures t.value = a *)
+  > EOF
+  $ cat > foo_config.ml << EOF
+  > module Gen = QCheck.Gen
+  > open Foo
+  > let init_sut = make 42
+  > type sut = int t
+  > EOF
+  $ ortac qcheck-stm foo.mli foo_config.ml
+  Error: Unsupported Gen module definition: only structures are allowed as
+         module definition here.
