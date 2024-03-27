@@ -369,3 +369,56 @@
  (action
   (run %{dep:invariants_stm_tests.exe} -v)))
 
+(library
+ (name custom_config)
+ (modules custom_config))
+
+(rule
+ (target custom_config_stm_tests.ml)
+ (package ortac-qcheck-stm)
+ (deps
+  (package ortac-core)
+  (package ortac-qcheck-stm))
+ (action
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   qcheck-stm
+   (with-stderr-to
+    custom_config_errors
+    (run
+     ortac
+     qcheck-stm
+     %{dep:custom_config.mli}
+     %{dep:custom_config_config.ml}
+     -o
+     %{target})))))
+
+(test
+ (name custom_config_stm_tests)
+ (package ortac-qcheck-stm)
+ (modules custom_config_stm_tests)
+ (libraries
+  qcheck-core
+  qcheck-core.runner
+  qcheck-stm.stm
+  qcheck-stm.sequential
+  qcheck-multicoretests-util
+  ortac-runtime-qcheck-stm
+  custom_config)
+ (action
+  (echo
+   "\n%{dep:custom_config_stm_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))
+
+(rule
+ (alias runtest)
+ (package ortac-qcheck-stm)
+ (action
+  (progn
+   (diff custom_config_errors.expected custom_config_errors)
+   (diff custom_config_stm_tests.expected.ml custom_config_stm_tests.ml))))
+
+(rule
+ (alias launchtests)
+ (action
+  (run %{dep:custom_config_stm_tests.exe} -v)))
+
