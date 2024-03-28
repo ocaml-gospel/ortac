@@ -12,6 +12,14 @@ module Spec =
         module Gen = struct include Gen
                             let int = small_signed_int end
       end
+    module Util =
+      struct
+        module Pp =
+          struct
+            include Util.Pp
+            let _pp_wont_be_used = of_show (fun _ -> "dummy") false
+          end
+      end
     type sut = int t
     type cmd =
       | Push of int 
