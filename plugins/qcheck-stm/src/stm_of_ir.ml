@@ -932,23 +932,36 @@ let agree_prop =
       check_init_state ();
       STMTests.agree_prop cs]
 
+let prepend_include_in_module name lident structure =
+  let open Ast_helper in
+  let name = noloc (Some name)
+  and expr =
+    pmod_structure
+    @@ ((Mod.ident lident |> Incl.mk |> pstr_include) :: structure)
+  in
+  [ pstr_module @@ module_binding ~name ~expr ]
+
 let qcheck config =
   match config.Cfg.gen_mod with
   | None -> []
   | Some structure ->
-      let open Ast_helper in
-      let name = noloc (Some "Gen")
-      and expr =
-        pmod_structure
-          ((lident "Gen" |> Mod.ident |> Incl.mk |> pstr_include) :: structure)
+      let structure =
+        prepend_include_in_module "Gen" (lident "Gen") structure
       in
-      let structure = [ pstr_module (module_binding ~name ~expr) ] in
-      let expr =
-        pmod_structure
-          ((lident "QCheck" |> Mod.ident |> Incl.mk |> pstr_include)
-          :: structure)
+      prepend_include_in_module "QCheck" (lident "QCheck") structure
+
+let util config =
+  match config.Cfg.pp_mod with
+  | None -> []
+  | Some structure ->
+      let structure =
+        prepend_include_in_module "Pp"
+          (noloc (Ldot (Lident "Util", "Pp")))
+          structure
       in
-      [ pstr_module (module_binding ~name:(noloc (Some "QCheck")) ~expr) ]
+      (* We don't need the whole `Util` module here *)
+      let name = noloc (Some "Util") and expr = pmod_structure structure in
+      [ pstr_module (module_binding ~name ~expr) ]
 
 let stm config ir =
   let open Reserr in
@@ -980,6 +993,7 @@ let stm config ir =
   let spec_expr =
     pmod_structure
       ((open_mod "STM" :: qcheck config)
+      @ util config
       @ [
           sut;
           cmd;
