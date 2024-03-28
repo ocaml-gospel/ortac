@@ -1,9 +1,7 @@
 type config = {
   interface_file : string;
-  init_function : string;
-  sut_type : string;
+  config_file : string;
   ocaml_output : string;
-  include_ : string option;
   package_name : string option;
   dune_output : string option;
 }
@@ -21,7 +19,6 @@ let msg ppf config =
      ; change some options rather that running ortac on the command line again@\n"
     config.interface_file
 
-let quote ppf s = pf ppf "%S" s
 let stanza k ppf config = pf ppf "@[<v 1>(%a)@]" k config
 let stanza_rule k ppf config = pf ppf "%a@." (stanza k) config
 
@@ -49,20 +46,22 @@ let ortac ppf _ = pf ppf "ortac"
 let dune ppf _ = pf ppf "dune"
 let qcheck_stm ppf _ = pf ppf "qcheck-stm"
 let interface ppf config = pf ppf "%s" config.interface_file
-let interface_mli ppf config = pf ppf "%%{dep:%s.mli}" config.interface_file
-let init_sut ppf config = pf ppf "%a" quote config.init_function
-let sut ppf config = pf ppf "%a" quote config.sut_type
+let config_file ppf config = pf ppf "%s" config.config_file
 let ocaml_output ppf config = pf ppf "%s" config.ocaml_output
 let runtest ppf _ = pf ppf "(alias runtest)"
 let promote ppf _ = pf ppf "(mode promote)"
-let name ppf config = pf ppf "(name %s)" config.ocaml_output
+
+let name ppf config =
+  pf ppf "(name %s)" (Filename.chop_extension config.ocaml_output)
+
+let dep aux ppf config = pf ppf "%%{dep:%a}" aux config
 
 let libraries =
   let k ppf config =
     pf ppf
       "libraries@ %s@ qcheck-stm.stm@ qcheck-stm.sequential@ \
        qcheck-multicoretests-util@ ortac-runtime-qcheck-stm"
-      config.interface_file
+      (Filename.chop_extension config.interface_file)
   in
   stanza k
 
@@ -77,27 +76,20 @@ let deps plug ppf _ =
   pf ppf "(deps@; %a)" package p
 
 let optional ppf s = function None -> () | Some x -> pf ppf s x
-let include_ ppf config = optional ppf "--include=%s" config.include_
 let quiet ppf _ = pf ppf "--quiet"
 let package_opt ppf config = optional ppf "--package=%s" config.package_name
 let package ppf config = optional ppf "(package %s)" config.package_name
-let targets_ml ppf config = pf ppf "(targets %s.ml)" config.ocaml_output
+let targets_ml ppf config = pf ppf "(targets %s)" config.ocaml_output
 let targets_dune ppf config = optional ppf "(targets %s)" config.dune_output
 
 let with_stdout_to ppf config =
   optional ppf "--with-stdout-to=%s" config.dune_output
 
-type optional_stanza =
-  | Include_
-  | Package_opt
-  | Package
-  | Targets_dune
-  | With_stdout_to
+type optional_stanza = Package_opt | Package | Targets_dune | With_stdout_to
 
 let get config =
   let aux x = function None -> [] | Some _ -> [ x ] in
   function
-  | Include_ -> aux include_ config.include_
   | Package_opt -> aux package_opt config.package_name
   | Package -> aux package config.package_name
   | Targets_dune -> aux targets_dune config.dune_output
@@ -105,12 +97,9 @@ let get config =
 
 let gen_gen_rule ppf config =
   let get = get config in
-  let opt_args =
-    List.flatten [ get Include_; get Package_opt; get With_stdout_to ]
-  in
+  let opt_args = List.flatten [ get Package_opt; get With_stdout_to ] in
   let args =
-    [ ortac; dune; qcheck_stm; interface; init_sut; sut; ocaml_output ]
-    @ opt_args
+    [ ortac; dune; qcheck_stm; interface; config_file; ocaml_output ] @ opt_args
   in
   let run ppf = run ppf args in
   let run = stanza run in
@@ -123,9 +112,7 @@ let gen_gen_rule ppf config =
 let gen_ortac_rule ppf config =
   let get = get config in
   let args =
-    [ ortac; qcheck_stm; interface_mli; init_sut; sut ]
-    @ get Include_
-    @ [ quiet ]
+    [ ortac; qcheck_stm; dep interface; dep config_file ] @ [ quiet ]
   in
   let run ppf = run ppf args in
   let run = stanza run in
@@ -139,9 +126,7 @@ let gen_ortac_rule ppf config =
 let gen_test_rule ppf config =
   let get = get config in
   let modules ppf config =
-    match config.include_ with
-    | None -> pf ppf "(modules %s)" config.ocaml_output
-    | Some i -> pf ppf "(modules %s %s)" config.ocaml_output i
+    pf ppf "(modules %s)" (Filename.chop_extension config.ocaml_output)
   in
   let run ppf =
     run ppf

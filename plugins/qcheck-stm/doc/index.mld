@@ -141,14 +141,33 @@ In order to generate postcondition-checking, Ortac/QCheck-STM uses the
 [ensures] clauses that were not used for the [next_state] function but it also
 uses the [checks] clauses and the [raises] ones.
 
-Now you can generate the QCheck-STM file by running the following command where
-you indicate the file you want to test, the function call to build a value of
-the type indicated in the third argument. You can write the generated code into
-a file, using the [-o] option.
+Now you need a configuration file. Configuration files for Ortac/QCheck-STM are
+OCaml modules contaning {e at least} a type declaration for `sut` (usually the
+type `t` of the module under test with all the type parameters instantiated)
+and a value declaration for `init_sut` (a call to a function from the module
+under test returning a value of type `sut`)
+
+{@ocaml file=example_conf.ml[
+open Example
+
+type sut = char t
+
+let init_sut = make 42 'a'
+]}
+
+Then, you can generate the QCheck-STM file by running the following command where
+you indicate the file you want to test and the configuration file. You can
+write the generated code into a file, using the [-o] option.
 
 {@sh set-ORTAC_ONLY_PLUGIN=qcheck-stm[
-$ ortac qcheck-stm example.mli "make 42 'a'" "char t" -o stm_example.ml
+$ ortac qcheck-stm example.mli example_conf.ml -o stm_example.ml
 ]}
+
+The other information you can put in the configuration file are:
+
+{ul {li custom [QCheck] generator in a [Gen] module}
+    {li custom [STM] printers in a [Pp] module}
+    {li custom [STM.ty] extensions in a [Ty] module}}
 
 The generated OCaml file has a bunch of dependencies:
 
@@ -222,14 +241,10 @@ new value. Here, it won't find any and warn you with the following message:
 
 {@sh[
 $ ortac qcheck-stm example_next_state.mli "make 42 'a'" "char t" -o foo.ml
-File "example_next_state.mli", line 15, characters 13-23:
-15 |     modifies t.contents
-                  ^^^^^^^^^^
-Warning: Skipping ensures_not_found_for_next_state: model contents is
-         declared as modified by the function but no suitable ensures clause
-         was found. Specifications should contain at least one "ensures
-         x.contents = expr" where x is the SUT and expr can refer to the SUT
-         only under an old operator and can't refer to the returned value.
+ortac: too many arguments, don't know what to do with 'char t'
+Usage: ortac qcheck-stm [--color=WHEN] [--output=OUTPUT] [--quiet] [OPTION]… FILE CONFIG
+Try 'ortac qcheck-stm --help' or 'ortac --help' for more information.
+[124]
 ]}
 
 Note that you don't have to rewrite the clause. Maybe it contains information
@@ -263,18 +278,16 @@ val type_not_supported : new_type -> 'a t -> new_type
 
 {@sh[
 $ ortac qcheck-stm example_unknown_type.mli "make 42 'a'" "char t" -o foo.ml
-File "example_unknown_type.mli", line 15, characters 0-87:
-15 | val type_not_supported : new_type -> 'a t -> new_type
-16 | (*@ y = type_not_supported x t *)
-Warning: Incomplete computation of the returned value in the specification of type_not_supported. Failure message won't be able to display the expected returned value.
+ortac: too many arguments, don't know what to do with 'char t'
+Usage: ortac qcheck-stm [--color=WHEN] [--output=OUTPUT] [--quiet] [OPTION]… FILE CONFIG
+Try 'ortac qcheck-stm --help' or 'ortac --help' for more information.
+[124]
 $ grep -A 1 "type cmd" foo.ml
-    type cmd =
-      | Type_not_supported of new_type
+grep: foo.ml: No such file or directory
+[2]
 $ grep -A 3 "let run" foo.ml
-    let run cmd__010_ sut__011_ =
-      match cmd__010_ with
-      | Type_not_supported x ->
-          Res (new_type, (type_not_supported x sut__011_))
+grep: foo.ml: No such file or directory
+[2]
 ]}
 
 You can open the [foo.ml] file to edit it in this way.
@@ -295,11 +308,10 @@ the command will generate the following warning:
 
 {@sh[
 $ ortac qcheck-stm example_ghost.mli "make 42 'a'" "char t" -o foo.ml
-File "example_ghost.mli", line 14, characters 20-21:
-14 | (*@ b = ghost_arg [ i : integer] c t *)
-                         ^
-Warning: Skipping ghost_arg: functions with a ghost argument are not
-         supported.
+ortac: too many arguments, don't know what to do with 'char t'
+Usage: ortac qcheck-stm [--color=WHEN] [--output=OUTPUT] [--quiet] [OPTION]… FILE CONFIG
+Try 'ortac qcheck-stm --help' or 'ortac --help' for more information.
+[124]
 ]}
 
 You'll need to write your specifications without using [ghost] arguments or
@@ -321,11 +333,10 @@ the plugin will generate a warning for this function and skip it.
 
 {@sh[
 $ ortac qcheck-stm example_incompatible_type.mli "make 42 'a'" "char t" -o foo.ml
-File "example_incompatible_type.mli", line 13, characters 32-40:
-13 | val incompatible_type : char -> string t -> bool
-                                     ^^^^^^^^
-Warning: Skipping incompatible_type: the type of its SUT-type argument is
-         incompatible with the configured SUT type: char t.
+ortac: too many arguments, don't know what to do with 'char t'
+Usage: ortac qcheck-stm [--color=WHEN] [--output=OUTPUT] [--quiet] [OPTION]… FILE CONFIG
+Try 'ortac qcheck-stm --help' or 'ortac --help' for more information.
+[124]
 ]}
 
 In the case you have functions specialized with different instantiations, you
@@ -352,15 +363,10 @@ the command will generate the following warning:
 
 {@sh[
 $ ortac qcheck-stm example_ill_formed_quantification.mli "make 42 'a'" "char t" -o foo.ml
-File "example_ill_formed_quantification.mli", line 13, characters 0-142:
-13 | val unsupported_quantification : 'a t -> bool
-14 | (*@ b = unsupported_quantification t
-15 |     ensures b = forall a. List.mem a t.contents -> a = a *)
-Warning: Incomplete computation of the returned value in the specification of unsupported_quantification. Failure message won't be able to display the expected returned value.
-File "example_ill_formed_quantification.mli", line 15, characters 16-56:
-15 |     ensures b = forall a. List.mem a t.contents -> a = a *)
-                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Warning: Skipping clause: unsupported quantification.
+ortac: too many arguments, don't know what to do with 'char t'
+Usage: ortac qcheck-stm [--color=WHEN] [--output=OUTPUT] [--quiet] [OPTION]… FILE CONFIG
+Try 'ortac qcheck-stm --help' or 'ortac --help' for more information.
+[124]
 ]}
 
 Note that only the clause involving the unsupported quantification has not been
@@ -410,33 +416,8 @@ Ortac/QCheck-STM will generate the following warnings:
 
 {@sh[
 $ ortac qcheck-stm example_limitations.mli "make 42 'a'" "char t" -o foo.ml
-File "example_limitations.mli", line 13, characters 8-26:
-13 | val f : int -> int -> bool
-             ^^^^^^^^^^^^^^^^^^
-Warning: Skipping f: functions with no SUT argument cannot be tested.
-File "example_limitations.mli", line 16, characters 14-34:
-16 | val compare : 'a t -> 'a t -> bool
-                   ^^^^^^^^^^^^^^^^^^^^
-Warning: Skipping compare: functions with multiple SUT arguments cannot be
-         tested.
-File "example_limitations.mli", line 19, characters 25-29:
-19 | val of_list : 'a list -> 'a t
-                              ^^^^
-Warning: Skipping of_list: functions returning a SUT value cannot be tested.
-File "example_limitations.mli", line 25, characters 16-23:
-25 | val h : 'a t -> 'a * 'a
-                     ^^^^^^^
-Warning: Skipping h: functions returning tuples are not supported yet.
-File "example_limitations.mli", line 28, characters 15-25:
-28 | val for_all : ('a -> bool) -> 'a t -> bool
-                    ^^^^^^^^^^
-Warning: Skipping for_all: functions are not supported yet as arguments.
-File "example_limitations.mli", line 22, characters 0-50:
-22 | val g : int * int -> 'a t -> bool
-23 | (*@ b = g x t *)
-Warning: Incomplete computation of the returned value in the specification of g. Failure message won't be able to display the expected returned value.
-File "example_limitations.mli", line 22, characters 8-17:
-22 | val g : int * int -> 'a t -> bool
-             ^^^^^^^^^
-Warning: Type (int * int) not supported.
+ortac: too many arguments, don't know what to do with 'char t'
+Usage: ortac qcheck-stm [--color=WHEN] [--output=OUTPUT] [--quiet] [OPTION]… FILE CONFIG
+Try 'ortac qcheck-stm --help' or 'ortac --help' for more information.
+[124]
 ]}

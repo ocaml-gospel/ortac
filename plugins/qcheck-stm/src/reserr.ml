@@ -11,46 +11,49 @@ type init_state_error =
 
 type W.kind +=
   | Constant_value of string
-  | Returning_sut of string
-  | No_sut_argument of string
-  | Multiple_sut_arguments of string
-  | No_sut_type of string
-  | No_init_function of string
-  | Syntax_error_in_type of string
-  | Syntax_error_in_init_sut of string
-  | Sut_type_not_supported of string
-  | Type_parameter_not_instantiated of string
-  | Type_not_supported_for_sut_parameter of string
-  | Incompatible_type of (string * string)
-  | Sut_type_not_specified of string
-  | No_models of string
-  | No_spec of string
+  | Ensures_not_found_for_next_state of (string * string)
+  | Functional_argument of string
+  | Ghost_values of (string * [ `Arg | `Ret ])
+  | Ignored_modifies
+  | Impossible_init_state_generation of init_state_error
   | Impossible_term_substitution of
       [ `Never | `New | `Old | `NotModel | `OutOfScope ]
-  | Ignored_modifies
-  | Ensures_not_found_for_next_state of (string * string)
-  | Type_not_supported of string
-  | Impossible_init_state_generation of init_state_error
-  | Functional_argument of string
-  | Returned_tuple of string
-  | Ghost_values of (string * [ `Arg | `Ret ])
   | Incompatible_sut of string
+  | Incompatible_type of (string * string)
   | Incomplete_ret_val_computation of string
+  | Incomplete_configuration_module of [ `Init_sut | `Sut ]
+  | Multiple_sut_arguments of string
+  | No_configuration_file of string
+  | No_init_function of string
+  | No_models of string
+  | No_spec of string
+  | No_sut_argument of string
+  | No_sut_type of string
+  | Not_a_structure of string
+  | Returned_tuple of string
+  | Returning_sut of string
+  | Sut_type_not_specified of string
+  | Sut_type_not_supported of string
+  | Syntax_error_in_config_module of string
+  | Type_not_supported of string
+  | Type_not_supported_for_sut_parameter of string
+  | Type_parameter_not_instantiated of string
 
 let level kind =
   match kind with
-  | Constant_value _ | Returning_sut _ | No_sut_argument _
-  | Multiple_sut_arguments _ | Incompatible_type _ | No_spec _
-  | Impossible_term_substitution _ | Ignored_modifies
-  | Ensures_not_found_for_next_state _ | Type_not_supported _
-  | Functional_argument _ | Returned_tuple _ | Ghost_values _
-  | Incomplete_ret_val_computation _ ->
+  | Constant_value _ | Ensures_not_found_for_next_state _
+  | Functional_argument _ | Ghost_values _ | Ignored_modifies
+  | Impossible_term_substitution _ | Incompatible_type _
+  | Incomplete_ret_val_computation _ | Multiple_sut_arguments _ | No_spec _
+  | No_sut_argument _ | Returned_tuple _ | Returning_sut _
+  | Type_not_supported _ ->
       W.Warning
-  | No_sut_type _ | No_init_function _ | Syntax_error_in_type _
-  | Sut_type_not_supported _ | Type_not_supported_for_sut_parameter _
-  | Syntax_error_in_init_sut _ | Type_parameter_not_instantiated _
-  | Sut_type_not_specified _ | No_models _ | Impossible_init_state_generation _
-  | Incompatible_sut _ ->
+  | Impossible_init_state_generation _ | Incompatible_sut _
+  | Incomplete_configuration_module _ | No_configuration_file _
+  | No_init_function _ | No_models _ | No_sut_type _ | Not_a_structure _
+  | Sut_type_not_specified _ | Sut_type_not_supported _
+  | Syntax_error_in_config_module _ | Type_not_supported_for_sut_parameter _
+  | Type_parameter_not_instantiated _ ->
       W.Error
   | _ -> W.level kind
 
@@ -164,8 +167,8 @@ let pp_kind ppf kind =
   (* Errors *)
   | No_sut_type ty -> pf ppf "Type %s not declared in the module" ty
   | No_init_function f -> pf ppf "Function %s not declared in the module" f
-  | Syntax_error_in_type t -> pf ppf "Syntax error in type %s" t
-  | Syntax_error_in_init_sut s -> pf ppf "Syntax error in OCaml expression %s" s
+  | Syntax_error_in_config_module s ->
+      pf ppf "Syntax error in OCaml configuration module %s" s
   | Sut_type_not_supported ty ->
       pf ppf "Unsupported SUT type %s:@ %a" ty text
         "SUT type must be a type constructor, possibly applied to type \
@@ -179,7 +182,11 @@ let pp_kind ppf kind =
          type"
   | Sut_type_not_specified ty ->
       pf ppf "Missing specification for the SUT type %s" ty
+  | No_configuration_file file -> pf ppf "Missing configuration file %s" file
   | No_models ty -> pf ppf "Missing model(s) for the SUT type %s" ty
+  | Not_a_structure mod_name ->
+      pf ppf "Unsupported %s module definition:@ %a" mod_name text
+        "only structures are allowed as module definition here"
   | Impossible_init_state_generation (Not_a_function_call fct) ->
       pf ppf "Unsupported INIT expression %s:@ %a" fct text
         "the INIT expression is expected to be a function call (the \
@@ -213,6 +220,13 @@ let pp_kind ppf kind =
       pf ppf "Error in INIT expression %s:@ %a" fct text
         "mismatch in the number of arguments between the INIT expression and \
          the function specification"
+  | Incomplete_configuration_module missing ->
+      let what =
+        match missing with
+        | `Init_sut -> "the init_sut value declaration"
+        | `Sut -> "the sut type declaration"
+      in
+      pf ppf "Incomplete configuration module: it is missing %s" what
   | Incompatible_sut t ->
       pf ppf "Incompatible declaration of SUT type:@ %a%s" text
         "the declaration of the SUT type is incompatible with the configured \
@@ -277,6 +291,18 @@ let promote_opt r =
   | Error errs, ws ->
       let* _ = warns ws and* _ = filter_errs errs in
       ok None
+
+let rec fold_left (f : 'a -> 'b -> 'a reserr) (acc : 'a) : 'b list -> 'a reserr
+    = function
+  | [] -> ok acc
+  | x :: xs -> (
+      match f acc x with
+      | (Ok _, _) as acc ->
+          let* acc = acc in
+          fold_left f acc xs
+      | Error errs, ws ->
+          let* _ = warns ws and* _ = filter_errs errs in
+          fold_left f acc xs)
 
 let of_option ~default = Option.fold ~none:(error default) ~some:ok
 let to_option = function Ok x, _ -> Some x | _ -> None

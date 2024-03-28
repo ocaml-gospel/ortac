@@ -19,7 +19,11 @@
    (ignore-stdout
     (with-stderr-to
      %{target}
-     (run ortac qcheck-stm %{dep:all_warnings.mli} "make 16 'a'" "char t"))))))
+     (run
+      ortac
+      qcheck-stm
+      %{dep:all_warnings.mli}
+      %{dep:all_warnings_config.ml}))))))
 
 (rule
  (alias runtest)
