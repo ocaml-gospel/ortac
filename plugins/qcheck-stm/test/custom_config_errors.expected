@@ -1,0 +1,18 @@
+File "custom_config.mli", line 6, characters 10-22:
+6 | val elt : 'a -> 'a elt
+              ^^^^^^^^^^^^
+Warning: Skipping elt: functions with no SUT argument cannot be tested.
+File "custom_config.mli", line 6, characters 0-22:
+6 | val elt : 'a -> 'a elt
+    ^^^^^^^^^^^^^^^^^^^^^^
+Warning: Skipping elt: functions without specifications cannot be tested.
+File "custom_config.mli", line 7, characters 11-23:
+7 | val proj : 'a elt -> 'a
+               ^^^^^^^^^^^^
+Warning: Skipping proj: functions with no SUT argument cannot be tested.
+File "custom_config.mli", line 19, characters 0-125:
+19 | val top : 'a t -> 'a elt
+20 | (*@ a = top t
+21 |     checks t.contents <> Sequence.empty
+22 |     ensures proj a = Sequence.hd t.contents *)
+Warning: Incomplete computation of the returned value in the specification of top. Failure message won't be able to display the expected returned value.
