@@ -17,22 +17,16 @@ end = struct
         & info [] ~doc:"Interface file containing Gospel specifications"
             ~docv:"INTERFACE")
 
-    let init =
+    let config_file =
       Arg.(
         required
         & pos 1 (some string) None
-        & info [] ~doc:"Init function to feed to ortac qcheck-stm" ~docv:"INIT")
-
-    let sut =
-      Arg.(
-        required
-        & pos 2 (some string) None
-        & info [] ~doc:"Sut type to feed to ortac qcheck-stm" ~docv:"SUT")
+        & info [] ~doc:"Configuration file for Ortac/QCheckSTM" ~docv:"CONFIG")
 
     let ocaml_output =
       Arg.(
         required
-        & pos 3 (some string) None
+        & pos 2 (some string) None
         & info [] ~doc:"Filename for the generated tests" ~docv:"OCAML_OUTPUT")
 
     let package_name =
@@ -48,19 +42,10 @@ end = struct
         & info [ "w"; "with-stdout-to" ]
             ~doc:"Filename for the generated dune rules" ~docv:"DUNE_OUTPUT")
 
-    let main interface_file init_function sut_type ocaml_output include_
-        package_name dune_output =
+    let main interface_file config_file ocaml_output package_name dune_output =
       let open Qcheck_stm in
       let config =
-        {
-          interface_file;
-          init_function;
-          sut_type;
-          ocaml_output;
-          include_;
-          package_name;
-          dune_output;
-        }
+        { interface_file; config_file; ocaml_output; package_name; dune_output }
       in
       let ppf = Registration.get_out_formatter dune_output in
       Qcheck_stm.gen_dune_rules ppf config
@@ -69,10 +54,8 @@ end = struct
       Term.(
         const main
         $ interface_file
-        $ init
-        $ sut
+        $ config_file
         $ ocaml_output
-        $ Registration.include_
         $ package_name
         $ with_stdout_to)
 
