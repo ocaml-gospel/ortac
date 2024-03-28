@@ -8,6 +8,7 @@ type config_under_construction = {
   init_sut_txt' : string option;
   gen_mod' : Ppxlib.structure option;
   pp_mod' : Ppxlib.structure option;
+  ty_mod' : Ppxlib.structure option;
 }
 
 let config_under_construction =
@@ -17,6 +18,7 @@ let config_under_construction =
     init_sut_txt' = None;
     gen_mod' = None;
     pp_mod' = None;
+    ty_mod' = None;
   }
 
 type t = {
@@ -26,6 +28,7 @@ type t = {
   init_sut_txt : string;
   gen_mod : Ppxlib.structure option;
   pp_mod : Ppxlib.structure option;
+  ty_mod : Ppxlib.structure option;
 }
 
 let mk_config context cfg_uc =
@@ -43,8 +46,9 @@ let mk_config context cfg_uc =
      be empty and we want to avoid raising twice the same error *)
   let init_sut_txt = Option.get cfg_uc.init_sut_txt'
   and gen_mod = cfg_uc.gen_mod'
-  and pp_mod = cfg_uc.pp_mod' in
-  ok { context; sut_core_type; init_sut; init_sut_txt; gen_mod; pp_mod }
+  and pp_mod = cfg_uc.pp_mod'
+  and ty_mod = cfg_uc.ty_mod' in
+  ok { context; sut_core_type; init_sut; init_sut_txt; gen_mod; pp_mod; ty_mod }
 
 let get_sut_type_name config =
   let open Ppxlib in
@@ -147,6 +151,9 @@ let module_binding cfg_uc (mb : Ppxlib.module_binding) =
   | Some name when String.equal "Pp" name ->
       let* content = get_structure name mb in
       ok { cfg_uc with pp_mod' = Some content }
+  | Some name when String.equal "Ty" name ->
+      let* content = get_structure name mb in
+      ok { cfg_uc with ty_mod' = Some content }
   | _ -> ok cfg_uc
 
 let scan_config cfg_uc config_mod =
