@@ -994,6 +994,7 @@ let stm config ir =
     pmod_structure
       ((open_mod "STM" :: qcheck config)
       @ util config
+      @ Option.value config.ty_mod ~default:[]
       @ [
           sut;
           cmd;
