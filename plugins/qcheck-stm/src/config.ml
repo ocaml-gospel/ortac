@@ -6,6 +6,7 @@ type config_under_construction = {
   sut_core_type' : Ppxlib.core_type option;
   init_sut' : Ppxlib.expression option;
   gen_mod' : Ppxlib.structure option;
+  pp_mod' : Ppxlib.structure option;
 }
 
 let config_under_construction =
@@ -13,6 +14,7 @@ let config_under_construction =
     sut_core_type' = None;
     init_sut' = None;
     gen_mod' = None;
+    pp_mod' = None;
   }
 
 type t = {
@@ -21,6 +23,7 @@ type t = {
   init_sut : Ppxlib.expression;
   init_sut_txt : string;
   gen_mod : Ppxlib.structure option; (* Containing custom QCheck generators *)
+  pp_mod : Ppxlib.structure option; (* Containing custom pretty printers *)
 }
 
 let mk_config context cfg_uc =
@@ -35,8 +38,9 @@ let mk_config context cfg_uc =
       cfg_uc.init_sut'
   in
   let init_sut_txt = Fmt.str "%a" Pprintast.expression init_sut
-  and gen_mod = cfg_uc.gen_mod' in
-  ok { context; sut_core_type; init_sut; init_sut_txt; gen_mod }
+  and gen_mod = cfg_uc.gen_mod'
+  and pp_mod = cfg_uc.pp_mod' in
+  ok { context; sut_core_type; init_sut; init_sut_txt; gen_mod; pp_mod }
 
 let get_sut_type_name config =
   let open Ppxlib in
@@ -126,21 +130,26 @@ let type_declarations cfg_uc =
 
 (* Inspect module definition in config module in order to collect information
    about:
-     - the custom [QCheck] generators *)
+     - the custom [QCheck] generators
+     - the custom [STM] pretty printers *)
 let module_binding cfg_uc (mb : Ppxlib.module_binding) =
   let open Reserr in
+  let get_structure name mb =
+    match mb.pmb_expr.pmod_desc with
+    | Pmod_structure structure
+    (* there is no need to go further, module constraints of module
+       constraints doesn't make sense *)
+    | Pmod_constraint ({ pmod_desc = Pmod_structure structure; _ }, _) ->
+        ok structure
+    | _ -> error (Not_a_structure name, Location.none)
+  in
   match mb.pmb_name.txt with
   | Some name when String.equal "Gen" name ->
-      let* content =
-        match mb.pmb_expr.pmod_desc with
-        | Pmod_structure structure
-        (* there is no need to go further, module constraints of module
-           constraints doesn't make sense *)
-        | Pmod_constraint ({ pmod_desc = Pmod_structure structure; _ }, _) ->
-            ok structure
-        | _ -> error (Not_a_structure name, Location.none)
-      in
+      let* content = get_structure name mb in
       ok { cfg_uc with gen_mod' = Some content }
+  | Some name when String.equal "Pp" name ->
+      let* content = get_structure name mb in
+      ok { cfg_uc with pp_mod' = Some content }
   | _ -> ok cfg_uc
 
 let scan_config cfg_uc config_mod =
