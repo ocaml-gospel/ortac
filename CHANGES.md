@@ -1,5 +1,7 @@
 # Unreleased
 
+- Move to a module-based configuration
+  [\#214](https://github.com/ocaml-gospel/ortac/pull/214)
 - Improve test-failure message
   [\#202](https://github.com/ocaml-gospel/ortac/pull/202) and
   [\#204](https://github.com/ocaml-gospel/ortac/pull/204) and
@@ -8,8 +10,6 @@
   [\#198](https://github.com/ocaml-gospel/ortac/pull/198)
 - Add support for type invariants
   [\#197](https://github.com/ocaml-gospel/ortac/pull/197)
-- Add an include option to qcheck-stm cli
-  [\#181](https://github.com/ocaml-gospel/ortac/pull/181)
 - Add a quiet flag
   [\#179](https://github.com/ocaml-gospel/ortac/pull/179)
 - Check for out of scope variables
