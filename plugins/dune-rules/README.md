@@ -20,18 +20,18 @@ plugins (the qcheck-stm plugin for now). You have to give it the option you want
 pass to the other plugins and some more information for dune.
 
 Let's say you want use the [Ortac/QCheck-STM] plugin on a module interface
-`lib.mli` to generate QCheck-STM tests for this module using `make 42 'a'` as
-initial value of type `char t`, including the `Lib_incl` module, in the context
-of the `pack` package.
+`lib.mli` to generate QCheck-STM tests with the `lib_conf.ml` configuration, in
+the context of the `pack` package.
 
 Then you can run:
 
 ```shell
-$ ortac dune qcheck-stm lib "make 42 'a'" "char t" lib_tests --include=lib_incl --package=pack --with-stdout-to=dune.inc
+$ ortac dune qcheck-stm lib.mli lib_conf.ml lib_tests.ml --package=pack --with-stdout-to=dune.inc
 ```
 
-to generate the dune rules to generate and run the tests. Next time you run
-`dune runtest`, your code should be tested using QCheck-STM.
+to generate the dune rules to generate and run the tests. You can then include
+`dune.inc` in the `dune` file and the next time you run `dune runtest`, your
+code should be tested using QCheck-STM.
 
 [Ortac/QCheck-STM]: ../qcheck-stm/README.md
 
