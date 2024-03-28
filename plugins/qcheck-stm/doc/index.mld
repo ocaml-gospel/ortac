@@ -141,18 +141,33 @@ In order to generate postcondition-checking, Ortac/QCheck-STM uses the
 [ensures] clauses that were not used for the [next_state] function but it also
 uses the [checks] clauses and the [raises] ones.
 
-Now you can generate the QCheck-STM file by running the following command where
-you indicate the file you want to test, the function call to build a value of
-the type indicated in the third argument. You can write the generated code into
-a file, using the [-o] option.
+Now you need a configuration file. Configuration files for Ortac/QCheck-STM are
+OCaml modules contaning {e at least} a type declaration for `sut` (usually the
+type `t` of the module under test with all the type parameters instantiated)
+and a value declaration for `init_sut` (a call to a function from the module
+under test returning a value of type `sut`)
+
+{@ocaml file=example_conf.ml[
+open Example
+
+type sut = char t
+
+let init_sut = make 42 'a'
+]}
+
+Then, you can generate the QCheck-STM file by running the following command where
+you indicate the file you want to test and the configuration file. You can
+write the generated code into a file, using the [-o] option.
 
 {@sh set-ORTAC_ONLY_PLUGIN=qcheck-stm[
-$ ortac qcheck-stm example.mli "make 42 'a'" "char t" -o stm_example.ml
-ortac: too many arguments, don't know what to do with 'char t'
-Usage: ortac qcheck-stm [--color=WHEN] [--output=OUTPUT] [--quiet] [OPTION]… FILE CONFIG
-Try 'ortac qcheck-stm --help' or 'ortac --help' for more information.
-[124]
+$ ortac qcheck-stm example.mli example_conf.ml -o stm_example.ml
 ]}
+
+The other information you can put in the configuration file are:
+
+{ul {li custom [QCheck] generator in a [Gen] module}
+    {li custom [STM] printers in a [Pp] module}
+    {li custom [STM.ty] extensions in a [Ty] module}}
 
 The generated OCaml file has a bunch of dependencies:
 
@@ -268,10 +283,10 @@ Usage: ortac qcheck-stm [--color=WHEN] [--output=OUTPUT] [--quiet] [OPTION]… F
 Try 'ortac qcheck-stm --help' or 'ortac --help' for more information.
 [124]
 $ grep -A 1 "type cmd" foo.ml
-grep: foo.ml: Aucun fichier ou dossier de ce type
+grep: foo.ml: No such file or directory
 [2]
 $ grep -A 3 "let run" foo.ml
-grep: foo.ml: Aucun fichier ou dossier de ce type
+grep: foo.ml: No such file or directory
 [2]
 ]}
 
