@@ -7,7 +7,7 @@
  (package ortac-examples)
  (deps
   (package ortac-qcheck-stm))
- (targets varray_tests.ml)
+ (targets varray_spec_tests.ml)
  (action
   (setenv
    ORTAC_ONLY_PLUGIN
@@ -18,12 +18,12 @@
      ortac
      qcheck-stm
      %{dep:varray_spec.mli}
-     %{dep:varray_config.ml}
+     %{dep:varray_spec_config.ml}
      --quiet)))))
 
 (test
- (name varray_tests)
- (modules varray_tests)
+ (name varray_spec_tests)
+ (modules varray_spec_tests)
  (libraries
   varray_spec
   qcheck-stm.stm

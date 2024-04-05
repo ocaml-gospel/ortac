@@ -7,7 +7,7 @@
  (package ortac-examples)
  (deps
   (package ortac-qcheck-stm))
- (targets lwt_dllist_tests.ml)
+ (targets lwt_dllist_spec_tests.ml)
  (action
   (setenv
    ORTAC_ONLY_PLUGIN
@@ -18,12 +18,12 @@
      ortac
      qcheck-stm
      %{dep:lwt_dllist_spec.mli}
-     %{dep:lwt_dllist_config.ml}
+     %{dep:lwt_dllist_spec_config.ml}
      --quiet)))))
 
 (test
- (name lwt_dllist_tests)
- (modules lwt_dllist_tests)
+ (name lwt_dllist_spec_tests)
+ (modules lwt_dllist_spec_tests)
  (libraries
   lwt_dllist_spec
   qcheck-stm.stm

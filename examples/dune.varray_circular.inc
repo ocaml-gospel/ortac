@@ -7,7 +7,7 @@
  (package ortac-examples)
  (deps
   (package ortac-qcheck-stm))
- (targets varray_circular_tests.ml)
+ (targets varray_circular_spec_tests.ml)
  (action
   (setenv
    ORTAC_ONLY_PLUGIN
@@ -18,12 +18,12 @@
      ortac
      qcheck-stm
      %{dep:varray_circular_spec.mli}
-     %{dep:varray_circular_config.ml}
+     %{dep:varray_circular_spec_config.ml}
      --quiet)))))
 
 (test
- (name varray_circular_tests)
- (modules varray_circular_tests)
+ (name varray_circular_spec_tests)
+ (modules varray_circular_spec_tests)
  (libraries
   varray_circular_spec
   qcheck-stm.stm
