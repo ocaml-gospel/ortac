@@ -29,23 +29,42 @@ end = struct
         & pos 2 (some string) None
         & info [] ~doc:"Filename for the generated tests" ~docv:"OCAML_OUTPUT")
 
+    let library =
+      Arg.(
+        value
+        & opt (some string) None
+        & info [ "l"; "library" ]
+            ~doc:"Name of the library the module under test belongs to."
+            ~absent:"INTERFACE without the file extension" ~docv:"LIBRARY")
+
     let package_name =
       Arg.(
         value
         & opt (some string) None
-        & info [ "p"; "package" ] ~doc:"Package name" ~docv:"PACKAGE")
+        & info [ "p"; "package" ] ~doc:"Package name." ~docv:"PACKAGE")
 
     let with_stdout_to =
       Arg.(
         value
         & opt (some string) None
         & info [ "w"; "with-stdout-to" ]
-            ~doc:"Filename for the generated dune rules" ~docv:"DUNE_OUTPUT")
+            ~doc:
+              "Filename for the generated dune rules. For use on the command \
+               line."
+            ~docv:"DUNE_OUTPUT")
 
-    let main interface_file config_file ocaml_output package_name dune_output =
+    let main interface_file config_file ocaml_output library package_name
+        dune_output =
       let open Qcheck_stm in
       let config =
-        { interface_file; config_file; ocaml_output; package_name; dune_output }
+        {
+          interface_file;
+          config_file;
+          ocaml_output;
+          library;
+          package_name;
+          dune_output;
+        }
       in
       let ppf = Registration.get_out_formatter dune_output in
       Qcheck_stm.gen_dune_rules ppf config
@@ -56,6 +75,7 @@ end = struct
         $ interface_file
         $ config_file
         $ ocaml_output
+        $ library
         $ package_name
         $ with_stdout_to)
 

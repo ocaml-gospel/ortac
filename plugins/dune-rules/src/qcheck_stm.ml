@@ -2,6 +2,7 @@ type config = {
   interface_file : string;
   config_file : string;
   ocaml_output : string;
+  library : string option;
   package_name : string option;
   dune_output : string option;
 }
@@ -51,11 +52,16 @@ let name ppf config =
 let dep aux ppf config = pf ppf "%%{dep:%a}" aux config
 
 let libraries =
+  let library ppf config =
+    pf ppf "%s@;"
+      (Option.value config.library
+         ~default:Filename.(basename config.interface_file |> chop_extension))
+  in
   let k ppf config =
     pf ppf
-      "libraries@ %s@ qcheck-stm.stm@ qcheck-stm.sequential@ \
+      "libraries@ %aqcheck-stm.stm@ qcheck-stm.sequential@ \
        qcheck-multicoretests-util@ ortac-runtime-qcheck-stm"
-      (Filename.chop_extension config.interface_file)
+      library config
   in
   stanza k
 
