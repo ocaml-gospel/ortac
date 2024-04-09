@@ -1,13 +1,24 @@
 type config = {
   interface_file : string;
-  config_file : string;
-  ocaml_output : string;
+  config_file : string option;
+  ocaml_output : string option;
   library : string option;
   package_name : string option;
   dune_output : string option;
 }
 
 open Fmt
+
+let get_optional proj suffix config =
+  let default =
+    str "%s_%s"
+      Filename.(basename config.interface_file |> chop_extension)
+      suffix
+  in
+  Option.value (proj config) ~default
+
+let get_config_file = get_optional (fun cfg -> cfg.config_file) "config.ml"
+let get_ocaml_output = get_optional (fun cfg -> cfg.ocaml_output) "tests.ml"
 
 let msg ppf config =
   pf ppf
@@ -42,12 +53,12 @@ let run ppf args = pf ppf "run@;%a" (concat args)
 let ortac ppf _ = pf ppf "ortac"
 let qcheck_stm ppf _ = pf ppf "qcheck-stm"
 let interface ppf config = pf ppf "%s" config.interface_file
-let config_file ppf config = pf ppf "%s" config.config_file
+let config_file ppf config = pf ppf "%s" (get_config_file config)
 let runtest ppf _ = pf ppf "(alias runtest)"
 let promote ppf _ = pf ppf "(mode promote)"
 
 let name ppf config =
-  pf ppf "(name %s)" (Filename.chop_extension config.ocaml_output)
+  pf ppf "(name %s)" (Filename.chop_extension @@ get_ocaml_output config)
 
 let dep aux ppf config = pf ppf "%%{dep:%a}" aux config
 
@@ -73,7 +84,7 @@ let deps ppf = pf ppf "(deps@; %a)" (package "ortac-qcheck-stm")
 let optional ppf s = function None -> () | Some x -> pf ppf s x
 let quiet ppf _ = pf ppf "--quiet"
 let package ppf config = optional ppf "(package %s)" config.package_name
-let targets_ml ppf config = pf ppf "(targets %s)" config.ocaml_output
+let targets_ml ppf config = pf ppf "(targets %s)" @@ get_ocaml_output config
 
 let gen_ortac_rule ppf config =
   let args =
@@ -88,7 +99,7 @@ let gen_ortac_rule ppf config =
 
 let gen_test_rule ppf config =
   let modules ppf config =
-    pf ppf "(modules %s)" (Filename.chop_extension config.ocaml_output)
+    pf ppf "(modules %s)" (Filename.chop_extension @@ get_ocaml_output config)
   in
   let run ppf =
     run ppf

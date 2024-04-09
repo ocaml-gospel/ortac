@@ -1,7 +1,7 @@
 type config = {
   interface_file : string;
-  config_file : string;
-  ocaml_output : string;
+  config_file : string option;
+  ocaml_output : string option;
   library : string option;
   package_name : string option;
   dune_output : string option;

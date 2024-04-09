@@ -14,20 +14,34 @@ end = struct
       Arg.(
         required
         & pos 0 (some string) None
-        & info [] ~doc:"Interface file containing Gospel specifications"
+        & info [] ~doc:"Interface file containing Gospel specifications."
             ~docv:"INTERFACE")
 
     let config_file =
       Arg.(
-        required
-        & pos 1 (some string) None
-        & info [] ~doc:"Configuration file for Ortac/QCheckSTM" ~docv:"CONFIG")
+        value
+        & opt (some string) None
+        & info [ "c"; "config" ]
+            ~doc:
+              "Configuration file for Ortac/QCheck-STM. Useful for generating \
+               multiple test files per module under test."
+            ~absent:
+              "concatenation of INTERFACE without the extension and \
+               \"_config.ml\""
+            ~docv:"CONFIG")
 
     let ocaml_output =
       Arg.(
-        required
-        & pos 2 (some string) None
-        & info [] ~doc:"Filename for the generated tests" ~docv:"OCAML_OUTPUT")
+        value
+        & opt (some string) None
+        & info [ "o"; "output" ]
+            ~doc:
+              "Filename for the generated tests. Useful for generating \
+               multiple test files per module under test."
+            ~absent:
+              "concatenation of INTERFACE without the file extension and \
+               \"_tests.ml\""
+            ~docv:"OCAML_OUTPUT")
 
     let library =
       Arg.(
