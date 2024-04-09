@@ -18,7 +18,12 @@ let () =
   | [] -> usage ()
   | cmds ->
       let doc = "Run ORTAC." in
-      let version = "ortac version %%VERSION%%" in
+      let version =
+        Printf.sprintf "ortac version: %s"
+          (match Build_info.V1.version () with
+          | None -> "n/a"
+          | Some v -> Build_info.V1.Version.to_string v)
+      in
       let info = Cmd.info "ortac" ~doc ~version in
       let group = Cmd.group info cmds in
       Stdlib.exit (Cmd.eval group)
