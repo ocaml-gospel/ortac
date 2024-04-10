@@ -7,8 +7,8 @@ for the other plugins.
 
 ## Installation
 
-Follow the global [installation instructions] in the main README of
-this repository. The dune-rules plugin is provided by the OPAM package
+Follow the global [installation instructions] in the main README of this
+repository. The dune-rules plugin is provided by the OPAM package
 `ortac-dune.opam`.
 
 [installation instructions]: ../../README.md#installation
@@ -16,22 +16,31 @@ this repository. The dune-rules plugin is provided by the OPAM package
 ## Quick start
 
 The dune-rules plugin can be used to generate dune rules for other ortac
-plugins (the qcheck-stm plugin for now). You have to give it the option you want to
-pass to the other plugins and some more information for dune.
+plugins (the qcheck-stm plugin for now). You have to give it the option you
+want to pass to the other plugins and some more information for dune.
 
 Let's say you want use the [Ortac/QCheck-STM] plugin on a module interface
-`lib.mli` to generate QCheck-STM tests with the `lib_conf.ml` configuration, in
-the context of the `pack` package.
+`lib.mli` to generate QCheck-STM tests.
 
-Then you can run:
+The best way to use Ortac/Dune is in a dune stanza:
 
-```shell
-$ ortac dune qcheck-stm lib.mli lib_conf.ml lib_tests.ml --package=pack --with-stdout-to=dune.inc
+```dune
+(rule
+ (alias runtest)
+ (mode promote)
+ (action
+  (with-stdout-to
+   dune.inc
+   (run ortac dune qcheck-stm lib.mli))))
+
+(include dune.inc)
 ```
 
-to generate the dune rules to generate and run the tests. You can then include
-`dune.inc` in the `dune` file and the next time you run `dune runtest`, your
-code should be tested using QCheck-STM.
+This stanza assumes that you have written the configuration for
+[Ortac/QCheck-STM] in a file named `lib_config.ml` and that the `Lib` module is
+part of the `lib` library. It will write the generated tests in `lib_tests.ml`.
+If you want more control, you can use the `--config`, `--library` and
+`--output` command-line options to give custom names to these files.
 
 [Ortac/QCheck-STM]: ../qcheck-stm/README.md
 
