@@ -24,7 +24,7 @@ depends: [
   "cmdliner" {>= "1.1.0"}
   "fmt"
   "ppxlib" {>= "0.26.0"}
-  "gospel" {>= "0.2.0"}
+  "gospel" {>= "0.3.0"}
   "alcotest" {with-test & >= "0.8.1"}
   "ortac-core"
   "ortac-runtime" {with-test}
@@ -47,6 +47,3 @@ build: [
   ["dune" "install" "-p" name "--create-install-files" name]
 ]
 dev-repo: "git+https://github.com/ocaml-gospel/ortac.git"
-pin-depends: [
-  [ "gospel.0.2.0+dev" "git+https://github.com/ocaml-gospel/gospel#044f1d5b1f6eba47ee9ad001a5ce1dcb3b49c03a" ]
-]
