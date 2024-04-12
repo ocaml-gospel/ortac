@@ -30,7 +30,7 @@
  (maintainers "Clément Pascutto <clement@pascutto.fr>")
  (documentation "https://ocaml-gospel.github.io/ortac/ortac-core/")
  (depends
-  (ocaml (>= 4.11.0))
+  (ocaml (>= 4.12.0))
   dune-build-info
   dune-site
   (cmdliner (>= 1.1.0))
@@ -76,7 +76,7 @@
   "Nicolas Osborne <nicolas.osborne@tarides.com>")
  (maintainers "Clément Pascutto <clement@pascutto.fr>")
  (depends
-  (ocaml (>= 4.11.0))
+  (ocaml (>= 4.12.0))
   (cmdliner (>= 1.1.0))
   fmt
   (ppxlib (>= 0.26.0))
@@ -102,7 +102,7 @@
  (authors "Nicolas Osborne <nicolas.osborne@tarides.com>")
  (maintainers "Nicolas Osborne <nicolas.osborne@tarides.com>")
  (depends
-  (ocaml (>= 4.11.0))
+  (ocaml (>= 4.12.0))
   (cmdliner (>= 1.1.0))
   fmt
   (ppxlib (>= 0.26.0))
@@ -127,7 +127,7 @@
  (authors "Nicolas Osborne <nicolas.osborne@tarides.com>")
  (maintainers "Nicolas Osborne <nicolas.osborne@tarides.com>")
  (depends
-  (ocaml (>= 4.11.0))
+  (ocaml (>= 4.12.0))
   (monolith (>= 20201026))
   pprint
   (fmt (>= 0.9.0))
@@ -153,7 +153,7 @@
  (maintainers "Nicolas Osborne <nicolas.osborne@tarides.com>")
  (documentation "https://ocaml-gospel.github.io/ortac/ortac-qcheck-stm/")
  (depends
-  (ocaml (>= 4.11.0))
+  (ocaml (>= 4.12.0))
   (cmdliner (>= 1.1.0))
   fmt
   (ppxlib (>= 0.26.0))
@@ -176,7 +176,7 @@
   "Nicolas Osborne <nicolas.osborne@tarides.com>")
  (maintainers "Nicolas Osborne <nicolas.osborne@tarides.com>")
  (depends
-  (ocaml (>= 4.11.0))
+  (ocaml (>= 4.12.0))
   fmt
   (cmdliner (>= 1.1.0))
   ortac-core
@@ -196,7 +196,7 @@
  (authors "Nicolas Osborne <nicolas.osborne@tarides.com>")
  (maintainers "Nicolas Osborne <nicolas.osborne@tarides.com>")
  (depends
-  (ocaml (>= 4.11.0))
+  (ocaml (>= 4.12.0))
   qcheck-stm
   ortac-runtime))
 
@@ -209,7 +209,7 @@
   "Samuel Hym <samuel.hym@rustyne.lautre.net>")
  (maintainers "Nicolas Osborne <nicolas.osborne@tarides.com>")
  (depends
-  (ocaml (>= 4.11.0))
+  (ocaml (>= 4.12.0))
   ortac-core
   ortac-qcheck-stm
   ortac-dune

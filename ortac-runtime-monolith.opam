@@ -17,7 +17,7 @@ homepage: "https://github.com/ocaml-gospel/ortac"
 bug-reports: "https://github.com/ocaml-gospel/ortac/issues"
 depends: [
   "dune" {>= "3.8"}
-  "ocaml" {>= "4.11.0"}
+  "ocaml" {>= "4.12.0"}
   "monolith" {>= "20201026"}
   "pprint"
   "fmt" {>= "0.9.0"}

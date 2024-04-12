@@ -23,7 +23,7 @@ doc: "https://ocaml-gospel.github.io/ortac/ortac-qcheck-stm/"
 bug-reports: "https://github.com/ocaml-gospel/ortac/issues"
 depends: [
   "dune" {>= "3.8"}
-  "ocaml" {>= "4.11.0"}
+  "ocaml" {>= "4.12.0"}
   "cmdliner" {>= "1.1.0"}
   "fmt"
   "ppxlib" {>= "0.26.0"}
