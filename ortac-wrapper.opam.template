@@ -1,3 +1,0 @@
-pin-depends: [
-  [ "gospel.0.2.0+dev" "git+https://github.com/ocaml-gospel/gospel#044f1d5b1f6eba47ee9ad001a5ce1dcb3b49c03a" ]
-]
