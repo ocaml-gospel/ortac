@@ -1,5 +1,7 @@
 # Unreleased
 
+- Make `--help` and `--version` work even without any plugins installed
+  [\#217](https://github.com/ocaml-gospel/ortac/pull/217)
 - Improve test-failure message
   [\#202](https://github.com/ocaml-gospel/ortac/pull/202) and
   [\#204](https://github.com/ocaml-gospel/ortac/pull/204) and
