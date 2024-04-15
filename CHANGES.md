@@ -1,4 +1,4 @@
-# Unreleased
+# 0.2.0
 
 - Make `--help` and `--version` work even without any plugins installed
   [\#217](https://github.com/ocaml-gospel/ortac/pull/217)
