@@ -81,9 +81,13 @@ let package s ppf =
   stanza k ppf
 
 let deps ppf = pf ppf "(deps@; %a)" (package "ortac-qcheck-stm")
-let optional ppf s = function None -> () | Some x -> pf ppf s x
 let quiet ppf _ = pf ppf "--quiet"
-let package ppf config = optional ppf "(package %s)" config.package_name
+
+let package config =
+  match config.package_name with
+  | None -> []
+  | Some s -> [ (fun ppf _ -> pf ppf "(package %s)" s) ]
+
 let targets_ml ppf config = pf ppf "(targets %s)" @@ get_ocaml_output config
 
 let gen_ortac_rule ppf config =
@@ -93,7 +97,9 @@ let gen_ortac_rule ppf config =
   let run ppf = run ppf args in
   let run = stanza run in
   let action ppf = action_with_env ppf (with_target run) in
-  let stanzas = [ runtest; promote; package; deps; targets_ml; action ] in
+  let stanzas =
+    [ runtest; promote ] @ package config @ [ deps; targets_ml; action ]
+  in
   let rule ppf = rule ppf stanzas in
   stanza_rule rule ppf config
 
@@ -108,7 +114,9 @@ let gen_test_rule ppf config =
       ]
   in
   let action ppf = action ppf (stanza run) in
-  let test ppf = test ppf [ name; modules; libraries; package; action ] in
+  let test ppf =
+    test ppf @@ [ name; modules; libraries ] @ package config @ [ action ]
+  in
   stanza_rule test ppf config
 
 let gen_dune_rules ppf config =
