@@ -8,6 +8,7 @@ type config_under_construction = {
   gen_mod' : Ppxlib.structure option;
   pp_mod' : Ppxlib.structure option;
   ty_mod' : Ppxlib.structure option;
+  cleanup' : Ppxlib.structure_item option;
 }
 
 let config_under_construction =
@@ -17,6 +18,7 @@ let config_under_construction =
     gen_mod' = None;
     pp_mod' = None;
     ty_mod' = None;
+    cleanup' = None;
   }
 
 type t = {
@@ -27,6 +29,7 @@ type t = {
   gen_mod : Ppxlib.structure option; (* Containing custom QCheck generators *)
   pp_mod : Ppxlib.structure option; (* Containing custom pretty printers *)
   ty_mod : Ppxlib.structure option; (* Containing custom STM.ty extensions *)
+  cleanup : Ppxlib.structure_item option;
 }
 
 let mk_config context cfg_uc =
@@ -43,8 +46,19 @@ let mk_config context cfg_uc =
   let init_sut_txt = Fmt.str "%a" Pprintast.expression init_sut
   and gen_mod = cfg_uc.gen_mod'
   and pp_mod = cfg_uc.pp_mod'
-  and ty_mod = cfg_uc.ty_mod' in
-  ok { context; sut_core_type; init_sut; init_sut_txt; gen_mod; pp_mod; ty_mod }
+  and ty_mod = cfg_uc.ty_mod'
+  and cleanup = cfg_uc.cleanup' in
+  ok
+    {
+      context;
+      sut_core_type;
+      init_sut;
+      init_sut_txt;
+      gen_mod;
+      pp_mod;
+      ty_mod;
+      cleanup;
+    }
 
 let get_sut_type_name config =
   let open Ppxlib in
@@ -104,6 +118,11 @@ let value_bindings cfg_uc =
     | Ppat_var s when String.equal "init_sut" s.txt ->
         let init_sut' = Some vb.pvb_expr in
         ok { cfg_uc with init_sut' }
+    | Ppat_var s when String.equal "cleanup" s.txt ->
+        let cleanup' =
+          Option.some @@ Ortac_core.Builder.pstr_value Nonrecursive [ vb ]
+        in
+        ok { cfg_uc with cleanup' }
     | _ -> ok cfg_uc
   in
   fold_left aux cfg_uc
