@@ -305,8 +305,8 @@ let init_state config state sigs =
     | expr ->
         error
           ( Impossible_init_state_generation
-              (Not_a_function_call (Fmt.str "%a" Pprintast.expression expr)),
-            Location.none )
+              (Not_a_function_call config.init_sut_txt),
+            expr.pexp_loc )
   in
   let* fct_str =
     match fct with
@@ -349,9 +349,8 @@ let init_state config state sigs =
     with Invalid_argument _ ->
       error
         ( Impossible_init_state_generation
-            (Mismatch_number_of_arguments
-               (Fmt.str "%a" Pprintast.expression config.init_sut)),
-          Location.none )
+            (Mismatch_number_of_arguments config.init_sut_txt),
+          config.init_sut.pexp_loc )
   in
   let open Gospel.Symbols in
   let rec return_type ty =
