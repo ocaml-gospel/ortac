@@ -40,7 +40,9 @@
   (alcotest (and :with-test (>= 0.8.1)))
   (ortac-runtime :with-test))
  (sites
-  (lib plugins)))
+  (lib plugins))
+ (conflicts
+  (result (< 1.5))))
 
 (package
  (name ortac-runtime)
@@ -162,8 +164,9 @@
   (qcheck-core :with-test)
   (qcheck-stm :with-test)
   (qcheck-multicoretests-util :with-test)
-  ortac-core
-  (ortac-runtime :with-test))
+  (ortac-core (= :version))
+  (ortac-runtime (and :with-test (= :version)))
+  (ortac-runtime-qcheck-stm (and :with-test (= :version))))
  (conflicts
   (result (< 1.5))))
 
@@ -179,7 +182,7 @@
   (ocaml (>= 4.12.0))
   fmt
   (cmdliner (>= 1.1.0))
-  ortac-core
+  (ortac-core (= :version))
   (ortac-qcheck-stm :with-test)))
 
 (package
@@ -198,7 +201,7 @@
  (depends
   (ocaml (>= 4.12.0))
   qcheck-stm
-  ortac-runtime))
+  (ortac-runtime (= :version))))
 
 (package
  (name ortac-examples)
@@ -210,11 +213,11 @@
  (maintainers "Nicolas Osborne <nicolas.osborne@tarides.com>")
  (depends
   (ocaml (>= 4.12.0))
-  ortac-core
-  ortac-qcheck-stm
-  ortac-dune
-  ortac-runtime
-  qcheck-stm
+  (ortac-core (= :version))
+  (ortac-qcheck-stm (= :version))
+  (ortac-dune (= :version))
+  (ortac-runtime (= :version))
+  (qcheck-stm :with-test)
   lwt-dllist
   (varray (>= 0.2))))
 
