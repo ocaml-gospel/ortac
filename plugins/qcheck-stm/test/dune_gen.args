@@ -24,3 +24,5 @@ tuples
 tuples_config
 functional_model
 functional_model_config
+test_cleanup
+test_cleanup_config
