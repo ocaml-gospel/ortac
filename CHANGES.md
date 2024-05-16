@@ -1,5 +1,7 @@
 # 0.3.0
 
+- Read an optional `cleanup` function from configuration module
+  [\#226](https://github.com/ocaml-gospel/ortac/pull/226)
 - Fix field access translation
   [\#229](https://github.com/ocaml-gospel/ortac/pull/229)
 - Add support for functional type in model
