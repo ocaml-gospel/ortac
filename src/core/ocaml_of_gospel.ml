@@ -1,9 +1,9 @@
 module W = Warnings
 open Ppxlib
 open Gospel
-open Fmt
 open Builder
-module Ident = Identifier.Ident
+
+let str_of_ident = Fmt.str "%a" Identifier.Ident.pp
 
 module M = struct
   let return a = (a, [])
@@ -34,7 +34,7 @@ let rec pattern_ p =
   let open M in
   match p.p_node with
   | Pwild -> return ppat_any
-  | Pvar v -> pvar (str "%a" Ident.pp v.vs_name) |> return
+  | Pvar v -> pvar (str_of_ident v.vs_name) |> return
   | Papp (l, pl) when Symbols.is_fs_tuple l ->
       let* pattern_s = map pattern_ pl in
       ppat_tuple pattern_s |> return
@@ -50,8 +50,8 @@ let rec pattern_ p =
             ppat_tuple pattern_s |> some
       in
       let name =
-        if Ident.equal Identifier.cons l.ls_name then "::"
-        else Fmt.str "%a" Ident.pp l.ls_name
+        if Identifier.(Ident.equal cons l.ls_name) then "::"
+        else str_of_ident l.ls_name
       in
       ppat_construct (lident name) args |> return
   | Por (p1, p2) ->
@@ -59,7 +59,7 @@ let rec pattern_ p =
       ppat_or p1 p2 |> return
   | Pas (p, v) ->
       let* p = pattern_ p in
-      ppat_alias p (noloc (str "%a" Ident.pp v.vs_name)) |> return
+      ppat_alias p (noloc (str_of_ident v.vs_name)) |> return
   | Pinterval (c1, c2) ->
       ppat_interval (Pconst_char c1) (Pconst_char c2) |> return
   | Pconst (Pconst_integer (_, _) as c) ->
@@ -120,7 +120,7 @@ and term ~context (t : Tterm.term) : expression =
   let loc = t.t_loc in
   let unsupported m = raise (W.Error (W.Unsupported m, loc)) in
   match t.t_node with
-  | Tvar { vs_name; _ } -> evar (str "%a" Ident.pp vs_name)
+  | Tvar { vs_name; _ } -> evar (str_of_ident vs_name)
   | Tconst c -> econst c
   | Tfield (t, f) -> pexp_field (term t) (lident f.ls_name.id_str)
   | Tapp (fs, []) when Symbols.(ls_equal fs fs_bool_true) -> [%expr true]
@@ -146,10 +146,10 @@ and term ~context (t : Tterm.term) : expression =
             (if tlist = [] then None
              else Some (List.map term tlist |> pexp_tuple))
             |> pexp_construct (lident func)
-          else kstr unsupported "function application `%s`" func)
+          else Fmt.kstr unsupported "function application `%s`" func)
   | Tif (i, t, e) -> [%expr if [%e term i] then [%e term t] else [%e term e]]
   | Tlet (x, t1, t2) ->
-      let x = str "%a" Ident.pp x.vs_name in
+      let x = str_of_ident x.vs_name in
       [%expr
         let [%p pvar x] = [%e term t1] in
         [%e term t2]]
@@ -178,7 +178,7 @@ and term ~context (t : Tterm.term) : expression =
           (if quant = Tforall then "Ortac_runtime.Z.forall"
            else "Ortac_runtime.Z.exists")
       in
-      let x = str "%a" Ident.pp var.vs_name in
+      let x = str_of_ident var.vs_name in
       let func = pexp_fun Nolabel None (pvar x) p in
       eapply quant [ start; stop; func ]
   | Tquant (_, _, _) -> unsupported "quantification"
@@ -219,13 +219,13 @@ let core_type_of_ty_with_subst ~context subst ty =
   let lident_of_tysymbol ts =
     (match Context.translate_tystdlib ts context with
     | Some ty -> ty
-    | None -> Fmt.str "%a" Ident.pp ts.ts_ident)
+    | None -> str_of_ident ts.ts_ident)
     |> Builder.lident
   in
   let rec aux ty =
     match ty.ty_node with
     | Tyvar v ->
-        let v = Fmt.str "%a" Ident.pp v.tv_name in
+        let v = str_of_ident v.tv_name in
         Option.value ~default:(Builder.ptyp_var v) (subst v)
     | Tyapp (ts, args) ->
         let args = List.map aux args in
@@ -238,12 +238,12 @@ let core_type_of_tysymbol ~context ts =
   let lid =
     (match Context.translate_tystdlib ts context with
     | Some ty -> ty
-    | None -> Fmt.str "%a" Ident.pp ts.Ttypes.ts_ident)
+    | None -> str_of_ident ts.Ttypes.ts_ident)
     |> Builder.lident
   in
   let args =
     List.map
-      (fun tv -> Builder.ptyp_var (Fmt.str "%a" Ident.pp tv.Ttypes.tv_name))
+      (fun tv -> Builder.ptyp_var (str_of_ident tv.Ttypes.tv_name))
       ts.ts_args
   in
   Builder.ptyp_constr lid args
