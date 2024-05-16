@@ -904,6 +904,28 @@ let ghost_functions config =
   in
   aux config []
 
+let ghost_types config =
+  let open Reserr in
+  let aux (rec_flag, type_decls) =
+    let rec_flag =
+      match rec_flag with
+      | Gospel.Tast.Nonrecursive -> Nonrecursive
+      | Gospel.Tast.Recursive -> Recursive
+    in
+    let* tds =
+      map
+        (fun td ->
+          try
+            ok
+              (Ortac_core.Ocaml_of_gospel.ocaml_type_decl_of_gospel_type_decl
+                 ~context:config.Cfg.context td)
+          with W.Error e -> error e)
+        type_decls
+    in
+    ok (pstr_type rec_flag tds)
+  in
+  map aux
+
 let agree_prop =
   [%stri
     let agree_prop cs =
@@ -912,6 +934,7 @@ let agree_prop =
 
 let stm include_ config ir =
   let open Reserr in
+  let* ghost_types = ghost_types config ir.ghost_types in
   let* config, ghost_functions = ghost_functions config ir.ghost_functions in
   let warn = [%stri [@@@ocaml.warning "-26-27"]] in
   let incl =
@@ -994,5 +1017,6 @@ let stm include_ config ir =
     (warn
      :: open_mod module_name
      :: [%stri module Ortac_runtime = Ortac_runtime_qcheck_stm]
-     :: ghost_functions
+     :: ghost_types
+    @ ghost_functions
     @ [ stm_spec; tests; check_init_state; postcond; call_tests ])
