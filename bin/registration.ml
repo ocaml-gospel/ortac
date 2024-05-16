@@ -44,4 +44,7 @@ let ocaml_file =
         else `Ok s
     | false -> `Error (Fmt.str "Error: `%s' not found" s)
   in
-  Arg.(required & pos 0 (some (parse, Fmt.string)) None & info [] ~docv:"FILE")
+  Arg.(
+    required
+    & pos 0 (some (parse, Fmt.string)) None
+    & info [] ~docv:"FILE" ~doc:"Read Gospel specifications in FILE.")
