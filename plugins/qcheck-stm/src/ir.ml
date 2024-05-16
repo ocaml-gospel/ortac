@@ -83,5 +83,6 @@ type t = {
   invariants : (Ident.t * term list) option;
   init_state : init_state;
   ghost_functions : Tast.function_ list;
+  ghost_types : (Tast.rec_flag * Tast.type_declaration list) list;
   values : value list;
 }

@@ -406,11 +406,19 @@ let ghost_functions =
       | Sig_function f when Option.is_some f.fun_def -> Some f
       | _ -> None)
 
+let ghost_types =
+  let open Tast in
+  List.filter_map (fun s ->
+      match s.sig_desc with
+      | Sig_type (rec_flag, type_decls, Ghost) -> Some (rec_flag, type_decls)
+      | _ -> None)
+
 let run sigs config =
   let open Reserr in
   let open Ir in
   let* state, invariants = state_and_invariants config sigs in
   let* init_fct, init_state = init_state config state sigs in
   let ghost_functions = ghost_functions sigs in
+  let ghost_types = ghost_types sigs in
   let* values = signature config init_fct state sigs in
-  ok { state; invariants; init_state; ghost_functions; values }
+  ok { state; invariants; init_state; ghost_functions; ghost_types; values }
