@@ -251,3 +251,59 @@ let core_type_of_tysymbol ~context ts =
       ts.ts_args
   in
   Builder.ptyp_constr lid args
+
+let ocaml_type_decl_of_gospel_type_decl ~context td =
+  let open Tast in
+  let core_type_of_ty = core_type_of_ty ~context in
+  let kind type_kind =
+    match type_kind with
+    | Pty_abstract -> Ptype_abstract
+    | Pty_variant constr_decls ->
+        Ptype_variant
+          (List.map
+             (fun cd ->
+               if cd.cd_ld <> [] then
+                 raise
+                   W.(
+                     Error
+                       ( Unsupported "constructor with a record as argument",
+                         cd.cd_loc ));
+               let name = noloc (str_of_ident cd.cd_cs.ls_name)
+               and args =
+                 Pcstr_tuple (List.map core_type_of_ty cd.cd_cs.ls_args)
+               and res = None in
+               constructor_declaration ~name ~args ~res)
+             constr_decls)
+    | Pty_record rec_decl ->
+        Ptype_record
+          (List.map
+             (fun (ld : Symbols.lsymbol label_declaration) ->
+               let name = noloc (str_of_ident ld.ld_field.ls_name)
+               and mutable_ = Ppxlib.Immutable
+               and type_ =
+                 core_type_of_ty
+                   (Option.value ~default:Ttypes.ty_bool ld.ld_field.ls_value)
+               in
+               label_declaration ~name ~mutable_ ~type_)
+             rec_decl.rd_ldl)
+  in
+  let name = noloc (str_of_ident td.td_ts.ts_ident)
+  and params =
+    List.map
+      (function
+        | tvsymbol, (var, inj) ->
+            (ptyp_var (str_of_ident tvsymbol.Ttypes.tv_name), (var, inj)))
+      td.td_params
+  and cstrs =
+    List.map
+      (function
+        | ty1, ty2, _ ->
+            (core_type_of_ty ty1, core_type_of_ty ty2, Location.none))
+      td.td_cstrs
+  and kind = kind td.td_kind
+  and private_ =
+    match td.td_private with
+    | Private -> Ppxlib.Private
+    | Public -> Ppxlib.Public
+  and manifest = Option.map core_type_of_ty td.td_manifest in
+  type_declaration ~name ~params ~cstrs ~kind ~private_ ~manifest

@@ -28,3 +28,8 @@ val core_type_of_tysymbol :
   context:Context.t -> Gospel.Ttypes.tysymbol -> Ppxlib.core_type
 (** [core_type_of_tysymbol ts] translates a Gospel type symbol into the
     corresponding OCaml [core_type] **)
+
+val ocaml_type_decl_of_gospel_type_decl :
+  context:Context.t -> Gospel.Tast.type_declaration -> Ppxlib.type_declaration
+(** [ocaml_type_decl_of_gospel_type_decl ~context td] translates a Gospel type
+    declaration into the corresponding OCaml [type_declaration]*)
