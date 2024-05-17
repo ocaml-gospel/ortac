@@ -1,3 +1,8 @@
+# 0.3.0
+
+- Add support for custom ghost types as model
+  [\#228](https://github.com/ocaml-gospel/ortac/pull/228)
+
 # 0.2.0
 
 - Make `--help` and `--version` work even without any plugins installed
