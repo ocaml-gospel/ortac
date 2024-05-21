@@ -222,12 +222,18 @@ let core_type_of_ty_aux ~context f =
     | None -> str_of_ident ts.ts_ident)
     |> Builder.lident
   in
+  let rec arrow = function
+    | [ a; b ] -> Builder.ptyp_arrow Nolabel a b
+    | a :: bs -> Builder.ptyp_arrow Nolabel a (arrow bs)
+    | _ -> invalid_arg "arrow"
+  in
   let rec aux ty =
     match ty.ty_node with
     | Tyvar v -> f (str_of_ident v.tv_name)
     | Tyapp (ts, args) ->
         let args = List.map aux args in
-        if is_ts_tuple ts then Builder.ptyp_tuple args
+        if is_ts_arrow ts then arrow args
+        else if is_ts_tuple ts then Builder.ptyp_tuple args
         else Builder.ptyp_constr (lident_of_tysymbol ts) args
   in
   aux
