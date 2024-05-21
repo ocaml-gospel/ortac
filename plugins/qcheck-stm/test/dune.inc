@@ -634,3 +634,56 @@
  (action
   (run %{dep:tuples_stm_tests.exe} -v)))
 
+(library
+ (name functional_model)
+ (modules functional_model))
+
+(rule
+ (target functional_model_stm_tests.ml)
+ (package ortac-qcheck-stm)
+ (deps
+  (package ortac-core)
+  (package ortac-qcheck-stm))
+ (action
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   qcheck-stm
+   (with-stderr-to
+    functional_model_errors
+    (run
+     ortac
+     qcheck-stm
+     %{dep:functional_model.mli}
+     %{dep:functional_model_config.ml}
+     -o
+     %{target})))))
+
+(test
+ (name functional_model_stm_tests)
+ (package ortac-qcheck-stm)
+ (modules functional_model_stm_tests)
+ (libraries
+  qcheck-core
+  qcheck-core.runner
+  qcheck-stm.stm
+  qcheck-stm.sequential
+  qcheck-multicoretests-util
+  ortac-runtime-qcheck-stm
+  functional_model)
+ (action
+  (echo
+   "\n%{dep:functional_model_stm_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))
+
+(rule
+ (alias runtest)
+ (package ortac-qcheck-stm)
+ (action
+  (progn
+   (diff functional_model_errors.expected functional_model_errors)
+   (diff functional_model_stm_tests.expected.ml functional_model_stm_tests.ml))))
+
+(rule
+ (alias launchtests)
+ (action
+  (run %{dep:functional_model_stm_tests.exe} -v)))
+

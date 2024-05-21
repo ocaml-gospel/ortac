@@ -22,3 +22,5 @@ test_without_sut
 test_without_sut_config
 tuples
 tuples_config
+functional_model
+functional_model_config
