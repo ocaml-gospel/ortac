@@ -54,11 +54,6 @@ let dump ppf t =
     pf ppf "sut_core_type: %a; init_sut: %a@." Ppxlib_ast.Pprintast.expression
       t.init_sut Ppxlib_ast.Pprintast.core_type t.sut_core_type)
 
-let core_type_of_string t =
-  let open Reserr in
-  try Ppxlib.Parse.core_type (Lexing.from_string t) |> ok
-  with _ -> error (Syntax_error_in_type t, Location.none)
-
 let rec acceptable_type_parameter param =
   let open Ppxlib in
   let open Reserr in
@@ -85,18 +80,28 @@ let core_type_is_a_well_formed_sut (core_type : Ppxlib.core_type) =
       let str = Fmt.str "%a" Ppxlib_ast.Pprintast.core_type core_type in
       error (Sut_type_not_supported str, Location.none)
 
-let sut_core_type str =
+let scan_config cfg_uc config_mod =
   let open Reserr in
-  let* sut_core_type = core_type_of_string str in
-  let* _ = core_type_is_a_well_formed_sut sut_core_type in
-  ok sut_core_type
-
-let init_sut_from_string str =
-  let open Ppxlib in
-  try Parse.expression (Lexing.from_string str) |> Reserr.ok
-  with _ -> Reserr.(error (Syntax_error_in_init_sut str, Location.none))
-
-let scan_config cfg_uc _ = Reserr.ok cfg_uc
+  let* ic =
+    try ok @@ open_in config_mod
+    with _ -> error (No_configuration_file config_mod, Location.none)
+  in
+  let lb = Lexing.from_channel ic in
+  let () = Lexing.set_filename lb config_mod in
+  let* _ast =
+    try ok @@ Ppxlib.Parse.implementation lb
+    with _ ->
+      error
+        ( Syntax_error_in_config_module config_mod,
+          Location.
+            {
+              loc_start = lb.lex_start_p;
+              loc_end = lb.lex_curr_p;
+              loc_ghost = false;
+            } )
+  in
+  close_in ic;
+  ok cfg_uc
 
 let init gospel config_module =
   let open Reserr in
