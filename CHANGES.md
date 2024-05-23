@@ -1,5 +1,7 @@
 # 0.3.0
 
+- Move to a module-based configuration
+  [\#214](https://github.com/ocaml-gospel/ortac/pull/214)
 - Add support for custom ghost types as model
   [\#228](https://github.com/ocaml-gospel/ortac/pull/228)
 
