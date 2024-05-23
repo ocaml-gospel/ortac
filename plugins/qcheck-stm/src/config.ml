@@ -2,12 +2,33 @@ open Gospel
 open Ortac_core
 open Ppxlib
 
+type config_under_construction = {
+  sut_core_type' : Ppxlib.core_type option;
+  init_sut' : Ppxlib.expression option;
+}
+
+let config_under_construction = { sut_core_type' = None; init_sut' = None }
+
 type t = {
   context : Context.t;
   sut_core_type : Ppxlib.core_type;
   init_sut : Ppxlib.expression;
   init_sut_txt : string;
 }
+
+let mk_config context cfg_uc =
+  let open Reserr in
+  let* sut_core_type =
+    of_option
+      ~default:(Incomplete_configuration_module `Sut, Location.none)
+      cfg_uc.sut_core_type'
+  and* init_sut =
+    of_option
+      ~default:(Incomplete_configuration_module `Init_sut, Location.none)
+      cfg_uc.init_sut'
+  in
+  let init_sut_txt = Fmt.str "%a" Pprintast.expression init_sut in
+  ok { context; sut_core_type; init_sut; init_sut_txt }
 
 let get_sut_type_name config =
   let open Ppxlib in
@@ -75,11 +96,13 @@ let init_sut_from_string str =
   try Parse.expression (Lexing.from_string str) |> Reserr.ok
   with _ -> Reserr.(error (Syntax_error_in_init_sut str, Location.none))
 
-let init path init_sut_txt sut_str =
+let scan_config cfg_uc _ = Reserr.ok cfg_uc
+
+let init gospel config_module =
   let open Reserr in
   try
-    let module_name = Utils.module_name_of_path path in
-    Parser_frontend.parse_ocaml_gospel path |> Utils.type_check [] path
+    let module_name = Utils.module_name_of_path gospel in
+    Parser_frontend.parse_ocaml_gospel gospel |> Utils.type_check [] gospel
     |> fun (env, sigs) ->
     assert (List.length env = 1);
     let namespace = List.hd env in
@@ -96,8 +119,9 @@ let init path init_sut_txt sut_str =
       | _ -> ctx
     in
     let context = List.fold_left add context sigs in
-    let* sut_core_type = sut_core_type sut_str
-    and* init_sut = init_sut_from_string init_sut_txt in
-    ok (sigs, { context; sut_core_type; init_sut; init_sut_txt })
+    let* config =
+      scan_config config_under_construction config_module >>= mk_config context
+    in
+    ok (sigs, config)
   with Gospel.Warnings.Error (l, k) ->
     error (Ortac_core.Warnings.GospelError k, l)
