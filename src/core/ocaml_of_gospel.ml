@@ -214,7 +214,7 @@ let term_with_catch ~context t =
     with e ->
       raise (Ortac_runtime.Partial_function (e, [%e elocation t.t_loc]))]
 
-let core_type_of_ty ~context =
+let core_type_of_ty_aux ~context f =
   let open Ttypes in
   let lident_of_tysymbol ts =
     (match Context.translate_tystdlib ts context with
@@ -224,7 +224,7 @@ let core_type_of_ty ~context =
   in
   let rec aux ty =
     match ty.ty_node with
-    | Tyvar v -> Builder.ptyp_var (str_of_ident v.tv_name)
+    | Tyvar v -> f (str_of_ident v.tv_name)
     | Tyapp (ts, args) ->
         let args = List.map aux args in
         if is_ts_tuple ts then Builder.ptyp_tuple args
@@ -232,25 +232,11 @@ let core_type_of_ty ~context =
   in
   aux
 
-let core_type_of_ty_with_subst ~context subst ty =
-  let open Ttypes in
-  let lident_of_tysymbol ts =
-    (match Context.translate_tystdlib ts context with
-    | Some ty -> ty
-    | None -> str_of_ident ts.ts_ident)
-    |> Builder.lident
-  in
-  let rec aux ty =
-    match ty.ty_node with
-    | Tyvar v ->
-        let v = str_of_ident v.tv_name in
-        Option.value ~default:(Builder.ptyp_var v) (subst v)
-    | Tyapp (ts, args) ->
-        let args = List.map aux args in
-        if is_ts_tuple ts then Builder.ptyp_tuple args
-        else Builder.ptyp_constr (lident_of_tysymbol ts) args
-  in
-  aux ty
+let core_type_of_ty ~context = core_type_of_ty_aux ~context Builder.ptyp_var
+
+let core_type_of_ty_with_subst ~context subst =
+  core_type_of_ty_aux ~context (fun v ->
+      Option.value ~default:(Builder.ptyp_var v) (subst v))
 
 let core_type_of_tysymbol ~context ts =
   let lid =
