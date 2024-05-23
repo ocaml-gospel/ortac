@@ -1,56 +1,56 @@
 module W = Ortac_core.Warnings
 
 type init_state_error =
-  | Not_a_function_call of string
-  | No_specification of string
+  | Mismatch_number_of_arguments of string
   | No_appropriate_specifications of string * string list
+  | No_specification of string
   | No_translatable_specification of string
+  | Not_a_function_call of string
   | Not_returning_sut of string
   | Qualified_name of string
-  | Mismatch_number_of_arguments of string
 
 type W.kind +=
   | Constant_value of string
-  | Returning_sut of string
-  | No_sut_argument of string
-  | Multiple_sut_arguments of string
-  | No_sut_type of string
-  | No_init_function of string
-  | Syntax_error_in_type of string
-  | Syntax_error_in_init_sut of string
-  | Sut_type_not_supported of string
-  | Type_parameter_not_instantiated of string
-  | Type_not_supported_for_sut_parameter of string
-  | Incompatible_type of (string * string)
-  | Sut_type_not_specified of string
-  | No_models of string
-  | No_spec of string
+  | Ensures_not_found_for_next_state of (string * string)
+  | Functional_argument of string
+  | Ghost_values of (string * [ `Arg | `Ret ])
+  | Ignored_modifies
+  | Impossible_init_state_generation of init_state_error
   | Impossible_term_substitution of
       [ `Never | `New | `Old | `NotModel | `OutOfScope ]
-  | Ignored_modifies
-  | Ensures_not_found_for_next_state of (string * string)
-  | Type_not_supported of string
-  | Impossible_init_state_generation of init_state_error
-  | Functional_argument of string
-  | Returned_tuple of string
-  | Ghost_values of (string * [ `Arg | `Ret ])
   | Incompatible_sut of string
+  | Incompatible_type of (string * string)
   | Incomplete_ret_val_computation of string
+  | Multiple_sut_arguments of string
+  | No_init_function of string
+  | No_models of string
+  | No_spec of string
+  | No_sut_argument of string
+  | No_sut_type of string
+  | Returned_tuple of string
+  | Returning_sut of string
+  | Sut_type_not_specified of string
+  | Sut_type_not_supported of string
+  | Syntax_error_in_init_sut of string
+  | Syntax_error_in_type of string
+  | Type_not_supported of string
+  | Type_not_supported_for_sut_parameter of string
+  | Type_parameter_not_instantiated of string
 
 let level kind =
   match kind with
-  | Constant_value _ | Returning_sut _ | No_sut_argument _
-  | Multiple_sut_arguments _ | Incompatible_type _ | No_spec _
-  | Impossible_term_substitution _ | Ignored_modifies
-  | Ensures_not_found_for_next_state _ | Type_not_supported _
-  | Functional_argument _ | Returned_tuple _ | Ghost_values _
-  | Incomplete_ret_val_computation _ ->
+  | Constant_value _ | Ensures_not_found_for_next_state _
+  | Functional_argument _ | Ghost_values _ | Ignored_modifies
+  | Impossible_term_substitution _ | Incompatible_type _
+  | Incomplete_ret_val_computation _ | Multiple_sut_arguments _ | No_spec _
+  | No_sut_argument _ | Returned_tuple _ | Returning_sut _
+  | Type_not_supported _ ->
       W.Warning
-  | No_sut_type _ | No_init_function _ | Syntax_error_in_type _
-  | Sut_type_not_supported _ | Type_not_supported_for_sut_parameter _
-  | Syntax_error_in_init_sut _ | Type_parameter_not_instantiated _
-  | Sut_type_not_specified _ | No_models _ | Impossible_init_state_generation _
-  | Incompatible_sut _ ->
+  | Impossible_init_state_generation _ | Incompatible_sut _ | No_init_function _
+  | No_models _ | No_sut_type _ | Sut_type_not_specified _
+  | Sut_type_not_supported _ | Syntax_error_in_init_sut _
+  | Syntax_error_in_type _ | Type_not_supported_for_sut_parameter _
+  | Type_parameter_not_instantiated _ ->
       W.Error
   | _ -> W.level kind
 
