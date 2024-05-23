@@ -33,8 +33,6 @@ type W.kind +=
   | Returning_sut of string
   | Sut_type_not_specified of string
   | Sut_type_not_supported of string
-  | Syntax_error_in_init_sut of string
-  | Syntax_error_in_type of string
   | Syntax_error_in_config_module of string
   | Type_not_supported of string
   | Type_not_supported_for_sut_parameter of string

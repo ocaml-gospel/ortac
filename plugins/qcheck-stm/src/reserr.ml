@@ -33,8 +33,6 @@ type W.kind +=
   | Returning_sut of string
   | Sut_type_not_specified of string
   | Sut_type_not_supported of string
-  | Syntax_error_in_init_sut of string
-  | Syntax_error_in_type of string
   | Syntax_error_in_config_module of string
   | Type_not_supported of string
   | Type_not_supported_for_sut_parameter of string
@@ -50,9 +48,9 @@ let level kind =
   | Type_not_supported _ ->
       W.Warning
   | Impossible_init_state_generation _ | Incompatible_sut _
-  | Incomplete_configuration_module _ | No_init_function _ | No_models _
-  | No_sut_type _ | Sut_type_not_specified _ | Sut_type_not_supported _
-  | Syntax_error_in_init_sut _ | Syntax_error_in_type _
+  | Incomplete_configuration_module _ | No_configuration_file _
+  | No_init_function _ | No_models _ | No_sut_type _ | Sut_type_not_specified _
+  | Sut_type_not_supported _ | Syntax_error_in_config_module _
   | Type_not_supported_for_sut_parameter _ | Type_parameter_not_instantiated _
     ->
       W.Error
@@ -168,8 +166,6 @@ let pp_kind ppf kind =
   (* Errors *)
   | No_sut_type ty -> pf ppf "Type %s not declared in the module" ty
   | No_init_function f -> pf ppf "Function %s not declared in the module" f
-  | Syntax_error_in_type t -> pf ppf "Syntax error in type %s" t
-  | Syntax_error_in_init_sut s -> pf ppf "Syntax error in OCaml expression %s" s
   | Syntax_error_in_config_module s ->
       pf ppf "Syntax error in OCaml configuration module %s" s
   | Sut_type_not_supported ty ->
