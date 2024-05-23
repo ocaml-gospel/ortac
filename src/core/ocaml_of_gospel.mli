@@ -12,6 +12,10 @@ val term_with_catch :
     into an {!Ortac_runtime.Partial_function} exception to trace the origin of
     the exception *)
 
+val core_type_of_ty : context:Context.t -> Gospel.Ttypes.ty -> Ppxlib.core_type
+(** [core_type_of_ty ~context ty] translates a Gospel type into the
+    corresponding OCaml [core_type] *)
+
 val core_type_of_ty_with_subst :
   context:Context.t ->
   (string -> Ppxlib.core_type option) ->
@@ -24,3 +28,8 @@ val core_type_of_tysymbol :
   context:Context.t -> Gospel.Ttypes.tysymbol -> Ppxlib.core_type
 (** [core_type_of_tysymbol ts] translates a Gospel type symbol into the
     corresponding OCaml [core_type] **)
+
+val ocaml_type_decl_of_gospel_type_decl :
+  context:Context.t -> Gospel.Tast.type_declaration -> Ppxlib.type_declaration
+(** [ocaml_type_decl_of_gospel_type_decl ~context td] translates a Gospel type
+    declaration into the corresponding OCaml [type_declaration]*)

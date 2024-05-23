@@ -12,3 +12,7 @@ sequence_model
 "create ()" "char t"
 invariants
 "create 42" "int t"
+integer_in_model
+"create ()" "t"
+ghost_as_model
+"create ()" "t"

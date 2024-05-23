@@ -369,3 +369,109 @@
  (action
   (run %{dep:invariants_stm_tests.exe} -v)))
 
+(library
+ (name integer_in_model)
+ (modules integer_in_model))
+
+(rule
+ (target integer_in_model_stm_tests.ml)
+ (package ortac-qcheck-stm)
+ (deps
+  (package ortac-core)
+  (package ortac-qcheck-stm))
+ (action
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   qcheck-stm
+   (with-stderr-to
+    integer_in_model_errors
+    (run
+     ortac
+     qcheck-stm
+     %{dep:integer_in_model.mli}
+     "create ()" "t"
+     -o
+     %{target})))))
+
+(test
+ (name integer_in_model_stm_tests)
+ (package ortac-qcheck-stm)
+ (modules integer_in_model_stm_tests)
+ (libraries
+  qcheck-core
+  qcheck-core.runner
+  qcheck-stm.stm
+  qcheck-stm.sequential
+  qcheck-multicoretests-util
+  ortac-runtime-qcheck-stm
+  integer_in_model)
+ (action
+  (echo
+   "\n%{dep:integer_in_model_stm_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))
+
+(rule
+ (alias runtest)
+ (package ortac-qcheck-stm)
+ (action
+  (progn
+   (diff integer_in_model_errors.expected integer_in_model_errors)
+   (diff integer_in_model_stm_tests.expected.ml integer_in_model_stm_tests.ml))))
+
+(rule
+ (alias launchtests)
+ (action
+  (run %{dep:integer_in_model_stm_tests.exe} -v)))
+
+(library
+ (name ghost_as_model)
+ (modules ghost_as_model))
+
+(rule
+ (target ghost_as_model_stm_tests.ml)
+ (package ortac-qcheck-stm)
+ (deps
+  (package ortac-core)
+  (package ortac-qcheck-stm))
+ (action
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   qcheck-stm
+   (with-stderr-to
+    ghost_as_model_errors
+    (run
+     ortac
+     qcheck-stm
+     %{dep:ghost_as_model.mli}
+     "create ()" "t"
+     -o
+     %{target})))))
+
+(test
+ (name ghost_as_model_stm_tests)
+ (package ortac-qcheck-stm)
+ (modules ghost_as_model_stm_tests)
+ (libraries
+  qcheck-core
+  qcheck-core.runner
+  qcheck-stm.stm
+  qcheck-stm.sequential
+  qcheck-multicoretests-util
+  ortac-runtime-qcheck-stm
+  ghost_as_model)
+ (action
+  (echo
+   "\n%{dep:ghost_as_model_stm_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))
+
+(rule
+ (alias runtest)
+ (package ortac-qcheck-stm)
+ (action
+  (progn
+   (diff ghost_as_model_errors.expected ghost_as_model_errors)
+   (diff ghost_as_model_stm_tests.expected.ml ghost_as_model_stm_tests.ml))))
+
+(rule
+ (alias launchtests)
+ (action
+  (run %{dep:ghost_as_model_stm_tests.exe} -v)))
+
