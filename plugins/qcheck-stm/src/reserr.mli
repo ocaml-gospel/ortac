@@ -20,8 +20,10 @@ type W.kind +=
       [ `Never | `New | `Old | `NotModel | `OutOfScope ]
   | Incompatible_sut of string
   | Incompatible_type of (string * string)
+  | Incomplete_configuration_module of [ `Init_sut | `Sut ]
   | Incomplete_ret_val_computation of string
   | Multiple_sut_arguments of string
+  | No_configuration_file of string
   | No_init_function of string
   | No_models of string
   | No_spec of string
@@ -33,6 +35,7 @@ type W.kind +=
   | Sut_type_not_supported of string
   | Syntax_error_in_init_sut of string
   | Syntax_error_in_type of string
+  | Syntax_error_in_config_module of string
   | Type_not_supported of string
   | Type_not_supported_for_sut_parameter of string
   | Type_parameter_not_instantiated of string
