@@ -4,6 +4,9 @@
 - [\#240](https://github.com/ocaml-gospel/ortac/pull/240)
 - Add support for testing functions with tuple arguments/return values
   [\#237](https://github.com/ocaml-gospel/ortac/pull/237)
+- Add dune-rules plugin
+  [\#190](https://github.com/ocaml-gospel/ortac/pull/190)
+  [\#218](https://github.com/ocaml-gospel/ortac/pull/218)
 - Add support for testing functions without a sut argument
   [\#235](https://github.com/ocaml-gospel/ortac/pull/235)
 - Add error for empty command type
