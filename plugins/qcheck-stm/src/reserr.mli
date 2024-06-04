@@ -1,41 +1,43 @@
 module W = Ortac_core.Warnings
 
 type init_state_error =
-  | Not_a_function_call of string
-  | No_specification of string
+  | Mismatch_number_of_arguments of string
   | No_appropriate_specifications of string * string list
+  | No_specification of string
   | No_translatable_specification of string
+  | Not_a_function_call of string
   | Not_returning_sut of string
   | Qualified_name of string
-  | Mismatch_number_of_arguments of string
 
 type W.kind +=
   | Constant_value of string
-  | Returning_sut of string
-  | No_sut_argument of string
-  | Multiple_sut_arguments of string
-  | No_sut_type of string
-  | No_init_function of string
-  | Syntax_error_in_type of string
-  | Syntax_error_in_init_sut of string
-  | Sut_type_not_supported of string
-  | Type_parameter_not_instantiated of string
-  | Type_not_supported_for_sut_parameter of string
-  | Incompatible_type of (string * string)
-  | Sut_type_not_specified of string
-  | No_models of string
-  | No_spec of string
+  | Ensures_not_found_for_next_state of (string * string)
+  | Functional_argument of string
+  | Ghost_values of (string * [ `Arg | `Ret ])
+  | Ignored_modifies
+  | Impossible_init_state_generation of init_state_error
   | Impossible_term_substitution of
       [ `Never | `New | `Old | `NotModel | `OutOfScope ]
-  | Ignored_modifies
-  | Ensures_not_found_for_next_state of (string * string)
-  | Type_not_supported of string
-  | Impossible_init_state_generation of init_state_error
-  | Functional_argument of string
-  | Returned_tuple of string
-  | Ghost_values of (string * [ `Arg | `Ret ])
   | Incompatible_sut of string
+  | Incompatible_type of (string * string)
+  | Incomplete_configuration_module of [ `Init_sut | `Sut ]
   | Incomplete_ret_val_computation of string
+  | Multiple_sut_arguments of string
+  | No_configuration_file of string
+  | No_init_function of string
+  | No_models of string
+  | No_spec of string
+  | No_sut_argument of string
+  | No_sut_type of string
+  | Not_a_structure of string
+  | Returned_tuple of string
+  | Returning_sut of string
+  | Sut_type_not_specified of string
+  | Sut_type_not_supported of string
+  | Syntax_error_in_config_module of string
+  | Type_not_supported of string
+  | Type_not_supported_for_sut_parameter of string
+  | Type_parameter_not_instantiated of string
 
 type 'a reserr
 
@@ -59,6 +61,7 @@ val promote : 'a reserr list -> 'a list reserr
 val promote_opt : 'a reserr -> 'a option reserr
 (** [promote_opt r] is [promote] for a unique value *)
 
+val fold_left : ('a -> 'b -> 'a reserr) -> 'a -> 'b list -> 'a reserr
 val of_option : default:W.t -> 'a option -> 'a reserr
 val to_option : 'a reserr -> 'a option
 val map : ('a -> 'b reserr) -> 'a list -> 'b list reserr

@@ -2,12 +2,49 @@ open Gospel
 open Ortac_core
 open Ppxlib
 
+type config_under_construction = {
+  sut_core_type' : Ppxlib.core_type option;
+  init_sut' : Ppxlib.expression option;
+  gen_mod' : Ppxlib.structure option;
+  pp_mod' : Ppxlib.structure option;
+  ty_mod' : Ppxlib.structure option;
+}
+
+let config_under_construction =
+  {
+    sut_core_type' = None;
+    init_sut' = None;
+    gen_mod' = None;
+    pp_mod' = None;
+    ty_mod' = None;
+  }
+
 type t = {
   context : Context.t;
   sut_core_type : Ppxlib.core_type;
   init_sut : Ppxlib.expression;
   init_sut_txt : string;
+  gen_mod : Ppxlib.structure option; (* Containing custom QCheck generators *)
+  pp_mod : Ppxlib.structure option; (* Containing custom pretty printers *)
+  ty_mod : Ppxlib.structure option; (* Containing custom STM.ty extensions *)
 }
+
+let mk_config context cfg_uc =
+  let open Reserr in
+  let* sut_core_type =
+    of_option
+      ~default:(Incomplete_configuration_module `Sut, Location.none)
+      cfg_uc.sut_core_type'
+  and* init_sut =
+    of_option
+      ~default:(Incomplete_configuration_module `Init_sut, Location.none)
+      cfg_uc.init_sut'
+  in
+  let init_sut_txt = Fmt.str "%a" Pprintast.expression init_sut
+  and gen_mod = cfg_uc.gen_mod'
+  and pp_mod = cfg_uc.pp_mod'
+  and ty_mod = cfg_uc.ty_mod' in
+  ok { context; sut_core_type; init_sut; init_sut_txt; gen_mod; pp_mod; ty_mod }
 
 let get_sut_type_name config =
   let open Ppxlib in
@@ -33,11 +70,6 @@ let dump ppf t =
     pf ppf "sut_core_type: %a; init_sut: %a@." Ppxlib_ast.Pprintast.expression
       t.init_sut Ppxlib_ast.Pprintast.core_type t.sut_core_type)
 
-let core_type_of_string t =
-  let open Reserr in
-  try Ppxlib.Parse.core_type (Lexing.from_string t) |> ok
-  with _ -> error (Syntax_error_in_type t, Location.none)
-
 let rec acceptable_type_parameter param =
   let open Ppxlib in
   let open Reserr in
@@ -57,29 +89,123 @@ let core_type_is_a_well_formed_sut (core_type : Ppxlib.core_type) =
   let open Ppxlib in
   let open Reserr in
   match core_type.ptyp_desc with
-  | Ptyp_constr (lid, cts) ->
+  | Ptyp_constr (_lid, cts) ->
       let* _ = map acceptable_type_parameter cts in
-      ok (lid, cts)
+      ok ()
   | _ ->
       let str = Fmt.str "%a" Ppxlib_ast.Pprintast.core_type core_type in
       error (Sut_type_not_supported str, Location.none)
 
-let sut_core_type str =
+(* Inspect value definition in config module in order to collect information
+   about:
+   - the definition of the [init_sut] function *)
+let value_bindings cfg_uc =
   let open Reserr in
-  let* sut_core_type = core_type_of_string str in
-  let* _ = core_type_is_a_well_formed_sut sut_core_type in
-  ok sut_core_type
+  let aux cfg_uc vb =
+    let open Ppxlib in
+    match vb.pvb_pat.ppat_desc with
+    | Ppat_var s when String.equal "init_sut" s.txt ->
+        let init_sut' = Some vb.pvb_expr in
+        ok { cfg_uc with init_sut' }
+    | _ -> ok cfg_uc
+  in
+  fold_left aux cfg_uc
 
-let init_sut_from_string str =
-  let open Ppxlib in
-  try Parse.expression (Lexing.from_string str) |> Reserr.ok
-  with _ -> Reserr.(error (Syntax_error_in_init_sut str, Location.none))
+(* Inspect type definition in config module in order to collect information
+   about:
+   - the definition of the [sut] type *)
+let type_declarations cfg_uc =
+  let open Reserr in
+  let aux cfg_uc (td : type_declaration) =
+    let open Ppxlib in
+    if String.equal "sut" td.ptype_name.txt then
+      let* manifest =
+        of_option
+          ~default:
+            ( Sut_type_not_supported (Fmt.str "%a" Pprintast.type_declaration td),
+              td.ptype_loc )
+          td.ptype_manifest
+      in
+      let* () = core_type_is_a_well_formed_sut manifest in
+      ok { cfg_uc with sut_core_type' = Some manifest }
+    else ok cfg_uc
+  in
+  fold_left aux cfg_uc
 
-let init path init_sut_txt sut_str =
+(* Inspect module definition in config module in order to collect information
+   about:
+     - the custom [QCheck] generators
+     - the custom [STM] pretty printers
+     - the custom [STM.ty] extensions and function constructors *)
+let module_binding cfg_uc (mb : Ppxlib.module_binding) =
+  let open Reserr in
+  let get_structure name mb =
+    match mb.pmb_expr.pmod_desc with
+    | Pmod_structure structure
+    (* there is no need to go further, module constraints of module
+       constraints doesn't make sense *)
+    | Pmod_constraint ({ pmod_desc = Pmod_structure structure; _ }, _) ->
+        ok structure
+    | _ -> error (Not_a_structure name, Location.none)
+  in
+  match mb.pmb_name.txt with
+  | Some name when String.equal "Gen" name ->
+      let* content = get_structure name mb in
+      ok { cfg_uc with gen_mod' = Some content }
+  | Some name when String.equal "Pp" name ->
+      let* content = get_structure name mb in
+      ok { cfg_uc with pp_mod' = Some content }
+  | Some name when String.equal "Ty" name ->
+      let* content = get_structure name mb in
+      ok { cfg_uc with ty_mod' = Some content }
+  | _ -> ok cfg_uc
+
+let scan_config cfg_uc config_mod =
+  let open Reserr in
+  let* ic =
+    try ok @@ open_in config_mod
+    with _ -> error (No_configuration_file config_mod, Location.none)
+  in
+  let lb = Lexing.from_channel ic in
+  let () = Lexing.set_filename lb config_mod in
+  let* ast =
+    try ok @@ Ppxlib.Parse.implementation lb
+    with _ ->
+      error
+        ( Syntax_error_in_config_module config_mod,
+          Location.
+            {
+              loc_start = lb.lex_start_p;
+              loc_end = lb.lex_curr_p;
+              loc_ghost = false;
+            } )
+  in
+  close_in ic;
+  let aux cfg_uc (str : structure_item) =
+    match str.pstr_desc with
+    | Pstr_eval (_, _) -> ok cfg_uc
+    | Pstr_value (_, xs) -> value_bindings cfg_uc xs
+    | Pstr_primitive _ -> ok cfg_uc
+    | Pstr_type (_, xs) -> type_declarations cfg_uc xs
+    | Pstr_typext _ -> ok cfg_uc
+    | Pstr_exception _ -> ok cfg_uc
+    | Pstr_module mb -> module_binding cfg_uc mb
+    | Pstr_recmodule _ -> ok cfg_uc
+    | Pstr_modtype _ -> ok cfg_uc
+    | Pstr_open _ -> ok cfg_uc
+    | Pstr_class _ -> ok cfg_uc
+    | Pstr_class_type _ -> ok cfg_uc
+    | Pstr_include _ -> ok cfg_uc
+    | Pstr_attribute _ -> ok cfg_uc
+    | Pstr_extension (_, _) -> ok cfg_uc
+  in
+  fold_left aux cfg_uc ast
+
+let init gospel config_module =
   let open Reserr in
   try
-    let module_name = Utils.module_name_of_path path in
-    Parser_frontend.parse_ocaml_gospel path |> Utils.type_check [] path
+    let module_name = Utils.module_name_of_path gospel in
+    Parser_frontend.parse_ocaml_gospel gospel |> Utils.type_check [] gospel
     |> fun (env, sigs) ->
     assert (List.length env = 1);
     let namespace = List.hd env in
@@ -96,8 +222,9 @@ let init path init_sut_txt sut_str =
       | _ -> ctx
     in
     let context = List.fold_left add context sigs in
-    let* sut_core_type = sut_core_type sut_str
-    and* init_sut = init_sut_from_string init_sut_txt in
-    ok (sigs, { context; sut_core_type; init_sut; init_sut_txt })
+    let* config =
+      scan_config config_under_construction config_module >>= mk_config context
+    in
+    ok (sigs, config)
   with Gospel.Warnings.Error (l, k) ->
     error (Ortac_core.Warnings.GospelError k, l)

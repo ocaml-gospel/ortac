@@ -932,23 +932,42 @@ let agree_prop =
       check_init_state ();
       STMTests.agree_prop cs]
 
-let stm include_ config ir =
+let prepend_include_in_module name lident structure =
+  let open Ast_helper in
+  let name = noloc (Some name)
+  and expr =
+    pmod_structure
+    @@ ((Mod.ident lident |> Incl.mk |> pstr_include) :: structure)
+  in
+  [ pstr_module @@ module_binding ~name ~expr ]
+
+let qcheck config =
+  match config.Cfg.gen_mod with
+  | None -> []
+  | Some structure ->
+      let structure =
+        prepend_include_in_module "Gen" (lident "Gen") structure
+      in
+      prepend_include_in_module "QCheck" (lident "QCheck") structure
+
+let util config =
+  match config.Cfg.pp_mod with
+  | None -> []
+  | Some structure ->
+      let structure =
+        prepend_include_in_module "Pp"
+          (noloc (Ldot (Lident "Util", "Pp")))
+          structure
+      in
+      (* We don't need the whole `Util` module here *)
+      let name = noloc (Some "Util") and expr = pmod_structure structure in
+      [ pstr_module (module_binding ~name ~expr) ]
+
+let stm config ir =
   let open Reserr in
   let* ghost_types = ghost_types config ir.ghost_types in
   let* config, ghost_functions = ghost_functions config ir.ghost_functions in
   let warn = [%stri [@@@ocaml.warning "-26-27"]] in
-  let incl =
-    Option.map
-      (fun m ->
-        let open Ast_helper in
-        String.capitalize_ascii m
-        |> lident
-        |> Mod.ident
-        |> Incl.mk
-        |> pstr_include)
-      include_
-    |> Option.to_list
-  in
   let sut = sut_type config in
   let cmd = cmd_type ir in
   let* cmd_show = cmd_show config ir in
@@ -973,7 +992,9 @@ let stm include_ config ir =
   let open_mod m = pstr_open Ast_helper.(Opn.mk (Mod.ident (lident m))) in
   let spec_expr =
     pmod_structure
-      ((open_mod "STM" :: incl)
+      ((open_mod "STM" :: qcheck config)
+      @ util config
+      @ Option.value config.ty_mod ~default:[]
       @ [
           sut;
           cmd;

@@ -3,41 +3,55 @@ command-line fail, so we load only the `qcheck-stm` plugin:
 
   $ export ORTAC_ONLY_PLUGIN=qcheck-stm
 
-We can make a syntax error in either the expression for the `init` function, or
-in the type declaration for the sytem under test:
+We can forget to write the configuration file:
 
   $ cat > foo.mli << EOF
   > type 'a t
   > val make : 'a -> 'a t
   > EOF
-  $ ortac qcheck-stm foo.mli "" "int t"
-  Error: Syntax error in OCaml expression .
-  $ ortac qcheck-stm foo.mli "make 42" ""
-  Error: Syntax error in type .
+  $ ortac qcheck-stm foo.mli foo_config.ml
+  Error: Missing configuration file foo_config.ml.
 
 We can give a pair as SUT type:
 
-  $ ortac qcheck-stm foo.mli "make 42" "int * bool"
+  $ cat > foo_config.ml << EOF
+  > open Foo
+  > let init_sut = make 42
+  > type sut = int * bool
+  > EOF
+  $ ortac qcheck-stm foo.mli foo_config.ml
   Error: Unsupported SUT type (int * bool): SUT type must be a type
          constructor, possibly applied to type arguments.
 
 We can give a functional argument to the SUT type:
 
-  $ ortac qcheck-stm foo.mli "make 42" "(int -> bool) t"
+  $ cat > foo_config.ml << EOF
+  > open Foo
+  > let init_sut = make 42
+  > type sut = (int -> bool) t
+  > EOF
+  $ ortac qcheck-stm foo.mli foo_config.ml
   Error: Unsupported type parameter int -> bool: only constructors and tuples
          are supported in arguments for the SUT type.
 
 We can give a type that does not exist in the module as the system under test:
 
-  $ cat > foo.mli << EOF
-  > type 'a t
+  $ cat > foo_config.ml << EOF
+  > open Foo
+  > let init_sut = make 42
+  > type sut = ty
   > EOF
-  $ ortac qcheck-stm foo.mli "()" "ty"
+  $ ortac qcheck-stm foo.mli foo_config.ml
   Error: Type ty not declared in the module.
 
 Or forget its argument:
 
-  $ ortac qcheck-stm foo.mli "()" "t"
+  $ cat > foo_config.ml << EOF
+  > open Foo
+  > let init_sut = make 42
+  > type sut = t
+  > EOF
+  $ ortac qcheck-stm foo.mli foo_config.ml
   File "foo.mli", line 1, characters 0-9:
   1 | type 'a t
       ^^^^^^^^^
@@ -50,19 +64,23 @@ Or forget its argument:
 
 We can forget to instantiate the type parameter of the system under test:
 
-  $ cat > foo.mli << EOF
-  > type 'a t
-  > val make : 'a -> 'a t
+  $ cat > foo_config.ml << EOF
+  > open Foo
+  > let init_sut = make 42
+  > type sut = 'a t
   > EOF
-  $ ortac qcheck-stm foo.mli "make 42" "'a t"
+  $ ortac qcheck-stm foo.mli foo_config.ml
   Error: Unsupported type parameter 'a: SUT type should be fully instantiated.
 
-We can forget to specify the type of the system under test:
+We can forget to specify the type of the system under test (which is already
+the case in `foo.mli`):
 
-  $ cat > foo.mli << EOF
-  > type 'a t
+  $ cat > foo_config.ml << EOF
+  > open Foo
+  > let init_sut = make 42
+  > type sut = int t
   > EOF
-  $ ortac qcheck-stm foo.mli "make 42" "int t"
+  $ ortac qcheck-stm foo.mli foo_config.ml
   File "foo.mli", line 1, characters 0-9:
   1 | type 'a t
       ^^^^^^^^^
@@ -74,7 +92,7 @@ Or specify it without any model:
   > type 'a t
   > (*@ ephemeral *)
   > EOF
-  $ ortac qcheck-stm foo.mli "make 42" "int t"
+  $ ortac qcheck-stm foo.mli foo_config.ml
   File "foo.mli", line 2, characters 3-14:
   2 | (*@ ephemeral *)
          ^^^^^^^^^^^
@@ -86,7 +104,7 @@ We can give a non-existing function for `init_state`:
   > type 'a t
   > (*@ mutable model value : 'a *)
   > EOF
-  $ ortac qcheck-stm foo.mli "make 42" "int t"
+  $ ortac qcheck-stm foo.mli foo_config.ml
   Error: Function make not declared in the module.
 
 We can forget to specify the function used for the `init_state` function:
@@ -96,7 +114,7 @@ We can forget to specify the function used for the `init_state` function:
   > (*@ mutable model value : 'a list *)
   > val make : 'a -> 'a t
   > EOF
-  $ ortac qcheck-stm foo.mli "make 42" "int t"
+  $ ortac qcheck-stm foo.mli foo_config.ml
   File "foo.mli", line 3, characters 0-21:
   3 | val make : 'a -> 'a t
       ^^^^^^^^^^^^^^^^^^^^^
@@ -115,7 +133,7 @@ Or specify it in a manner that does not allow to deduce the complete `state`:
   >     requires true
   >     ensures t.max_size = 123 *)
   > EOF
-  $ ortac qcheck-stm foo.mli "make 42" "int t"
+  $ ortac qcheck-stm foo.mli foo_config.ml
   File "foo.mli", line 6, characters 3-62:
   6 | ... t = make a
   7 |     requires true
@@ -134,7 +152,7 @@ Or specify it using clauses that cannot be executed:
   >     requires true
   >     ensures t.value = if forall i. i = i then a :: [] else [] *)
   > EOF
-  $ ortac qcheck-stm foo.mli "make 42" "int t"
+  $ ortac qcheck-stm foo.mli foo_config.ml
   Error: Unsupported INIT function: the specification of the function called in
          the INIT expression does not provide a translatable specification for
          the following field of the model: value.
@@ -152,7 +170,7 @@ Or we can give a function that does not return the type of the system under test
   > (*@ make i
   >     modifies () *)
   > EOF
-  $ ortac qcheck-stm foo.mli "make 42" "int t"
+  $ ortac qcheck-stm foo.mli foo_config.ml
   File "foo.mli", line 3, characters 0-52:
   3 | val make : int -> unit
   4 | (*@ make i
@@ -166,7 +184,15 @@ We are expected to give a function call as expression for the `init_state` funct
   > type 'a t
   > (*@ mutable model value : 'a *)
   > EOF
-  $ ortac qcheck-stm foo.mli "42" "int t"
+  $ cat > foo_config.ml << EOF
+  > open Foo
+  > let init_sut = 42
+  > type sut = int t
+  > EOF
+  $ ortac qcheck-stm foo.mli foo_config.ml
+  File "foo_config.ml", line 2, characters 15-17:
+  2 | let init_sut = 42
+                     ^^
   Error: Unsupported INIT expression 42: the INIT expression is expected to be
          a function call (the specification of that function is required to
          initialize the model state).
@@ -177,8 +203,12 @@ It also does not support qualified names:
   > type 'a t
   > (*@ mutable model value : 'a *)
   > EOF
-  $ ortac qcheck-stm foo.mli "Bar.make 42" "int t"
-  Error: Unsupported INIT function Bar.make: qualified names are not yet
+  $ cat > foo_config.ml << EOF
+  > let init_sut = Foo.make 42
+  > type sut = int t
+  > EOF
+  $ ortac qcheck-stm foo.mli foo_config.ml
+  Error: Unsupported INIT function Foo.make: qualified names are not yet
          supported.
 
 It checks the number of arguments in the function call:
@@ -190,9 +220,18 @@ It checks the number of arguments in the function call:
   > (*@ t = make a
   >     ensures t.value = a *)
   > EOF
-  $ ortac qcheck-stm foo.mli "make 42 73" "int t"
+  $ cat > foo_config.ml << EOF
+  > open Foo
+  > let init_sut = make 42 73
+  > type sut = int t
+  > EOF
+  $ ortac qcheck-stm foo.mli foo_config.ml
+  File "foo_config.ml", line 2, characters 15-25:
+  2 | let init_sut = make 42 73
+                     ^^^^^^^^^^
   Error: Error in INIT expression make 42 73: mismatch in the number of
          arguments between the INIT expression and the function specification.
+
 We shouldn't be able to define a model by itsef in the `make` function:
   $ cat > foo.mli << EOF
   > type 'a t
@@ -202,7 +241,12 @@ We shouldn't be able to define a model by itsef in the `make` function:
   >     requires true
   >     ensures t.value = t.value *)
   > EOF
-  $ ortac qcheck-stm foo.mli "make 42" "int t"
+  $ cat > foo_config.ml << EOF
+  > open Foo
+  > let init_sut = make 42
+  > type sut = int t
+  > EOF
+  $ ortac qcheck-stm foo.mli foo_config.ml
   Error: Unsupported INIT function: the specification of the function called in
          the INIT expression does not provide a translatable specification for
          the following field of the model: value.
@@ -211,3 +255,21 @@ We shouldn't be able to define a model by itsef in the `make` function:
                             ^
   Warning: Skipping clause: impossible to define the initial value of the model
            with a recursive expression.
+
+If we add some custom generators, we should do so in a `Gen` module that is implemented (functor application or reference to another module are not supported):
+  $ cat > foo.mli << EOF
+  > type 'a t
+  > (*@ mutable model value : 'a *)
+  > val make : 'a -> 'a t
+  > (*@ t = make a
+  >     ensures t.value = a *)
+  > EOF
+  $ cat > foo_config.ml << EOF
+  > module Gen = QCheck.Gen
+  > open Foo
+  > let init_sut = make 42
+  > type sut = int t
+  > EOF
+  $ ortac qcheck-stm foo.mli foo_config.ml
+  Error: Unsupported Gen module definition: only structures are allowed as
+         module definition here.

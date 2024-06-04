@@ -18,7 +18,7 @@ pieces of information:
     {- How to generate the said model? The [init_state] function.}
     {- How does the model change when calling a function? The [next_state] function.}}
 
-Answering these five questions is done part in the command-line arguments and
+Answering these five questions is done part in a configuration module and
 part in the Gospel specifications that you will have to write in a specific
 style.
 
@@ -141,14 +141,55 @@ In order to generate postcondition-checking, Ortac/QCheck-STM uses the
 [ensures] clauses that were not used for the [next_state] function but it also
 uses the [checks] clauses and the [raises] ones.
 
-Now you can generate the QCheck-STM file by running the following command where
-you indicate the file you want to test, the function call to build a value of
-the type indicated in the third argument. You can write the generated code into
-a file, using the [-o] option.
+Now you need a configuration file. Configuration files for Ortac/QCheck-STM are
+OCaml modules containing {e at least} a type declaration for `sut` (usually the
+type `t` of the module under test with all the type parameters instantiated)
+and a value declaration for `init_sut` (a call to a function from the module
+under test returning a value of type `sut`)
+
+{@ocaml file=example_config.ml[
+open Example
+
+type sut = char t
+
+let init_sut = make 42 'a'
+]}
+
+Then, you can generate the QCheck-STM file by running the following command where
+you indicate the file you want to test and the configuration file. You can
+write the generated code into a file, using the [-o] option.
 
 {@sh set-ORTAC_ONLY_PLUGIN=qcheck-stm[
-$ ortac qcheck-stm example.mli "make 42 'a'" "char t" -o stm_example.ml
+$ ortac qcheck-stm example.mli example_config.ml -o stm_example.ml
 ]}
+
+The other information you can put in the configuration file are:
+
+{ul {li custom [QCheck] generators in a [Gen] module}
+    {li custom [STM] printers in a [Pp] module}
+    {li custom [STM.ty] extensions and its functional constructors in a [Ty]
+    module}}
+
+Let's say for example that you want to run the generated tests using a custom
+generator for the type [int] that only generates small positive integers. You
+can still rely on the generated command generator, you just have to override the
+[int] generator:
+
+{@ocaml file=example_config_qcheck.ml[
+open Example
+
+type sut = char t
+
+let init_sut = make 42 'a'
+
+module Gen = struct
+  let int = small_signed_int
+end
+]}
+
+When you have a user-defined type in the module under test, you have to declare
+an [STM] printer and an extension of the [STM.ty] type. This follows the same
+principle to include them in the configuration module.
 
 The generated OCaml file has a bunch of dependencies:
 
@@ -221,7 +262,7 @@ Ortac/QCheck-STM will look at the [modifies] clause and then look for an
 new value. Here, it won't find any and warn you with the following message:
 
 {@sh[
-$ ortac qcheck-stm example_next_state.mli "make 42 'a'" "char t" -o foo.ml
+$ ortac qcheck-stm example_next_state.mli example_config.ml -o foo.ml
 File "example_next_state.mli", line 15, characters 13-23:
 15 |     modifies t.contents
                   ^^^^^^^^^^
@@ -262,11 +303,7 @@ val type_not_supported : new_type -> 'a t -> new_type
 ]}
 
 {@sh[
-$ ortac qcheck-stm example_unknown_type.mli "make 42 'a'" "char t" -o foo.ml
-File "example_unknown_type.mli", line 15, characters 0-87:
-15 | val type_not_supported : new_type -> 'a t -> new_type
-16 | (*@ y = type_not_supported x t *)
-Warning: Incomplete computation of the returned value in the specification of type_not_supported. Failure message won't be able to display the expected returned value.
+$ ortac qcheck-stm example_unknown_type.mli example_config.ml -o foo.ml --quiet
 $ grep -A 1 "type cmd" foo.ml
     type cmd =
       | Type_not_supported of new_type
@@ -294,7 +331,7 @@ val ghost_arg : char -> 'a t -> bool
 the command will generate the following warning:
 
 {@sh[
-$ ortac qcheck-stm example_ghost.mli "make 42 'a'" "char t" -o foo.ml
+$ ortac qcheck-stm example_ghost.mli example_config.ml -o foo.ml
 File "example_ghost.mli", line 14, characters 20-21:
 14 | (*@ b = ghost_arg [ i : integer] c t *)
                          ^
@@ -320,7 +357,7 @@ val incompatible_type : char -> string t -> bool
 the plugin will generate a warning for this function and skip it.
 
 {@sh[
-$ ortac qcheck-stm example_incompatible_type.mli "make 42 'a'" "char t" -o foo.ml
+$ ortac qcheck-stm example_incompatible_type.mli example_config.ml -o foo.ml
 File "example_incompatible_type.mli", line 13, characters 32-40:
 13 | val incompatible_type : char -> string t -> bool
                                      ^^^^^^^^
@@ -351,7 +388,7 @@ val unsupported_quantification : 'a t -> bool
 the command will generate the following warning:
 
 {@sh[
-$ ortac qcheck-stm example_ill_formed_quantification.mli "make 42 'a'" "char t" -o foo.ml
+$ ortac qcheck-stm example_ill_formed_quantification.mli example_config.ml -o foo.ml
 File "example_ill_formed_quantification.mli", line 13, characters 0-142:
 13 | val unsupported_quantification : 'a t -> bool
 14 | (*@ b = unsupported_quantification t
@@ -409,7 +446,7 @@ val for_all : ('a -> bool) -> 'a t -> bool
 Ortac/QCheck-STM will generate the following warnings:
 
 {@sh[
-$ ortac qcheck-stm example_limitations.mli "make 42 'a'" "char t" -o foo.ml
+$ ortac qcheck-stm example_limitations.mli example_config.ml -o foo.ml
 File "example_limitations.mli", line 13, characters 8-26:
 13 | val f : int -> int -> bool
              ^^^^^^^^^^^^^^^^^^

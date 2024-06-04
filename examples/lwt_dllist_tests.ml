@@ -6,7 +6,11 @@ module Ortac_runtime = Ortac_runtime_qcheck_stm
 module Spec =
   struct
     open STM
-    include Lwt_dllist_incl
+    type _ ty +=  
+      | Node: 'a ty -> 'a node ty 
+    let node spec =
+      let (ty, show) = spec in
+      ((Node ty), (fun n -> Printf.sprintf "Node %s" (show (get n))))
     type sut = int t
     type cmd =
       | Is_empty 

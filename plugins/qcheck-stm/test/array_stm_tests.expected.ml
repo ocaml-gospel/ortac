@@ -6,6 +6,12 @@ module Ortac_runtime = Ortac_runtime_qcheck_stm
 module Spec =
   struct
     open STM
+    module QCheck =
+      struct
+        include QCheck
+        module Gen = struct include Gen
+                            let int = small_signed_int end
+      end
     type sut = char t
     type cmd =
       | Length 

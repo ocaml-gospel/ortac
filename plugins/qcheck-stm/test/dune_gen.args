@@ -1,18 +1,20 @@
 array
-"make 16 'a'" "char t"
+array_config
 hashtbl
-"create ~random:false 16" "(char, int) t"
+hashtbl_config
 record
-"make 42" "t"
+record_config
 ref
-"make 42" "t"
+ref_config
 conjunctive_clauses
-"make 42 'a'" "char t"
+conjunctive_clauses_config
 sequence_model
-"create ()" "char t"
+sequence_model_config
 invariants
-"create 42" "int t"
+invariants_config
 integer_in_model
-"create ()" "t"
+integer_in_model_config
 ghost_as_model
-"create ()" "t"
+ghost_as_model_config
+custom_config
+custom_config_config
