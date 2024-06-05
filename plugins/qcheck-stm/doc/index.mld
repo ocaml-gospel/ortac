@@ -332,9 +332,8 @@ the command will generate the following warning:
 
 {@sh[
 $ ortac qcheck-stm example_ghost.mli example_config.ml -o foo.ml
-Error: The generated cmd type is empty.
-File "example_ghost.mli", line 14, characters 20-21:
-14 | (*@ b = ghost_arg [ i : integer] c t *)
+File "example_ghost.mli", line 18, characters 20-21:
+18 | (*@ b = ghost_arg [ i : integer] c t *)
                          ^
 Warning: Skipping ghost_arg: functions with a ghost argument are not
          supported.
@@ -359,9 +358,8 @@ the plugin will generate a warning for this function and skip it.
 
 {@sh[
 $ ortac qcheck-stm example_incompatible_type.mli example_config.ml -o foo.ml
-Error: The generated cmd type is empty.
-File "example_incompatible_type.mli", line 13, characters 32-40:
-13 | val incompatible_type : char -> string t -> bool
+File "example_incompatible_type.mli", line 17, characters 32-40:
+17 | val incompatible_type : char -> string t -> bool
                                      ^^^^^^^^
 Warning: Skipping incompatible_type: the type of its SUT-type argument is
          incompatible with the configured SUT type: char t.
@@ -369,6 +367,34 @@ Warning: Skipping incompatible_type: the type of its SUT-type argument is
 
 In the case you have functions specialized with different instantiations, you
 can always generate one test per possible instantiation, of course.
+
+{2 Empty command type} 
+
+During the translation of the Gospel annotations [ortac] will leave out 
+specifications that do not adhere to its requirements. In the extreme case this 
+may result in an empty set of commands that it can use to create test traces 
+from. 
+
+Given the following example: 
+
+{@ocaml file=example_empty_cmd.mli,part=fun-decl[
+type 'a t
+(*@ model size : int
+    mutable model contents : 'a list *)
+
+val make : int -> 'a -> 'a t
+(*@ t = make i a
+    checks i >= 0
+    ensures t.size = i
+    ensures t.contents = List.init i (fun j -> a) *)
+]}
+
+the command will generate the following error: 
+
+{@sh[
+$ ortac qcheck-stm example_empty_cmd.mli example_config.ml -o foo.ml 
+Error: The generated cmd type is empty.
+]}
 
 {2 [ortac] limitations}
 
@@ -479,3 +505,4 @@ File "example_limitations.mli", line 22, characters 8-17:
              ^^^^^^^^^
 Warning: Type (int * int) not supported.
 ]}
+
