@@ -505,4 +505,3 @@ File "example_limitations.mli", line 22, characters 8-17:
              ^^^^^^^^^
 Warning: Type (int * int) not supported.
 ]}
-
