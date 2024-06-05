@@ -11,6 +11,7 @@ type init_state_error =
 
 type W.kind +=
   | Constant_value of string
+  | Empty_cmd_type
   | Ensures_not_found_for_next_state of (string * string)
   | Functional_argument of string
   | Ghost_values of (string * [ `Arg | `Ret ])

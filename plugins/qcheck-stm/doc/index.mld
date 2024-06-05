@@ -332,6 +332,7 @@ the command will generate the following warning:
 
 {@sh[
 $ ortac qcheck-stm example_ghost.mli example_config.ml -o foo.ml
+Error: The generated cmd type is empty.
 File "example_ghost.mli", line 14, characters 20-21:
 14 | (*@ b = ghost_arg [ i : integer] c t *)
                          ^
@@ -358,6 +359,7 @@ the plugin will generate a warning for this function and skip it.
 
 {@sh[
 $ ortac qcheck-stm example_incompatible_type.mli example_config.ml -o foo.ml
+Error: The generated cmd type is empty.
 File "example_incompatible_type.mli", line 13, characters 32-40:
 13 | val incompatible_type : char -> string t -> bool
                                      ^^^^^^^^

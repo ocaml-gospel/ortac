@@ -11,6 +11,7 @@ type init_state_error =
 
 type W.kind +=
   | Constant_value of string
+  | Empty_cmd_type
   | Ensures_not_found_for_next_state of (string * string)
   | Functional_argument of string
   | Ghost_values of (string * [ `Arg | `Ret ])
@@ -48,7 +49,7 @@ let level kind =
   | No_sut_argument _ | Returned_tuple _ | Returning_sut _
   | Type_not_supported _ ->
       W.Warning
-  | Impossible_init_state_generation _ | Incompatible_sut _
+  | Empty_cmd_type | Impossible_init_state_generation _ | Incompatible_sut _
   | Incomplete_configuration_module _ | No_configuration_file _
   | No_init_function _ | No_models _ | No_sut_type _ | Not_a_structure _
   | Sut_type_not_specified _ | Sut_type_not_supported _
@@ -100,6 +101,7 @@ let pp_kind ppf kind =
   (* Warnings *)
   | Constant_value id ->
       pf ppf "Skipping %s:@ %a" id text "constants cannot be tested"
+  | Empty_cmd_type -> pf ppf "The generated cmd type is empty"
   | Ensures_not_found_for_next_state (f, m) ->
       pf ppf "Skipping %s:@ model@ %s %a@;%a%s%a" f m text
         "is declared as modified by the function but no suitable ensures \
