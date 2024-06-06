@@ -8,6 +8,10 @@ val make : int -> 'a -> 'a t
     ensures t.size = i
     ensures t.contents = List.init i (fun j -> a) *)
 
+val dummy : 'a t -> int
+(*@ l = dummy t
+    ensures l = t.size *)
+
 (* $MDX part-begin=fun-decl *)
 
 val ghost_arg : char -> 'a t -> bool

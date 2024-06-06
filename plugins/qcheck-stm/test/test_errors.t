@@ -151,6 +151,9 @@ Or specify it using clauses that cannot be executed:
   > (*@ t = make a
   >     requires true
   >     ensures t.value = if forall i. i = i then a :: [] else [] *)
+  > val dummy : 'a t -> 'a list
+  > (*@ l = dummy t
+  >     ensures l = t.value *)
   > EOF
   $ ortac qcheck-stm foo.mli foo_config.ml
   Error: Unsupported INIT function: the specification of the function called in
@@ -240,6 +243,9 @@ We shouldn't be able to define a model by itsef in the `make` function:
   > (*@ t = make a
   >     requires true
   >     ensures t.value = t.value *)
+  > val dummy : 'a t -> 'a list 
+  > (*@ l = dummy t 
+  >     ensures l = t.value *)
   > EOF
   $ cat > foo_config.ml << EOF
   > open Foo
