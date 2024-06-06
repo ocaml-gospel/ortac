@@ -151,9 +151,18 @@ Or specify it using clauses that cannot be executed:
   > (*@ t = make a
   >     requires true
   >     ensures t.value = if forall i. i = i then a :: [] else [] *)
+  > val dummy : 'a t -> 'a list
+  > (*@ l = dummy t
+  >     ensures l = t.value *)
   > EOF
   $ ortac qcheck-stm foo.mli foo_config.ml
-  Error: The generated cmd type is empty.
+  Error: Unsupported INIT function: the specification of the function called in
+         the INIT expression does not provide a translatable specification for
+         the following field of the model: value.
+  File "foo.mli", line 6, characters 25-40:
+  6 |     ensures t.value = if forall i. i = i then a :: [] else [] *)
+                               ^^^^^^^^^^^^^^^
+  Warning: Skipping clause: unsupported quantification.
 
 Or we can give a function that does not return the type of the system under test:
 
@@ -234,6 +243,9 @@ We shouldn't be able to define a model by itsef in the `make` function:
   > (*@ t = make a
   >     requires true
   >     ensures t.value = t.value *)
+  > val dummy : 'a t -> 'a list 
+  > (*@ l = dummy t 
+  >     ensures l = t.value *)
   > EOF
   $ cat > foo_config.ml << EOF
   > open Foo
@@ -241,7 +253,14 @@ We shouldn't be able to define a model by itsef in the `make` function:
   > type sut = int t
   > EOF
   $ ortac qcheck-stm foo.mli foo_config.ml
-  Error: The generated cmd type is empty.
+  Error: Unsupported INIT function: the specification of the function called in
+         the INIT expression does not provide a translatable specification for
+         the following field of the model: value.
+  File "foo.mli", line 6, characters 22-23:
+  6 |     ensures t.value = t.value *)
+                            ^
+  Warning: Skipping clause: impossible to define the initial value of the model
+           with a recursive expression.
 
 If we add some custom generators, we should do so in a `Gen` module that is implemented (functor application or reference to another module are not supported):
   $ cat > foo.mli << EOF
