@@ -446,15 +446,12 @@ val for_all : 'a t -> bool
 
 Finally, note that this tool is still fairly new and comes with limitations
 that should be lifted in the future. Fow now, we only support testing functions
-with exactly one [SUT] argument in its signature, we don't support tuples and
+with at most one [SUT] argument in its signature, we don't support tuples and
 we only support first-order functions.
 
 If we add the following declarations to our example file,
 
 {@ocaml file=example_limitations.mli,part=fun-decl[
-val f : int -> int -> bool
-(*@ b = f x y *)
-
 val compare : 'a t -> 'a t -> bool
 (*@ b = compare t1 t2 *)
 
@@ -475,33 +472,29 @@ Ortac/QCheck-STM will generate the following warnings:
 
 {@sh[
 $ ortac qcheck-stm example_limitations.mli example_config.ml -o foo.ml
-File "example_limitations.mli", line 16, characters 14-34:
-16 | val compare : 'a t -> 'a t -> bool
+File "example_limitations.mli", line 13, characters 14-34:
+13 | val compare : 'a t -> 'a t -> bool
                    ^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping compare: functions with multiple SUT arguments cannot be
          tested.
-File "example_limitations.mli", line 19, characters 25-29:
-19 | val of_list : 'a list -> 'a t
+File "example_limitations.mli", line 16, characters 25-29:
+16 | val of_list : 'a list -> 'a t
                               ^^^^
 Warning: Skipping of_list: functions returning a SUT value cannot be tested.
-File "example_limitations.mli", line 25, characters 16-23:
-25 | val h : 'a t -> 'a * 'a
+File "example_limitations.mli", line 22, characters 16-23:
+22 | val h : 'a t -> 'a * 'a
                      ^^^^^^^
 Warning: Skipping h: functions returning tuples are not supported yet.
-File "example_limitations.mli", line 28, characters 15-25:
-28 | val for_all : ('a -> bool) -> 'a t -> bool
+File "example_limitations.mli", line 25, characters 15-25:
+25 | val for_all : ('a -> bool) -> 'a t -> bool
                     ^^^^^^^^^^
 Warning: Skipping for_all: functions are not supported yet as arguments.
-File "example_limitations.mli", line 13, characters 0-43:
-13 | val f : int -> int -> bool
-14 | (*@ b = f x y *)
-Warning: Incomplete computation of the returned value in the specification of f. Failure message won't be able to display the expected returned value.
-File "example_limitations.mli", line 22, characters 0-50:
-22 | val g : int * int -> 'a t -> bool
-23 | (*@ b = g x t *)
+File "example_limitations.mli", line 19, characters 0-50:
+19 | val g : int * int -> 'a t -> bool
+20 | (*@ b = g x t *)
 Warning: Incomplete computation of the returned value in the specification of g. Failure message won't be able to display the expected returned value.
-File "example_limitations.mli", line 22, characters 8-17:
-22 | val g : int * int -> 'a t -> bool
+File "example_limitations.mli", line 19, characters 8-17:
+19 | val g : int * int -> 'a t -> bool
              ^^^^^^^^^
 Warning: Type (int * int) not supported.
 ]}

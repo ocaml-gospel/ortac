@@ -16,9 +16,6 @@ val constant : unit
 val returning_sut : 'a -> 'a t
 (*@ t = returning_sut a *)
 
-val no_sut_argument : bool -> bool
-(*@ a = no_sut_argument b *)
-
 val multiple_sut_argument : 'a t -> 'a t -> bool
 (*@ b = multiple_sut_argument x y *)
 
