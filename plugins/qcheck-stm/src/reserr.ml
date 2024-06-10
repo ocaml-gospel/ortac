@@ -28,7 +28,6 @@ type W.kind +=
   | No_init_function of string
   | No_models of string
   | No_spec of string
-  | No_sut_argument of string
   | No_sut_type of string
   | Not_a_structure of string
   | Returned_tuple of string
@@ -46,8 +45,7 @@ let level kind =
   | Functional_argument _ | Ghost_values _ | Ignored_modifies
   | Impossible_term_substitution _ | Incompatible_type _
   | Incomplete_ret_val_computation _ | Multiple_sut_arguments _ | No_spec _
-  | No_sut_argument _ | Returned_tuple _ | Returning_sut _
-  | Type_not_supported _ ->
+  | Returned_tuple _ | Returning_sut _ | Type_not_supported _ ->
       W.Warning
   | Empty_cmd_type | Impossible_init_state_generation _ | Incompatible_sut _
   | Incomplete_configuration_module _ | No_configuration_file _
@@ -130,9 +128,6 @@ let pp_kind ppf kind =
   | No_spec fct ->
       pf ppf "Skipping %s:@ %a" fct text
         "functions without specifications cannot be tested"
-  | No_sut_argument id ->
-      pf ppf "Skipping %s:@ %a" id text
-        "functions with no SUT argument cannot be tested"
   | Returned_tuple f ->
       pf ppf "Skipping %s:@ %a" f text
         "functions returning tuples are not supported yet"

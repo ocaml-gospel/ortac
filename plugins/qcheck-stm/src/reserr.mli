@@ -28,7 +28,6 @@ type W.kind +=
   | No_init_function of string
   | No_models of string
   | No_spec of string
-  | No_sut_argument of string
   | No_sut_type of string
   | Not_a_structure of string
   | Returned_tuple of string
