@@ -1,5 +1,7 @@
 # 0.3.0
 
+- Add support for testing functions without a sut argument
+  [\#235](https://github.com/ocaml-gospel/ortac/pull/235)
 - Add error for empty command type 
   [\#234](https://github.com/ocaml-gospel/ortac/pull/234)
 - Move to a module-based configuration
