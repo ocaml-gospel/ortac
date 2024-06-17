@@ -75,10 +75,7 @@ let ty_var_substitution config (vd : val_description) =
   let value_name, value_type = (vd.vd_name.id_str, vd.vd_type) in
   assert (is_a_function value_type);
   let open Ppxlib in
-  let ret = function
-    | None -> Reserr.(error (No_sut_argument value_name, value_type.ptyp_loc))
-    | Some x -> Reserr.ok x
-  in
+  let ret = function None -> Reserr.ok [] | Some x -> Reserr.ok x in
   let rec aux seen ty =
     match ty.ptyp_desc with
     | Ptyp_any | Ptyp_var _ -> ret seen
@@ -128,8 +125,7 @@ let split_args config vd args =
     | _, _ -> failwith "shouldn't happen (too few parameters)"
   in
   let* sut, args = aux None [] vd.vd_type args in
-  (* sut cannot be none because its presence has already been checked *)
-  ok (Option.get sut, args)
+  ok (sut, args)
 
 let get_state_description_with_index is_t state spec =
   let open Tterm in
@@ -149,8 +145,9 @@ let get_state_description_with_index is_t state spec =
 let next_state sut state spec =
   let open Tterm in
   let is_t vs =
-    let open Symbols in
-    Ident.equal sut vs.vs_name
+    Option.fold
+      ~some:(fun sut -> Ident.equal sut vs.Symbols.vs_name)
+      ~none:false sut
   in
   let formulae = get_state_description_with_index is_t state spec in
   let open Reserr in

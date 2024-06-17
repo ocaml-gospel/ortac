@@ -475,10 +475,6 @@ Ortac/QCheck-STM will generate the following warnings:
 
 {@sh[
 $ ortac qcheck-stm example_limitations.mli example_config.ml -o foo.ml
-File "example_limitations.mli", line 13, characters 8-26:
-13 | val f : int -> int -> bool
-             ^^^^^^^^^^^^^^^^^^
-Warning: Skipping f: functions with no SUT argument cannot be tested.
 File "example_limitations.mli", line 16, characters 14-34:
 16 | val compare : 'a t -> 'a t -> bool
                    ^^^^^^^^^^^^^^^^^^^^
@@ -496,6 +492,10 @@ File "example_limitations.mli", line 28, characters 15-25:
 28 | val for_all : ('a -> bool) -> 'a t -> bool
                     ^^^^^^^^^^
 Warning: Skipping for_all: functions are not supported yet as arguments.
+File "example_limitations.mli", line 13, characters 0-43:
+13 | val f : int -> int -> bool
+14 | (*@ b = f x y *)
+Warning: Incomplete computation of the returned value in the specification of f. Failure message won't be able to display the expected returned value.
 File "example_limitations.mli", line 22, characters 0-50:
 22 | val g : int * int -> 'a t -> bool
 23 | (*@ b = g x t *)

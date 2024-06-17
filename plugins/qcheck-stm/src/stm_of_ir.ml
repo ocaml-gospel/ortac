@@ -149,9 +149,12 @@ let subst_term state ?(out_of_scope = []) ~gos_t ?(old_lz = false) ~old_t
 
 let translate_checks config state value state_ident t =
   let open Reserr in
-  subst_term state ~gos_t:value.sut_var ~old_t:(Some state_ident)
-    ~new_t:(Some state_ident) t.term
-  >>= ocaml_of_term config
+  match value.sut_var with
+  | Some sut_var ->
+      subst_term state ~gos_t:sut_var ~old_t:(Some state_ident)
+        ~new_t:(Some state_ident) t.term
+      >>= ocaml_of_term config
+  | None -> ocaml_of_term config t.term
 
 let str_of_ident = Fmt.str "%a" Ident.pp
 let longident_loc_of_ident id = str_of_ident id |> lident
@@ -330,9 +333,12 @@ let next_state_case state config state_ident nb_models value =
     let descriptions =
       List.filter_map
         (fun (i, { model; description }) ->
-          subst_term ~out_of_scope:value.ret state ~gos_t:value.sut_var
-            ~old_t:(Some state_ident) ~new_t:None description
-          >>= ocaml_of_term config
+          (match value.sut_var with
+          | Some sut_var ->
+              subst_term ~out_of_scope:value.ret state ~gos_t:sut_var
+                ~old_t:(Some state_ident) ~new_t:None description
+              >>= ocaml_of_term config
+          | None -> ocaml_of_term config description)
           |> to_option
           |> Option.map (fun description -> (i, model, description)))
         value.next_state.formulae
@@ -405,9 +411,12 @@ let precond_case config state state_ident value =
     list_and
     <$> map
           (fun t ->
-            subst_term state ~gos_t:value.sut_var ~old_t:None
-              ~new_t:(Some state_ident) t
-            >>= ocaml_of_term config)
+            match value.sut_var with
+            | Some sut_var ->
+                subst_term state ~gos_t:sut_var ~old_t:None
+                  ~new_t:(Some state_ident) t
+                >>= ocaml_of_term config
+            | None -> ocaml_of_term config t)
           value.precond
   in
   ok (case ~lhs ~guard:None ~rhs)
@@ -453,9 +462,12 @@ let postcond_case config state invariants idx state_ident new_state_ident value
     =
   let open Reserr in
   let translate_postcond t =
-    subst_term state ~gos_t:value.sut_var ~old_t:(Some state_ident) ~new_lz:true
-      ~new_t:(Some new_state_ident) t.term
-    >>= ocaml_of_term config
+    match value.sut_var with
+    | Some sut_var ->
+        subst_term state ~gos_t:sut_var ~old_t:(Some state_ident) ~new_lz:true
+          ~new_t:(Some new_state_ident) t.term
+        >>= ocaml_of_term config
+    | None -> ocaml_of_term config t.term
   and translate_invariants id t =
     subst_term state ~gos_t:id ~old_t:None ~new_t:(Some new_state_ident)
       ~new_lz:true t.term

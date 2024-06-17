@@ -1,5 +1,5 @@
-Error: The generated cmd type is empty.
-File "test_without_sut.mli", line 8, characters 10-27:
-8 | val add : int -> int -> int
-              ^^^^^^^^^^^^^^^^^
-Warning: Skipping add: functions with no SUT argument cannot be tested.
+File "test_without_sut.mli", line 8, characters 0-68:
+ 8 | val add : int -> int -> int
+ 9 | (*@ c = add a b
+10 |     ensures c = a + b *)
+Warning: Incomplete computation of the returned value in the specification of add. Failure message won't be able to display the expected returned value.

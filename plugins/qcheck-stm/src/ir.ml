@@ -41,7 +41,7 @@ type value = {
   id : Ident.t;
   ty : Ppxlib.core_type;
   inst : (string * Ppxlib.core_type) list;
-  sut_var : Ident.t;
+  sut_var : Ident.t option;
   args : (Ppxlib.core_type * Ident.t option) list;
       (* arguments of unit types can be nameless *)
   ret : Ident.t list;
