@@ -446,8 +446,8 @@ val for_all : 'a t -> bool
 
 Finally, note that this tool is still fairly new and comes with limitations
 that should be lifted in the future. Fow now, we only support testing functions
-with at most one [SUT] argument in its signature, we don't support tuples and
-we only support first-order functions.
+with at most one [SUT] argument in its signature, tuples with less than 10
+elements and we only support first-order functions.
 
 If we add the following declarations to our example file,
 
@@ -458,11 +458,8 @@ val compare : 'a t -> 'a t -> bool
 val of_list : 'a list -> 'a t
 (*@ t = of_list xs *)
 
-val g : int * int -> 'a t -> bool
-(*@ b = g x t *)
-
-val h : 'a t -> 'a * 'a
-(*@ (l, r) = h t *)
+val g : 'a t -> 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a -> bool
+(*@ b = g t x *)
 
 val for_all : ('a -> bool) -> 'a t -> bool
 (*@ b = for_all p t *)
@@ -472,25 +469,21 @@ Ortac/QCheck-STM will generate the following warnings:
 
 {@sh[
 $ ortac qcheck-stm example_limitations.mli example_config.ml -o foo.ml
-File "example_limitations.mli", line 13, characters 14-34:
-13 | val compare : 'a t -> 'a t -> bool
+File "example_limitations.mli", line 17, characters 14-34:
+17 | val compare : 'a t -> 'a t -> bool
                    ^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping compare: functions with multiple SUT arguments cannot be
          tested.
-File "example_limitations.mli", line 16, characters 25-29:
-16 | val of_list : 'a list -> 'a t
+File "example_limitations.mli", line 20, characters 25-29:
+20 | val of_list : 'a list -> 'a t
                               ^^^^
 Warning: Skipping of_list: functions returning a SUT value cannot be tested.
-File "example_limitations.mli", line 25, characters 15-25:
-25 | val for_all : ('a -> bool) -> 'a t -> bool
+File "example_limitations.mli", line 23, characters 16-63:
+23 | val g : 'a t -> 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a -> bool
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Warning: Skipping g: Can only test tuples with arity < 10.
+File "example_limitations.mli", line 26, characters 15-25:
+26 | val for_all : ('a -> bool) -> 'a t -> bool
                     ^^^^^^^^^^
 Warning: Skipping for_all: functions are not supported yet as arguments.
-File "example_limitations.mli", line 19, characters 0-50:
-19 | val g : int * int -> 'a t -> bool
-20 | (*@ b = g x t *)
-Warning: Incomplete computation of the returned value in the specification of g. Failure message won't be able to display the expected returned value.
-File "example_limitations.mli", line 22, characters 0-43:
-22 | val h : 'a t -> 'a * 'a
-23 | (*@ (l, r) = h t *)
-Warning: Incomplete computation of the returned value in the specification of h. Failure message won't be able to display the expected returned value.
 ]}

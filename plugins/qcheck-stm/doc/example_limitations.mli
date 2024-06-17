@@ -8,6 +8,10 @@ val make : int -> 'a -> 'a t
     ensures t.size = i
     ensures t.contents = List.init i (fun j -> a) *)
 
+val dummy : 'a t -> int
+(*@ l = dummy t
+    ensures l = t.size *)
+
 (* $MDX part-begin=fun-decl *)
 
 val compare : 'a t -> 'a t -> bool
@@ -16,11 +20,8 @@ val compare : 'a t -> 'a t -> bool
 val of_list : 'a list -> 'a t
 (*@ t = of_list xs *)
 
-val g : int * int -> 'a t -> bool
-(*@ b = g x t *)
-
-val h : 'a t -> 'a * 'a
-(*@ (l, r) = h t *)
+val g : 'a t -> 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a -> bool
+(*@ b = g t x *)
 
 val for_all : ('a -> bool) -> 'a t -> bool
 (*@ b = for_all p t *)
