@@ -970,7 +970,7 @@ let stm config ir =
   let open Reserr in
   let* ghost_types = ghost_types config ir.ghost_types in
   let* config, ghost_functions = ghost_functions config ir.ghost_functions in
-  let warn = [%stri [@@@ocaml.warning "-26-27"]] in
+  let warn = [%stri [@@@ocaml.warning "-26-27-69"]] in
   let sut = sut_type config in
   let* cmd = cmd_type ir in
   let* cmd_show = cmd_show config ir in
