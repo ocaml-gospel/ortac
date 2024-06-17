@@ -15,19 +15,10 @@ File "hashtbl.mli", line 73, characters 12-32:
 73 | val fold : ('a -> 'b -> 'c -> 'c) -> ('a, 'b) t -> 'c -> 'c
                  ^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping fold: functions are not supported yet as arguments.
-File "hashtbl.mli", line 78, characters 16-28:
-78 | val randomize : unit -> unit
-                     ^^^^^^^^^^^^
-Warning: Skipping randomize: functions with no SUT argument cannot be tested.
 File "hashtbl.mli", line 78, characters 0-28:
 78 | val randomize : unit -> unit
      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping randomize: functions without specifications cannot be
-         tested.
-File "hashtbl.mli", line 79, characters 20-32:
-79 | val is_randomized : unit -> bool
-                         ^^^^^^^^^^^^
-Warning: Skipping is_randomized: functions with no SUT argument cannot be
          tested.
 File "hashtbl.mli", line 79, characters 0-32:
 79 | val is_randomized : unit -> bool
@@ -77,38 +68,19 @@ File "hashtbl.mli", line 102, characters 0-42:
 102 | val of_seq : ('a * 'b) Seq.t -> ('a, 'b) t
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping of_seq: functions without specifications cannot be tested.
-File "hashtbl.mli", line 103, characters 11-20:
-103 | val hash : 'a -> int
-                 ^^^^^^^^^
-Warning: Skipping hash: functions with no SUT argument cannot be tested.
 File "hashtbl.mli", line 103, characters 0-20:
 103 | val hash : 'a -> int
       ^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping hash: functions without specifications cannot be tested.
-File "hashtbl.mli", line 104, characters 18-34:
-104 | val seeded_hash : int -> 'a -> int
-                        ^^^^^^^^^^^^^^^^
-Warning: Skipping seeded_hash: functions with no SUT argument cannot be
-         tested.
 File "hashtbl.mli", line 104, characters 0-34:
 104 | val seeded_hash : int -> 'a -> int
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping seeded_hash: functions without specifications cannot be
          tested.
-File "hashtbl.mli", line 105, characters 17-40:
-105 | val hash_param : int -> int -> 'a -> int
-                       ^^^^^^^^^^^^^^^^^^^^^^^
-Warning: Skipping hash_param: functions with no SUT argument cannot be
-         tested.
 File "hashtbl.mli", line 105, characters 0-40:
 105 | val hash_param : int -> int -> 'a -> int
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping hash_param: functions without specifications cannot be
-         tested.
-File "hashtbl.mli", line 106, characters 24-54:
-106 | val seeded_hash_param : int -> int -> int -> 'a -> int
-                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Warning: Skipping seeded_hash_param: functions with no SUT argument cannot be
          tested.
 File "hashtbl.mli", line 106, characters 0-54:
 106 | val seeded_hash_param : int -> int -> int -> 'a -> int

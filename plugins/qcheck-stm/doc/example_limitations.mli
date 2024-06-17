@@ -10,9 +10,6 @@ val make : int -> 'a -> 'a t
 
 (* $MDX part-begin=fun-decl *)
 
-val f : int -> int -> bool
-(*@ b = f x y *)
-
 val compare : 'a t -> 'a t -> bool
 (*@ b = compare t1 t2 *)
 

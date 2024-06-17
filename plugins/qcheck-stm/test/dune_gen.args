@@ -18,3 +18,5 @@ ghost_as_model
 ghost_as_model_config
 custom_config
 custom_config_config
+test_without_sut
+test_without_sut_config

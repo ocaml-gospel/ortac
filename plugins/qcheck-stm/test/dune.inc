@@ -528,3 +528,56 @@
  (action
   (run %{dep:custom_config_stm_tests.exe} -v)))
 
+(library
+ (name test_without_sut)
+ (modules test_without_sut))
+
+(rule
+ (target test_without_sut_stm_tests.ml)
+ (package ortac-qcheck-stm)
+ (deps
+  (package ortac-core)
+  (package ortac-qcheck-stm))
+ (action
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   qcheck-stm
+   (with-stderr-to
+    test_without_sut_errors
+    (run
+     ortac
+     qcheck-stm
+     %{dep:test_without_sut.mli}
+     %{dep:test_without_sut_config.ml}
+     -o
+     %{target})))))
+
+(test
+ (name test_without_sut_stm_tests)
+ (package ortac-qcheck-stm)
+ (modules test_without_sut_stm_tests)
+ (libraries
+  qcheck-core
+  qcheck-core.runner
+  qcheck-stm.stm
+  qcheck-stm.sequential
+  qcheck-multicoretests-util
+  ortac-runtime-qcheck-stm
+  test_without_sut)
+ (action
+  (echo
+   "\n%{dep:test_without_sut_stm_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))
+
+(rule
+ (alias runtest)
+ (package ortac-qcheck-stm)
+ (action
+  (progn
+   (diff test_without_sut_errors.expected test_without_sut_errors)
+   (diff test_without_sut_stm_tests.expected.ml test_without_sut_stm_tests.ml))))
+
+(rule
+ (alias launchtests)
+ (action
+  (run %{dep:test_without_sut_stm_tests.exe} -v)))
+
