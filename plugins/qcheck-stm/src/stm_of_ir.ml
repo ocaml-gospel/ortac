@@ -226,8 +226,7 @@ let exp_of_core_type inst typ =
             pexp_apply
             <$> constr_str
             <*> (List.map (fun e -> (Nolabel, e)) <$> map aux xs))
-    (* Ppxlib invariant: List.length xs >= 2 *)
-    | Ptyp_tuple xs when List.length xs < 10 ->
+    | Ptyp_tuple xs ->
         let tup_constr =
           pexp_ident (lident ("tup" ^ string_of_int (List.length xs)))
         in
@@ -745,8 +744,7 @@ let pp_cmd_case config value =
   let open Reserr in
   let rec pp_of_ty ty : expression reserr =
     match ty.ptyp_desc with
-    (* Ppxlib invariant: List.length xs >= 2 *)
-    | Ptyp_tuple xs when List.length xs < 10 ->
+    | Ptyp_tuple xs ->
         let* pps = map pp_of_ty xs in
         let func = qualify_pp ("pp_tuple" ^ string_of_int (List.length xs)) in
         ok (pexp_apply func (List.map (fun e -> (Nolabel, e)) pps))
