@@ -202,6 +202,12 @@ let pat_of_core_type inst typ =
           | xs -> (fun xs -> Some (ppat_tuple xs)) <$> map aux xs
         in
         ppat_construct <$> constr_str <*> pat_arg
+    | Ptyp_tuple xs ->
+        let* pat_arg = ppat_tuple <$> map aux xs in
+        ppat_construct
+          (lident ("Tup" ^ string_of_int (List.length xs)))
+          (Some pat_arg)
+        |> ok
     | _ ->
         error
           ( Type_not_supported (Fmt.str "%a" Pprintast.core_type typ),
@@ -446,10 +452,6 @@ let expected_returned_value translate_postcond value =
   let ret_val =
     match (ty_ret.ptyp_desc, value.ret_values) with
     | Ptyp_constr ({ txt = Lident "unit"; _ }, _), _ -> Some eunit
-    | Ptyp_tuple _, _ ->
-        failwith
-          "shouldn't happen (functions returning tuples are filtered out \
-           before)"
     | _, [ xs ] ->
         Option.bind
           (to_option @@ map translate_postcond xs)
@@ -524,7 +526,7 @@ let postcond_case config state invariants idx state_ident new_state_ident value
     let* ret_ty =
       let open Ppxlib in
       match ret_ty.ptyp_desc with
-      | Ptyp_var _ | Ptyp_constr _ -> ok ret_ty
+      | Ptyp_var _ | Ptyp_constr _ | Ptyp_tuple _ -> ok ret_ty
       | _ ->
           error
             ( Type_not_supported (Fmt.str "%a" Pprintast.core_type ret_ty),
@@ -543,10 +545,7 @@ let postcond_case config state invariants idx state_ident new_state_ident value
           if may_raise_exception value then pvar (str_of_ident res_default)
           else ppat_any
       | [ id ] -> pvar (str_of_ident id)
-      | _ ->
-          failwith
-            "shouldn't happen (functions returning tuples are filtered out \
-             before)"
+      | xs -> ppat_tuple (List.map (fun x -> pvar @@ str_of_ident x) xs)
     in
     ok
       (ppat_construct (lident "Res")
@@ -582,10 +581,10 @@ let postcond_case config state invariants idx state_ident new_state_ident value
     | [ id ] ->
         let id = str_of_ident id in
         (evar id, pvar id)
-    | _ ->
-        failwith
-          "shouldn't happen (functions returning tuples are filtered out \
-           before)"
+    | xs ->
+        let evars = List.map (fun x -> evar @@ str_of_ident x) xs in
+        let pvars = List.map (fun x -> pvar @@ str_of_ident x) xs in
+        (pexp_tuple evars, ppat_tuple pvars)
   in
   let* rhs =
     if may_raise_exception value then
@@ -985,6 +984,104 @@ let util config =
       let name = noloc (Some "Util") and expr = pmod_structure structure in
       [ pstr_module (module_binding ~name ~expr) ]
 
+let gen_tuple_ty arities =
+  let constructors =
+    List.map
+      (fun ar ->
+        let name = Located.mk ("Tup" ^ string_of_int ar) in
+        let idxs =
+          List.init ar (fun x -> "a" ^ string_of_int (x + 1) |> ptyp_var)
+        in
+        let args = List.map (fun c -> ptyp_constr (lident "ty") [ c ]) idxs in
+        let ret = ptyp_constr (lident "ty") [ ptyp_tuple idxs ] in
+        let kind = Pext_decl ([], Pcstr_tuple args, Some ret) in
+        extension_constructor ~name ~kind)
+      arities
+  in
+  let path = lident "ty" in
+  let params = [ (ptyp_any, (NoVariance, NoInjectivity)) ] in
+  let private_ = Public in
+  pstr_typext (type_extension ~path ~params ~constructors ~private_)
+
+let gen_tuple_constr arities =
+  let range idx = List.init idx (fun x -> x + 1) in
+  let gen_vb arity =
+    let arity_str = string_of_int arity in
+    let idxs = range arity in
+    let pat = pvar ("tup" ^ arity_str) in
+    let ty_show =
+      pexp_tuple
+        [
+          pexp_construct
+            (lident ("Tup" ^ arity_str))
+            (Some
+               (pexp_tuple
+                  (List.map (fun i -> evar ("ty" ^ string_of_int i)) idxs)));
+          pexp_apply
+            (qualify [ "Util"; "Pp" ] "to_show")
+            [
+              ( Nolabel,
+                pexp_apply
+                  (qualify [ "Util"; "Pp" ] ("pp_tuple" ^ string_of_int arity))
+                  (List.map
+                     (fun i ->
+                       ( Nolabel,
+                         pexp_apply
+                           (qualify [ "Util"; "Pp" ] "of_show")
+                           [ (Nolabel, evar ("show" ^ string_of_int i)) ] ))
+                     idxs) );
+            ];
+        ]
+    in
+    let body =
+      pexp_let Nonrecursive
+        (List.map
+           (fun i ->
+             let pat =
+               ppat_tuple
+                 [
+                   pvar ("ty" ^ string_of_int i); pvar ("show" ^ string_of_int i);
+                 ]
+             in
+             let expr = evar ("spec" ^ string_of_int i) in
+             value_binding ~pat ~expr)
+           idxs)
+        ty_show
+    in
+    let expr =
+      List.fold_left
+        (fun acc i ->
+          pexp_fun Nolabel None (pvar ("spec" ^ string_of_int i)) acc)
+        body (List.rev idxs)
+    in
+    value_binding ~pat ~expr
+  in
+  let vbs = List.map gen_vb arities in
+  pstr_value Nonrecursive vbs
+
+(* This function creates type extensions for STM.ty and smart constructors for
+   them. It looks up all required tuple arities from the return types of
+   IR values
+*)
+let tuple_types ir =
+  let ret_tys =
+    List.map (fun v -> (Ir.get_return_type v).ptyp_desc) ir.values
+  in
+  (* We use a set as we only need each tuple arity once *)
+  let module IntS = Set.Make (Int) in
+  let rec aux acc = function
+    | Ptyp_tuple xs ->
+        let acc' =
+          (* Tuples might be nested *)
+          List.fold_left aux acc (List.map (fun x -> x.ptyp_desc) xs)
+        in
+        IntS.union (IntS.singleton (List.length xs)) acc'
+    | _ -> acc
+  in
+  let arities = List.fold_left aux IntS.empty ret_tys |> IntS.elements in
+  if List.length arities = 0 then []
+  else [ gen_tuple_ty arities; gen_tuple_constr arities ]
+
 let stm config ir =
   let open Reserr in
   let* ghost_types = ghost_types config ir.ghost_types in
@@ -1017,6 +1114,7 @@ let stm config ir =
       ((open_mod "STM" :: qcheck config)
       @ util config
       @ Option.value config.ty_mod ~default:[]
+      @ tuple_types ir
       @ [
           sut;
           cmd;

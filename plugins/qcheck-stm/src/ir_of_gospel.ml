@@ -29,7 +29,6 @@ let no_functional_arg_or_big_tuple vd =
     | Ptyp_arrow (_, l, r) ->
         let* _ = contains_arrow l in
         aux r
-    | Ptyp_tuple _ -> error (Returned_tuple vd.vd_name.id_str, ty.ptyp_loc)
     | _ -> ok ()
   in
   aux vd.vd_type

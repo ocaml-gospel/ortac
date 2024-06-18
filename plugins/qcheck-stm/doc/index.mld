@@ -481,10 +481,6 @@ File "example_limitations.mli", line 16, characters 25-29:
 16 | val of_list : 'a list -> 'a t
                               ^^^^
 Warning: Skipping of_list: functions returning a SUT value cannot be tested.
-File "example_limitations.mli", line 22, characters 16-23:
-22 | val h : 'a t -> 'a * 'a
-                     ^^^^^^^
-Warning: Skipping h: functions returning tuples are not supported yet.
 File "example_limitations.mli", line 25, characters 15-25:
 25 | val for_all : ('a -> bool) -> 'a t -> bool
                     ^^^^^^^^^^
@@ -493,8 +489,8 @@ File "example_limitations.mli", line 19, characters 0-50:
 19 | val g : int * int -> 'a t -> bool
 20 | (*@ b = g x t *)
 Warning: Incomplete computation of the returned value in the specification of g. Failure message won't be able to display the expected returned value.
-File "example_limitations.mli", line 19, characters 8-17:
-19 | val g : int * int -> 'a t -> bool
-             ^^^^^^^^^
-Warning: Type (int * int) not supported.
+File "example_limitations.mli", line 22, characters 0-43:
+22 | val h : 'a t -> 'a * 'a
+23 | (*@ (l, r) = h t *)
+Warning: Incomplete computation of the returned value in the specification of h. Failure message won't be able to display the expected returned value.
 ]}
