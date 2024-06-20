@@ -53,10 +53,7 @@ let get_sut_type_name config =
   | _ -> failwith "unreachable case in get_sut_type_name"
 
 let get_sut_type_name_str config =
-  let open Ppxlib in
-  match get_sut_type_name config with
-  | Longident.Lident s | Longident.Ldot (_, s) -> s
-  | Longident.Lapply (_, _) -> failwith "not supported"
+  Ppxlib.Longident.last_exn (get_sut_type_name config)
 
 let is_sut config ty =
   let sut_type_name = get_sut_type_name config in
