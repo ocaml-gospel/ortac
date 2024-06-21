@@ -1082,11 +1082,17 @@ let tuple_types ir =
   if List.length arities = 0 then []
   else [ gen_tuple_ty arities; gen_tuple_constr arities ]
 
+let integer_ty_ext =
+  [
+    [%stri type _ ty += Integer : Ortac_runtime.integer ty];
+    [%stri let integer = (Integer, Ortac_runtime.string_of_integer)];
+  ]
+
 let stm config ir =
   let open Reserr in
   let* ghost_types = ghost_types config ir.ghost_types in
   let* config, ghost_functions = ghost_functions config ir.ghost_functions in
-  let warn = [%stri [@@@ocaml.warning "-26-27-69"]] in
+  let warn = [%stri [@@@ocaml.warning "-26-27-69-32"]] in
   let sut = sut_type config in
   let* cmd = cmd_type ir in
   let* cmd_show = cmd_show config ir in
@@ -1114,6 +1120,7 @@ let stm config ir =
       ((open_mod "STM" :: qcheck config)
       @ util config
       @ Option.value config.ty_mod ~default:[]
+      @ integer_ty_ext
       @ tuple_types ir
       @ [
           sut;

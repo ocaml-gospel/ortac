@@ -140,6 +140,8 @@ let _ =
 
 type integer = Z.t
 
+let string_of_integer = Z.to_string
+
 module Aux = struct
   let take n xs =
     let rec aux n acc xs =
