@@ -1698,7 +1698,33 @@ let ortac_postcond cmd__016_ state__017_ res__018_ =
           else
             Some
               (Ortac_runtime.report "Varray_spec" "make 42 'a'"
-                 (Either.right (Res (Ortac_runtime.dummy, ()))) "length"
+                 (Either.right
+                    (Res
+                       (integer,
+                         (try
+                            Ortac_runtime.Gospelstdlib.Sequence.length
+                              (Lazy.force new_state__019_).contents
+                          with
+                          | e ->
+                              raise
+                                (Ortac_runtime.Partial_function
+                                   (e,
+                                     {
+                                       Ortac_runtime.start =
+                                         {
+                                           pos_fname = "varray_spec.mli";
+                                           pos_lnum = 144;
+                                           pos_bol = 8166;
+                                           pos_cnum = 8184
+                                         };
+                                       Ortac_runtime.stop =
+                                         {
+                                           pos_fname = "varray_spec.mli";
+                                           pos_lnum = 144;
+                                           pos_bol = 8166;
+                                           pos_cnum = 8210
+                                         }
+                                     })))))) "length"
                  [("l = Sequence.length t.contents",
                     {
                       Ortac_runtime.start =

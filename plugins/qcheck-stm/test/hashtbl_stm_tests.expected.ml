@@ -593,7 +593,33 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
           else
             Some
               (Ortac_runtime.report "Hashtbl" "create ~random:false 16"
-                 (Either.right (Res (Ortac_runtime.dummy, ()))) "length"
+                 (Either.right
+                    (Res
+                       (integer,
+                         (try
+                            Ortac_runtime.Gospelstdlib.List.length
+                              (Lazy.force new_state__007_).contents
+                          with
+                          | e ->
+                              raise
+                                (Ortac_runtime.Partial_function
+                                   (e,
+                                     {
+                                       Ortac_runtime.start =
+                                         {
+                                           pos_fname = "hashtbl.mli";
+                                           pos_lnum = 76;
+                                           pos_bol = 3727;
+                                           pos_cnum = 3743
+                                         };
+                                       Ortac_runtime.stop =
+                                         {
+                                           pos_fname = "hashtbl.mli";
+                                           pos_lnum = 76;
+                                           pos_bol = 3727;
+                                           pos_cnum = 3765
+                                         }
+                                     })))))) "length"
                  [("i = List.length h.contents",
                     {
                       Ortac_runtime.start =

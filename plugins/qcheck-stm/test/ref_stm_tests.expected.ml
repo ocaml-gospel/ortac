@@ -92,7 +92,31 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
           else
             Some
               (Ortac_runtime.report "Ref" "make 42"
-                 (Either.right (Res (Ortac_runtime.dummy, ()))) "get"
+                 (Either.right
+                    (Res
+                       (integer,
+                         (try (Lazy.force new_state__007_).value
+                          with
+                          | e ->
+                              raise
+                                (Ortac_runtime.Partial_function
+                                   (e,
+                                     {
+                                       Ortac_runtime.start =
+                                         {
+                                           pos_fname = "ref.mli";
+                                           pos_lnum = 11;
+                                           pos_bol = 346;
+                                           pos_cnum = 362
+                                         };
+                                       Ortac_runtime.stop =
+                                         {
+                                           pos_fname = "ref.mli";
+                                           pos_lnum = 11;
+                                           pos_bol = 346;
+                                           pos_cnum = 369
+                                         }
+                                     })))))) "get"
                  [("i = r.value",
                     {
                       Ortac_runtime.start =

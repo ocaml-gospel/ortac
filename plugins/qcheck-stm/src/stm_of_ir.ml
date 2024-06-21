@@ -448,22 +448,31 @@ let precond config ir =
 
 let expected_returned_value translate_postcond value =
   let open Reserr in
+  let ( >>= ) = Option.bind in
   let ty_ret = Ir.get_return_type value in
-  let ret_val =
-    match (ty_ret.ptyp_desc, value.ret_values) with
-    | Ptyp_constr ({ txt = Lident "unit"; _ }, _), _ -> Some eunit
-    | _, [ xs ] ->
-        Option.bind
-          (to_option @@ map translate_postcond xs)
-          (Fun.flip List.nth_opt 0)
-    (* type of the returned value will be checked later with a proper error *)
-    | _, _ -> None
-  in
   let ty_show = to_option @@ exp_of_core_type value.inst ty_ret in
-  match (ty_show, ret_val) with
-  | Some ty_show, Some ret_value ->
-      let args = pexp_tuple_opt [ ty_show; ret_value ] in
-      Some (pexp_construct res args)
+  let ret_res ts val_ =
+    match ts with
+    | Some ty_show ->
+        let args = pexp_tuple_opt [ ty_show; val_ ] in
+        Some (pexp_construct res args)
+    | None -> None
+  in
+  let ty_show_integer = evar "integer" in
+  match (ty_ret.ptyp_desc, value.ret_values) with
+  | Ptyp_constr ({ txt = Lident "unit"; _ }, _), _ -> ret_res ty_show eunit
+  | Ptyp_constr ({ txt = Lident "int"; _ }, _), [ (t :: _ as xs) ]
+    when t.term.t_ty = Some Gospel.Ttypes.ty_integer ->
+      map translate_postcond xs
+      |> to_option
+      >>= Fun.flip List.nth_opt 0
+      >>= ret_res (Some ty_show_integer)
+  | _, [ xs ] ->
+      map translate_postcond xs
+      |> to_option
+      >>= Fun.flip List.nth_opt 0
+      >>= ret_res ty_show
+  (* type of the returned value will be checked later with a proper error *)
   | _, _ -> None
 
 let postcond_case config state invariants idx state_ident new_state_ident value

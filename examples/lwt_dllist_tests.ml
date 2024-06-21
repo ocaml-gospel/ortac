@@ -393,7 +393,33 @@ let ortac_postcond cmd__005_ state__006_ res__007_ =
           else
             Some
               (Ortac_runtime.report "Lwt_dllist_spec" "create ()"
-                 (Either.right (Res (Ortac_runtime.dummy, ()))) "length"
+                 (Either.right
+                    (Res
+                       (integer,
+                         (try
+                            Ortac_runtime.Gospelstdlib.Sequence.length
+                              (Lazy.force new_state__008_).contents
+                          with
+                          | e ->
+                              raise
+                                (Ortac_runtime.Partial_function
+                                   (e,
+                                     {
+                                       Ortac_runtime.start =
+                                         {
+                                           pos_fname = "lwt_dllist_spec.mli";
+                                           pos_lnum = 58;
+                                           pos_bol = 2649;
+                                           pos_cnum = 2667
+                                         };
+                                       Ortac_runtime.stop =
+                                         {
+                                           pos_fname = "lwt_dllist_spec.mli";
+                                           pos_lnum = 58;
+                                           pos_bol = 2649;
+                                           pos_cnum = 2693
+                                         }
+                                     })))))) "length"
                  [("l = Sequence.length s.contents",
                     {
                       Ortac_runtime.start =

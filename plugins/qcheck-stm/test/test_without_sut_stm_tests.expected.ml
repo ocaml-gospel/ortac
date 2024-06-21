@@ -110,7 +110,34 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
           else
             Some
               (Ortac_runtime.report "Test_without_sut" "make 16 0"
-                 (Either.right (Res (Ortac_runtime.dummy, ()))) "add"
+                 (Either.right
+                    (Res
+                       (integer,
+                         (try
+                            Ortac_runtime.Gospelstdlib.(+)
+                              (Ortac_runtime.Gospelstdlib.integer_of_int a_1)
+                              (Ortac_runtime.Gospelstdlib.integer_of_int b)
+                          with
+                          | e ->
+                              raise
+                                (Ortac_runtime.Partial_function
+                                   (e,
+                                     {
+                                       Ortac_runtime.start =
+                                         {
+                                           pos_fname = "test_without_sut.mli";
+                                           pos_lnum = 10;
+                                           pos_bol = 480;
+                                           pos_cnum = 498
+                                         };
+                                       Ortac_runtime.stop =
+                                         {
+                                           pos_fname = "test_without_sut.mli";
+                                           pos_lnum = 10;
+                                           pos_bol = 480;
+                                           pos_cnum = 499
+                                         }
+                                     })))))) "add"
                  [("c = a + b",
                     {
                       Ortac_runtime.start =

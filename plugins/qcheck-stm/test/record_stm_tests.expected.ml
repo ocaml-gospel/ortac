@@ -141,7 +141,34 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
           else
             Some
               (Ortac_runtime.report "Record" "make 42"
-                 (Either.right (Res (Ortac_runtime.dummy, ()))) "plus1"
+                 (Either.right
+                    (Res
+                       (integer,
+                         (try
+                            Ortac_runtime.Gospelstdlib.(+)
+                              (Ortac_runtime.Gospelstdlib.integer_of_int i_1)
+                              (Ortac_runtime.Gospelstdlib.integer_of_int 1)
+                          with
+                          | e ->
+                              raise
+                                (Ortac_runtime.Partial_function
+                                   (e,
+                                     {
+                                       Ortac_runtime.start =
+                                         {
+                                           pos_fname = "record.mli";
+                                           pos_lnum = 11;
+                                           pos_bol = 425;
+                                           pos_cnum = 444
+                                         };
+                                       Ortac_runtime.stop =
+                                         {
+                                           pos_fname = "record.mli";
+                                           pos_lnum = 11;
+                                           pos_bol = 425;
+                                           pos_cnum = 445
+                                         }
+                                     })))))) "plus1"
                  [("i1 = i + 1",
                     {
                       Ortac_runtime.start =
@@ -191,7 +218,34 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
           else
             Some
               (Ortac_runtime.report "Record" "make 42"
-                 (Either.right (Res (Ortac_runtime.dummy, ()))) "plus2"
+                 (Either.right
+                    (Res
+                       (integer,
+                         (try
+                            Ortac_runtime.Gospelstdlib.(+)
+                              (Ortac_runtime.Gospelstdlib.integer_of_int i_2)
+                              (Ortac_runtime.Gospelstdlib.integer_of_int 2)
+                          with
+                          | e ->
+                              raise
+                                (Ortac_runtime.Partial_function
+                                   (e,
+                                     {
+                                       Ortac_runtime.start =
+                                         {
+                                           pos_fname = "record.mli";
+                                           pos_lnum = 18;
+                                           pos_bol = 727;
+                                           pos_cnum = 746
+                                         };
+                                       Ortac_runtime.stop =
+                                         {
+                                           pos_fname = "record.mli";
+                                           pos_lnum = 18;
+                                           pos_bol = 727;
+                                           pos_cnum = 747
+                                         }
+                                     })))))) "plus2"
                  [("i2 = i + 2",
                     {
                       Ortac_runtime.start =
@@ -240,7 +294,31 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
              else
                Some
                  (Ortac_runtime.report "Record" "make 42"
-                    (Either.right (Res (Ortac_runtime.dummy, ()))) "get"
+                    (Either.right
+                       (Res
+                          (integer,
+                            (try (Lazy.force new_state__007_).value
+                             with
+                             | e ->
+                                 raise
+                                   (Ortac_runtime.Partial_function
+                                      (e,
+                                        {
+                                          Ortac_runtime.start =
+                                            {
+                                              pos_fname = "record.mli";
+                                              pos_lnum = 23;
+                                              pos_bol = 868;
+                                              pos_cnum = 884
+                                            };
+                                          Ortac_runtime.stop =
+                                            {
+                                              pos_fname = "record.mli";
+                                              pos_lnum = 23;
+                                              pos_bol = 868;
+                                              pos_cnum = 891
+                                            }
+                                        })))))) "get"
                     [("i = r.value",
                        {
                          Ortac_runtime.start =
@@ -291,7 +369,31 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
                 else
                   Some
                     (Ortac_runtime.report "Record" "make 42"
-                       (Either.right (Res (Ortac_runtime.dummy, ()))) "get"
+                       (Either.right
+                          (Res
+                             (integer,
+                               (try (Lazy.force new_state__007_).value
+                                with
+                                | e ->
+                                    raise
+                                      (Ortac_runtime.Partial_function
+                                         (e,
+                                           {
+                                             Ortac_runtime.start =
+                                               {
+                                                 pos_fname = "record.mli";
+                                                 pos_lnum = 23;
+                                                 pos_bol = 868;
+                                                 pos_cnum = 884
+                                               };
+                                             Ortac_runtime.stop =
+                                               {
+                                                 pos_fname = "record.mli";
+                                                 pos_lnum = 23;
+                                                 pos_bol = 868;
+                                                 pos_cnum = 891
+                                               }
+                                           })))))) "get"
                        [("plus1 i = i + 1",
                           {
                             Ortac_runtime.start =
@@ -340,7 +442,31 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
                 else
                   Some
                     (Ortac_runtime.report "Record" "make 42"
-                       (Either.right (Res (Ortac_runtime.dummy, ()))) "get"
+                       (Either.right
+                          (Res
+                             (integer,
+                               (try (Lazy.force new_state__007_).value
+                                with
+                                | e ->
+                                    raise
+                                      (Ortac_runtime.Partial_function
+                                         (e,
+                                           {
+                                             Ortac_runtime.start =
+                                               {
+                                                 pos_fname = "record.mli";
+                                                 pos_lnum = 23;
+                                                 pos_bol = 868;
+                                                 pos_cnum = 884
+                                               };
+                                             Ortac_runtime.stop =
+                                               {
+                                                 pos_fname = "record.mli";
+                                                 pos_lnum = 23;
+                                                 pos_bol = 868;
+                                                 pos_cnum = 891
+                                               }
+                                           })))))) "get"
                        [("plus2 i = i + 2",
                           {
                             Ortac_runtime.start =
