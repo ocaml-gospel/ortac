@@ -226,6 +226,13 @@ let exp_of_core_type inst typ =
             pexp_apply
             <$> constr_str
             <*> (List.map (fun e -> (Nolabel, e)) <$> map aux xs))
+    (* Ppxlib invariant: List.length xs >= 2 *)
+    | Ptyp_tuple xs when List.length xs < 10 ->
+        let tup_constr =
+          pexp_ident (lident ("tup" ^ string_of_int (List.length xs)))
+        in
+        pexp_apply tup_constr
+        <$> (List.map (fun e -> (Nolabel, e)) <$> map aux xs)
     | _ ->
         error
           ( Type_not_supported (Fmt.str "%a" Pprintast.core_type typ),
@@ -738,9 +745,11 @@ let pp_cmd_case config value =
   let open Reserr in
   let rec pp_of_ty ty : expression reserr =
     match ty.ptyp_desc with
-    | Ptyp_tuple [ ty0; ty1 ] ->
-        let* pp0 = pp_of_ty ty0 and* pp1 = pp_of_ty ty1 in
-        ok (pexp_apply (evar "pp_pair") [ (Nolabel, pp0); (Nolabel, pp1) ])
+    (* Ppxlib invariant: List.length xs >= 2 *)
+    | Ptyp_tuple xs when List.length xs < 10 ->
+        let* pps = map pp_of_ty xs in
+        let func = qualify_pp ("pp_tuple" ^ string_of_int (List.length xs)) in
+        ok (pexp_apply func (List.map (fun e -> (Nolabel, e)) pps))
     | Ptyp_constr (lid, xs) ->
         let* xs = map pp_of_ty xs and* s = munge_longident false ty lid in
         let pp = qualify_pp ("pp_" ^ s) in
