@@ -46,8 +46,7 @@ generated.
      %{test}
      --verbose)))
 
-When the optional output argument is set, rules will be written in the file and will reflect
-this fact.
+When the optional output argument is set, rules will be written in the file.
 
   $ ortac dune qcheck-stm intf_spec.mli --library=lib --package=my_package --with-stdout-to=dune.inc
   $ cat dune.inc
