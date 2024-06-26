@@ -42,11 +42,6 @@ File "all_warnings.mli", line 46, characters 6-7:
            ^
 Warning: Skipping ghost_returned_value: functions with a ghost returned value
          are not supported.
-File "all_warnings.mli", line 56, characters 27-36:
-56 | val return_tuple : 'a t -> 'a * bool
-                                ^^^^^^^^^
-Warning: Skipping return_tuple: functions returning tuples are not supported
-         yet.
 File "all_warnings.mli", line 34, characters 13-23:
 34 |     modifies t.contents *)
                   ^^^^^^^^^^
@@ -81,6 +76,10 @@ File "all_warnings.mli", line 52, characters 0-111:
 53 | (*@ b = record_not_model_field t
 54 |     requires Array.length t.v > 0 *)
 Warning: Incomplete computation of the returned value in the specification of record_not_model_field. Failure message won't be able to display the expected returned value.
+File "all_warnings.mli", line 56, characters 0-67:
+56 | val return_tuple : 'a t -> 'a * bool
+57 | (*@ (a, b) = return_tuple t *)
+Warning: Incomplete computation of the returned value in the specification of return_tuple. Failure message won't be able to display the expected returned value.
 File "all_warnings.mli", line 59, characters 0-278:
 59 | val term_refer_to_returned_value_next_state : 'a t -> 'a option
 60 | (*@ o = term_refer_to_returned_value_next_state t

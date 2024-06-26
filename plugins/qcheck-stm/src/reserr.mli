@@ -35,6 +35,7 @@ type W.kind +=
   | Sut_type_not_specified of string
   | Sut_type_not_supported of string
   | Syntax_error_in_config_module of string
+  | Tuple_arity of string
   | Type_not_supported of string
   | Type_not_supported_for_sut_parameter of string
   | Type_parameter_not_instantiated of string

@@ -1,5 +1,7 @@
 # 0.3.0
 
+- Add support for testing functions with tuple arguments/return values
+  [\#237](https://github.com/ocaml-gospel/ortac/pull/237)
 - Add support for testing functions without a sut argument
   [\#235](https://github.com/ocaml-gospel/ortac/pull/235)
 - Add error for empty command type 

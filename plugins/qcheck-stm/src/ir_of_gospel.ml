@@ -10,13 +10,15 @@ let constant_test vd =
       (Constant_value (Fmt.str "%a" Ident.pp vd.vd_name), vd.vd_loc) |> error
   | _ -> ok ()
 
-let no_functional_arg_or_returned_tuple vd =
+let no_functional_arg_or_big_tuple vd =
   let open Reserr in
   let open Ppxlib in
   let rec contains_arrow ty =
     match ty.ptyp_desc with
     | Ptyp_arrow (_, _, _) ->
         error (Functional_argument vd.vd_name.id_str, ty.ptyp_loc)
+    | Ptyp_tuple xs when List.length xs > 9 ->
+        error (Tuple_arity vd.vd_name.id_str, ty.ptyp_loc)
     | Ptyp_tuple xs | Ptyp_constr (_, xs) ->
         let* _ = List.map contains_arrow xs |> sequence in
         ok ()
@@ -27,7 +29,6 @@ let no_functional_arg_or_returned_tuple vd =
     | Ptyp_arrow (_, l, r) ->
         let* _ = contains_arrow l in
         aux r
-    | Ptyp_tuple _ -> error (Returned_tuple vd.vd_name.id_str, ty.ptyp_loc)
     | _ -> ok ()
   in
   aux vd.vd_type
@@ -215,7 +216,7 @@ let postcond spec =
 
 let val_desc config state vd =
   let open Reserr in
-  let* () = constant_test vd and* () = no_functional_arg_or_returned_tuple vd in
+  let* () = constant_test vd and* () = no_functional_arg_or_big_tuple vd in
   let* inst = ty_var_substitution config vd
   and* spec =
     of_option ~default:(No_spec vd.vd_name.id_str, vd.vd_loc) vd.vd_spec

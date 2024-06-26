@@ -35,6 +35,7 @@ type W.kind +=
   | Sut_type_not_specified of string
   | Sut_type_not_supported of string
   | Syntax_error_in_config_module of string
+  | Tuple_arity of string
   | Type_not_supported of string
   | Type_not_supported_for_sut_parameter of string
   | Type_parameter_not_instantiated of string
@@ -45,7 +46,7 @@ let level kind =
   | Functional_argument _ | Ghost_values _ | Ignored_modifies
   | Impossible_term_substitution _ | Incompatible_type _
   | Incomplete_ret_val_computation _ | Multiple_sut_arguments _ | No_spec _
-  | Returned_tuple _ | Returning_sut _ | Type_not_supported _ ->
+  | Returned_tuple _ | Returning_sut _ | Tuple_arity _ | Type_not_supported _ ->
       W.Warning
   | Empty_cmd_type | Impossible_init_state_generation _ | Incompatible_sut _
   | Incomplete_configuration_module _ | No_configuration_file _
@@ -157,6 +158,8 @@ let pp_kind ppf kind =
              next_state function"
       in
       pf ppf "Skipping clause:@ %a" text msg
+  | Tuple_arity fct ->
+      pf ppf "Skipping %s:@ %a" fct text "Can only test tuples with arity < 10"
   (* This following message is broad and used in seemingly different contexts
      but in fact we support all the types that the Gospel type-checker supports,
      so that error message should never get reported to the end user *)
