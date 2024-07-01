@@ -115,8 +115,3 @@ File "hashtbl.mli", line 44, characters 0-106:
 45 | (*@ b = mem h a
 46 |     ensures b = List.mem a (List.map fst h.contents) *)
 Warning: Incomplete computation of the returned value in the specification of mem. Failure message won't be able to display the expected returned value.
-File "hashtbl.mli", line 74, characters 0-89:
-74 | val length : ('a, 'b) t -> int
-75 | (*@ i = length h
-76 |     ensures i = List.length h.contents *)
-Warning: Incomplete computation of the returned value in the specification of length. Failure message won't be able to display the expected returned value.

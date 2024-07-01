@@ -448,22 +448,31 @@ let precond config ir =
 
 let expected_returned_value translate_postcond value =
   let open Reserr in
+  let ( >>= ) = Option.bind in
   let ty_ret = Ir.get_return_type value in
-  let ret_val =
-    match (ty_ret.ptyp_desc, value.ret_values) with
-    | Ptyp_constr ({ txt = Lident "unit"; _ }, _), _ -> Some eunit
-    | _, [ xs ] ->
-        Option.bind
-          (to_option @@ map translate_postcond xs)
-          (Fun.flip List.nth_opt 0)
-    (* type of the returned value will be checked later with a proper error *)
-    | _, _ -> None
-  in
   let ty_show = to_option @@ exp_of_core_type value.inst ty_ret in
-  match (ty_show, ret_val) with
-  | Some ty_show, Some ret_value ->
-      let args = pexp_tuple_opt [ ty_show; ret_value ] in
-      Some (pexp_construct res args)
+  let ret_res ts val_ =
+    match ts with
+    | Some ty_show ->
+        let args = pexp_tuple_opt [ ty_show; val_ ] in
+        Some (pexp_construct res args)
+    | None -> None
+  in
+  let ty_show_integer = evar "integer" in
+  match (ty_ret.ptyp_desc, value.ret_values) with
+  | Ptyp_constr ({ txt = Lident "unit"; _ }, _), _ -> ret_res ty_show eunit
+  | Ptyp_constr ({ txt = Lident "int"; _ }, _), [ (t :: _ as xs) ]
+    when t.term.t_ty = Some Gospel.Ttypes.ty_integer ->
+      map translate_postcond xs
+      |> to_option
+      >>= Fun.flip List.nth_opt 0
+      >>= ret_res (Some ty_show_integer)
+  | _, [ xs ] ->
+      map translate_postcond xs
+      |> to_option
+      >>= Fun.flip List.nth_opt 0
+      >>= ret_res ty_show
+  (* type of the returned value will be checked later with a proper error *)
   | _, _ -> None
 
 let postcond_case config state invariants idx state_ident new_state_ident value
@@ -1082,11 +1091,17 @@ let tuple_types ir =
   if List.length arities = 0 then []
   else [ gen_tuple_ty arities; gen_tuple_constr arities ]
 
+let integer_ty_ext =
+  [
+    [%stri type _ ty += Integer : Ortac_runtime.integer ty];
+    [%stri let integer = (Integer, Ortac_runtime.string_of_integer)];
+  ]
+
 let stm config ir =
   let open Reserr in
   let* ghost_types = ghost_types config ir.ghost_types in
   let* config, ghost_functions = ghost_functions config ir.ghost_functions in
-  let warn = [%stri [@@@ocaml.warning "-26-27-69"]] in
+  let warn = [%stri [@@@ocaml.warning "-26-27-69-32"]] in
   let sut = sut_type config in
   let* cmd = cmd_type ir in
   let* cmd_show = cmd_show config ir in
@@ -1114,6 +1129,7 @@ let stm config ir =
       ((open_mod "STM" :: qcheck config)
       @ util config
       @ Option.value config.ty_mod ~default:[]
+      @ integer_ty_ext
       @ tuple_types ir
       @ [
           sut;

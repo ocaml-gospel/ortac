@@ -179,6 +179,13 @@ let returned_value_description spec ret =
     | Tapp (ls, [ { t_node = Tvar vs; _ }; right ])
       when Symbols.(ls_equal ps_equ ls) && is_ret vs ->
         [ Ir.term_val spec right ]
+    (* Gospel automatically inserts a cast from int to integer when needed *)
+    | Tapp
+        (ls, [ { t_node = Tapp (func, [ { t_node = Tvar vs; _ } ]); _ }; right ])
+      when String.equal func.ls_name.id_str "integer_of_int"
+           && Symbols.(ls_equal ps_equ ls)
+           && is_ret vs ->
+        [ Ir.term_val spec right ]
     | Tbinop ((Tand | Tand_asym), l, r) -> pred l @ pred r
     | _ -> []
   in

@@ -44,6 +44,8 @@ module type S = sig
 
   type integer
 
+  val string_of_integer : integer -> string
+
   module Gospelstdlib : sig
     type 'a sequence
     type 'a bag
