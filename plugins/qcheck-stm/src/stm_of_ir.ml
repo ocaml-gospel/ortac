@@ -1114,9 +1114,12 @@ let stm config ir =
   let* init_state = init_state config ir in
   let* check_init_state = check_init_state config ir in
   let cleanup =
-    let pat = pvar "cleanup" in
-    let expr = efun [ (Nolabel, ppat_any) ] eunit in
-    pstr_value Nonrecursive [ value_binding ~pat ~expr ]
+    let default =
+      let pat = pvar "cleanup" in
+      let expr = efun [ (Nolabel, ppat_any) ] eunit in
+      pstr_value Nonrecursive [ value_binding ~pat ~expr ]
+    in
+    Option.value config.cleanup ~default
   in
   let init_sut =
     let pat = pvar "init_sut" in

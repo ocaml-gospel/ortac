@@ -687,3 +687,56 @@
  (action
   (run %{dep:functional_model_stm_tests.exe} -v)))
 
+(library
+ (name test_cleanup)
+ (modules test_cleanup))
+
+(rule
+ (target test_cleanup_stm_tests.ml)
+ (package ortac-qcheck-stm)
+ (deps
+  (package ortac-core)
+  (package ortac-qcheck-stm))
+ (action
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   qcheck-stm
+   (with-stderr-to
+    test_cleanup_errors
+    (run
+     ortac
+     qcheck-stm
+     %{dep:test_cleanup.mli}
+     %{dep:test_cleanup_config.ml}
+     -o
+     %{target})))))
+
+(test
+ (name test_cleanup_stm_tests)
+ (package ortac-qcheck-stm)
+ (modules test_cleanup_stm_tests)
+ (libraries
+  qcheck-core
+  qcheck-core.runner
+  qcheck-stm.stm
+  qcheck-stm.sequential
+  qcheck-multicoretests-util
+  ortac-runtime-qcheck-stm
+  test_cleanup)
+ (action
+  (echo
+   "\n%{dep:test_cleanup_stm_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))
+
+(rule
+ (alias runtest)
+ (package ortac-qcheck-stm)
+ (action
+  (progn
+   (diff test_cleanup_errors.expected test_cleanup_errors)
+   (diff test_cleanup_stm_tests.expected.ml test_cleanup_stm_tests.ml))))
+
+(rule
+ (alias launchtests)
+ (action
+  (run %{dep:test_cleanup_stm_tests.exe} -v)))
+
