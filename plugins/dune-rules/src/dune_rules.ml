@@ -14,38 +14,71 @@ end = struct
       Arg.(
         required
         & pos 0 (some string) None
-        & info [] ~doc:"Interface file containing Gospel specifications"
+        & info [] ~doc:"Interface file containing Gospel specifications."
             ~docv:"INTERFACE")
 
     let config_file =
       Arg.(
-        required
-        & pos 1 (some string) None
-        & info [] ~doc:"Configuration file for Ortac/QCheckSTM" ~docv:"CONFIG")
+        value
+        & opt (some string) None
+        & info [ "c"; "config" ]
+            ~doc:
+              "Configuration file for Ortac/QCheck-STM. Useful for generating \
+               multiple test files per module under test."
+            ~absent:
+              "concatenation of INTERFACE without the extension and \
+               \"_config.ml\""
+            ~docv:"CONFIG")
 
     let ocaml_output =
       Arg.(
-        required
-        & pos 2 (some string) None
-        & info [] ~doc:"Filename for the generated tests" ~docv:"OCAML_OUTPUT")
+        value
+        & opt (some string) None
+        & info [ "o"; "output" ]
+            ~doc:
+              "Filename for the generated tests. Useful for generating \
+               multiple test files per module under test."
+            ~absent:
+              "concatenation of INTERFACE without the file extension and \
+               \"_tests.ml\""
+            ~docv:"OCAML_OUTPUT")
+
+    let library =
+      Arg.(
+        value
+        & opt (some string) None
+        & info [ "l"; "library" ]
+            ~doc:"Name of the library the module under test belongs to."
+            ~absent:"INTERFACE without the file extension" ~docv:"LIBRARY")
 
     let package_name =
       Arg.(
         value
         & opt (some string) None
-        & info [ "p"; "package" ] ~doc:"Package name" ~docv:"PACKAGE")
+        & info [ "p"; "package" ] ~doc:"Package name." ~docv:"PACKAGE")
 
     let with_stdout_to =
       Arg.(
         value
         & opt (some string) None
         & info [ "w"; "with-stdout-to" ]
-            ~doc:"Filename for the generated dune rules" ~docv:"DUNE_OUTPUT")
+            ~doc:
+              "Filename for the generated dune rules. For use on the command \
+               line."
+            ~docv:"DUNE_OUTPUT")
 
-    let main interface_file config_file ocaml_output package_name dune_output =
+    let main interface_file config_file ocaml_output library package_name
+        dune_output =
       let open Qcheck_stm in
       let config =
-        { interface_file; config_file; ocaml_output; package_name; dune_output }
+        {
+          interface_file;
+          config_file;
+          ocaml_output;
+          library;
+          package_name;
+          dune_output;
+        }
       in
       let ppf = Registration.get_out_formatter dune_output in
       Qcheck_stm.gen_dune_rules ppf config
@@ -56,6 +89,7 @@ end = struct
         $ interface_file
         $ config_file
         $ ocaml_output
+        $ library
         $ package_name
         $ with_stdout_to)
 

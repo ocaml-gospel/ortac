@@ -8,6 +8,17 @@
   (:standard -w -69))
  (package ortac-examples))
 
+(rule
+ (alias runtest)
+ (mode promote)
+ (action
+  (with-stdout-to
+   dune.lwt_dllist.inc
+   (setenv
+    ORTAC_ONLY_PLUGIN
+    dune-rules
+    (run ortac dune qcheck-stm lwt_dllist_spec.mli --package=ortac-examples)))))
+
 (include dune.lwt_dllist.inc)
 
 (rule
@@ -29,6 +40,17 @@
  (libraries varray)
  (package ortac-examples))
 
+(rule
+ (alias runtest)
+ (mode promote)
+ (action
+  (with-stdout-to
+   dune.varray.inc
+   (setenv
+    ORTAC_ONLY_PLUGIN
+    dune-rules
+    (run ortac dune qcheck-stm varray_spec.mli --package=ortac-examples)))))
+
 (include dune.varray.inc)
 
 (rule
@@ -39,5 +61,21 @@
  (modules varray_circular_spec)
  (libraries varray)
  (package ortac-examples))
+
+(rule
+ (alias runtest)
+ (mode promote)
+ (action
+  (with-stdout-to
+   dune.varray_circular.inc
+   (setenv
+    ORTAC_ONLY_PLUGIN
+    dune-rules
+    (run
+     ortac
+     dune
+     qcheck-stm
+     varray_circular_spec.mli
+     --package=ortac-examples)))))
 
 (include dune.varray_circular.inc)

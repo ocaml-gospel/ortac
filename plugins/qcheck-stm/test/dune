@@ -7,7 +7,6 @@
   (package ortac-qcheck-stm)))
 
 (rule
- (target all_warnings_errors)
  (package ortac-qcheck-stm)
  (deps
   (package ortac-core)
@@ -18,7 +17,7 @@
    qcheck-stm
    (ignore-stdout
     (with-stderr-to
-     %{target}
+     all_warnings_errors
      (run
       ortac
       qcheck-stm
@@ -36,10 +35,9 @@
  (modules dune_gen))
 
 (rule
- (targets dune.inc.gen)
  (action
   (with-stdout-to
-   %{targets}
+   dune.inc.gen
    (run ./dune_gen.exe %{read-lines:dune_gen.args}))))
 
 (rule
@@ -48,7 +46,6 @@
   (diff dune.inc dune.inc.gen)))
 
 (rule
- (target empty_cmd_errors)
  (package ortac-qcheck-stm)
  (deps
   (package ortac-core)
@@ -59,7 +56,7 @@
    qcheck-stm
    (ignore-stdout
     (with-stderr-to
-     %{target}
+     empty_cmd_errors
      (run ortac qcheck-stm %{dep:empty_cmd.mli} %{dep:empty_cmd_config.ml}))))))
 
 (rule
