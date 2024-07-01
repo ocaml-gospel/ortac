@@ -1,5 +1,7 @@
 # 0.3.0
 
+- Add support for functional type in model
+  [\#230](https://github.com/ocaml-gospel/ortac/pull/230)
 - Remove bug in qcheck-stm plugin when returning integers
 - [\#240](https://github.com/ocaml-gospel/ortac/pull/240)
 - Add support for testing functions with tuple arguments/return values
