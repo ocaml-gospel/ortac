@@ -122,7 +122,7 @@ and term ~context (t : Tterm.term) : expression =
   match t.t_node with
   | Tvar { vs_name; _ } -> evar (str_of_ident vs_name)
   | Tconst c -> econst c
-  | Tfield (t, f) -> pexp_field (term t) (lident f.ls_name.id_str)
+  | Tfield (t, f) -> pexp_field (term t) (lident (str_of_ident f.ls_name))
   | Tapp (fs, []) when Symbols.(ls_equal fs fs_bool_true) -> [%expr true]
   | Tapp (fs, []) when Symbols.(ls_equal fs fs_bool_false) -> [%expr false]
   | Tapp (fs, tlist) when Symbols.is_fs_tuple fs ->

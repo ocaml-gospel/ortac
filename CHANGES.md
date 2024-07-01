@@ -1,5 +1,7 @@
 # 0.3.0
 
+- Fix field access translation
+  [\#229](https://github.com/ocaml-gospel/ortac/pull/229)
 - Add support for functional type in model
   [\#230](https://github.com/ocaml-gospel/ortac/pull/230)
 - Remove bug in qcheck-stm plugin when returning integers

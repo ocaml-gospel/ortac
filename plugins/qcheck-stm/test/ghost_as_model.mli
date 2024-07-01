@@ -1,13 +1,13 @@
 (*@ type m = A of integer *)
 
 type t
-(*@ mutable model view : m *)
+(*@ mutable model m : m *)
 
 val create : unit -> t
 (*@ t = create ()
-    ensures t.view = A 0 *)
+    ensures t.m = A 0 *)
 
 val use : t -> unit
 (*@ use t
-    modifies t.view
-    ensures t.view = match old t.view with A x -> A (succ x) *)
+    modifies t.m
+    ensures t.m = match old t.m with A x -> A (succ x) *)

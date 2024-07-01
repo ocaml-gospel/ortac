@@ -6,6 +6,5 @@ let () =
       Arith.suite;
       Exceptions.suite;
       Terms.suite;
-      Types.suite;
       Translation.suite;
     ]

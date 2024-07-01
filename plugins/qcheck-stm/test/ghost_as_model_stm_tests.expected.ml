@@ -17,11 +17,11 @@ module Spec =
     let show_cmd cmd__001_ =
       match cmd__001_ with | Use -> Format.asprintf "%s sut" "use"
     type nonrec state = {
-      view: m }
+      m_1: m }
     let init_state =
       let () = () in
       {
-        view =
+        m_1 =
           (try A (Ortac_runtime.Gospelstdlib.integer_of_int 0)
            with
            | e ->
@@ -33,15 +33,15 @@ module Spec =
                           {
                             pos_fname = "ghost_as_model.mli";
                             pos_lnum = 8;
-                            pos_bol = 349;
-                            pos_cnum = 370
+                            pos_bol = 343;
+                            pos_cnum = 361
                           };
                         Ortac_runtime.stop =
                           {
                             pos_fname = "ghost_as_model.mli";
                             pos_lnum = 8;
-                            pos_bol = 349;
-                            pos_cnum = 371
+                            pos_bol = 343;
+                            pos_cnum = 362
                           }
                       })))
       }
@@ -54,9 +54,9 @@ module Spec =
       match cmd__002_ with
       | Use ->
           {
-            view =
+            m_1 =
               ((try
-                  match state__003_.view with
+                  match state__003_.m_1 with
                   | A x -> A (Ortac_runtime.Gospelstdlib.succ x)
                 with
                 | e ->
@@ -68,15 +68,15 @@ module Spec =
                                {
                                  pos_fname = "ghost_as_model.mli";
                                  pos_lnum = 13;
-                                 pos_bol = 517;
-                                 pos_cnum = 538
+                                 pos_bol = 502;
+                                 pos_cnum = 520
                                };
                              Ortac_runtime.stop =
                                {
                                  pos_fname = "ghost_as_model.mli";
                                  pos_lnum = 13;
-                                 pos_bol = 517;
-                                 pos_cnum = 577
+                                 pos_bol = 502;
+                                 pos_cnum = 556
                                }
                            }))))
           }
