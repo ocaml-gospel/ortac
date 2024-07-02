@@ -37,11 +37,11 @@ let read_gospel_file filename =
   (gfile.muc_import, sigs)
 
 let check filename =
-  let module_name = module_name_of_path filename
+  let open Registration in
+  let module_name = module_name_of_path (unwrap filename)
   and env, ast =
-    match Filename.extension filename with
-    | ".mli" -> type_check [] filename
-    | ".gospel" -> read_gospel_file filename
-    | _ -> invalid_arg "check"
+    match filename with
+    | MLI filename -> type_check [] filename
+    | GOSPEL filename -> read_gospel_file filename
   in
   { module_name; namespace = List.hd env; ast }

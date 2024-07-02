@@ -10,7 +10,7 @@ type checked = {
   ast : Gospel.Tast.signature;
 }
 
-val check : string -> checked
+val check : Registration.input_file -> checked
 (** [check filename] calls the Gospel type checker on [filename] with an empty
     load path if it is an interface and read its content if it is a [.gospel]
     file *)

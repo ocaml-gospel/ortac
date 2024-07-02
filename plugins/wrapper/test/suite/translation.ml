@@ -3,7 +3,7 @@ module Utils = Ortac_core__Utils
 
 let translate path =
   let open Utils in
-  let { module_name; namespace; ast } = check path in
+  let { module_name; namespace; ast } = check (Registration.MLI path) in
   let context = Ortac_core.Context.init module_name namespace in
   Ortac_wrapper__Ir_of_gospel.signature ~context ast
 
