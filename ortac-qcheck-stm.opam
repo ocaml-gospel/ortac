@@ -35,7 +35,7 @@ depends: [
   "qcheck-multicoretests-util" {with-test}
   "ortac-core" {= version}
   "ortac-runtime" {with-test & = version}
-  "ortac-runtime-qcheck-stm" {with-test & = version}
+  "ortac-runtime-qcheck-stm" {= version}
   "odoc" {with-doc}
 ]
 conflicts: [
