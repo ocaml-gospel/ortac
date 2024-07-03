@@ -8,10 +8,11 @@
 (name ortac)
 (license MIT)
 (source (github ocaml-gospel/ortac))
+(maintainers "Nicolas Osborne <nicolas.osborne@tarides.com>")
 (authors
  "Clément Pascutto <clement@pascutto.fr>"
  "Nicolas Osborne <nicolas.osborne@tarides.com>"
- "Samuel Hym <samuel.hym@rustyne.lautre.net>")
+ "Samuel Hym <samuel@tarides.com>")
 
 (package
  (name ortac-core)
@@ -27,7 +28,6 @@
   "\> You will need at least one of the Ortac plugins to actually
   "\> generate test code.
   )
- (maintainers "Clément Pascutto <clement@pascutto.fr>")
  (documentation "https://ocaml-gospel.github.io/ortac/ortac-core/")
  (depends
   (ocaml (>= 4.12.0))
@@ -53,7 +53,6 @@
   "\> Ortac (OCaml Runtime Assertion Checking) is a tool to turn
   "\> executable Gospel specifications into code to test they hold.
   )
- (maintainers "Clément Pascutto <clement@pascutto.fr>")
  (documentation "https://ocaml-gospel.github.io/ortac/ortac-runtime/")
  (depends
   (ocaml (>= 4.12.0))
@@ -76,7 +75,6 @@
  (authors
   "Clément Pascutto <clement@pascutto.fr>"
   "Nicolas Osborne <nicolas.osborne@tarides.com>")
- (maintainers "Clément Pascutto <clement@pascutto.fr>")
  (depends
   (ocaml (>= 4.12.0))
   (cmdliner (>= 1.1.0))
@@ -102,7 +100,6 @@
   "\> executable Gospel specifications into code to test they hold.
   )
  (authors "Nicolas Osborne <nicolas.osborne@tarides.com>")
- (maintainers "Nicolas Osborne <nicolas.osborne@tarides.com>")
  (depends
   (ocaml (>= 4.12.0))
   (cmdliner (>= 1.1.0))
@@ -127,7 +124,6 @@
   "\> executable Gospel specifications into code to test they hold.
   )
  (authors "Nicolas Osborne <nicolas.osborne@tarides.com>")
- (maintainers "Nicolas Osborne <nicolas.osborne@tarides.com>")
  (depends
   (ocaml (>= 4.12.0))
   (monolith (>= 20201026))
@@ -151,8 +147,8 @@
   )
  (authors
   "Nicolas Osborne <nicolas.osborne@tarides.com>"
-  "Samuel Hym <samuel.hym@rustyne.lautre.net>")
- (maintainers "Nicolas Osborne <nicolas.osborne@tarides.com>")
+  "Samuel Hym <samuel@tarides.com>"
+  "Nikolaus Huber <mail@n-huber.eu>")
  (documentation "https://ocaml-gospel.github.io/ortac/ortac-qcheck-stm/")
  (depends
   (ocaml (>= 4.12.0))
@@ -177,7 +173,6 @@
  (description "Generate dune rules for other ortac plugins")
  (authors
   "Nicolas Osborne <nicolas.osborne@tarides.com>")
- (maintainers "Nicolas Osborne <nicolas.osborne@tarides.com>")
  (depends
   (ocaml (>= 4.12.0))
   fmt
@@ -197,7 +192,6 @@
   "\> executable Gospel specifications into code to test they hold.
   )
  (authors "Nicolas Osborne <nicolas.osborne@tarides.com>")
- (maintainers "Nicolas Osborne <nicolas.osborne@tarides.com>")
  (depends
   (ocaml (>= 4.12.0))
   qcheck-stm
@@ -209,8 +203,7 @@
   "Ortac examples on different libraries")
  (authors
   "Nicolas Osborne <nicolas.osborne@tarides.com>"
-  "Samuel Hym <samuel.hym@rustyne.lautre.net>")
- (maintainers "Nicolas Osborne <nicolas.osborne@tarides.com>")
+  "Samuel Hym <samuel@tarides.com>")
  (depends
   (ocaml (>= 4.12.0))
   (ortac-core (= :version))

@@ -5,7 +5,7 @@ synopsis: "Ortac examples on different libraries"
 maintainer: ["Nicolas Osborne <nicolas.osborne@tarides.com>"]
 authors: [
   "Nicolas Osborne <nicolas.osborne@tarides.com>"
-  "Samuel Hym <samuel.hym@rustyne.lautre.net>"
+  "Samuel Hym <samuel@tarides.com>"
 ]
 license: "MIT"
 homepage: "https://github.com/ocaml-gospel/ortac"

@@ -10,7 +10,7 @@ their specifications hold.
 Ortac (OCaml Runtime Assertion Checking) is a tool to turn
 executable Gospel specifications into code to test they hold.
 """
-maintainer: ["Clément Pascutto <clement@pascutto.fr>"]
+maintainer: ["Nicolas Osborne <nicolas.osborne@tarides.com>"]
 authors: [
   "Clément Pascutto <clement@pascutto.fr>"
   "Nicolas Osborne <nicolas.osborne@tarides.com>"
