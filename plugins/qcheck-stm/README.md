@@ -105,6 +105,13 @@ From there, you can run the program directly for random testing:
 $ ./path/to/main.exe
 ```
 
+## Using the dune-rules plugin
+
+When using the [QCheck-STM] plugin in a testing setup the creation of the
+required dune files can be automated with the dune-rules plugin. See the
+[dedicated README][dune-rules README] for details.
+
+[dune-rules README]: ../dune-rules/README.md
 
 ## Supported Gospel and other limitations
 
