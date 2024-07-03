@@ -23,7 +23,7 @@ depends: [
   "cmdliner" {>= "1.1.0"}
   "fmt"
   "ppxlib" {>= "0.26.0"}
-  "gospel" {>= "0.3.0"}
+  "gospel" {= "0.3.0"}
   "monolith" {with-test & >= "20201026"}
   "pprint" {with-test}
   "ortac-core"

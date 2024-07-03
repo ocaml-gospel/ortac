@@ -36,7 +36,7 @@
   (cmdliner (>= 1.1.0))
   fmt
   (ppxlib (>= 0.26.0))
-  (gospel (>= 0.3.0))
+  (gospel (= 0.3.0))
   (alcotest (and :with-test (>= 0.8.1)))
   (ortac-runtime :with-test))
  (sites
@@ -80,7 +80,7 @@
   (cmdliner (>= 1.1.0))
   fmt
   (ppxlib (>= 0.26.0))
-  (gospel (>= 0.3.0))
+  (gospel (= 0.3.0))
   (alcotest (and :with-test (>= 0.8.1)))
   ortac-core
   (ortac-runtime :with-test)))
@@ -105,7 +105,7 @@
   (cmdliner (>= 1.1.0))
   fmt
   (ppxlib (>= 0.26.0))
-  (gospel (>= 0.3.0))
+  (gospel (= 0.3.0))
   (monolith (and :with-test (>= 20201026)))
   (pprint :with-test)
   ortac-core
@@ -156,7 +156,7 @@
   fmt
   (ppxlib (>= 0.26.0))
   (mdx (and :with-test (>= 2.3.0)))
-  (gospel (>= 0.3.0))
+  (gospel (= 0.3.0))
   (qcheck-core :with-test)
   (qcheck-stm :with-test)
   (qcheck-multicoretests-util :with-test)

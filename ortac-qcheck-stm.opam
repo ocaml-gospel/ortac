@@ -29,7 +29,7 @@ depends: [
   "fmt"
   "ppxlib" {>= "0.26.0"}
   "mdx" {with-test & >= "2.3.0"}
-  "gospel" {>= "0.3.0"}
+  "gospel" {= "0.3.0"}
   "qcheck-core" {with-test}
   "qcheck-stm" {with-test}
   "qcheck-multicoretests-util" {with-test}
