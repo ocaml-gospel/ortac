@@ -3,7 +3,7 @@
 (using dune_site 0.1)
 (using mdx 0.4)
 
-(version 0.2.0)
+(version 0.3.0)
 
 (name ortac)
 (license MIT)
