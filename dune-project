@@ -58,7 +58,7 @@
   (ocaml (>= 4.12.0))
   (fmt (>= 0.8.7))
   zarith
-  (monolith :with-test)))
+  (monolith (and :with-test (>= 20201026)))))
 
 ; Wrapper plugin
 (package
