@@ -1,3 +1,8 @@
+# Unreleased
+
+- Fix sut as type argument or inside tuple bug
+  [\#245](https://github.com/ocaml-gospel/ortac/pull/245)
+
 # 0.3.0
 
 - Read an optional `cleanup` function from configuration module
