@@ -32,6 +32,8 @@ type W.kind +=
   | Not_a_structure of string
   | Returned_tuple of string
   | Returning_sut of string
+  | Sut_as_type_inst of string
+  | Sut_in_tuple of string
   | Sut_type_not_specified of string
   | Sut_type_not_supported of string
   | Syntax_error_in_config_module of string
@@ -46,7 +48,8 @@ let level kind =
   | Functional_argument _ | Ghost_values _ | Ignored_modifies
   | Impossible_term_substitution _ | Incompatible_type _
   | Incomplete_ret_val_computation _ | Multiple_sut_arguments _ | No_spec _
-  | Returned_tuple _ | Returning_sut _ | Tuple_arity _ | Type_not_supported _ ->
+  | Returned_tuple _ | Returning_sut _ | Sut_as_type_inst _ | Sut_in_tuple _
+  | Tuple_arity _ | Type_not_supported _ ->
       W.Warning
   | Empty_cmd_type | Impossible_init_state_generation _ | Incompatible_sut _
   | Incomplete_configuration_module _ | No_configuration_file _
@@ -223,6 +226,10 @@ let pp_kind ppf kind =
   | Not_a_structure mod_name ->
       pf ppf "Unsupported %s module definition:@ %a" mod_name text
         "only structures are allowed as module definition here"
+  | Sut_as_type_inst f ->
+      pf ppf "Skipping %s:@ %a" f text "unsupported SUT type as type argument"
+  | Sut_in_tuple f ->
+      pf ppf "Skipping %s:@ %a" f text "unsupported SUT type in tuple type"
   | Sut_type_not_specified ty ->
       pf ppf "Missing specification for the SUT type %s" ty
   | Sut_type_not_supported ty ->

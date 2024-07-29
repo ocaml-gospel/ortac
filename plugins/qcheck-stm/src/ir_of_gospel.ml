@@ -76,11 +76,35 @@ let ty_var_substitution config (vd : val_description) =
   let value_name, value_type = (vd.vd_name.id_str, vd.vd_type) in
   assert (is_a_function value_type);
   let open Ppxlib in
+  let open Reserr in
   let ret = function None -> Reserr.ok [] | Some x -> Reserr.ok x in
+  let rec check pos ty =
+    match ty.ptyp_desc with
+    | Ptyp_constr (_, args) -> (
+        match List.find_opt (Cfg.is_sut config) args with
+        | Some _ -> (
+            match pos with
+            | `Left -> error (Sut_as_type_inst value_name, ty.ptyp_loc)
+            | `Right -> error (Returning_sut value_name, ty.ptyp_loc))
+        | None ->
+            let* _ = List.map (check pos) args |> sequence in
+            ok ())
+    | Ptyp_tuple elems -> (
+        match List.find_opt (Cfg.is_sut config) elems with
+        | Some _ -> (
+            match pos with
+            | `Left -> error (Sut_in_tuple value_name, ty.ptyp_loc)
+            | `Right -> error (Returning_sut value_name, ty.ptyp_loc))
+        | None ->
+            let* _ = List.map (check pos) elems |> sequence in
+            ok ())
+    | _ -> ok ()
+  in
   let rec aux seen ty =
     match ty.ptyp_desc with
     | Ptyp_any | Ptyp_var _ -> ret seen
     | Ptyp_arrow (_, l, r) ->
+        let* () = check `Left l in
         if Cfg.is_sut config l then
           match seen with
           | None ->
@@ -91,11 +115,13 @@ let ty_var_substitution config (vd : val_description) =
               Reserr.(
                 error (Multiple_sut_arguments value_name, value_type.ptyp_loc))
         else aux seen r
-    | Ptyp_tuple elems ->
-        if List.for_all (fun t -> not (Cfg.is_sut config t)) elems then ret seen
-        else Reserr.(error (Returning_sut value_name, ty.ptyp_loc))
+    | Ptyp_tuple _ ->
+        let* () = check `Right ty in
+        ret seen
     | Ptyp_constr (_, _) ->
-        if not (Cfg.is_sut config ty) then ret seen
+        if not (Cfg.is_sut config ty) then
+          let* () = check `Right ty in
+          ret seen
         else Reserr.(error (Returning_sut value_name, ty.ptyp_loc))
     (* not supported *)
     | Ptyp_object (_, _)

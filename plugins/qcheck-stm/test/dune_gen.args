@@ -26,3 +26,5 @@ functional_model
 functional_model_config
 test_cleanup
 test_cleanup_config
+sut_in_type
+sut_in_type_config

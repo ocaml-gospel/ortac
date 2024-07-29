@@ -32,6 +32,8 @@ type W.kind +=
   | Not_a_structure of string
   | Returned_tuple of string
   | Returning_sut of string
+  | Sut_as_type_inst of string
+  | Sut_in_tuple of string
   | Sut_type_not_specified of string
   | Sut_type_not_supported of string
   | Syntax_error_in_config_module of string
