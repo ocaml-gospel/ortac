@@ -158,7 +158,7 @@
   (mdx (and :with-test (>= 2.3.0)))
   (gospel (= 0.3.0))
   (qcheck-core :with-test)
-  (qcheck-stm :with-test)
+  (qcheck-stm (and :with-test (>= 0.3)))
   (qcheck-multicoretests-util :with-test)
   (ortac-core (= :version))
   (ortac-runtime (and :with-test (= :version)))
@@ -194,7 +194,7 @@
  (authors "Nicolas Osborne <nicolas.osborne@tarides.com>")
  (depends
   (ocaml (>= 4.12.0))
-  qcheck-stm
+  (qcheck-stm (>= 0.3))
   (ortac-runtime (= :version))))
 
 (package
