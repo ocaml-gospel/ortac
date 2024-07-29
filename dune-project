@@ -161,7 +161,6 @@
   (qcheck-stm (>= 0.3))
   (qcheck-multicoretests-util :with-test)
   (ortac-core (= :version))
-  (ortac-runtime (and :with-test (= :version)))
   (ortac-runtime-qcheck-stm (= :version)))
  (conflicts
   (result (< 1.5))))
