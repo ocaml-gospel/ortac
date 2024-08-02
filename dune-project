@@ -157,11 +157,8 @@
   (ppxlib (>= 0.26.0))
   (mdx (and :with-test (>= 2.3.0)))
   (gospel (= 0.3.0))
-  (qcheck-core :with-test)
-  (qcheck-stm :with-test)
-  (qcheck-multicoretests-util :with-test)
+  (qcheck-stm (>= 0.3))
   (ortac-core (= :version))
-  (ortac-runtime (and :with-test (= :version)))
   (ortac-runtime-qcheck-stm (= :version)))
  (conflicts
   (result (< 1.5))))
@@ -194,7 +191,7 @@
  (authors "Nicolas Osborne <nicolas.osborne@tarides.com>")
  (depends
   (ocaml (>= 4.12.0))
-  qcheck-stm
+  (qcheck-stm (>= 0.3))
   (ortac-runtime (= :version))))
 
 (package
@@ -209,8 +206,6 @@
   (ortac-core (= :version))
   (ortac-qcheck-stm (= :version))
   (ortac-dune (= :version))
-  (ortac-runtime (= :version))
-  (qcheck-stm :with-test)
   lwt-dllist
   (varray (>= 0.2))))
 
