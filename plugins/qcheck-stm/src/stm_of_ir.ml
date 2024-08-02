@@ -272,12 +272,12 @@ let arb_cmd_case config value =
   in
   let gen_args =
     (* XXX TODO: use `requires` clauses to build smarter generators *)
-    List.map
+    traverse
       (fun (ty, _) -> exp_of_core_type ~use_small:is_create value.inst ty)
       value.args
   in
   let app l r = pexp_apply (evar "( <*> )") [ (Nolabel, l); (Nolabel, r) ] in
-  List.fold_left app fun_cstr <$> sequence gen_args
+  List.fold_left app fun_cstr <$> gen_args
 
 let arb_cmd config ir =
   let open Reserr in

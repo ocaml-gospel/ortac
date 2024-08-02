@@ -19,9 +19,7 @@ let no_functional_arg_or_big_tuple vd =
         error (Functional_argument vd.vd_name.id_str, ty.ptyp_loc)
     | Ptyp_tuple xs when List.length xs > 9 ->
         error (Tuple_arity vd.vd_name.id_str, ty.ptyp_loc)
-    | Ptyp_tuple xs | Ptyp_constr (_, xs) ->
-        let* _ = List.map contains_arrow xs |> sequence in
-        ok ()
+    | Ptyp_tuple xs | Ptyp_constr (_, xs) -> traverse_ contains_arrow xs
     | _ -> ok ()
   in
   let rec aux ty =
@@ -85,18 +83,14 @@ let ty_var_substitution config (vd : val_description) =
             match pos with
             | `Left -> error (Sut_as_type_inst value_name, ty.ptyp_loc)
             | `Right -> error (Returning_nested_sut value_name, ty.ptyp_loc))
-        | None ->
-            let* _ = List.map (check pos) args |> sequence in
-            ok ())
+        | None -> traverse_ (check pos) args)
     | Ptyp_tuple elems -> (
         match List.find_opt (Cfg.is_sut config) elems with
         | Some _ -> (
             match pos with
             | `Left -> error (Sut_in_tuple value_name, ty.ptyp_loc)
             | `Right -> error (Returning_nested_sut value_name, ty.ptyp_loc))
-        | None ->
-            let* _ = List.map (check pos) elems |> sequence in
-            ok ())
+        | None -> traverse_ (check pos) elems)
     | _ -> ok ()
   in
   let rec aux insts ty =
@@ -295,7 +289,7 @@ let val_desc config state vd =
           failwith
             "shouldn't happen (only non labelled and ghost value are returned)"
     in
-    List.map p spec.sp_ret |> sequence
+    traverse p spec.sp_ret
   in
   let ret_values = List.map (returned_value_description spec) ret in
   let next_states = next_states suts state spec in
