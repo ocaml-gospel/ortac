@@ -14,9 +14,6 @@ val dummy : 'a t -> int
 
 (* $MDX part-begin=fun-decl *)
 
-val compare : 'a t -> 'a t -> bool
-(*@ b = compare t1 t2 *)
-
 val of_list : 'a list -> 'a t
 (*@ t = of_list xs *)
 
