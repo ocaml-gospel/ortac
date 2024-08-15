@@ -98,7 +98,7 @@ module SUT = struct
     (** [get_name t n] returns the name for the [n]th element of the stack [t]
         of SUTs *)
   end
-  with type elt := M.sut = struct
+  with type elt = M.sut = struct
     type elt = M.sut
     type t = elt Stack.t
 
