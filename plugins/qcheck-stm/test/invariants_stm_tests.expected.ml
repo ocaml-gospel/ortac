@@ -136,6 +136,12 @@ let check_init_state () =
                       }
                   })))
   then QCheck.Test.fail_report "INIT_SUT violates type invariants for SUT"
+let ortac_show_cmd cmd__020_ state__021_ =
+  let open Spec in
+    match cmd__020_ with
+    | Push a_1 ->
+        Format.asprintf "%s %a %s" "push" (Util.Pp.pp_int true) a_1
+          (SUT.get_name state__021_ 0)
 let ortac_postcond cmd__006_ state__007_ res__008_ =
   let open Spec in
     let open STM in
@@ -146,5 +152,5 @@ let ortac_postcond cmd__006_ state__007_ res__008_ =
 let _ =
   QCheck_base_runner.run_tests_main
     (let count = 1000 in
-     [STMTests.agree_test ~count ~name:"Invariants STM tests"
-        check_init_state ortac_postcond])
+     [STMTests.agree_test ~count ~name:"Invariants STM tests" 1
+        check_init_state ortac_show_cmd ortac_postcond])

@@ -231,6 +231,15 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
+let ortac_show_cmd cmd__033_ state__034_ =
+  let open Spec in
+    match cmd__033_ with
+    | Add v ->
+        Format.asprintf "%s %a %s" "add" (Util.Pp.pp_char true) v
+          (SUT.get_name state__034_ 0)
+    | Remove -> Format.asprintf "%s %s" "remove" (SUT.get_name state__034_ 0)
+    | Remove_ ->
+        Format.asprintf "%s %s" "remove_" (SUT.get_name state__034_ 0)
 let ortac_postcond cmd__012_ state__013_ res__014_ =
   let open Spec in
     let open STM in
@@ -243,5 +252,5 @@ let ortac_postcond cmd__012_ state__013_ res__014_ =
 let _ =
   QCheck_base_runner.run_tests_main
     (let count = 1000 in
-     [STMTests.agree_test ~count ~name:"Sequence_model STM tests"
-        check_init_state ortac_postcond])
+     [STMTests.agree_test ~count ~name:"Sequence_model STM tests" 1
+        check_init_state ortac_show_cmd ortac_postcond])

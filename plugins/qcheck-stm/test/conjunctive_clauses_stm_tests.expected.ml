@@ -177,6 +177,13 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
+let ortac_show_cmd cmd__023_ state__024_ =
+  let open Spec in
+    match cmd__023_ with
+    | Set (i_1, a_2) ->
+        Format.asprintf "protect (fun () -> %s %s %a %a)" "set"
+          (SUT.get_name state__024_ 0) (Util.Pp.pp_int true) i_1
+          (Util.Pp.pp_char true) a_2
 let ortac_postcond cmd__008_ state__009_ res__010_ =
   let open Spec in
     let open STM in
@@ -306,5 +313,5 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
 let _ =
   QCheck_base_runner.run_tests_main
     (let count = 1000 in
-     [STMTests.agree_test ~count ~name:"Conjunctive_clauses STM tests"
-        check_init_state ortac_postcond])
+     [STMTests.agree_test ~count ~name:"Conjunctive_clauses STM tests" 1
+        check_init_state ortac_show_cmd ortac_postcond])

@@ -1066,6 +1066,50 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
+let ortac_show_cmd cmd__154_ state__155_ =
+  let open Spec in
+    match cmd__154_ with
+    | Push_back x ->
+        Format.asprintf "%s %s %a" "push_back" (SUT.get_name state__155_ 0)
+          (Util.Pp.pp_elt Util.Pp.pp_char true) x
+    | Pop_back ->
+        Format.asprintf "protect (fun () -> %s %s)" "pop_back"
+          (SUT.get_name state__155_ 0)
+    | Push_front x_1 ->
+        Format.asprintf "%s %s %a" "push_front" (SUT.get_name state__155_ 0)
+          (Util.Pp.pp_elt Util.Pp.pp_char true) x_1
+    | Pop_front ->
+        Format.asprintf "protect (fun () -> %s %s)" "pop_front"
+          (SUT.get_name state__155_ 0)
+    | Insert_at (i_1, x_2) ->
+        Format.asprintf "protect (fun () -> %s %s %a %a)" "insert_at"
+          (SUT.get_name state__155_ 0) (Util.Pp.pp_int true) i_1
+          (Util.Pp.pp_elt Util.Pp.pp_char true) x_2
+    | Pop_at i_2 ->
+        Format.asprintf "protect (fun () -> %s %s %a)" "pop_at"
+          (SUT.get_name state__155_ 0) (Util.Pp.pp_int true) i_2
+    | Delete_at i_3 ->
+        Format.asprintf "protect (fun () -> %s %s %a)" "delete_at"
+          (SUT.get_name state__155_ 0) (Util.Pp.pp_int true) i_3
+    | Get i_4 ->
+        Format.asprintf "protect (fun () -> %s %s %a)" "get"
+          (SUT.get_name state__155_ 0) (Util.Pp.pp_int true) i_4
+    | Set (i_5, v) ->
+        Format.asprintf "protect (fun () -> %s %s %a %a)" "set"
+          (SUT.get_name state__155_ 0) (Util.Pp.pp_int true) i_5
+          (Util.Pp.pp_elt Util.Pp.pp_char true) v
+    | Length -> Format.asprintf "%s %s" "length" (SUT.get_name state__155_ 0)
+    | Is_empty ->
+        Format.asprintf "%s %s" "is_empty" (SUT.get_name state__155_ 0)
+    | Fill (pos, len, x_3) ->
+        Format.asprintf "protect (fun () -> %s %s %a %a %a)" "fill"
+          (SUT.get_name state__155_ 0) (Util.Pp.pp_int true) pos
+          (Util.Pp.pp_int true) len (Util.Pp.pp_elt Util.Pp.pp_char true) x_3
+    | Blit (src_pos, dst_pos, len_1) ->
+        Format.asprintf "protect (fun () -> %s %s %a %s %a %a)" "blit"
+          (SUT.get_name state__155_ 0) (Util.Pp.pp_int true) src_pos
+          (SUT.get_name state__155_ 1) (Util.Pp.pp_int true) dst_pos
+          (Util.Pp.pp_int true) len_1
 let ortac_postcond cmd__052_ state__053_ res__054_ =
   let open Spec in
     let open STM in
@@ -2638,5 +2682,5 @@ let ortac_postcond cmd__052_ state__053_ res__054_ =
 let _ =
   QCheck_base_runner.run_tests_main
     (let count = 1000 in
-     [STMTests.agree_test ~count ~name:"Varray_circular_spec STM tests"
-        check_init_state ortac_postcond])
+     [STMTests.agree_test ~count ~name:"Varray_circular_spec STM tests" 2
+        check_init_state ortac_show_cmd ortac_postcond])

@@ -385,6 +385,28 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
+let ortac_show_cmd cmd__084_ state__085_ =
+  let open Spec in
+    match cmd__084_ with
+    | Is_empty ->
+        Format.asprintf "%s %s" "is_empty" (SUT.get_name state__085_ 0)
+    | Length -> Format.asprintf "%s %s" "length" (SUT.get_name state__085_ 0)
+    | Add_l a_1 ->
+        Format.asprintf "%s %a %s" "add_l" (Util.Pp.pp_int true) a_1
+          (SUT.get_name state__085_ 0)
+    | Add_r a_2 ->
+        Format.asprintf "%s %a %s" "add_r" (Util.Pp.pp_int true) a_2
+          (SUT.get_name state__085_ 0)
+    | Take_l ->
+        Format.asprintf "protect (fun () -> %s %s)" "take_l"
+          (SUT.get_name state__085_ 0)
+    | Take_r ->
+        Format.asprintf "protect (fun () -> %s %s)" "take_r"
+          (SUT.get_name state__085_ 0)
+    | Take_opt_l ->
+        Format.asprintf "%s %s" "take_opt_l" (SUT.get_name state__085_ 0)
+    | Take_opt_r ->
+        Format.asprintf "%s %s" "take_opt_r" (SUT.get_name state__085_ 0)
 let ortac_postcond cmd__021_ state__022_ res__023_ =
   let open Spec in
     let open STM in
@@ -871,5 +893,5 @@ let ortac_postcond cmd__021_ state__022_ res__023_ =
 let _ =
   QCheck_base_runner.run_tests_main
     (let count = 1000 in
-     [STMTests.agree_test ~count ~name:"Lwt_dllist_spec STM tests"
-        check_init_state ortac_postcond])
+     [STMTests.agree_test ~count ~name:"Lwt_dllist_spec STM tests" 1
+        check_init_state ortac_show_cmd ortac_postcond])

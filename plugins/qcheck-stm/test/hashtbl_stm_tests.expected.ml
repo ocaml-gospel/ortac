@@ -380,6 +380,33 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
+let ortac_show_cmd cmd__089_ state__090_ =
+  let open Spec in
+    match cmd__089_ with
+    | Clear -> Format.asprintf "%s %s" "clear" (SUT.get_name state__090_ 0)
+    | Reset -> Format.asprintf "%s %s" "reset" (SUT.get_name state__090_ 0)
+    | Add (a_2, b_2) ->
+        Format.asprintf "%s %s %a %a" "add" (SUT.get_name state__090_ 0)
+          (Util.Pp.pp_char true) a_2 (Util.Pp.pp_int true) b_2
+    | Find a_3 ->
+        Format.asprintf "protect (fun () -> %s %s %a)" "find"
+          (SUT.get_name state__090_ 0) (Util.Pp.pp_char true) a_3
+    | Find_opt a_4 ->
+        Format.asprintf "%s %s %a" "find_opt" (SUT.get_name state__090_ 0)
+          (Util.Pp.pp_char true) a_4
+    | Find_all a_5 ->
+        Format.asprintf "%s %s %a" "find_all" (SUT.get_name state__090_ 0)
+          (Util.Pp.pp_char true) a_5
+    | Mem a_6 ->
+        Format.asprintf "%s %s %a" "mem" (SUT.get_name state__090_ 0)
+          (Util.Pp.pp_char true) a_6
+    | Remove a_7 ->
+        Format.asprintf "%s %s %a" "remove" (SUT.get_name state__090_ 0)
+          (Util.Pp.pp_char true) a_7
+    | Replace (a_8, b_3) ->
+        Format.asprintf "%s %s %a %a" "replace" (SUT.get_name state__090_ 0)
+          (Util.Pp.pp_char true) a_8 (Util.Pp.pp_int true) b_3
+    | Length -> Format.asprintf "%s %s" "length" (SUT.get_name state__090_ 0)
 let ortac_postcond cmd__024_ state__025_ res__026_ =
   let open Spec in
     let open STM in
@@ -753,5 +780,5 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
 let _ =
   QCheck_base_runner.run_tests_main
     (let count = 1000 in
-     [STMTests.agree_test ~count ~name:"Hashtbl STM tests" check_init_state
-        ortac_postcond])
+     [STMTests.agree_test ~count ~name:"Hashtbl STM tests" 1 check_init_state
+        ortac_show_cmd ortac_postcond])

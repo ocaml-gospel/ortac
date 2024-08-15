@@ -325,6 +325,26 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
+let ortac_show_cmd cmd__087_ state__088_ =
+  let open Spec in
+    match cmd__087_ with
+    | Push v ->
+        Format.asprintf "%s %a %s" "push" (Util.Pp.pp_int true) v
+          (SUT.get_name state__088_ 0)
+    | Pop ->
+        Format.asprintf "protect (fun () -> %s %s)" "pop"
+          (SUT.get_name state__088_ 0)
+    | Peek ->
+        Format.asprintf "protect (fun () -> %s %s)" "peek"
+          (SUT.get_name state__088_ 0)
+    | Peek_opt ->
+        Format.asprintf "%s %s" "peek_opt" (SUT.get_name state__088_ 0)
+    | Clear -> Format.asprintf "%s %s" "clear" (SUT.get_name state__088_ 0)
+    | Is_empty ->
+        Format.asprintf "%s %s" "is_empty" (SUT.get_name state__088_ 0)
+    | Transfer ->
+        Format.asprintf "%s %s %s" "transfer" (SUT.get_name state__088_ 0)
+          (SUT.get_name state__088_ 1)
 let ortac_postcond cmd__021_ state__022_ res__023_ =
   let open Spec in
     let open STM in
@@ -859,5 +879,5 @@ let ortac_postcond cmd__021_ state__022_ res__023_ =
 let _ =
   QCheck_base_runner.run_tests_main
     (let count = 1000 in
-     [STMTests.agree_test ~count ~name:"Queue STM tests" check_init_state
-        ortac_postcond])
+     [STMTests.agree_test ~count ~name:"Queue STM tests" 2 check_init_state
+        ortac_show_cmd ortac_postcond])

@@ -1285,6 +1285,82 @@ let integer_ty_ext =
     [%stri let integer = (Integer, Ortac_runtime.string_of_integer)];
   ]
 
+let pp_ortac_cmd_case config suts value =
+  let lhs = mk_cmd_pattern value in
+  let qualify_pp = qualify [ "Util"; "Pp" ] in
+  let get_name =
+    Option.fold ~none:eunit ~some:(fun id -> str_of_ident id |> evar)
+  in
+  let open Reserr in
+  let rec pp_of_ty ty : expression reserr =
+    match ty.ptyp_desc with
+    | Ptyp_tuple xs ->
+        let* pps = map pp_of_ty xs in
+        let func = qualify_pp ("pp_tuple" ^ string_of_int (List.length xs)) in
+        ok (pexp_apply func (List.map (fun e -> (Nolabel, e)) pps))
+    | Ptyp_constr (lid, xs) ->
+        let* xs = map pp_of_ty xs and* s = munge_longident false ty lid in
+        let pp = qualify_pp ("pp_" ^ s) in
+        ok
+          (match xs with
+          | [] -> pp
+          | _ -> pexp_apply pp (List.map (fun x -> (Nolabel, x)) xs))
+    | _ ->
+        error
+          (Type_not_supported (Fmt.str "%a" Pprintast.core_type ty), ty.ptyp_loc)
+  in
+  let* rhs =
+    let name = str_of_ident value.id in
+    let rec aux ty n args =
+      match (ty.ptyp_desc, args) with
+      | Ptyp_arrow (_, l, r), xs when Cfg.is_sut config l ->
+          let* fmt, pps = aux r (n + 1) xs in
+          let get_sut =
+            eapply (qualify [ "SUT" ] "get_name") [ evar suts; eint n ]
+          in
+          ok ("%s" :: fmt, get_sut :: pps)
+      | Ptyp_arrow (_, _, r), (ty, id) :: xs ->
+          let ty = subst_core_type value.inst ty in
+          let* pp = pp_of_ty ty and* fmt, pps = aux r n xs in
+          ok
+            ( "%a" :: fmt,
+              pexp_apply pp [ (Nolabel, ebool true) ] :: get_name id :: pps )
+      | _, [] -> ok ([], [])
+      | _, _ ->
+          failwith
+            "shouldn't happen (list of arguments should be consistent with \
+             type)"
+    in
+    let* fmt, pp_args = aux value.ty 0 value.args in
+    let fmt =
+      let call = String.concat " " ("%s" :: fmt) in
+      if may_raise_exception value then "protect (fun () -> " ^ call ^ ")"
+      else call
+    in
+    let args =
+      List.map (fun x -> (Nolabel, x)) (estring fmt :: estring name :: pp_args)
+    in
+    pexp_apply (qualify [ "Format" ] "asprintf") args |> ok
+  in
+  case ~lhs ~guard:None ~rhs |> ok
+
+let ortac_cmd_show config ir =
+  let cmd_name = gen_symbol ~prefix:"cmd" () in
+  let suts_name = gen_symbol ~prefix:"state" () in
+  let open Reserr in
+  let* cases = map (pp_ortac_cmd_case config suts_name) ir.values in
+  let match_expr = pexp_match (evar cmd_name) cases in
+  let body =
+    pexp_open
+      (open_infos ~expr:(pmod_ident (lident "Spec")) ~override:Fresh)
+      match_expr
+  in
+  let pat = pvar "ortac_show_cmd" in
+  let expr =
+    efun [ (Nolabel, pvar cmd_name); (Nolabel, pvar suts_name) ] body
+  in
+  pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
+
 let stm config ir =
   let open Reserr in
   let* ghost_types = ghost_types config ir.ghost_types in
@@ -1298,6 +1374,7 @@ let stm config ir =
   let* run = run config ir in
   let* arb_cmd = arb_cmd ir in
   let* check_init_state = check_init_state config ir in
+  let* ortac_show = ortac_cmd_show config ir in
   let cleanup =
     let default =
       let pat = pvar "cleanup" in
@@ -1344,13 +1421,14 @@ let stm config ir =
   let call_tests =
     let loc = Location.none in
     let descr = estring (module_name ^ " STM tests") in
+    let max_suts = get_max_suts ir in
     [%stri
       let _ =
         QCheck_base_runner.run_tests_main
           (let count = 1000 in
            [
-             STMTests.agree_test ~count ~name:[%e descr] check_init_state
-               ortac_postcond;
+             STMTests.agree_test ~count ~name:[%e descr] [%e eint max_suts]
+               check_init_state ortac_show_cmd ortac_postcond;
            ])]
   in
   let sut_mod = sut_module config in
@@ -1363,4 +1441,4 @@ let stm config ir =
     @ ghost_functions
     @ sut_mod
     @ model_mod
-    @ [ stm_spec; tests; check_init_state; postcond; call_tests ])
+    @ [ stm_spec; tests; check_init_state; ortac_show; postcond; call_tests ])
