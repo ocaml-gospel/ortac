@@ -2,6 +2,8 @@
 
 - Fix sut as type argument or inside tuple bug
   [\#245](https://github.com/ocaml-gospel/ortac/pull/245)
+- Add support for multiple sut arguments
+  [\#247](https://github.com/ocaml-gospel/ortac/pull/247)
 
 # 0.3.0
 
