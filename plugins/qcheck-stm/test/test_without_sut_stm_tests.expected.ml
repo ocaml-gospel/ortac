@@ -27,16 +27,16 @@ module ModelElt =
                         Ortac_runtime.start =
                           {
                             pos_fname = "test_without_sut.mli";
-                            pos_lnum = 6;
-                            pos_bol = 265;
-                            pos_cnum = 290
+                            pos_lnum = 7;
+                            pos_bol = 283;
+                            pos_cnum = 308
                           };
                         Ortac_runtime.stop =
                           {
                             pos_fname = "test_without_sut.mli";
-                            pos_lnum = 6;
-                            pos_bol = 265;
-                            pos_cnum = 314
+                            pos_lnum = 7;
+                            pos_bol = 283;
+                            pos_cnum = 332
                           }
                       })))
       }
@@ -110,16 +110,16 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
                           Ortac_runtime.start =
                             {
                               pos_fname = "test_without_sut.mli";
-                              pos_lnum = 10;
-                              pos_bol = 480;
-                              pos_cnum = 492
+                              pos_lnum = 11;
+                              pos_bol = 499;
+                              pos_cnum = 511
                             };
                           Ortac_runtime.stop =
                             {
                               pos_fname = "test_without_sut.mli";
-                              pos_lnum = 10;
-                              pos_bol = 480;
-                              pos_cnum = 501
+                              pos_lnum = 11;
+                              pos_bol = 499;
+                              pos_cnum = 520
                             }
                         })))
           then None
@@ -142,16 +142,16 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
                                        Ortac_runtime.start =
                                          {
                                            pos_fname = "test_without_sut.mli";
-                                           pos_lnum = 10;
-                                           pos_bol = 480;
-                                           pos_cnum = 498
+                                           pos_lnum = 11;
+                                           pos_bol = 499;
+                                           pos_cnum = 517
                                          };
                                        Ortac_runtime.stop =
                                          {
                                            pos_fname = "test_without_sut.mli";
-                                           pos_lnum = 10;
-                                           pos_bol = 480;
-                                           pos_cnum = 499
+                                           pos_lnum = 11;
+                                           pos_bol = 499;
+                                           pos_cnum = 518
                                          }
                                      })))))) "add"
                  [("c = a + b",
@@ -159,16 +159,16 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
                       Ortac_runtime.start =
                         {
                           pos_fname = "test_without_sut.mli";
-                          pos_lnum = 10;
-                          pos_bol = 480;
-                          pos_cnum = 492
+                          pos_lnum = 11;
+                          pos_bol = 499;
+                          pos_cnum = 511
                         };
                       Ortac_runtime.stop =
                         {
                           pos_fname = "test_without_sut.mli";
-                          pos_lnum = 10;
-                          pos_bol = 480;
-                          pos_cnum = 501
+                          pos_lnum = 11;
+                          pos_bol = 499;
+                          pos_cnum = 520
                         }
                     })])
       | _ -> None

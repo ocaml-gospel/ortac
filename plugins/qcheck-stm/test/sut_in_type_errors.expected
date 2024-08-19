@@ -1,17 +1,17 @@
 Error: The generated cmd type is empty.
-File "sut_in_type.mli", line 8, characters 18-27:
-8 | val sut_in_type : 'a t list -> int
+File "sut_in_type.mli", line 9, characters 18-27:
+9 | val sut_in_type : 'a t list -> int
                       ^^^^^^^^^
 Warning: Skipping sut_in_type: unsupported SUT type as type argument.
-File "sut_in_type.mli", line 12, characters 19-29:
-12 | val sut_in_tuple : 'a t * int -> bool
+File "sut_in_type.mli", line 13, characters 19-29:
+13 | val sut_in_tuple : 'a t * int -> bool
                         ^^^^^^^^^^
 Warning: Skipping sut_in_tuple: unsupported SUT type in tuple type.
-File "sut_in_type.mli", line 16, characters 25-34:
-16 | val sut_in_nested_type : 'a t list list -> bool
+File "sut_in_type.mli", line 17, characters 25-34:
+17 | val sut_in_nested_type : 'a t list list -> bool
                               ^^^^^^^^^
 Warning: Skipping sut_in_nested_type: unsupported SUT type as type argument.
-File "sut_in_type.mli", line 20, characters 26-35:
-20 | val sut_nested_in_tuple : 'a t list * int -> bool
+File "sut_in_type.mli", line 21, characters 26-35:
+21 | val sut_nested_in_tuple : 'a t list * int -> bool
                                ^^^^^^^^^
 Warning: Skipping sut_nested_in_tuple: unsupported SUT type as type argument.
