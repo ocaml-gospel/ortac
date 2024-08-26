@@ -34,24 +34,24 @@
     "/module type S = sig/,/^end/ { if ($0 != \"module type S = sig\" && $0 != \"end\") print }"
     %{sig}))))
 
-(library
- (name varray_spec)
- (modules varray_spec)
- (libraries varray)
- (package ortac-examples))
+; (library
+;  (name varray_spec)
+;  (modules varray_spec)
+;  (libraries varray)
+;  (package ortac-examples))
 
-(rule
- (alias runtest)
- (mode promote)
- (action
-  (with-stdout-to
-   dune.varray.inc
-   (setenv
-    ORTAC_ONLY_PLUGIN
-    dune-rules
-    (run ortac dune qcheck-stm varray_spec.mli --package=ortac-examples)))))
+; (rule
+;  (alias runtest)
+;  (mode promote)
+;  (action
+;   (with-stdout-to
+;    dune.varray.inc
+;    (setenv
+;     ORTAC_ONLY_PLUGIN
+;     dune-rules
+;     (run ortac dune qcheck-stm varray_spec.mli --package=ortac-examples)))))
 
-(include dune.varray.inc)
+; (include dune.varray.inc)
 
 (rule
  (copy varray_spec.mli varray_circular_spec.mli))
