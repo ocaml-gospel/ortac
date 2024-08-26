@@ -723,15 +723,15 @@ module Spec =
                             {
                               pos_fname = "varray_spec.mli";
                               pos_lnum = 211;
-                              pos_bol = 12225;
-                              pos_cnum = 12238
+                              pos_bol = 12214;
+                              pos_cnum = 12227
                             };
                           Ortac_runtime.stop =
                             {
                               pos_fname = "varray_spec.mli";
                               pos_lnum = 211;
-                              pos_bol = 12225;
-                              pos_cnum = 12300
+                              pos_bol = 12214;
+                              pos_cnum = 12289
                             }
                         })))
           then
@@ -771,15 +771,15 @@ module Spec =
                                     {
                                       pos_fname = "varray_spec.mli";
                                       pos_lnum = 213;
-                                      pos_bol = 12327;
-                                      pos_cnum = 12354
+                                      pos_bol = 12316;
+                                      pos_cnum = 12343
                                     };
                                   Ortac_runtime.stop =
                                     {
                                       pos_fname = "varray_spec.mli";
                                       pos_lnum = 213;
-                                      pos_bol = 12327;
-                                      pos_cnum = 12474
+                                      pos_bol = 12316;
+                                      pos_cnum = 12463
                                     }
                                 })))
                 } in
@@ -820,15 +820,15 @@ module Spec =
                             {
                               pos_fname = "varray_spec.mli";
                               pos_lnum = 223;
-                              pos_bol = 13158;
-                              pos_cnum = 13171
+                              pos_bol = 13147;
+                              pos_cnum = 13160
                             };
                           Ortac_runtime.stop =
                             {
                               pos_fname = "varray_spec.mli";
                               pos_lnum = 223;
-                              pos_bol = 13158;
-                              pos_cnum = 13232
+                              pos_bol = 13147;
+                              pos_cnum = 13221
                             }
                         })))
               &&
@@ -863,15 +863,15 @@ module Spec =
                                {
                                  pos_fname = "varray_spec.mli";
                                  pos_lnum = 224;
-                                 pos_bol = 13233;
-                                 pos_cnum = 13246
+                                 pos_bol = 13222;
+                                 pos_cnum = 13235
                                };
                              Ortac_runtime.stop =
                                {
                                  pos_fname = "varray_spec.mli";
                                  pos_lnum = 224;
-                                 pos_bol = 13233;
-                                 pos_cnum = 13307
+                                 pos_bol = 13222;
+                                 pos_cnum = 13296
                                }
                            }))))
           then
@@ -940,15 +940,15 @@ module Spec =
                                     {
                                       pos_fname = "varray_spec.mli";
                                       pos_lnum = 227;
-                                      pos_bol = 13365;
-                                      pos_cnum = 13373
+                                      pos_bol = 13354;
+                                      pos_cnum = 13362
                                     };
                                   Ortac_runtime.stop =
                                     {
                                       pos_fname = "varray_spec.mli";
                                       pos_lnum = 229;
-                                      pos_bol = 13552;
-                                      pos_cnum = 13597
+                                      pos_bol = 13541;
+                                      pos_cnum = 13586
                                     }
                                 })))
                 } in
@@ -2231,15 +2231,15 @@ let ortac_postcond cmd__052_ state__053_ res__054_ =
                                   {
                                     pos_fname = "varray_spec.mli";
                                     pos_lnum = 211;
-                                    pos_bol = 12225;
-                                    pos_cnum = 12238
+                                    pos_bol = 12214;
+                                    pos_cnum = 12227
                                   };
                                 Ortac_runtime.stop =
                                   {
                                     pos_fname = "varray_spec.mli";
                                     pos_lnum = 211;
-                                    pos_bol = 12225;
-                                    pos_cnum = 12300
+                                    pos_bol = 12214;
+                                    pos_cnum = 12289
                                   }
                               }))
                  then None
@@ -2253,15 +2253,15 @@ let ortac_postcond cmd__052_ state__053_ res__054_ =
                                {
                                  pos_fname = "varray_spec.mli";
                                  pos_lnum = 211;
-                                 pos_bol = 12225;
-                                 pos_cnum = 12238
+                                 pos_bol = 12214;
+                                 pos_cnum = 12227
                                };
                              Ortac_runtime.stop =
                                {
                                  pos_fname = "varray_spec.mli";
                                  pos_lnum = 211;
-                                 pos_bol = 12225;
-                                 pos_cnum = 12300
+                                 pos_bol = 12214;
+                                 pos_cnum = 12289
                                }
                            })])
            with
@@ -2303,15 +2303,15 @@ let ortac_postcond cmd__052_ state__053_ res__054_ =
                                       {
                                         pos_fname = "varray_spec.mli";
                                         pos_lnum = 211;
-                                        pos_bol = 12225;
-                                        pos_cnum = 12238
+                                        pos_bol = 12214;
+                                        pos_cnum = 12227
                                       };
                                     Ortac_runtime.stop =
                                       {
                                         pos_fname = "varray_spec.mli";
                                         pos_lnum = 211;
-                                        pos_bol = 12225;
-                                        pos_cnum = 12300
+                                        pos_bol = 12214;
+                                        pos_cnum = 12289
                                       }
                                   })))
                     then None
@@ -2325,15 +2325,15 @@ let ortac_postcond cmd__052_ state__053_ res__054_ =
                                   {
                                     pos_fname = "varray_spec.mli";
                                     pos_lnum = 211;
-                                    pos_bol = 12225;
-                                    pos_cnum = 12238
+                                    pos_bol = 12214;
+                                    pos_cnum = 12227
                                   };
                                 Ortac_runtime.stop =
                                   {
                                     pos_fname = "varray_spec.mli";
                                     pos_lnum = 211;
-                                    pos_bol = 12225;
-                                    pos_cnum = 12300
+                                    pos_bol = 12214;
+                                    pos_cnum = 12289
                                   }
                               })])))
       | (Blit (src_pos, dst_pos, len_1), Res ((Result (Unit, Exn), _), res))
@@ -2379,15 +2379,15 @@ let ortac_postcond cmd__052_ state__053_ res__054_ =
                                      {
                                        pos_fname = "varray_spec.mli";
                                        pos_lnum = 223;
-                                       pos_bol = 13158;
-                                       pos_cnum = 13171
+                                       pos_bol = 13147;
+                                       pos_cnum = 13160
                                      };
                                    Ortac_runtime.stop =
                                      {
                                        pos_fname = "varray_spec.mli";
                                        pos_lnum = 223;
-                                       pos_bol = 13158;
-                                       pos_cnum = 13232
+                                       pos_bol = 13147;
+                                       pos_cnum = 13221
                                      }
                                  }))
                     then None
@@ -2401,15 +2401,15 @@ let ortac_postcond cmd__052_ state__053_ res__054_ =
                                   {
                                     pos_fname = "varray_spec.mli";
                                     pos_lnum = 223;
-                                    pos_bol = 13158;
-                                    pos_cnum = 13171
+                                    pos_bol = 13147;
+                                    pos_cnum = 13160
                                   };
                                 Ortac_runtime.stop =
                                   {
                                     pos_fname = "varray_spec.mli";
                                     pos_lnum = 223;
-                                    pos_bol = 13158;
-                                    pos_cnum = 13232
+                                    pos_bol = 13147;
+                                    pos_cnum = 13221
                                   }
                               })]))
                    (if
@@ -2452,15 +2452,15 @@ let ortac_postcond cmd__052_ state__053_ res__054_ =
                                      {
                                        pos_fname = "varray_spec.mli";
                                        pos_lnum = 224;
-                                       pos_bol = 13233;
-                                       pos_cnum = 13246
+                                       pos_bol = 13222;
+                                       pos_cnum = 13235
                                      };
                                    Ortac_runtime.stop =
                                      {
                                        pos_fname = "varray_spec.mli";
                                        pos_lnum = 224;
-                                       pos_bol = 13233;
-                                       pos_cnum = 13307
+                                       pos_bol = 13222;
+                                       pos_cnum = 13296
                                      }
                                  }))
                     then None
@@ -2474,15 +2474,15 @@ let ortac_postcond cmd__052_ state__053_ res__054_ =
                                   {
                                     pos_fname = "varray_spec.mli";
                                     pos_lnum = 224;
-                                    pos_bol = 13233;
-                                    pos_cnum = 13246
+                                    pos_bol = 13222;
+                                    pos_cnum = 13235
                                   };
                                 Ortac_runtime.stop =
                                   {
                                     pos_fname = "varray_spec.mli";
                                     pos_lnum = 224;
-                                    pos_bol = 13233;
-                                    pos_cnum = 13307
+                                    pos_bol = 13222;
+                                    pos_cnum = 13296
                                   }
                               })]))
            with
@@ -2532,15 +2532,15 @@ let ortac_postcond cmd__052_ state__053_ res__054_ =
                                         {
                                           pos_fname = "varray_spec.mli";
                                           pos_lnum = 223;
-                                          pos_bol = 13158;
-                                          pos_cnum = 13171
+                                          pos_bol = 13147;
+                                          pos_cnum = 13160
                                         };
                                       Ortac_runtime.stop =
                                         {
                                           pos_fname = "varray_spec.mli";
                                           pos_lnum = 223;
-                                          pos_bol = 13158;
-                                          pos_cnum = 13232
+                                          pos_bol = 13147;
+                                          pos_cnum = 13221
                                         }
                                     }))
                        then None
@@ -2554,15 +2554,15 @@ let ortac_postcond cmd__052_ state__053_ res__054_ =
                                      {
                                        pos_fname = "varray_spec.mli";
                                        pos_lnum = 223;
-                                       pos_bol = 13158;
-                                       pos_cnum = 13171
+                                       pos_bol = 13147;
+                                       pos_cnum = 13160
                                      };
                                    Ortac_runtime.stop =
                                      {
                                        pos_fname = "varray_spec.mli";
                                        pos_lnum = 223;
-                                       pos_bol = 13158;
-                                       pos_cnum = 13232
+                                       pos_bol = 13147;
+                                       pos_cnum = 13221
                                      }
                                  })]))
                       (if
@@ -2605,15 +2605,15 @@ let ortac_postcond cmd__052_ state__053_ res__054_ =
                                         {
                                           pos_fname = "varray_spec.mli";
                                           pos_lnum = 224;
-                                          pos_bol = 13233;
-                                          pos_cnum = 13246
+                                          pos_bol = 13222;
+                                          pos_cnum = 13235
                                         };
                                       Ortac_runtime.stop =
                                         {
                                           pos_fname = "varray_spec.mli";
                                           pos_lnum = 224;
-                                          pos_bol = 13233;
-                                          pos_cnum = 13307
+                                          pos_bol = 13222;
+                                          pos_cnum = 13296
                                         }
                                     }))
                        then None
@@ -2627,15 +2627,15 @@ let ortac_postcond cmd__052_ state__053_ res__054_ =
                                      {
                                        pos_fname = "varray_spec.mli";
                                        pos_lnum = 224;
-                                       pos_bol = 13233;
-                                       pos_cnum = 13246
+                                       pos_bol = 13222;
+                                       pos_cnum = 13235
                                      };
                                    Ortac_runtime.stop =
                                      {
                                        pos_fname = "varray_spec.mli";
                                        pos_lnum = 224;
-                                       pos_bol = 13233;
-                                       pos_cnum = 13307
+                                       pos_bol = 13222;
+                                       pos_cnum = 13296
                                      }
                                  })]))))
       | _ -> None

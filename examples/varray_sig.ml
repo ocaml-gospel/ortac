@@ -311,8 +311,8 @@ module type S = sig
       @raise Invalid_argument if the range [i, i + n - 1] is invalid for [t].
   *)
   (*@ r = sub t i n
-      checks 0 <= i < Sequence.length t.contents
-      checks n = 0 \/ i <= i + n - 1 < Sequence.length t.contents
+      checks 0 <= i <= Sequence.length t.contents
+      checks i <= i + n <= Sequence.length t.contents
       ensures r.contents = if n = 0 then Sequence.empty else t.contents[i..i+n-1] *)
 
   val copy : 'a t -> 'a t
