@@ -384,6 +384,11 @@ let next_state_case state config state_ident nb_models value =
     | sut_vars -> (
         let vbs, sut_map = pop_states state_ident value in
         let wrap e = if vbs <> [] then pexp_let Nonrecursive vbs e else e in
+        (* Figure out which suts are used but not modified *)
+        let modified_suts = List.map fst value.next_states in
+        let modified_sut_map =
+          List.filter (fun (id, _) -> List.mem id modified_suts) sut_map
+        in
         let* next_states =
           map
             (fun (sut, next_state) ->
@@ -392,7 +397,7 @@ let next_state_case state config state_ident nb_models value =
                 List.filter_map
                   (fun (i, { model; description }) ->
                     subst_term ~out_of_scope:value.ret state ~gos_t:sut_vars
-                      ~old_t:sut_map ~new_t:[] description
+                      ~old_t:sut_map ~new_t:modified_sut_map description
                     >>= ocaml_of_term config
                     |> to_option
                     |> Option.map (fun description -> (i, model, description)))
