@@ -308,15 +308,16 @@ let run_case config sut_name value =
     let suts, call =
       let efun = exp_of_ident value.id in
       let mk_arg = Option.fold ~none:eunit ~some:exp_of_ident in
+      let trans_lb = function Optional l -> Labelled l | l -> l in
       let rec aux ty args sut_vars =
         match (ty.ptyp_desc, args, sut_vars) with
         | Ptyp_arrow (lb, l, r), xs, sut :: rest when Cfg.is_sut config l ->
             let tmp = gen_symbol ~prefix:(str_of_ident sut) () in
             let suts, args = aux r xs rest in
-            (tmp :: suts, (lb, evar tmp) :: args)
+            (tmp :: suts, (trans_lb lb, evar tmp) :: args)
         | Ptyp_arrow (lb, _, r), x :: xs, suts ->
             let suts, args = aux r xs suts in
-            (suts, (lb, mk_arg x) :: args)
+            (suts, (trans_lb lb, mk_arg x) :: args)
         | _, [], _ -> ([], [])
         | _, _, _ ->
             failwith
