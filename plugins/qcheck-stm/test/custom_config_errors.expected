@@ -6,6 +6,11 @@ File "custom_config.mli", line 7, characters 0-35:
 7 | val proj : 'a elt -> 'a
 8 | (*@ pure *)
 Warning: Incomplete computation of the returned value in the specification of proj. Failure message won't be able to display the expected returned value.
+File "custom_config.mli", line 10, characters 0-84:
+10 | val empty : unit -> 'a t
+11 | (*@ t = empty ()
+12 |     ensures t.contents = Sequence.empty *)
+Warning: Incomplete computation of the returned value in the specification of empty. Failure message won't be able to display the expected returned value.
 File "custom_config.mli", line 19, characters 0-125:
 19 | val top : 'a t -> 'a elt
 20 | (*@ a = top t

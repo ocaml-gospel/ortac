@@ -1,3 +1,8 @@
+File "queue.mli", line 6, characters 0-86:
+6 | val create : unit -> 'a t
+7 | (*@ t = create ()
+8 |     ensures t.contents = Sequence.empty *)
+Warning: Incomplete computation of the returned value in the specification of create. Failure message won't be able to display the expected returned value.
 File "queue.mli", line 30, characters 0-172:
 30 | val peek_opt : 'a t -> 'a option
 31 | (*@ v = peek_opt t

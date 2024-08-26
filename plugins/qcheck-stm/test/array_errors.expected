@@ -1,3 +1,10 @@
+File "array.mli", line 20, characters 0-139:
+20 | val make : int -> 'a -> 'a t
+21 | (*@ t = make i a
+22 |     checks i >= 0
+23 |     ensures t.size = i
+24 |     ensures t.contents = List.init i (fun j -> a) *)
+Warning: Incomplete computation of the returned value in the specification of make. Failure message won't be able to display the expected returned value.
 File "array.mli", line 38, characters 0-85:
 38 | val mem : 'a -> 'a t -> bool
 39 | (*@ b = mem a t

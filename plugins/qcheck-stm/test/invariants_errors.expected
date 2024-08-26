@@ -1,0 +1,5 @@
+File "invariants.mli", line 6, characters 0-89:
+6 | val create : 'a -> 'a t
+7 | (*@ t = create a
+8 |     ensures t.contents = Sequence.singleton a *)
+Warning: Incomplete computation of the returned value in the specification of create. Failure message won't be able to display the expected returned value.

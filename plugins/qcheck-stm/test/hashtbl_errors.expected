@@ -1,7 +1,3 @@
-File "hashtbl.mli", line 19, characters 25-35:
-19 | val copy : ('a, 'b) t -> ('a, 'b) t
-                              ^^^^^^^^^^
-Warning: Skipping copy: functions returning a SUT value cannot be tested.
 File "hashtbl.mli", line 63, characters 12-28:
 63 | val iter : ('a -> 'b -> unit) -> ('a, 'b) t -> unit
                  ^^^^^^^^^^^^^^^^
@@ -25,10 +21,6 @@ File "hashtbl.mli", line 79, characters 0-32:
      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping is_randomized: functions without specifications cannot be
          tested.
-File "hashtbl.mli", line 82, characters 68-78:
-82 |   ?random:(* thwart tools/sync_stdlib_docs *) bool -> ('a, 'b) t -> ('a, 'b) t
-                                                                         ^^^^^^^^^^
-Warning: Skipping rebuild: functions returning a SUT value cannot be tested.
 File "hashtbl.mli", line 81, characters 0-92:
 81 | val rebuild :
 82 |   ?random:(* thwart tools/sync_stdlib_docs *) bool -> ('a, 'b) t -> ('a, 'b) t
@@ -60,10 +52,6 @@ File "hashtbl.mli", line 101, characters 0-55:
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping replace_seq: functions without specifications cannot be
          tested.
-File "hashtbl.mli", line 102, characters 32-42:
-102 | val of_seq : ('a * 'b) Seq.t -> ('a, 'b) t
-                                      ^^^^^^^^^^
-Warning: Skipping of_seq: functions returning a SUT value cannot be tested.
 File "hashtbl.mli", line 102, characters 0-42:
 102 | val of_seq : ('a * 'b) Seq.t -> ('a, 'b) t
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -87,6 +75,17 @@ File "hashtbl.mli", line 106, characters 0-54:
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping seeded_hash_param: functions without specifications cannot
          be tested.
+File "hashtbl.mli", line 4, characters 0-143:
+4 | val create :
+5 |   ?random:(* thwart tools/sync_stdlib_docs *) bool -> int -> ('a, 'b) t
+6 | (*@ h = create ?random size
+7 |     ensures h.contents = [] *)
+Warning: Incomplete computation of the returned value in the specification of create. Failure message won't be able to display the expected returned value.
+File "hashtbl.mli", line 19, characters 0-93:
+19 | val copy : ('a, 'b) t -> ('a, 'b) t
+20 | (*@ h2 = copy h1
+21 |     ensures h2.contents = h1.contents *)
+Warning: Incomplete computation of the returned value in the specification of copy. Failure message won't be able to display the expected returned value.
 File "hashtbl.mli", line 28, characters 0-226:
 28 | val find : ('a, 'b) t -> 'a -> 'b
 29 | (*@ b = find h a

@@ -299,7 +299,11 @@ let run_case config sut_name value =
   let lhs = mk_cmd_pattern value in
   let open Reserr in
   let* rhs =
-    let* ty_show = exp_of_core_type value.inst (Ir.get_return_type value) in
+    let* ty_show =
+      let ret_ty = Ir.get_return_type value in
+      if Cfg.is_sut config ret_ty then evar "sut" |> ok
+      else exp_of_core_type value.inst ret_ty
+    in
     let ty_show =
       if may_raise_exception value then
         pexp_apply (evar "result") [ (Nolabel, ty_show); (Nolabel, evar "exn") ]
@@ -342,6 +346,19 @@ let run_case config sut_name value =
         (fun sut ->
           eapply (qualify [ "SUT" ] "push") [ evar sut_name; evar sut ])
         (List.rev suts)
+      @
+      (* If a sut is returned, push it last *)
+      if Cfg.does_return_sut config value.ty then
+        (* We can only push a sut if there was no exception *)
+        if may_raise_exception value then
+          [
+            [%expr
+              match [%e evar call_res] with
+              | Ok res -> SUT.push [%e evar sut_name] res
+              | Error _ -> ()];
+          ]
+        else [ [%expr SUT.push [%e evar sut_name] [%e evar call_res]] ]
+      else []
     in
     let tail = List.fold_right pexp_sequence pushes (evar call_res) in
     let wrapped_call =
@@ -385,107 +402,118 @@ let next_state_case state config state_ident nb_models value =
   let lhs = mk_cmd_pattern value in
   let open Reserr in
   let* idx, rhs =
-    match value.sut_vars with
-    | [] -> ([], state_ident |> str_of_ident |> evar) |> ok
-    | sut_vars -> (
-        let vbs, sut_map = pop_states state_ident value in
-        let wrap e = if vbs <> [] then pexp_let Nonrecursive vbs e else e in
-        (* Figure out which suts are used but not modified *)
-        let modified_suts = List.map fst value.next_states in
-        let modified_sut_map =
-          List.filter (fun (id, _) -> List.mem id modified_suts) sut_map
+    if value.sut_vars = [] && not (Cfg.does_return_sut config value.ty) then
+      ([], state_ident |> str_of_ident |> evar) |> ok
+    else
+      let vbs, sut_map = pop_states state_ident value in
+      let sut_map =
+        if Cfg.does_return_sut config value.ty then
+          let ret_id = List.hd value.ret in
+          let ret_var = gen_symbol ~prefix:(str_of_ident ret_id) () in
+          (ret_id, Ident.create ~loc:Location.none ret_var) :: sut_map
+        else sut_map
+      in
+      let wrap e = if vbs <> [] then pexp_let Nonrecursive vbs e else e in
+      (* Figure out which suts are used but not modified *)
+      let modified_suts = List.map fst value.next_states in
+      let modified_sut_map =
+        List.filter (fun (id, _) -> List.mem id modified_suts) sut_map
+      in
+      let* next_states =
+        map
+          (fun (sut, next_state) ->
+            (* substitute state variable when under `old` operator and translate description into ocaml *)
+            let descriptions =
+              List.filter_map
+                (fun (i, { model; description }) ->
+                  subst_term ~out_of_scope:value.ret state ~gos_t:value.sut_vars
+                    ~old_t:sut_map ~new_t:modified_sut_map description
+                  >>= ocaml_of_term config
+                  |> to_option
+                  |> Option.map (fun description -> (i, model, description)))
+                next_state.formulae
+            in
+            (* choose one and only one description per modified model *)
+            let pick id =
+              List.find_opt (fun (_, m, _) -> Ident.equal id m) descriptions
+            in
+            let* descriptions =
+              map
+                (fun (id, loc) ->
+                  of_option
+                    ~default:
+                      ( Ensures_not_found_for_next_state
+                          (value.id.id_str, id.Ident.id_str),
+                        loc )
+                    (pick id))
+                next_state.modifies
+            in
+            (* [idx], like [descriptions], is in the order of the modifies clauses *)
+            let idx = List.map (fun (i, _, _) -> i) descriptions in
+            match
+              List.map
+                (fun (_, m, e) -> (lident (str_of_ident m), e))
+                descriptions
+            with
+            | [] -> ok (idx, sut, List.assoc sut sut_map |> str_of_ident |> evar)
+            | fields ->
+                ok
+                  ( idx,
+                    sut,
+                    pexp_open
+                      Ast_helper.(Opn.mk (Mod.ident (lident "ModelElt")))
+                      (pexp_record fields
+                         (if List.length fields = nb_models then None
+                          else
+                            Some (evar (List.assoc sut sut_map |> str_of_ident))))
+                  ))
+          value.next_states
+      in
+      let vbs_next_states, next_vars_assoc =
+        let aux (_, sut, expr) (vbs, vars) =
+          let next_state_var = gen_symbol ~prefix:(str_of_ident sut) () in
+          let pat = pvar next_state_var in
+          (value_binding ~pat ~expr :: vbs, (sut, next_state_var) :: vars)
         in
-        let* next_states =
-          map
-            (fun (sut, next_state) ->
-              (* substitute state variable when under `old` operator and translate description into ocaml *)
-              let descriptions =
-                List.filter_map
-                  (fun (i, { model; description }) ->
-                    subst_term ~out_of_scope:value.ret state ~gos_t:sut_vars
-                      ~old_t:sut_map ~new_t:modified_sut_map description
-                    >>= ocaml_of_term config
-                    |> to_option
-                    |> Option.map (fun description -> (i, model, description)))
-                  next_state.formulae
-              in
-              (* choose one and only one description per modified model *)
-              let pick id =
-                List.find_opt (fun (_, m, _) -> Ident.equal id m) descriptions
-              in
-              let* descriptions =
-                map
-                  (fun (id, loc) ->
-                    of_option
-                      ~default:
-                        ( Ensures_not_found_for_next_state
-                            (value.id.id_str, id.Ident.id_str),
-                          loc )
-                      (pick id))
-                  next_state.modifies
-              in
-              (* [idx], like [descriptions], is in the order of the modifies clauses *)
-              let idx = List.map (fun (i, _, _) -> i) descriptions in
-              match
-                List.map
-                  (fun (_, m, e) -> (lident (str_of_ident m), e))
-                  descriptions
-              with
-              | [] ->
-                  ok (idx, sut, List.assoc sut sut_map |> str_of_ident |> evar)
-              | fields ->
-                  ok
-                    ( idx,
-                      sut,
-                      pexp_open
-                        Ast_helper.(Opn.mk (Mod.ident (lident "ModelElt")))
-                        (pexp_record fields
-                           (if List.length fields = nb_models then None
-                            else
-                              Some
-                                (evar (List.assoc sut sut_map |> str_of_ident))))
-                    ))
-            value.next_states
-        in
-        let vbs_next_states, next_state_vars =
-          let aux (_, sut, expr) (vbs, vars) =
-            let next_state_var = gen_symbol ~prefix:(str_of_ident sut) () in
-            let pat = pvar next_state_var in
-            (value_binding ~pat ~expr :: vbs, (sut, next_state_var) :: vars)
-          in
-          List.fold_right aux next_states ([], [])
-        in
-        (* Get the next_state_vars in the correct, reversed order *)
-        let next_state_vars =
-          List.(rev_map (fun n -> assoc n next_state_vars) sut_vars)
-        in
-        let push_expr =
-          List.fold_left
-            (fun body next_var ->
-              eapply (qualify [ "Model" ] "push") [ body; evar next_var ])
-            (eapply
-               (qualify [ "Model" ] "drop_n")
-               [
-                 evar (str_of_ident state_ident);
-                 pexp_constant
-                   (Pconst_integer (List.length sut_map |> string_of_int, None));
-               ])
-            next_state_vars
-        in
-        let new_state = pexp_let Nonrecursive vbs_next_states push_expr in
-        let idx =
-          List.fold_left (fun acc (i, _, _) -> i @ acc) [] next_states
-        in
-        let translate_checks = translate_checks config state value sut_map in
-        let* checks = map translate_checks value.postcond.checks in
-        match checks with
-        | [] -> ok (idx, wrap new_state)
-        | _ ->
-            ok
-              ( idx,
-                wrap
-                  (pexp_ifthenelse (list_and checks) new_state (Some state_var))
-              ))
+        List.fold_right aux next_states ([], [])
+      in
+      (* Get the next_state_vars in the correct, reversed order *)
+      let next_state_vars =
+        List.(rev_map (fun n -> assoc n next_vars_assoc) value.sut_vars)
+      in
+      let push_expr =
+        List.fold_left
+          (fun body next_var ->
+            eapply (qualify [ "Model" ] "push") [ body; evar next_var ])
+          (eapply
+             (qualify [ "Model" ] "drop_n")
+             [
+               evar (str_of_ident state_ident);
+               pexp_constant
+                 (Pconst_integer
+                    (List.length value.sut_vars |> string_of_int, None));
+             ])
+          next_state_vars
+      in
+      let push_expr =
+        if Cfg.does_return_sut config value.ty then
+          let ret_id = List.hd value.ret in
+          let ret_var = List.assoc ret_id next_vars_assoc in
+          eapply (qualify [ "Model" ] "push") [ push_expr; evar ret_var ]
+        else push_expr
+      in
+      let new_state = pexp_let Nonrecursive vbs_next_states push_expr in
+      let idx = List.fold_left (fun acc (i, _, _) -> i @ acc) [] next_states in
+      let translate_checks = translate_checks config state value sut_map in
+      let* checks = map translate_checks value.postcond.checks in
+      match checks with
+      | [] -> ok (idx, wrap new_state)
+      | _ ->
+          ok
+            ( idx,
+              wrap
+                (pexp_ifthenelse (list_and checks) new_state (Some state_var))
+            )
   in
   (idx, case ~lhs ~guard:None ~rhs) |> ok
 
@@ -679,7 +707,10 @@ let postcond_case config state invariants idx state_ident new_state_ident value
             ( Type_not_supported (Fmt.str "%a" Pprintast.core_type ret_ty),
               ret_ty.ptyp_loc )
     in
-    let* pat_ty = pat_of_core_type value.inst ret_ty in
+    let* pat_ty =
+      if Cfg.is_sut config ret_ty then pvar "SUT" |> ok
+      else pat_of_core_type value.inst ret_ty
+    in
     let pat_ty =
       if may_raise_exception value then
         ppat_construct (lident "Result")
@@ -1378,11 +1409,21 @@ let ortac_cmd_show config ir =
   in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
+let sut_stm_ty_defs config ir =
+  let ret_vals = List.map Ir.get_return_type ir.values in
+  let has_sut_ret = List.exists (Cfg.is_sut config) ret_vals in
+  if has_sut_ret then
+    [%str
+      type _ ty += SUT : SUT.elt ty
+
+      let sut = (SUT, fun _ -> "<sut>")]
+  else []
+
 let stm config ir =
   let open Reserr in
   let* ghost_types = ghost_types config ir.ghost_types in
   let* config, ghost_functions = ghost_functions config ir.ghost_functions in
-  let warn = [%stri [@@@ocaml.warning "-26-27-69-32"]] in
+  let warn = [%stri [@@@ocaml.warning "-26-27-69-32-38"]] in
   let* cmd = cmd_type ir in
   let* cmd_show = cmd_show config ir in
   let* idx, next_state = next_state config ir in
@@ -1409,6 +1450,7 @@ let stm config ir =
       @ util config
       @ Option.value config.ty_mod ~default:[]
       @ integer_ty_ext
+      @ sut_stm_ty_defs config ir
       @ tuple_types ir
       @ sut_defs
       @ state_defs

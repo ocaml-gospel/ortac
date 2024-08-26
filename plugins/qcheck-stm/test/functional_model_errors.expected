@@ -1,0 +1,5 @@
+File "functional_model.mli", line 4, characters 0-82:
+4 | val empty : unit -> ('a, 'b) t
+5 | (*@ t = empty ()
+6 |     ensures t.m = fun _ -> None *)
+Warning: Incomplete computation of the returned value in the specification of empty. Failure message won't be able to display the expected returned value.
