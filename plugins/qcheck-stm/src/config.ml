@@ -76,6 +76,15 @@ let is_sut config ty =
   | Ptyp_constr (lid, _) -> lid.txt = sut_type_name
   | _ -> false
 
+let does_return_sut config ty =
+  let rec aux ty =
+    match ty.ptyp_desc with
+    | Ptyp_arrow (_, _, r) -> aux r
+    | Ptyp_constr _ -> is_sut config ty
+    | _ -> false
+  in
+  aux ty
+
 let dump ppf t =
   Fmt.(
     pf ppf "sut_core_type: %a; init_sut: %a@." Ppxlib_ast.Pprintast.expression

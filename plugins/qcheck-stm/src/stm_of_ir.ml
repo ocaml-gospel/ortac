@@ -211,7 +211,7 @@ let pat_of_core_type inst typ =
   in
   aux typ
 
-let exp_of_core_type inst typ =
+let exp_of_core_type ?(use_small = false) inst typ =
   let rec aux ty =
     let open Reserr in
     match ty.ptyp_desc with
@@ -221,13 +221,15 @@ let exp_of_core_type inst typ =
         | None -> ok exp_default
         | Some t -> aux t)
     | Ptyp_constr (c, xs) -> (
-        let constr_str = evar <$> munge_longident false ty c in
+        let* constr_id = munge_longident false ty c in
+        let constr_str = evar constr_id in
         match xs with
-        | [] -> constr_str
+        | [] ->
+            if constr_id = "int" && use_small then evar "small_signed_int" |> ok
+            else constr_str |> ok
         | xs ->
-            pexp_apply
-            <$> constr_str
-            <*> (List.map (fun e -> (Nolabel, e)) <$> map aux xs))
+            pexp_apply constr_str
+            <$> (List.map (fun e -> (Nolabel, e)) <$> map aux xs))
     | Ptyp_tuple xs ->
         let tup_constr =
           pexp_ident (lident ("tup" ^ string_of_int (List.length xs)))
@@ -243,8 +245,9 @@ let exp_of_core_type inst typ =
 
 let exp_of_ident id = pexp_ident (lident (str_of_ident id))
 
-let arb_cmd_case value =
+let arb_cmd_case config value =
   let open Reserr in
+  let is_create = value.sut_vars = [] && Cfg.does_return_sut config value.ty in
   let epure = pexp_ident (lident "pure") in
   let pure e = pexp_apply epure [ (Nolabel, e) ] in
   let fun_cstr =
@@ -268,14 +271,16 @@ let arb_cmd_case value =
   in
   let gen_args =
     (* XXX TODO: use `requires` clauses to build smarter generators *)
-    List.map (fun (ty, _) -> exp_of_core_type value.inst ty) value.args
+    List.map
+      (fun (ty, _) -> exp_of_core_type ~use_small:is_create value.inst ty)
+      value.args
   in
   let app l r = pexp_apply (evar "( <*> )") [ (Nolabel, l); (Nolabel, r) ] in
   List.fold_left app fun_cstr <$> sequence gen_args
 
-let arb_cmd ir =
+let arb_cmd config ir =
   let open Reserr in
-  let* cmds = elist <$> map arb_cmd_case ir.values in
+  let* cmds = elist <$> map (arb_cmd_case config) ir.values in
   let open Ppxlib in
   let let_open str e =
     pexp_open Ast_helper.(Opn.mk (Mod.ident (lident str |> noloc))) e
@@ -1383,7 +1388,7 @@ let stm config ir =
   let* postcond = postcond config idx ir in
   let* precond = precond config ir in
   let* run = run config ir in
-  let* arb_cmd = arb_cmd ir in
+  let* arb_cmd = arb_cmd config ir in
   let* check_init_state = check_init_state config ir in
   let* ortac_show = ortac_cmd_show config ir in
   let cleanup =
