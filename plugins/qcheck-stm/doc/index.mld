@@ -308,10 +308,10 @@ $ grep -A 1 "type cmd" foo.ml
     type cmd =
       | Type_not_supported of new_type
 $ grep -A 3 "let run" foo.ml
-    let run cmd__010_ sut__011_ =
-      match cmd__010_ with
+    let run cmd__014_ sut__015_ =
+      match cmd__014_ with
       | Type_not_supported x ->
-          Res (new_type, (type_not_supported x sut__011_))
+          Res
 ]}
 
 You can open the [foo.ml] file to edit it in this way.
@@ -469,11 +469,6 @@ Ortac/QCheck-STM will generate the following warnings:
 
 {@sh[
 $ ortac qcheck-stm example_limitations.mli example_config.ml -o foo.ml
-File "example_limitations.mli", line 17, characters 14-34:
-17 | val compare : 'a t -> 'a t -> bool
-                   ^^^^^^^^^^^^^^^^^^^^
-Warning: Skipping compare: functions with multiple SUT arguments cannot be
-         tested.
 File "example_limitations.mli", line 20, characters 25-29:
 20 | val of_list : 'a list -> 'a t
                               ^^^^
@@ -486,4 +481,8 @@ File "example_limitations.mli", line 26, characters 15-25:
 26 | val for_all : ('a -> bool) -> 'a t -> bool
                     ^^^^^^^^^^
 Warning: Skipping for_all: functions are not supported yet as arguments.
+File "example_limitations.mli", line 17, characters 0-59:
+17 | val compare : 'a t -> 'a t -> bool
+18 | (*@ b = compare t1 t2 *)
+Warning: Incomplete computation of the returned value in the specification of compare. Failure message won't be able to display the expected returned value.
 ]}

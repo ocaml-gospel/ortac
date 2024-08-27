@@ -41,12 +41,15 @@ type value = {
   id : Ident.t;
   ty : Ppxlib.core_type;
   inst : (string * Ppxlib.core_type) list;
-  sut_var : Ident.t option;
+  sut_vars : Ident.t list;
+      (* invariant: suts must be in the order in which they appear, so for
+         example in [test (t1 : sut) (t2 : sut)] the list must be [t1; t2] *)
   args : (Ppxlib.core_type * Ident.t option) list;
       (* arguments of unit types can be nameless *)
   ret : Ident.t list;
   ret_values : term list list;
-  next_state : next_state;
+  next_states : (Ident.t * next_state) list;
+      (* each used sut can have a different next state *)
   precond : Tterm.term list;
   postcond : postcond;
 }
@@ -64,16 +67,16 @@ let get_return_type value =
   in
   aux value.ty
 
-let value id ty inst sut_var args ret ret_values next_state precond postcond =
+let value id ty inst sut_vars args ret ret_values next_states precond postcond =
   {
     id;
     ty;
     inst;
-    sut_var;
+    sut_vars;
     args;
     ret;
     ret_values;
-    next_state;
+    next_states;
     precond;
     postcond;
   }

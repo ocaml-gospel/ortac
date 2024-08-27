@@ -3,22 +3,14 @@
 [@@@ocaml.warning "-26-27-69-32"]
 open Invariants
 module Ortac_runtime = Ortac_runtime_qcheck_stm
-module Spec =
+module SUT =
+  (Ortac_runtime.SUT.Make)(struct type sut = int t
+                                  let init () = create 42 end)
+module ModelElt =
   struct
-    open STM
-    type _ ty +=  
-      | Integer: Ortac_runtime.integer ty 
-    let integer = (Integer, Ortac_runtime.string_of_integer)
-    type sut = int t
-    type cmd =
-      | Push of int 
-    let show_cmd cmd__001_ =
-      match cmd__001_ with
-      | Push a_1 ->
-          Format.asprintf "%s %a sut" "push" (Util.Pp.pp_int true) a_1
-    type nonrec state = {
+    type nonrec elt = {
       contents: int list }
-    let init_state =
+    let init =
       let a_2 = 42 in
       {
         contents =
@@ -45,7 +37,24 @@ module Spec =
                           }
                       })))
       }
-    let init_sut () = create 42
+  end
+module Model = (Ortac_runtime.Model.Make)(ModelElt)
+module Spec =
+  struct
+    open STM
+    type _ ty +=  
+      | Integer: Ortac_runtime.integer ty 
+    let integer = (Integer, Ortac_runtime.string_of_integer)
+    type sut = SUT.t
+    let init_sut = SUT.create 1
+    type state = Model.t
+    let init_state = Model.create 1 ()
+    type cmd =
+      | Push of int 
+    let show_cmd cmd__001_ =
+      match cmd__001_ with
+      | Push a_1 ->
+          Format.asprintf "%s %a <sut>" "push" (Util.Pp.pp_int true) a_1
     let cleanup _ = ()
     let arb_cmd _ =
       let open QCheck in
@@ -54,45 +63,56 @@ module Spec =
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
       | Push a_1 ->
-          {
-            contents =
-              ((try a_1 :: state__003_.contents
-                with
-                | e ->
-                    raise
-                      (Ortac_runtime.Partial_function
-                         (e,
-                           {
-                             Ortac_runtime.start =
-                               {
-                                 pos_fname = "invariants.mli";
-                                 pos_lnum = 13;
-                                 pos_bol = 476;
-                                 pos_cnum = 501
-                               };
-                             Ortac_runtime.stop =
-                               {
-                                 pos_fname = "invariants.mli";
-                                 pos_lnum = 13;
-                                 pos_bol = 476;
-                                 pos_cnum = 522
-                               }
-                           }))))
-          }
-    let precond cmd__008_ state__009_ =
-      match cmd__008_ with | Push a_1 -> true
+          let t_1__004_ = Model.get state__003_ 0 in
+          let t_1__005_ =
+            let open ModelElt in
+              {
+                contents =
+                  (try a_1 :: t_1__004_.contents
+                   with
+                   | e ->
+                       raise
+                         (Ortac_runtime.Partial_function
+                            (e,
+                              {
+                                Ortac_runtime.start =
+                                  {
+                                    pos_fname = "invariants.mli";
+                                    pos_lnum = 13;
+                                    pos_bol = 476;
+                                    pos_cnum = 501
+                                  };
+                                Ortac_runtime.stop =
+                                  {
+                                    pos_fname = "invariants.mli";
+                                    pos_lnum = 13;
+                                    pos_bol = 476;
+                                    pos_cnum = 522
+                                  }
+                              })))
+              } in
+          Model.push (Model.drop_n state__003_ 1) t_1__005_
+    let precond cmd__012_ state__013_ =
+      match cmd__012_ with
+      | Push a_1 -> let t_1__014_ = Model.get state__013_ 0 in true
     let postcond _ _ _ = true
-    let run cmd__010_ sut__011_ =
-      match cmd__010_ with | Push a_1 -> Res (unit, (push a_1 sut__011_))
+    let run cmd__015_ sut__016_ =
+      match cmd__015_ with
+      | Push a_1 ->
+          Res
+            (unit,
+              (let t_1__017_ = SUT.pop sut__016_ in
+               let res__018_ = push a_1 t_1__017_ in
+               (SUT.push sut__016_ t_1__017_; res__018_)))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () =
-  let __state__012_ = Spec.init_state in
+  let __state__019_ = Model.get Spec.init_state 0 in
   if
     not
       (try
          Ortac_runtime.Gospelstdlib.(>)
-           (Ortac_runtime.Gospelstdlib.List.length __state__012_.contents)
+           (Ortac_runtime.Gospelstdlib.List.length __state__019_.contents)
            (Ortac_runtime.Gospelstdlib.integer_of_int 0)
        with
        | e ->
@@ -116,61 +136,12 @@ let check_init_state () =
                       }
                   })))
   then QCheck.Test.fail_report "INIT_SUT violates type invariants for SUT"
-let ortac_postcond cmd__004_ state__005_ res__006_ =
+let ortac_postcond cmd__006_ state__007_ res__008_ =
   let open Spec in
     let open STM in
-      let new_state__007_ = lazy (next_state cmd__004_ state__005_) in
-      match (cmd__004_, res__006_) with
-      | (Push a_1, Res ((Unit, _), _)) ->
-          if
-            (try
-               Ortac_runtime.Gospelstdlib.(>)
-                 (Ortac_runtime.Gospelstdlib.List.length
-                    (Lazy.force new_state__007_).contents)
-                 (Ortac_runtime.Gospelstdlib.integer_of_int 0)
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "invariants.mli";
-                              pos_lnum = 4;
-                              pos_bol = 110;
-                              pos_cnum = 124
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "invariants.mli";
-                              pos_lnum = 4;
-                              pos_bol = 110;
-                              pos_cnum = 150
-                            }
-                        })))
-          then None
-          else
-            Some
-              (Ortac_runtime.report "Invariants" "create 42"
-                 (Either.right (Res (unit, ()))) "push"
-                 [("List.length x.contents > 0",
-                    {
-                      Ortac_runtime.start =
-                        {
-                          pos_fname = "invariants.mli";
-                          pos_lnum = 4;
-                          pos_bol = 110;
-                          pos_cnum = 124
-                        };
-                      Ortac_runtime.stop =
-                        {
-                          pos_fname = "invariants.mli";
-                          pos_lnum = 4;
-                          pos_bol = 110;
-                          pos_cnum = 150
-                        }
-                    })])
+      let new_state__009_ = lazy (next_state cmd__006_ state__007_) in
+      match (cmd__006_, res__008_) with
+      | (Push a_1, Res ((Unit, _), _)) -> None
       | _ -> None
 let _ =
   QCheck_base_runner.run_tests_main

@@ -8,11 +8,6 @@ File "all_warnings.mli", line 16, characters 26-30:
                                ^^^^
 Warning: Skipping returning_sut: functions returning a SUT value cannot be
          tested.
-File "all_warnings.mli", line 19, characters 28-48:
-19 | val multiple_sut_argument : 'a t -> 'a t -> bool
-                                 ^^^^^^^^^^^^^^^^^^^^
-Warning: Skipping multiple_sut_argument: functions with multiple SUT
-         arguments cannot be tested.
 File "all_warnings.mli", line 22, characters 24-29:
 22 | val incompatible_type : int t -> bool
                              ^^^^^
@@ -22,11 +17,6 @@ File "all_warnings.mli", line 25, characters 0-26:
 25 | val no_spec : 'a t -> bool
      ^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping no_spec: functions without specifications cannot be tested.
-File "all_warnings.mli", line 30, characters 13-15:
-30 |     modifies () *)
-                  ^^
-Warning: Skipping unsupported modifies clause: expected "modifies x" or
-         "modifies x.model" where x is the SUT.
 File "all_warnings.mli", line 39, characters 27-37:
 39 | val functional_argument : ('a -> bool) -> 'a t -> bool
                                 ^^^^^^^^^^
@@ -58,6 +48,10 @@ Warning: Skipping term_refer_to_returned_value_next_state: model contents is
          was found. Specifications should contain at least one "ensures
          x.contents = expr" where x is the SUT and expr can refer to the SUT
          only under an old operator and can't refer to the returned value.
+File "all_warnings.mli", line 19, characters 0-85:
+19 | val multiple_sut_argument : 'a t -> 'a t -> bool
+20 | (*@ b = multiple_sut_argument x y *)
+Warning: Incomplete computation of the returned value in the specification of multiple_sut_argument. Failure message won't be able to display the expected returned value.
 File "all_warnings.mli", line 36, characters 0-66:
 36 | val type_not_supported : 'a t -> s
 37 | (*@ s = type_not_supported t *)

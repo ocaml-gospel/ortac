@@ -1,0 +1,5 @@
+File "invariants.mli", line 4, characters 26-27:
+4 |     invariant List.length x.contents > 0 *)
+                              ^
+Warning: Skipping clause: occurrences of the SUT in clauses are not supported
+         under old operator.

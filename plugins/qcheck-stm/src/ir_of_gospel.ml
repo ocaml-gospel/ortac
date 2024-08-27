@@ -77,7 +77,6 @@ let ty_var_substitution config (vd : val_description) =
   assert (is_a_function value_type);
   let open Ppxlib in
   let open Reserr in
-  let ret = function None -> Reserr.ok [] | Some x -> Reserr.ok x in
   let rec check pos ty =
     match ty.ptyp_desc with
     | Ptyp_constr (_, args) -> (
@@ -100,28 +99,23 @@ let ty_var_substitution config (vd : val_description) =
             ok ())
     | _ -> ok ()
   in
-  let rec aux seen ty =
+  let rec aux insts ty =
     match ty.ptyp_desc with
-    | Ptyp_any | Ptyp_var _ -> ret seen
+    | Ptyp_any | Ptyp_var _ -> Reserr.ok insts
     | Ptyp_arrow (_, l, r) ->
         let* () = check `Left l in
         if Cfg.is_sut config l then
-          match seen with
-          | None ->
-              let open Reserr in
-              let* x = unify (`Value value_name) config.sut_core_type l in
-              aux (Some x) r
-          | Some _ ->
-              Reserr.(
-                error (Multiple_sut_arguments value_name, value_type.ptyp_loc))
-        else aux seen r
+          let open Reserr in
+          let* x = unify (`Value value_name) config.sut_core_type l in
+          aux (insts @ x) r
+        else aux insts r
     | Ptyp_tuple _ ->
         let* () = check `Right ty in
-        ret seen
+        Reserr.ok insts
     | Ptyp_constr (_, _) ->
         if not (Cfg.is_sut config ty) then
           let* () = check `Right ty in
-          ret seen
+          Reserr.ok insts
         else Reserr.(error (Returning_sut value_name, ty.ptyp_loc))
     (* not supported *)
     | Ptyp_object (_, _)
@@ -132,27 +126,26 @@ let ty_var_substitution config (vd : val_description) =
     | Ptyp_package _ | Ptyp_extension _ ->
         failwith "not supported"
   in
-  aux None value_type
+  aux [] value_type
 
 let split_args config vd args =
   let open Ppxlib in
   let open Reserr in
   let module Ident = Identifier.Ident in
-  let rec aux sut acc ty args =
+  let rec aux suts acc ty args =
     match (ty.ptyp_desc, args) with
     | _, Lghost vs :: _ ->
         error (Ghost_values (vd.vd_name.id_str, `Arg), vs.vs_name.id_loc)
     | Ptyp_arrow (_, l, r), Lnone vs :: xs
     | Ptyp_arrow (_, l, r), Loptional vs :: xs
     | Ptyp_arrow (_, l, r), Lnamed vs :: xs ->
-        if Cfg.is_sut config l then aux (Some vs.vs_name) acc r xs
-        else aux sut ((l, Some vs.vs_name) :: acc) r xs
-    | Ptyp_arrow (_, l, r), Lunit :: xs -> aux sut ((l, None) :: acc) r xs
-    | _, [] -> ok (sut, List.rev acc)
+        if Cfg.is_sut config l then aux (vs.vs_name :: suts) acc r xs
+        else aux suts ((l, Some vs.vs_name) :: acc) r xs
+    | Ptyp_arrow (_, l, r), Lunit :: xs -> aux suts ((l, None) :: acc) r xs
+    | _, [] -> ok (List.rev suts, List.rev acc)
     | _, _ -> failwith "shouldn't happen (too few parameters)"
   in
-  let* sut, args = aux None [] vd.vd_type args in
-  ok (sut, args)
+  aux [] [] vd.vd_type args
 
 let get_state_description_with_index is_t state spec =
   let open Tterm in
@@ -169,27 +162,25 @@ let get_state_description_with_index is_t state spec =
   in
   List.mapi pred spec.sp_post |> List.filter_map Fun.id
 
-let next_state sut state spec =
-  let open Tterm in
-  let is_t vs =
-    Option.fold
-      ~some:(fun sut -> Ident.equal sut vs.Symbols.vs_name)
-      ~none:false sut
+let next_states suts state spec =
+  let next_state sut =
+    let open Tterm in
+    let is_t vs = Ident.equal sut vs.Symbols.vs_name in
+    let formulae = get_state_description_with_index is_t state spec in
+    let check_modify = function
+      | { t_node = Tvar vs; _ } as t when is_t vs ->
+          List.map (fun (m, _) -> (m, t.t_loc)) state
+      | { t_node = Tfield ({ t_node = Tvar vs; _ }, m); _ } as t when is_t vs ->
+          [ (m.ls_name, t.t_loc) ]
+      | _ -> []
+    in
+    let modifies = List.concat_map check_modify spec.sp_wr in
+    let modifies =
+      List.sort_uniq (fun (i, _) (i', _) -> Ident.compare i i') modifies
+    in
+    (sut, Ir.{ formulae; modifies })
   in
-  let formulae = get_state_description_with_index is_t state spec in
-  let open Reserr in
-  let check_modify = function
-    | { t_node = Tvar vs; _ } as t when is_t vs ->
-        List.map (fun (m, _) -> (m, t.t_loc)) state |> ok
-    | { t_node = Tfield ({ t_node = Tvar vs; _ }, m); _ } as t when is_t vs ->
-        ok [ (m.ls_name, t.t_loc) ]
-    | t -> error (Ignored_modifies, t.t_loc)
-  in
-  let* modifies = concat_map check_modify spec.sp_wr in
-  let modifies =
-    List.sort_uniq (fun (i, _) (i', _) -> Ident.compare i i') modifies
-  in
-  ok Ir.{ formulae; modifies }
+  List.map next_state suts
 
 (* returns the list of terms [t] such that [ret = t] appears in the [ensures] of
    the [spec] *)
@@ -254,7 +245,7 @@ let val_desc config state vd =
   and* spec =
     of_option ~default:(No_spec vd.vd_name.id_str, vd.vd_loc) vd.vd_spec
   in
-  let* sut, args = split_args config vd spec.sp_args
+  let* suts, args = split_args config vd spec.sp_args
   and* ret =
     let p = function
       | Lnone vs -> ok vs.vs_name
@@ -267,9 +258,9 @@ let val_desc config state vd =
     List.map p spec.sp_ret |> sequence
   in
   let ret_values = List.map (returned_value_description spec) ret in
-  let* next_state = next_state sut state spec in
+  let next_states = next_states suts state spec in
   let postcond = postcond spec in
-  Ir.value vd.vd_name vd.vd_type inst sut args ret ret_values next_state
+  Ir.value vd.vd_name vd.vd_type inst suts args ret ret_values next_states
     spec.sp_pre postcond
   |> ok
 
