@@ -3,23 +3,16 @@
 [@@@ocaml.warning "-26-27-69-32"]
 open Functional_model
 module Ortac_runtime = Ortac_runtime_qcheck_stm
-module Spec =
+module SUT =
+  (Ortac_runtime.SUT.Make)(struct
+                             type sut = (char, int) t
+                             let init () = empty ()
+                           end)
+module ModelElt =
   struct
-    open STM
-    type _ ty +=  
-      | Integer: Ortac_runtime.integer ty 
-    let integer = (Integer, Ortac_runtime.string_of_integer)
-    type sut = (char, int) t
-    type cmd =
-      | Add of char * int 
-    let show_cmd cmd__001_ =
-      match cmd__001_ with
-      | Add (a_1, b_1) ->
-          Format.asprintf "%s sut %a %a" "add" (Util.Pp.pp_char true) a_1
-            (Util.Pp.pp_int true) b_1
-    type nonrec state = {
+    type nonrec elt = {
       m: char -> int option }
-    let init_state =
+    let init =
       let () = () in
       {
         m =
@@ -46,7 +39,25 @@ module Spec =
                           }
                       })))
       }
-    let init_sut () = empty ()
+  end
+module Model = (Ortac_runtime.Model.Make)(ModelElt)
+module Spec =
+  struct
+    open STM
+    type _ ty +=  
+      | Integer: Ortac_runtime.integer ty 
+    let integer = (Integer, Ortac_runtime.string_of_integer)
+    type sut = SUT.t
+    let init_sut = SUT.create 1
+    type state = Model.t
+    let init_state = Model.create 1 ()
+    type cmd =
+      | Add of char * int 
+    let show_cmd cmd__001_ =
+      match cmd__001_ with
+      | Add (a_1, b_1) ->
+          Format.asprintf "%s <sut> %a %a" "add" (Util.Pp.pp_char true) a_1
+            (Util.Pp.pp_int true) b_1
     let cleanup _ = ()
     let arb_cmd _ =
       let open QCheck in
@@ -58,49 +69,65 @@ module Spec =
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
       | Add (a_1, b_1) ->
-          {
-            m =
-              ((try fun x -> if x = a_1 then Some b_1 else state__003_.m x
-                with
-                | e ->
-                    raise
-                      (Ortac_runtime.Partial_function
-                         (e,
-                           {
-                             Ortac_runtime.start =
-                               {
-                                 pos_fname = "functional_model.mli";
-                                 pos_lnum = 11;
-                                 pos_bol = 482;
-                                 pos_cnum = 500
-                               };
-                             Ortac_runtime.stop =
-                               {
-                                 pos_fname = "functional_model.mli";
-                                 pos_lnum = 11;
-                                 pos_bol = 482;
-                                 pos_cnum = 546
-                               }
-                           }))))
-          }
-    let precond cmd__008_ state__009_ =
-      match cmd__008_ with | Add (a_1, b_1) -> true
+          let t_1__004_ = Model.get state__003_ 0 in
+          let t_1__005_ =
+            let open ModelElt in
+              {
+                m =
+                  (try fun x -> if x = a_1 then Some b_1 else t_1__004_.m x
+                   with
+                   | e ->
+                       raise
+                         (Ortac_runtime.Partial_function
+                            (e,
+                              {
+                                Ortac_runtime.start =
+                                  {
+                                    pos_fname = "functional_model.mli";
+                                    pos_lnum = 11;
+                                    pos_bol = 482;
+                                    pos_cnum = 500
+                                  };
+                                Ortac_runtime.stop =
+                                  {
+                                    pos_fname = "functional_model.mli";
+                                    pos_lnum = 11;
+                                    pos_bol = 482;
+                                    pos_cnum = 546
+                                  }
+                              })))
+              } in
+          Model.push (Model.drop_n state__003_ 1) t_1__005_
+    let precond cmd__011_ state__012_ =
+      match cmd__011_ with
+      | Add (a_1, b_1) -> let t_1__013_ = Model.get state__012_ 0 in true
     let postcond _ _ _ = true
-    let run cmd__010_ sut__011_ =
-      match cmd__010_ with
-      | Add (a_1, b_1) -> Res (unit, (add sut__011_ a_1 b_1))
+    let run cmd__014_ sut__015_ =
+      match cmd__014_ with
+      | Add (a_1, b_1) ->
+          Res
+            (unit,
+              (let t_1__016_ = SUT.pop sut__015_ in
+               let res__017_ = add t_1__016_ a_1 b_1 in
+               (SUT.push sut__015_ t_1__016_; res__017_)))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_postcond cmd__004_ state__005_ res__006_ =
+let ortac_show_cmd cmd__019_ state__020_ =
+  let open Spec in
+    match cmd__019_ with
+    | Add (a_1, b_1) ->
+        Format.asprintf "%s %s %a %a" "add" (SUT.get_name state__020_ 0)
+          (Util.Pp.pp_char true) a_1 (Util.Pp.pp_int true) b_1
+let ortac_postcond cmd__006_ state__007_ res__008_ =
   let open Spec in
     let open STM in
-      let new_state__007_ = lazy (next_state cmd__004_ state__005_) in
-      match (cmd__004_, res__006_) with
+      let new_state__009_ = lazy (next_state cmd__006_ state__007_) in
+      match (cmd__006_, res__008_) with
       | (Add (a_1, b_1), Res ((Unit, _), _)) -> None
       | _ -> None
 let _ =
   QCheck_base_runner.run_tests_main
     (let count = 1000 in
-     [STMTests.agree_test ~count ~name:"Functional_model STM tests"
-        check_init_state ortac_postcond])
+     [STMTests.agree_test ~count ~name:"Functional_model STM tests" 1
+        check_init_state ortac_show_cmd ortac_postcond])

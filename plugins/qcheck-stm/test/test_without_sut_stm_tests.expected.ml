@@ -3,29 +3,14 @@
 [@@@ocaml.warning "-26-27-69-32"]
 open Test_without_sut
 module Ortac_runtime = Ortac_runtime_qcheck_stm
-module Spec =
+module SUT =
+  (Ortac_runtime.SUT.Make)(struct type sut = int t
+                                  let init () = make 16 0 end)
+module ModelElt =
   struct
-    open STM
-    module QCheck =
-      struct
-        include QCheck
-        module Gen = struct include Gen
-                            let int = small_signed_int end
-      end
-    type _ ty +=  
-      | Integer: Ortac_runtime.integer ty 
-    let integer = (Integer, Ortac_runtime.string_of_integer)
-    type sut = int t
-    type cmd =
-      | Add of int * int 
-    let show_cmd cmd__001_ =
-      match cmd__001_ with
-      | Add (a_1, b) ->
-          Format.asprintf "%s %a %a" "add" (Util.Pp.pp_int true) a_1
-            (Util.Pp.pp_int true) b
-    type nonrec state = {
+    type nonrec elt = {
       contents: int list }
-    let init_state =
+    let init =
       let i = 16
       and a_2 = 0 in
       {
@@ -55,7 +40,31 @@ module Spec =
                           }
                       })))
       }
-    let init_sut () = make 16 0
+  end
+module Model = (Ortac_runtime.Model.Make)(ModelElt)
+module Spec =
+  struct
+    open STM
+    module QCheck =
+      struct
+        include QCheck
+        module Gen = struct include Gen
+                            let int = small_signed_int end
+      end
+    type _ ty +=  
+      | Integer: Ortac_runtime.integer ty 
+    let integer = (Integer, Ortac_runtime.string_of_integer)
+    type sut = SUT.t
+    let init_sut = SUT.create 0
+    type state = Model.t
+    let init_state = Model.create 0 ()
+    type cmd =
+      | Add of int * int 
+    let show_cmd cmd__001_ =
+      match cmd__001_ with
+      | Add (a_1, b) ->
+          Format.asprintf "%s %a %a" "add" (Util.Pp.pp_int true) a_1
+            (Util.Pp.pp_int true) b
     let cleanup _ = ()
     let arb_cmd _ =
       let open QCheck in
@@ -69,10 +78,17 @@ module Spec =
       match cmd__008_ with | Add (a_1, b) -> true
     let postcond _ _ _ = true
     let run cmd__010_ sut__011_ =
-      match cmd__010_ with | Add (a_1, b) -> Res (int, (add a_1 b))
+      match cmd__010_ with
+      | Add (a_1, b) -> Res (int, (let res__012_ = add a_1 b in res__012_))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
+let ortac_show_cmd cmd__014_ state__015_ =
+  let open Spec in
+    match cmd__014_ with
+    | Add (a_1, b) ->
+        Format.asprintf "%s %a %a" "add" (Util.Pp.pp_int true) a_1
+          (Util.Pp.pp_int true) b
 let ortac_postcond cmd__004_ state__005_ res__006_ =
   let open Spec in
     let open STM in
@@ -159,5 +175,5 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
 let _ =
   QCheck_base_runner.run_tests_main
     (let count = 1000 in
-     [STMTests.agree_test ~count ~name:"Test_without_sut STM tests"
-        check_init_state ortac_postcond])
+     [STMTests.agree_test ~count ~name:"Test_without_sut STM tests" 0
+        check_init_state ortac_show_cmd ortac_postcond])

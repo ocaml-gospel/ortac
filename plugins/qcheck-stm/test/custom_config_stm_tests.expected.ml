@@ -3,6 +3,42 @@
 [@@@ocaml.warning "-26-27-69-32"]
 open Custom_config
 module Ortac_runtime = Ortac_runtime_qcheck_stm
+module SUT =
+  (Ortac_runtime.SUT.Make)(struct type sut = int t
+                                  let init () = empty () end)
+module ModelElt =
+  struct
+    type nonrec elt = {
+      contents: int Ortac_runtime.Gospelstdlib.sequence }
+    let init =
+      let () = () in
+      {
+        contents =
+          (try Ortac_runtime.Gospelstdlib.Sequence.empty
+           with
+           | e ->
+               raise
+                 (Ortac_runtime.Partial_function
+                    (e,
+                      {
+                        Ortac_runtime.start =
+                          {
+                            pos_fname = "custom_config.mli";
+                            pos_lnum = 12;
+                            pos_bol = 421;
+                            pos_cnum = 446
+                          };
+                        Ortac_runtime.stop =
+                          {
+                            pos_fname = "custom_config.mli";
+                            pos_lnum = 12;
+                            pos_bol = 421;
+                            pos_cnum = 460
+                          }
+                      })))
+      }
+  end
+module Model = (Ortac_runtime.Model.Make)(ModelElt)
 module Spec =
   struct
     open STM
@@ -33,7 +69,10 @@ module Spec =
     type _ ty +=  
       | Integer: Ortac_runtime.integer ty 
     let integer = (Integer, Ortac_runtime.string_of_integer)
-    type sut = int t
+    type sut = SUT.t
+    let init_sut = SUT.create 1
+    type state = Model.t
+    let init_state = Model.create 1 ()
     type cmd =
       | Proj of char elt 
       | Push of int elt 
@@ -44,39 +83,9 @@ module Spec =
           Format.asprintf "%s %a" "proj"
             (Util.Pp.pp_elt Util.Pp.pp_char true) __arg0
       | Push e ->
-          Format.asprintf "%s sut %a" "push"
+          Format.asprintf "%s <sut> %a" "push"
             (Util.Pp.pp_elt Util.Pp.pp_int true) e
-      | Top -> Format.asprintf "protect (fun () -> %s sut)" "top"
-    type nonrec state = {
-      contents: int Ortac_runtime.Gospelstdlib.sequence }
-    let init_state =
-      let () = () in
-      {
-        contents =
-          (try Ortac_runtime.Gospelstdlib.Sequence.empty
-           with
-           | e ->
-               raise
-                 (Ortac_runtime.Partial_function
-                    (e,
-                      {
-                        Ortac_runtime.start =
-                          {
-                            pos_fname = "custom_config.mli";
-                            pos_lnum = 12;
-                            pos_bol = 421;
-                            pos_cnum = 446
-                          };
-                        Ortac_runtime.stop =
-                          {
-                            pos_fname = "custom_config.mli";
-                            pos_lnum = 12;
-                            pos_bol = 421;
-                            pos_cnum = 460
-                          }
-                      })))
-      }
-    let init_sut () = empty ()
+      | Top -> Format.asprintf "protect (fun () -> %s <sut>)" "top"
     let cleanup _ = ()
     let arb_cmd _ =
       let open QCheck in
@@ -90,62 +99,118 @@ module Spec =
       match cmd__002_ with
       | Proj __arg0 -> state__003_
       | Push e ->
-          {
-            contents =
-              ((try
-                  Ortac_runtime.Gospelstdlib.Sequence.cons (proj e)
-                    state__003_.contents
-                with
-                | e ->
-                    raise
-                      (Ortac_runtime.Partial_function
-                         (e,
-                           {
-                             Ortac_runtime.start =
-                               {
-                                 pos_fname = "custom_config.mli";
-                                 pos_lnum = 17;
-                                 pos_bol = 639;
-                                 pos_cnum = 664
-                               };
-                             Ortac_runtime.stop =
-                               {
-                                 pos_fname = "custom_config.mli";
-                                 pos_lnum = 17;
-                                 pos_bol = 639;
-                                 pos_cnum = 703
-                               }
-                           }))))
-          }
-      | Top -> state__003_
-    let precond cmd__008_ state__009_ =
-      match cmd__008_ with
+          let t_1__004_ = Model.get state__003_ 0 in
+          let t_1__005_ =
+            let open ModelElt in
+              {
+                contents =
+                  (try
+                     Ortac_runtime.Gospelstdlib.Sequence.cons (proj e)
+                       t_1__004_.contents
+                   with
+                   | e ->
+                       raise
+                         (Ortac_runtime.Partial_function
+                            (e,
+                              {
+                                Ortac_runtime.start =
+                                  {
+                                    pos_fname = "custom_config.mli";
+                                    pos_lnum = 17;
+                                    pos_bol = 639;
+                                    pos_cnum = 664
+                                  };
+                                Ortac_runtime.stop =
+                                  {
+                                    pos_fname = "custom_config.mli";
+                                    pos_lnum = 17;
+                                    pos_bol = 639;
+                                    pos_cnum = 703
+                                  }
+                              })))
+              } in
+          Model.push (Model.drop_n state__003_ 1) t_1__005_
+      | Top ->
+          let t_2__006_ = Model.get state__003_ 0 in
+          if
+            (try
+               not
+                 (t_2__006_.contents =
+                    Ortac_runtime.Gospelstdlib.Sequence.empty)
+             with
+             | e ->
+                 raise
+                   (Ortac_runtime.Partial_function
+                      (e,
+                        {
+                          Ortac_runtime.start =
+                            {
+                              pos_fname = "custom_config.mli";
+                              pos_lnum = 21;
+                              pos_bol = 875;
+                              pos_cnum = 886
+                            };
+                          Ortac_runtime.stop =
+                            {
+                              pos_fname = "custom_config.mli";
+                              pos_lnum = 21;
+                              pos_bol = 875;
+                              pos_cnum = 914
+                            }
+                        })))
+          then
+            let t_2__007_ = t_2__006_ in
+            Model.push (Model.drop_n state__003_ 1) t_2__007_
+          else state__003_
+    let precond cmd__016_ state__017_ =
+      match cmd__016_ with
       | Proj __arg0 -> true
-      | Push e -> true
-      | Top -> true
+      | Push e -> let t_1__018_ = Model.get state__017_ 0 in true
+      | Top -> let t_2__019_ = Model.get state__017_ 0 in true
     let postcond _ _ _ = true
-    let run cmd__010_ sut__011_ =
-      match cmd__010_ with
-      | Proj __arg0 -> Res (char, (proj __arg0))
-      | Push e -> Res (unit, (push sut__011_ e))
+    let run cmd__020_ sut__021_ =
+      match cmd__020_ with
+      | Proj __arg0 -> Res (char, (let res__022_ = proj __arg0 in res__022_))
+      | Push e ->
+          Res
+            (unit,
+              (let t_1__023_ = SUT.pop sut__021_ in
+               let res__024_ = push t_1__023_ e in
+               (SUT.push sut__021_ t_1__023_; res__024_)))
       | Top ->
           Res
-            ((result (elt int) exn), (protect (fun () -> top sut__011_) ()))
+            ((result (elt int) exn),
+              (let t_2__025_ = SUT.pop sut__021_ in
+               let res__026_ = protect (fun () -> top t_2__025_) () in
+               (SUT.push sut__021_ t_2__025_; res__026_)))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_postcond cmd__004_ state__005_ res__006_ =
+let ortac_show_cmd cmd__028_ state__029_ =
+  let open Spec in
+    match cmd__028_ with
+    | Proj __arg0 ->
+        Format.asprintf "%s %a" "proj" (Util.Pp.pp_elt Util.Pp.pp_char true)
+          __arg0
+    | Push e ->
+        Format.asprintf "%s %s %a" "push" (SUT.get_name state__029_ 0)
+          (Util.Pp.pp_elt Util.Pp.pp_int true) e
+    | Top ->
+        Format.asprintf "protect (fun () -> %s %s)" "top"
+          (SUT.get_name state__029_ 0)
+let ortac_postcond cmd__008_ state__009_ res__010_ =
   let open Spec in
     let open STM in
-      let new_state__007_ = lazy (next_state cmd__004_ state__005_) in
-      match (cmd__004_, res__006_) with
+      let new_state__011_ = lazy (next_state cmd__008_ state__009_) in
+      match (cmd__008_, res__010_) with
       | (Proj __arg0, Res ((Char, _), result)) -> None
       | (Push e, Res ((Unit, _), _)) -> None
       | (Top, Res ((Result (Elt (Int), Exn), _), a_1)) ->
           (match if
+                   let tmp__015_ = Model.get state__009_ 0 in
                    try
                      not
-                       (state__005_.contents =
+                       (tmp__015_.contents =
                           Ortac_runtime.Gospelstdlib.Sequence.empty)
                    with
                    | e ->
@@ -195,10 +260,13 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
                (match a_1 with
                 | Ok a_1 ->
                     if
+                      let t_old__013_ = Model.get state__009_ 0
+                      and t_new__014_ =
+                        lazy (Model.get (Lazy.force new_state__011_) 0) in
                       (try
                          (proj a_1) =
                            (Ortac_runtime.Gospelstdlib.Sequence.hd
-                              (Lazy.force new_state__007_).contents)
+                              (Lazy.force t_new__014_).contents)
                        with
                        | e ->
                            raise
@@ -249,9 +317,10 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
                 | Error (Invalid_argument _) -> None
                 | _ ->
                     if
+                      let tmp__015_ = Model.get state__009_ 0 in
                       (try
                          not
-                           (state__005_.contents =
+                           (tmp__015_.contents =
                               Ortac_runtime.Gospelstdlib.Sequence.empty)
                        with
                        | e ->
@@ -300,5 +369,5 @@ let ortac_postcond cmd__004_ state__005_ res__006_ =
 let _ =
   QCheck_base_runner.run_tests_main
     (let count = 1000 in
-     [STMTests.agree_test ~count ~name:"Custom_config STM tests"
-        check_init_state ortac_postcond])
+     [STMTests.agree_test ~count ~name:"Custom_config STM tests" 1
+        check_init_state ortac_show_cmd ortac_postcond])

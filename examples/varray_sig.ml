@@ -340,12 +340,13 @@ module type S = sig
       @raise Invalid_argument if the ranges are invalid for either varray.
   *)
   (*@ blit src src_pos dst dst_pos len
-      checks 0 <= src_pos < Sequence.length src.contents
-      checks len = 0 \/ src_pos < src_pos + len < Sequence.length src.contents
-      checks 0 <= dst_pos < Sequence.length dst.contents
-      checks len = 0 \/ dst_pos < dst_pos + len < Sequence.length dst.contents
+      checks 0 <= src_pos <= src_pos + len <= Sequence.length src.contents
+      checks 0 <= dst_pos <= dst_pos + len <= Sequence.length dst.contents
       modifies dst.contents
-      ensures dst.contents = old (dst.contents[..dst_pos] ++ src.contents[src_pos..src_pos + len - 1] ++ dst.contents[dst_pos + len..]) *)
+      ensures dst.contents =
+        if dst_pos = 0 then old (src.contents[src_pos..src_pos + len - 1] ++ dst.contents [len..])
+        else old (dst.contents[..dst_pos-1] ++ src.contents[src_pos..src_pos + len - 1]
+            ++ dst.contents[dst_pos + len..]) *)
 
   (** {1 Traversals} *)
 

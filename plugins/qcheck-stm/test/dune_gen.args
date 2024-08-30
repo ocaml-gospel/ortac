@@ -28,3 +28,5 @@ test_cleanup
 test_cleanup_config
 sut_in_type
 sut_in_type_config
+queue
+queue_config

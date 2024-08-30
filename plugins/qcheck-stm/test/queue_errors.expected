@@ -1,0 +1,7 @@
+File "queue.mli", line 30, characters 0-172:
+30 | val peek_opt : 'a t -> 'a option
+31 | (*@ v = peek_opt t
+32 |     ensures match v with
+33 |         | None -> t.contents = Sequence.empty
+34 |         | Some a -> a = Sequence.hd t.contents *)
+Warning: Incomplete computation of the returned value in the specification of peek_opt. Failure message won't be able to display the expected returned value.
