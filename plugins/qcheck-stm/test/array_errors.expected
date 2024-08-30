@@ -1,12 +1,32 @@
-File "array.mli", line 20, characters 0-139:
+File "array.mli", line 20, characters 0-143:
 20 | val make : int -> 'a -> 'a t
 21 | (*@ t = make i a
 22 |     checks i >= 0
 23 |     ensures t.size = i
-24 |     ensures t.contents = List.init i (fun j -> a) *)
+24 |     ensures t.contents = Sequence.init i (fun j -> a) *)
 Warning: Incomplete computation of the returned value in the specification of make. Failure message won't be able to display the expected returned value.
-File "array.mli", line 38, characters 0-85:
-38 | val mem : 'a -> 'a t -> bool
-39 | (*@ b = mem a t
-40 |     ensures b = List.mem a t.contents *)
+File "array.mli", line 26, characters 0-142:
+26 | val append : 'a t -> 'a t -> 'a t
+27 | (*@ t = append a b
+28 |     ensures t.size = a.size + b.size
+29 |     ensures t.contents = a.contents ++ b.contents *)
+Warning: Incomplete computation of the returned value in the specification of append. Failure message won't be able to display the expected returned value.
+File "array.mli", line 31, characters 0-260:
+31 | val sub : 'a t -> int -> int -> 'a t
+32 | (*@ r = sub t i n
+33 |     checks 0 <= i <= Sequence.length t.contents
+34 |     checks i <= i + n <= Sequence.length t.contents
+35 |     ensures r.size = n
+36 |     ensures r.contents = if n = 0 then Sequence.empty else t.contents[i..i+n-1] *)
+Warning: Incomplete computation of the returned value in the specification of sub. Failure message won't be able to display the expected returned value.
+File "array.mli", line 38, characters 0-105:
+38 | val copy : 'a t -> 'a t
+39 | (*@ r = copy t
+40 |     ensures r.size = t.size
+41 |     ensures r.contents = t.contents *)
+Warning: Incomplete computation of the returned value in the specification of copy. Failure message won't be able to display the expected returned value.
+File "array.mli", line 55, characters 0-89:
+55 | val mem : 'a -> 'a t -> bool
+56 | (*@ b = mem a t
+57 |     ensures b = Sequence.mem t.contents a *)
 Warning: Incomplete computation of the returned value in the specification of mem. Failure message won't be able to display the expected returned value.
