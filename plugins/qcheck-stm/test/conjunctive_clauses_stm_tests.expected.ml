@@ -256,16 +256,28 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__026_ state__027_ =
+let ortac_show_cmd cmd__026_ state__027_ last__029_ res__028_ =
   let open Spec in
-    match cmd__026_ with
-    | Make (i_1, a_2) ->
-        Format.asprintf "protect (fun () -> %s %a %a)" "make"
-          (Util.Pp.pp_int true) i_1 (Util.Pp.pp_char true) a_2
-    | Set (i_2, a_3) ->
-        Format.asprintf "protect (fun () -> %s %s %a %a)" "set"
-          (SUT.get_name state__027_ 0) (Util.Pp.pp_int true) i_2
-          (Util.Pp.pp_char true) a_3
+    let open STM in
+      match (cmd__026_, res__028_) with
+      | (Make (i_1, a_2), Res ((Result (SUT, Exn), _), t_1)) ->
+          let lhs =
+            if last__029_
+            then "r"
+            else
+              (match t_1 with
+               | Ok _ -> "Ok " ^ (SUT.get_name state__027_ 0)
+               | Error _ -> "_")
+          and shift = match t_1 with | Ok _ -> 1 | Error _ -> 0 in
+          Format.asprintf "let %s = protect (fun () -> %s %a %a)" lhs "make"
+            (Util.Pp.pp_int true) i_1 (Util.Pp.pp_char true) a_2
+      | (Set (i_2, a_3), Res ((Result (Unit, Exn), _), _)) ->
+          let lhs = if last__029_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = protect (fun () -> %s %s %a %a)" lhs
+            "set" (SUT.get_name state__027_ (0 + shift))
+            (Util.Pp.pp_int true) i_2 (Util.Pp.pp_char true) a_3
+      | _ -> assert false
 let ortac_postcond cmd__010_ state__011_ res__012_ =
   let open Spec in
     let open STM in

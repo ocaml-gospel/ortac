@@ -136,10 +136,9 @@ module Make (Spec : Spec) = struct
     in
     let rec aux ppf = function
       | [ (c, r) ] ->
-          pf ppf "let r = %s@\n%a(* returned %s *)@\n" c pp_expected ret
-            (show_res r)
+          pf ppf "%s@\n%a(* returned %s *)@\n" c pp_expected ret (show_res r)
       | (c, r) :: xs ->
-          pf ppf "let _ = %s@\n(* returned %s *)@\n" c (show_res r);
+          pf ppf "%s@\n(* returned %s *)@\n" c (show_res r);
           aux ppf xs
       | _ -> assert false
     in
@@ -147,8 +146,12 @@ module Make (Spec : Spec) = struct
       List.init max_suts (fun i -> Format.asprintf "let sut%d = %s" i init_sut)
     in
     pf ppf
-      "@[open %s@\nlet protect f = try Ok (f ()) with e -> Error e@\n%a@\n%a@]"
-      mod_name
+      "@[%s@\n\
+       open %s@\n\
+       let protect f = try Ok (f ()) with e -> Error e@\n\
+       %a@\n\
+       %a@]"
+      "[@@@ocaml.warning \"-8\"]" mod_name
       Format.(
         pp_print_list ~pp_sep:(fun pf _ -> fprintf pf "@\n") pp_print_string)
       inits aux trace
@@ -172,8 +175,8 @@ module Make (Spec : Spec) = struct
     match cs with
     | [] -> None
     | c :: cs -> (
-        let call = ortac_show_cmd c sut in
         let res = Spec.run c sut in
+        let call = ortac_show_cmd c sut (cs = []) res in
         (* This functor will be called after a modified postcond has been
            defined, returning a list of 3-plets containing the command, the
            term and the location *)

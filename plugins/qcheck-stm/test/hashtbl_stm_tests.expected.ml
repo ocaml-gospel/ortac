@@ -469,37 +469,73 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__100_ state__101_ =
+let ortac_show_cmd cmd__100_ state__101_ last__103_ res__102_ =
   let open Spec in
-    match cmd__100_ with
-    | Create (random, size) ->
-        Format.asprintf "%s %a %a" "create" (Util.Pp.pp_bool true) random
-          (Util.Pp.pp_int true) size
-    | Clear -> Format.asprintf "%s %s" "clear" (SUT.get_name state__101_ 0)
-    | Reset -> Format.asprintf "%s %s" "reset" (SUT.get_name state__101_ 0)
-    | Copy -> Format.asprintf "%s %s" "copy" (SUT.get_name state__101_ 0)
-    | Add (a_2, b_2) ->
-        Format.asprintf "%s %s %a %a" "add" (SUT.get_name state__101_ 0)
-          (Util.Pp.pp_char true) a_2 (Util.Pp.pp_int true) b_2
-    | Find a_3 ->
-        Format.asprintf "protect (fun () -> %s %s %a)" "find"
-          (SUT.get_name state__101_ 0) (Util.Pp.pp_char true) a_3
-    | Find_opt a_4 ->
-        Format.asprintf "%s %s %a" "find_opt" (SUT.get_name state__101_ 0)
-          (Util.Pp.pp_char true) a_4
-    | Find_all a_5 ->
-        Format.asprintf "%s %s %a" "find_all" (SUT.get_name state__101_ 0)
-          (Util.Pp.pp_char true) a_5
-    | Mem a_6 ->
-        Format.asprintf "%s %s %a" "mem" (SUT.get_name state__101_ 0)
-          (Util.Pp.pp_char true) a_6
-    | Remove a_7 ->
-        Format.asprintf "%s %s %a" "remove" (SUT.get_name state__101_ 0)
-          (Util.Pp.pp_char true) a_7
-    | Replace (a_8, b_3) ->
-        Format.asprintf "%s %s %a %a" "replace" (SUT.get_name state__101_ 0)
-          (Util.Pp.pp_char true) a_8 (Util.Pp.pp_int true) b_3
-    | Length -> Format.asprintf "%s %s" "length" (SUT.get_name state__101_ 0)
+    let open STM in
+      match (cmd__100_, res__102_) with
+      | (Create (random, size), Res ((SUT, _), h)) ->
+          let lhs = if last__103_ then "r" else SUT.get_name state__101_ 0
+          and shift = 1 in
+          Format.asprintf "let %s = %s %a %a" lhs "create"
+            (Util.Pp.pp_bool true) random (Util.Pp.pp_int true) size
+      | (Clear, Res ((Unit, _), _)) ->
+          let lhs = if last__103_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s" lhs "clear"
+            (SUT.get_name state__101_ (0 + shift))
+      | (Reset, Res ((Unit, _), _)) ->
+          let lhs = if last__103_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s" lhs "reset"
+            (SUT.get_name state__101_ (0 + shift))
+      | (Copy, Res ((SUT, _), h2)) ->
+          let lhs = if last__103_ then "r" else SUT.get_name state__101_ 0
+          and shift = 1 in
+          Format.asprintf "let %s = %s %s" lhs "copy"
+            (SUT.get_name state__101_ (0 + shift))
+      | (Add (a_2, b_2), Res ((Unit, _), _)) ->
+          let lhs = if last__103_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s %a %a" lhs "add"
+            (SUT.get_name state__101_ (0 + shift)) (Util.Pp.pp_char true) a_2
+            (Util.Pp.pp_int true) b_2
+      | (Find a_3, Res ((Result (Int, Exn), _), _)) ->
+          let lhs = if last__103_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = protect (fun () -> %s %s %a)" lhs "find"
+            (SUT.get_name state__101_ (0 + shift)) (Util.Pp.pp_char true) a_3
+      | (Find_opt a_4, Res ((Option (Int), _), _)) ->
+          let lhs = if last__103_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s %a" lhs "find_opt"
+            (SUT.get_name state__101_ (0 + shift)) (Util.Pp.pp_char true) a_4
+      | (Find_all a_5, Res ((List (Int), _), _)) ->
+          let lhs = if last__103_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s %a" lhs "find_all"
+            (SUT.get_name state__101_ (0 + shift)) (Util.Pp.pp_char true) a_5
+      | (Mem a_6, Res ((Bool, _), _)) ->
+          let lhs = if last__103_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s %a" lhs "mem"
+            (SUT.get_name state__101_ (0 + shift)) (Util.Pp.pp_char true) a_6
+      | (Remove a_7, Res ((Unit, _), _)) ->
+          let lhs = if last__103_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s %a" lhs "remove"
+            (SUT.get_name state__101_ (0 + shift)) (Util.Pp.pp_char true) a_7
+      | (Replace (a_8, b_3), Res ((Unit, _), _)) ->
+          let lhs = if last__103_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s %a %a" lhs "replace"
+            (SUT.get_name state__101_ (0 + shift)) (Util.Pp.pp_char true) a_8
+            (Util.Pp.pp_int true) b_3
+      | (Length, Res ((Int, _), _)) ->
+          let lhs = if last__103_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s" lhs "length"
+            (SUT.get_name state__101_ (0 + shift))
+      | _ -> assert false
 let ortac_postcond cmd__030_ state__031_ res__032_ =
   let open Spec in
     let open STM in

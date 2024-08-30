@@ -833,37 +833,78 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__113_ state__114_ =
+let ortac_show_cmd cmd__113_ state__114_ last__116_ res__115_ =
   let open Spec in
-    match cmd__113_ with
-    | Length -> Format.asprintf "%s %s" "length" (SUT.get_name state__114_ 0)
-    | Get i ->
-        Format.asprintf "protect (fun () -> %s %s %a)" "get"
-          (SUT.get_name state__114_ 0) (Util.Pp.pp_int true) i
-    | Set (i_1, a_1) ->
-        Format.asprintf "protect (fun () -> %s %s %a %a)" "set"
-          (SUT.get_name state__114_ 0) (Util.Pp.pp_int true) i_1
-          (Util.Pp.pp_char true) a_1
-    | Make (i_2, a_2) ->
-        Format.asprintf "protect (fun () -> %s %a %a)" "make"
-          (Util.Pp.pp_int true) i_2 (Util.Pp.pp_char true) a_2
-    | Append ->
-        Format.asprintf "%s %s %s" "append" (SUT.get_name state__114_ 0)
-          (SUT.get_name state__114_ 1)
-    | Sub (i_3, n) ->
-        Format.asprintf "protect (fun () -> %s %s %a %a)" "sub"
-          (SUT.get_name state__114_ 0) (Util.Pp.pp_int true) i_3
-          (Util.Pp.pp_int true) n
-    | Copy -> Format.asprintf "%s %s" "copy" (SUT.get_name state__114_ 0)
-    | Fill (pos, len, x) ->
-        Format.asprintf "protect (fun () -> %s %s %a %a %a)" "fill"
-          (SUT.get_name state__114_ 0) (Util.Pp.pp_int true) pos
-          (Util.Pp.pp_int true) len (Util.Pp.pp_char true) x
-    | To_list ->
-        Format.asprintf "%s %s" "to_list" (SUT.get_name state__114_ 0)
-    | Mem a_3 ->
-        Format.asprintf "%s %a %s" "mem" (Util.Pp.pp_char true) a_3
-          (SUT.get_name state__114_ 0)
+    let open STM in
+      match (cmd__113_, res__115_) with
+      | (Length, Res ((Int, _), _)) ->
+          let lhs = if last__116_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s" lhs "length"
+            (SUT.get_name state__114_ (0 + shift))
+      | (Get i, Res ((Result (Char, Exn), _), _)) ->
+          let lhs = if last__116_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = protect (fun () -> %s %s %a)" lhs "get"
+            (SUT.get_name state__114_ (0 + shift)) (Util.Pp.pp_int true) i
+      | (Set (i_1, a_1), Res ((Result (Unit, Exn), _), _)) ->
+          let lhs = if last__116_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = protect (fun () -> %s %s %a %a)" lhs
+            "set" (SUT.get_name state__114_ (0 + shift))
+            (Util.Pp.pp_int true) i_1 (Util.Pp.pp_char true) a_1
+      | (Make (i_2, a_2), Res ((Result (SUT, Exn), _), t_4)) ->
+          let lhs =
+            if last__116_
+            then "r"
+            else
+              (match t_4 with
+               | Ok _ -> "Ok " ^ (SUT.get_name state__114_ 0)
+               | Error _ -> "_")
+          and shift = match t_4 with | Ok _ -> 1 | Error _ -> 0 in
+          Format.asprintf "let %s = protect (fun () -> %s %a %a)" lhs "make"
+            (Util.Pp.pp_int true) i_2 (Util.Pp.pp_char true) a_2
+      | (Append, Res ((SUT, _), t_5)) ->
+          let lhs = if last__116_ then "r" else SUT.get_name state__114_ 0
+          and shift = 1 in
+          Format.asprintf "let %s = %s %s %s" lhs "append"
+            (SUT.get_name state__114_ (0 + shift))
+            (SUT.get_name state__114_ (1 + shift))
+      | (Sub (i_3, n), Res ((Result (SUT, Exn), _), r)) ->
+          let lhs =
+            if last__116_
+            then "r"
+            else
+              (match r with
+               | Ok _ -> "Ok " ^ (SUT.get_name state__114_ 0)
+               | Error _ -> "_")
+          and shift = match r with | Ok _ -> 1 | Error _ -> 0 in
+          Format.asprintf "let %s = protect (fun () -> %s %s %a %a)" lhs
+            "sub" (SUT.get_name state__114_ (0 + shift))
+            (Util.Pp.pp_int true) i_3 (Util.Pp.pp_int true) n
+      | (Copy, Res ((SUT, _), r_1)) ->
+          let lhs = if last__116_ then "r" else SUT.get_name state__114_ 0
+          and shift = 1 in
+          Format.asprintf "let %s = %s %s" lhs "copy"
+            (SUT.get_name state__114_ (0 + shift))
+      | (Fill (pos, len, x), Res ((Result (Unit, Exn), _), _)) ->
+          let lhs = if last__116_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = protect (fun () -> %s %s %a %a %a)" lhs
+            "fill" (SUT.get_name state__114_ (0 + shift))
+            (Util.Pp.pp_int true) pos (Util.Pp.pp_int true) len
+            (Util.Pp.pp_char true) x
+      | (To_list, Res ((List (Char), _), _)) ->
+          let lhs = if last__116_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s" lhs "to_list"
+            (SUT.get_name state__114_ (0 + shift))
+      | (Mem a_3, Res ((Bool, _), _)) ->
+          let lhs = if last__116_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %a %s" lhs "mem"
+            (Util.Pp.pp_char true) a_3 (SUT.get_name state__114_ (0 + shift))
+      | _ -> assert false
 let ortac_postcond cmd__042_ state__043_ res__044_ =
   let open Spec in
     let open STM in

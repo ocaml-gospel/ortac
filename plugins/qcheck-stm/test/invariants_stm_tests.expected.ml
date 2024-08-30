@@ -262,17 +262,27 @@ let check_init_state () =
                       }
                   })))
   then QCheck.Test.fail_report "INIT_SUT violates type invariants for SUT"
-let ortac_show_cmd cmd__036_ state__037_ =
+let ortac_show_cmd cmd__036_ state__037_ last__039_ res__038_ =
   let open Spec in
-    match cmd__036_ with
-    | Create a_1 ->
-        Format.asprintf "%s %a" "create" (Util.Pp.pp_int true) a_1
-    | Push a_2 ->
-        Format.asprintf "%s %a %s" "push" (Util.Pp.pp_int true) a_2
-          (SUT.get_name state__037_ 0)
-    | Transfer ->
-        Format.asprintf "%s %s %s" "transfer" (SUT.get_name state__037_ 0)
-          (SUT.get_name state__037_ 1)
+    let open STM in
+      match (cmd__036_, res__038_) with
+      | (Create a_1, Res ((SUT, _), t_1)) ->
+          let lhs = if last__039_ then "r" else SUT.get_name state__037_ 0
+          and shift = 1 in
+          Format.asprintf "let %s = %s %a" lhs "create" (Util.Pp.pp_int true)
+            a_1
+      | (Push a_2, Res ((Unit, _), _)) ->
+          let lhs = if last__039_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %a %s" lhs "push"
+            (Util.Pp.pp_int true) a_2 (SUT.get_name state__037_ (0 + shift))
+      | (Transfer, Res ((Unit, _), _)) ->
+          let lhs = if last__039_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s %s" lhs "transfer"
+            (SUT.get_name state__037_ (0 + shift))
+            (SUT.get_name state__037_ (1 + shift))
+      | _ -> assert false
 let ortac_postcond cmd__012_ state__013_ res__014_ =
   let open Spec in
     let open STM in

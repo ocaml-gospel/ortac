@@ -338,26 +338,51 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__062_ state__063_ =
+let ortac_show_cmd cmd__062_ state__063_ last__065_ res__064_ =
   let open Spec in
-    match cmd__062_ with
-    | Create () -> Format.asprintf "%s %a" "create" (Util.Pp.pp_unit true) ()
-    | Clear -> Format.asprintf "%s %s" "clear" (SUT.get_name state__063_ 0)
-    | Add tup ->
-        Format.asprintf "%s %s %a" "add" (SUT.get_name state__063_ 0)
-          (Util.Pp.pp_tuple2 Util.Pp.pp_char Util.Pp.pp_int true) tup
-    | Add' tup_1 ->
-        Format.asprintf "%s %s %a" "add'" (SUT.get_name state__063_ 0)
-          (Util.Pp.pp_tuple3 Util.Pp.pp_bool Util.Pp.pp_char Util.Pp.pp_int
-             true) tup_1
-    | Add'' tup_2 ->
-        Format.asprintf "%s %s %a" "add''" (SUT.get_name state__063_ 0)
-          (Util.Pp.pp_tuple2 Util.Pp.pp_bool
-             (Util.Pp.pp_tuple2 Util.Pp.pp_char Util.Pp.pp_int) true) tup_2
-    | Size_tup ->
-        Format.asprintf "%s %s" "size_tup" (SUT.get_name state__063_ 0)
-    | Size_tup' ->
-        Format.asprintf "%s %s" "size_tup'" (SUT.get_name state__063_ 0)
+    let open STM in
+      match (cmd__062_, res__064_) with
+      | (Create (), Res ((SUT, _), h)) ->
+          let lhs = if last__065_ then "r" else SUT.get_name state__063_ 0
+          and shift = 1 in
+          Format.asprintf "let %s = %s %a" lhs "create"
+            (Util.Pp.pp_unit true) ()
+      | (Clear, Res ((Unit, _), _)) ->
+          let lhs = if last__065_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s" lhs "clear"
+            (SUT.get_name state__063_ (0 + shift))
+      | (Add tup, Res ((Unit, _), _)) ->
+          let lhs = if last__065_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s %a" lhs "add"
+            (SUT.get_name state__063_ (0 + shift))
+            (Util.Pp.pp_tuple2 Util.Pp.pp_char Util.Pp.pp_int true) tup
+      | (Add' tup_1, Res ((Unit, _), _)) ->
+          let lhs = if last__065_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s %a" lhs "add'"
+            (SUT.get_name state__063_ (0 + shift))
+            (Util.Pp.pp_tuple3 Util.Pp.pp_bool Util.Pp.pp_char Util.Pp.pp_int
+               true) tup_1
+      | (Add'' tup_2, Res ((Unit, _), _)) ->
+          let lhs = if last__065_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s %a" lhs "add''"
+            (SUT.get_name state__063_ (0 + shift))
+            (Util.Pp.pp_tuple2 Util.Pp.pp_bool
+               (Util.Pp.pp_tuple2 Util.Pp.pp_char Util.Pp.pp_int) true) tup_2
+      | (Size_tup, Res ((Tup2 (Int, Int), _), _)) ->
+          let lhs = if last__065_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s" lhs "size_tup"
+            (SUT.get_name state__063_ (0 + shift))
+      | (Size_tup', Res ((Tup3 (Int, Int, Int), _), _)) ->
+          let lhs = if last__065_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s" lhs "size_tup'"
+            (SUT.get_name state__063_ (0 + shift))
+      | _ -> assert false
 let ortac_postcond cmd__018_ state__019_ res__020_ =
   let open Spec in
     let open STM in

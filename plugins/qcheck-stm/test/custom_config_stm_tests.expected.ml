@@ -227,19 +227,32 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__031_ state__032_ =
+let ortac_show_cmd cmd__031_ state__032_ last__034_ res__033_ =
   let open Spec in
-    match cmd__031_ with
-    | Proj __arg0 ->
-        Format.asprintf "%s %a" "proj" (Util.Pp.pp_elt Util.Pp.pp_char true)
-          __arg0
-    | Empty () -> Format.asprintf "%s %a" "empty" (Util.Pp.pp_unit true) ()
-    | Push e ->
-        Format.asprintf "%s %s %a" "push" (SUT.get_name state__032_ 0)
-          (Util.Pp.pp_elt Util.Pp.pp_int true) e
-    | Top ->
-        Format.asprintf "protect (fun () -> %s %s)" "top"
-          (SUT.get_name state__032_ 0)
+    let open STM in
+      match (cmd__031_, res__033_) with
+      | (Proj __arg0, Res ((Char, _), _)) ->
+          let lhs = if last__034_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %a" lhs "proj"
+            (Util.Pp.pp_elt Util.Pp.pp_char true) __arg0
+      | (Empty (), Res ((SUT, _), t_1)) ->
+          let lhs = if last__034_ then "r" else SUT.get_name state__032_ 0
+          and shift = 1 in
+          Format.asprintf "let %s = %s %a" lhs "empty" (Util.Pp.pp_unit true)
+            ()
+      | (Push e, Res ((Unit, _), _)) ->
+          let lhs = if last__034_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s %a" lhs "push"
+            (SUT.get_name state__032_ (0 + shift))
+            (Util.Pp.pp_elt Util.Pp.pp_int true) e
+      | (Top, Res ((Result (Elt (Int), Exn), _), _)) ->
+          let lhs = if last__034_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "top"
+            (SUT.get_name state__032_ (0 + shift))
+      | _ -> assert false
 let ortac_postcond cmd__010_ state__011_ res__012_ =
   let open Spec in
     let open STM in

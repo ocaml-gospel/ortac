@@ -367,27 +367,52 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__090_ state__091_ =
+let ortac_show_cmd cmd__090_ state__091_ last__093_ res__092_ =
   let open Spec in
-    match cmd__090_ with
-    | Create () -> Format.asprintf "%s %a" "create" (Util.Pp.pp_unit true) ()
-    | Push v ->
-        Format.asprintf "%s %a %s" "push" (Util.Pp.pp_int true) v
-          (SUT.get_name state__091_ 0)
-    | Pop ->
-        Format.asprintf "protect (fun () -> %s %s)" "pop"
-          (SUT.get_name state__091_ 0)
-    | Peek ->
-        Format.asprintf "protect (fun () -> %s %s)" "peek"
-          (SUT.get_name state__091_ 0)
-    | Peek_opt ->
-        Format.asprintf "%s %s" "peek_opt" (SUT.get_name state__091_ 0)
-    | Clear -> Format.asprintf "%s %s" "clear" (SUT.get_name state__091_ 0)
-    | Is_empty ->
-        Format.asprintf "%s %s" "is_empty" (SUT.get_name state__091_ 0)
-    | Transfer ->
-        Format.asprintf "%s %s %s" "transfer" (SUT.get_name state__091_ 0)
-          (SUT.get_name state__091_ 1)
+    let open STM in
+      match (cmd__090_, res__092_) with
+      | (Create (), Res ((SUT, _), t_1)) ->
+          let lhs = if last__093_ then "r" else SUT.get_name state__091_ 0
+          and shift = 1 in
+          Format.asprintf "let %s = %s %a" lhs "create"
+            (Util.Pp.pp_unit true) ()
+      | (Push v, Res ((Unit, _), _)) ->
+          let lhs = if last__093_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %a %s" lhs "push"
+            (Util.Pp.pp_int true) v (SUT.get_name state__091_ (0 + shift))
+      | (Pop, Res ((Result (Int, Exn), _), _)) ->
+          let lhs = if last__093_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "pop"
+            (SUT.get_name state__091_ (0 + shift))
+      | (Peek, Res ((Result (Int, Exn), _), _)) ->
+          let lhs = if last__093_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "peek"
+            (SUT.get_name state__091_ (0 + shift))
+      | (Peek_opt, Res ((Option (Int), _), _)) ->
+          let lhs = if last__093_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s" lhs "peek_opt"
+            (SUT.get_name state__091_ (0 + shift))
+      | (Clear, Res ((Unit, _), _)) ->
+          let lhs = if last__093_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s" lhs "clear"
+            (SUT.get_name state__091_ (0 + shift))
+      | (Is_empty, Res ((Bool, _), _)) ->
+          let lhs = if last__093_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s" lhs "is_empty"
+            (SUT.get_name state__091_ (0 + shift))
+      | (Transfer, Res ((Unit, _), _)) ->
+          let lhs = if last__093_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s %s" lhs "transfer"
+            (SUT.get_name state__091_ (0 + shift))
+            (SUT.get_name state__091_ (1 + shift))
+      | _ -> assert false
 let ortac_postcond cmd__023_ state__024_ res__025_ =
   let open Spec in
     let open STM in

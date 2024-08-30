@@ -1333,8 +1333,38 @@ let integer_ty_ext =
     [%stri let integer = (Integer, Ortac_runtime.string_of_integer)];
   ]
 
-let pp_ortac_cmd_case config suts value =
-  let lhs = mk_cmd_pattern value in
+let pp_ortac_cmd_case config suts last value =
+  let open Reserr in
+  let lhs0 = mk_cmd_pattern value in
+  let* lhs1 =
+    let ret_ty = Ir.get_return_type value in
+    let* ret_ty =
+      let open Ppxlib in
+      match ret_ty.ptyp_desc with
+      | Ptyp_var _ | Ptyp_constr _ | Ptyp_tuple _ -> ok ret_ty
+      (* Unsupported return types are already filtered out *)
+      | _ -> assert false
+    in
+    let* pat_ty =
+      if Cfg.is_sut config ret_ty then pvar "SUT" |> ok
+      else pat_of_core_type value.inst ret_ty
+    in
+    let pat_ty =
+      if may_raise_exception value then
+        ppat_construct (lident "Result")
+          (Some (ppat_tuple [ pat_ty; ppat_construct (lident "Exn") None ]))
+      else pat_ty
+    in
+    let pat_ret =
+      if Cfg.does_return_sut config value.ty then
+        List.hd value.ret |> str_of_ident |> pvar
+      else ppat_any
+    in
+    ok
+      (ppat_construct (lident "Res")
+         (Some (ppat_tuple [ ppat_tuple [ pat_ty; ppat_any ]; pat_ret ])))
+  in
+  let lhs = ppat_tuple [ lhs0; lhs1 ] in
   let qualify_pp = qualify [ "Util"; "Pp" ] in
   let get_name =
     Option.fold ~none:eunit ~some:(fun id -> str_of_ident id |> evar)
@@ -1364,7 +1394,9 @@ let pp_ortac_cmd_case config suts value =
       | Ptyp_arrow (_, l, r), xs when Cfg.is_sut config l ->
           let* fmt, pps = aux r (n + 1) xs in
           let get_sut =
-            eapply (qualify [ "SUT" ] "get_name") [ evar suts; eint n ]
+            eapply
+              (qualify [ "SUT" ] "get_name")
+              [ evar suts; eapply (evar "+") [ eint n; evar "shift" ] ]
           in
           ok ("%s" :: fmt, get_sut :: pps)
       | Ptyp_arrow (_, _, r), (ty, id) :: xs ->
@@ -1382,30 +1414,93 @@ let pp_ortac_cmd_case config suts value =
     let* fmt, pp_args = aux value.ty 0 value.args in
     let fmt =
       let call = String.concat " " ("%s" :: fmt) in
-      if may_raise_exception value then "protect (fun () -> " ^ call ^ ")"
-      else call
+      let protected_call =
+        if may_raise_exception value then "protect (fun () -> " ^ call ^ ")"
+        else call
+      in
+      "let %s = " ^ protected_call
     in
     let args =
-      List.map (fun x -> (Nolabel, x)) (estring fmt :: estring name :: pp_args)
+      List.map
+        (fun x -> (Nolabel, x))
+        (estring fmt :: evar "lhs" :: estring name :: pp_args)
     in
-    pexp_apply (qualify [ "Format" ] "asprintf") args |> ok
+    let res_match ok_expr error_expr =
+      let res =
+        match value.ret with
+        | [ id ] -> evar (str_of_ident id)
+        | _ -> failwith "should not happen, can only return exactly one sut"
+      in
+      pexp_match res
+        [
+          (case ~lhs:(ppat_construct (lident "Ok") (Some ppat_any)))
+            ~guard:None ~rhs:ok_expr;
+          (case ~lhs:(ppat_construct (lident "Error") (Some ppat_any)))
+            ~guard:None ~rhs:error_expr;
+        ]
+    in
+    let lhs =
+      let pat = pvar "lhs" in
+      let expr =
+        pexp_ifthenelse (evar last) (estring "r")
+          (Some
+             (if
+                Cfg.does_return_sut config value.ty && may_raise_exception value
+              then
+                res_match
+                  [%expr "Ok " ^ SUT.get_name [%e evar suts] 0]
+                  (estring "_")
+              else if Cfg.does_return_sut config value.ty then
+                eapply (qualify [ "SUT" ] "get_name") [ evar suts; eint 0 ]
+              else estring "_"))
+      in
+      value_binding ~pat ~expr
+    in
+    let shift =
+      let pat = pvar "shift" in
+      let expr =
+        if Cfg.does_return_sut config value.ty && may_raise_exception value then
+          res_match (eint 1) (eint 0)
+        else if Cfg.does_return_sut config value.ty then eint 1
+        else eint 0
+      in
+      value_binding ~pat ~expr
+    in
+    pexp_let Nonrecursive [ lhs; shift ]
+      (pexp_apply (qualify [ "Format" ] "asprintf") args)
+    |> ok
   in
   case ~lhs ~guard:None ~rhs |> ok
 
 let ortac_cmd_show config ir =
   let cmd_name = gen_symbol ~prefix:"cmd" () in
   let suts_name = gen_symbol ~prefix:"state" () in
+  let res_name = gen_symbol ~prefix:"res" () in
+  let last_name = gen_symbol ~prefix:"last" () in
   let open Reserr in
-  let* cases = map (pp_ortac_cmd_case config suts_name) ir.values in
-  let match_expr = pexp_match (evar cmd_name) cases in
+  let* cases = map (pp_ortac_cmd_case config suts_name last_name) ir.values in
+  let default_case =
+    case ~lhs:ppat_any ~guard:None ~rhs:(eapply (evar "assert") [ ebool false ])
+  in
+  let cases = cases @ [ default_case ] in
+  let match_expr =
+    pexp_match (pexp_tuple [ evar cmd_name; evar res_name ]) cases
+  in
   let body =
     pexp_open
-      (open_infos ~expr:(pmod_ident (lident "Spec")) ~override:Fresh)
-      match_expr
+      Ast_helper.(Opn.mk (Mod.ident (lident "Spec")))
+      (pexp_open Ast_helper.(Opn.mk (Mod.ident (lident "STM"))) match_expr)
   in
   let pat = pvar "ortac_show_cmd" in
   let expr =
-    efun [ (Nolabel, pvar cmd_name); (Nolabel, pvar suts_name) ] body
+    efun
+      [
+        (Nolabel, pvar cmd_name);
+        (Nolabel, pvar suts_name);
+        (Nolabel, pvar last_name);
+        (Nolabel, pvar res_name);
+      ]
+      body
   in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
