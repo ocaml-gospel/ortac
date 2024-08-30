@@ -44,23 +44,3 @@
  (alias runtest)
  (action
   (diff dune.inc dune.inc.gen)))
-
-(rule
- (package ortac-qcheck-stm)
- (deps
-  (package ortac-core)
-  (package ortac-qcheck-stm))
- (action
-  (setenv
-   ORTAC_ONLY_PLUGIN
-   qcheck-stm
-   (ignore-stdout
-    (with-stderr-to
-     empty_cmd_errors
-     (run ortac qcheck-stm %{dep:empty_cmd.mli} %{dep:empty_cmd_config.ml}))))))
-
-(rule
- (alias runtest)
- (package ortac-qcheck-stm)
- (action
-  (diff empty_cmd_errors.expected empty_cmd_errors)))

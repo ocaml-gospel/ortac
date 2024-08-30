@@ -917,10 +917,7 @@ let cmd_type ir =
     type_declaration ~name:(noloc "cmd") ~params:[] ~cstrs:[]
       ~kind:(Ptype_variant constructors) ~private_:Public ~manifest:None
   in
-  let open Reserr in
-  if List.length constructors = 0 then
-    error (Empty_cmd_type, Ppxlib.Location.none)
-  else pstr_type Recursive [ td ] |> ok
+  pstr_type Recursive [ td ]
 
 let pp_cmd_case config value =
   let lhs = mk_cmd_pattern value in
@@ -1519,7 +1516,7 @@ let stm config ir =
   let* ghost_types = ghost_types config ir.ghost_types in
   let* config, ghost_functions = ghost_functions config ir.ghost_functions in
   let warn = [%stri [@@@ocaml.warning "-26-27-69-32-38"]] in
-  let* cmd = cmd_type ir in
+  let cmd = cmd_type ir in
   let* cmd_show = cmd_show config ir in
   let* idx, next_state = next_state config ir in
   let* postcond = postcond config idx ir in

@@ -1,5 +1,0 @@
-File "empty_cmd.mli", line 4, characters 0-64:
-4 | val make : unit -> t
-5 | (*@ t = make u
-6 |     ensures t.content = 0 *)
-Warning: Incomplete computation of the returned value in the specification of make. Failure message won't be able to display the expected returned value.
