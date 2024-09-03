@@ -592,26 +592,26 @@ let postcond_case config state invariants idx state_ident new_state_ident value
       ~new_lz:true ~new_t:sut_map_new t.term
     >>= ocaml_of_term config
     >>= wrap
-  and translate_invariants id t =
+  and translate_invariants idx sut id t =
+    (* translates the type invariants for the given model. As multiple suts may
+       be used during a call, idx gives the offset on the stack of suts, sut is
+       the identifier for the sut stack, id the name of the model in the
+       invariant, and t a term that needs to be checked *)
     let vbs, sut_map =
-      let aux idx sut_var =
-        let tmp = gen_symbol ~prefix:id.Ident.id_str () in
-        let pat = pvar tmp in
-        let expr =
-          [%expr
-            lazy
-              (Model.get
-                 (Lazy.force [%e evar new_state_ident.Ident.id_str])
-                 [%e eint idx])]
-        in
-        ( value_binding ~pat ~expr,
-          (sut_var, Ident.create ~loc:Location.none tmp) )
+      let tmp = gen_symbol ~prefix:sut.Ident.id_str () in
+      let pat = pvar tmp in
+      let expr =
+        [%expr
+          lazy
+            (Model.get
+               (Lazy.force [%e evar new_state_ident.Ident.id_str])
+               [%e eint idx])]
       in
-      List.mapi aux value.sut_vars |> List.split
+      (value_binding ~pat ~expr, (id, Ident.create ~loc:Location.none tmp))
     in
-    let wrap = pexp_let Nonrecursive vbs in
+    let wrap = pexp_let Nonrecursive [ vbs ] in
     let* subst_term =
-      subst_term state ~gos_t:[ id ] ~old_t:[] ~new_t:sut_map ~new_lz:true
+      subst_term state ~gos_t:[ id ] ~old_t:[] ~new_t:[ sut_map ] ~new_lz:true
         t.term
     in
     let* ocaml_term = ocaml_of_term config subst_term in
@@ -704,12 +704,18 @@ let postcond_case config state invariants idx state_ident new_state_ident value
     (* [postcond] and [invariants] are specification of normal behaviour *)
     let* postcond = map (fun t -> wrap_check t <$> translate_postcond t) normal
     and* invariants =
-      Option.fold ~none:(ok [])
-        ~some:(fun (id, xs) ->
-          map (fun t -> wrap_check t <$> translate_invariants id t) xs)
-        invariants
+      match invariants with
+      | None -> ok []
+      | Some (id, xs) ->
+          List.mapi
+            (fun idx sut ->
+              map
+                (fun t -> wrap_check t <$> translate_invariants idx sut id t)
+                xs)
+            value.sut_vars
+          |> promote
     in
-    list_append (postcond @ invariants) |> ok
+    list_append (postcond @ List.concat invariants) |> ok
   in
   let res, pat_ret =
     match value.ret with

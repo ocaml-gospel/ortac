@@ -232,8 +232,159 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
     let open STM in
       let new_state__013_ = lazy (next_state cmd__010_ state__011_) in
       match (cmd__010_, res__012_) with
-      | (Push a_1, Res ((Unit, _), _)) -> None
-      | (Transfer, Res ((Unit, _), _)) -> None
+      | (Push a_1, Res ((Unit, _), _)) ->
+          if
+            let t__014_ = lazy (Model.get (Lazy.force new_state__013_) 0) in
+            (try
+               Ortac_runtime.Gospelstdlib.(>)
+                 (Ortac_runtime.Gospelstdlib.Sequence.length
+                    (Lazy.force t__014_).contents)
+                 (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+             with
+             | e ->
+                 raise
+                   (Ortac_runtime.Partial_function
+                      (e,
+                        {
+                          Ortac_runtime.start =
+                            {
+                              pos_fname = "invariants.mli";
+                              pos_lnum = 4;
+                              pos_bol = 114;
+                              pos_cnum = 128
+                            };
+                          Ortac_runtime.stop =
+                            {
+                              pos_fname = "invariants.mli";
+                              pos_lnum = 4;
+                              pos_bol = 114;
+                              pos_cnum = 158
+                            }
+                        })))
+          then None
+          else
+            Some
+              (Ortac_runtime.report "Invariants" "create 42"
+                 (Either.right (Res (unit, ()))) "push"
+                 [("Sequence.length x.contents > 0",
+                    {
+                      Ortac_runtime.start =
+                        {
+                          pos_fname = "invariants.mli";
+                          pos_lnum = 4;
+                          pos_bol = 114;
+                          pos_cnum = 128
+                        };
+                      Ortac_runtime.stop =
+                        {
+                          pos_fname = "invariants.mli";
+                          pos_lnum = 4;
+                          pos_bol = 114;
+                          pos_cnum = 158
+                        }
+                    })])
+      | (Transfer, Res ((Unit, _), _)) ->
+          Ortac_runtime.append
+            (if
+               let t1__016_ = lazy (Model.get (Lazy.force new_state__013_) 0) in
+               try
+                 Ortac_runtime.Gospelstdlib.(>)
+                   (Ortac_runtime.Gospelstdlib.Sequence.length
+                      (Lazy.force t1__016_).contents)
+                   (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+               with
+               | e ->
+                   raise
+                     (Ortac_runtime.Partial_function
+                        (e,
+                          {
+                            Ortac_runtime.start =
+                              {
+                                pos_fname = "invariants.mli";
+                                pos_lnum = 4;
+                                pos_bol = 114;
+                                pos_cnum = 128
+                              };
+                            Ortac_runtime.stop =
+                              {
+                                pos_fname = "invariants.mli";
+                                pos_lnum = 4;
+                                pos_bol = 114;
+                                pos_cnum = 158
+                              }
+                          }))
+             then None
+             else
+               Some
+                 (Ortac_runtime.report "Invariants" "create 42"
+                    (Either.right (Res (unit, ()))) "transfer"
+                    [("Sequence.length x.contents > 0",
+                       {
+                         Ortac_runtime.start =
+                           {
+                             pos_fname = "invariants.mli";
+                             pos_lnum = 4;
+                             pos_bol = 114;
+                             pos_cnum = 128
+                           };
+                         Ortac_runtime.stop =
+                           {
+                             pos_fname = "invariants.mli";
+                             pos_lnum = 4;
+                             pos_bol = 114;
+                             pos_cnum = 158
+                           }
+                       })]))
+            (if
+               let t2__017_ = lazy (Model.get (Lazy.force new_state__013_) 1) in
+               try
+                 Ortac_runtime.Gospelstdlib.(>)
+                   (Ortac_runtime.Gospelstdlib.Sequence.length
+                      (Lazy.force t2__017_).contents)
+                   (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+               with
+               | e ->
+                   raise
+                     (Ortac_runtime.Partial_function
+                        (e,
+                          {
+                            Ortac_runtime.start =
+                              {
+                                pos_fname = "invariants.mli";
+                                pos_lnum = 4;
+                                pos_bol = 114;
+                                pos_cnum = 128
+                              };
+                            Ortac_runtime.stop =
+                              {
+                                pos_fname = "invariants.mli";
+                                pos_lnum = 4;
+                                pos_bol = 114;
+                                pos_cnum = 158
+                              }
+                          }))
+             then None
+             else
+               Some
+                 (Ortac_runtime.report "Invariants" "create 42"
+                    (Either.right (Res (unit, ()))) "transfer"
+                    [("Sequence.length x.contents > 0",
+                       {
+                         Ortac_runtime.start =
+                           {
+                             pos_fname = "invariants.mli";
+                             pos_lnum = 4;
+                             pos_bol = 114;
+                             pos_cnum = 128
+                           };
+                         Ortac_runtime.stop =
+                           {
+                             pos_fname = "invariants.mli";
+                             pos_lnum = 4;
+                             pos_bol = 114;
+                             pos_cnum = 158
+                           }
+                       })]))
       | _ -> None
 let _ =
   QCheck_base_runner.run_tests_main
