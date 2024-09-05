@@ -258,6 +258,10 @@ let app f r =
 
 let ( <*> ) = app
 
+let traverse f xs =
+  let cons_f x xs = List.cons <$> f x <*> xs in
+  List.fold_right cons_f xs (ok [])
+
 let sequence r =
   let rec aux = function
     | [] -> ok []

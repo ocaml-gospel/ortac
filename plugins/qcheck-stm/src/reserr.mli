@@ -49,6 +49,10 @@ val ( let* ) : 'a reserr -> ('a -> 'b reserr) -> 'b reserr
 val ( >>= ) : 'a reserr -> ('a -> 'b reserr) -> 'b reserr
 val ( and* ) : 'a reserr -> 'b reserr -> ('a * 'b) reserr
 
+val traverse : ('a -> 'b reserr) -> 'a list -> 'b list reserr
+(** [traverse f xs] maps [f] over [xs] and returns [ok] of the resulting list
+    iff it contains no [error] *)
+
 val sequence : 'a reserr list -> 'a list reserr
 (** [sequence rs] returns [ok] of the list of ['a] iff there is no [error] in
     [rs] *)
