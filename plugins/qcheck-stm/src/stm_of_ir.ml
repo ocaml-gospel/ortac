@@ -769,13 +769,12 @@ let postcond_case config state invariants idx state_ident new_state_ident value
               ret_id :: value.sut_vars
             else value.sut_vars
           in
-          List.mapi
+          promote_mapi
             (fun idx sut ->
               map
                 (fun t -> wrap_check t <$> translate_invariants idx sut id t)
                 xs)
             suts
-          |> promote
     in
     list_append (postcond @ List.concat invariants) |> ok
   in
