@@ -53,6 +53,9 @@ val traverse : ('a -> 'b reserr) -> 'a list -> 'b list reserr
 (** [traverse f xs] maps [f] over [xs] and returns [ok] of the resulting list
     iff it contains no [error] *)
 
+val traverse_ : ('a -> 'b reserr) -> 'a list -> unit reserr
+(** [traverse_ f xs] is [traverse f xs] ignoring the returned list *)
+
 val sequence : 'a reserr list -> 'a list reserr
 (** [sequence rs] returns [ok] of the list of ['a] iff there is no [error] in
     [rs] *)
