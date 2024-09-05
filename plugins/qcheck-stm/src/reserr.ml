@@ -286,7 +286,19 @@ let rec promote = function
       let* _ = warns ws and* _ = filter_errs errs in
       promote xs
 
-let promote_map f l = List.map f l |> promote
+let promote_map f =
+  let rec aux = function
+    | [] -> ok []
+    | x :: xs -> (
+        match f x with
+        | (Ok _, _) as x ->
+            let* y = x and* ys = aux xs in
+            ok (y :: ys)
+        | Error errs, ws ->
+            let* _ = warns ws and* _ = filter_errs errs in
+            aux xs)
+  in
+  aux
 
 let promote_mapi f =
   let rec aux i = function

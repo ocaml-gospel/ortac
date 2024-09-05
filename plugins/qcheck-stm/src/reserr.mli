@@ -66,6 +66,7 @@ val promote : 'a reserr list -> 'a list reserr
     [Warning] in the warnings list *)
 
 val promote_map : ('a -> 'b reserr) -> 'a list -> 'b list reserr
+(** [promote_map f xs] is [List.map f xs |> promote] with only one traversal *)
 
 val promote_mapi : (int -> 'a -> 'b reserr) -> 'a list -> 'b list reserr
 (** [promote_mapi f xs] is [List.mapi f xs |> promote] with only one traversal *)
