@@ -286,6 +286,20 @@ let rec promote = function
       let* _ = warns ws and* _ = filter_errs errs in
       promote xs
 
+let promote_mapi f =
+  let rec aux i = function
+    | [] -> ok []
+    | x :: xs -> (
+        match f i x with
+        | (Ok _, _) as x ->
+            let* y = x and* ys = aux (i + 1) xs in
+            ok (y :: ys)
+        | Error errs, ws ->
+            let* _ = warns ws and* _ = filter_errs errs in
+            aux (i + 1) xs)
+  in
+  aux 0
+
 let promote_opt r =
   match r with
   | (Ok _, _) as x ->

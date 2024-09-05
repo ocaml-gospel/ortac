@@ -65,6 +65,9 @@ val promote : 'a reserr list -> 'a list reserr
     no [errors] of level [Error] in [rs] and store the [errors] of level
     [Warning] in the warnings list *)
 
+val promote_mapi : (int -> 'a -> 'b reserr) -> 'a list -> 'b list reserr
+(** [promote_mapi f xs] is [List.mapi f xs |> promote] with only one traversal *)
+
 val promote_opt : 'a reserr -> 'a option reserr
 (** [promote_opt r] is [promote] for a unique value *)
 
