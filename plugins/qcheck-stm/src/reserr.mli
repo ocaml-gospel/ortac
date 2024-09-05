@@ -77,7 +77,6 @@ val promote_opt : 'a reserr -> 'a option reserr
 val fold_left : ('a -> 'b -> 'a reserr) -> 'a -> 'b list -> 'a reserr
 val of_option : default:W.t -> 'a option -> 'a reserr
 val to_option : 'a reserr -> 'a option
-val concat_map : ('a -> 'b list reserr) -> 'a list -> 'b list reserr
 val fmap : ('a -> 'b) -> 'a reserr -> 'b reserr
 val ( <$> ) : ('a -> 'b) -> 'a reserr -> 'b reserr
 val app : ('a -> 'b) reserr -> 'a reserr -> 'b reserr
