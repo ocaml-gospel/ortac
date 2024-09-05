@@ -266,15 +266,7 @@ let traverse_ f xs =
   let f x u = f x >>= Fun.const u in
   List.fold_right f xs (ok ())
 
-let sequence r =
-  let rec aux = function
-    | [] -> ok []
-    | ((Ok _, _) as x) :: xs ->
-        let* y = x and* ys = aux xs in
-        ok (y :: ys)
-    | ((Error _, _) as x) :: _ -> x
-  in
-  aux r
+let sequence xs = traverse Fun.id xs
 
 let rec filter_errs = function
   | [] -> ok ()
