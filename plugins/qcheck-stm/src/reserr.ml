@@ -323,8 +323,7 @@ let promote_opt r =
       let* _ = warns ws and* _ = filter_errs errs in
       ok None
 
-let rec fold_left (f : 'a -> 'b -> 'a reserr) (acc : 'a) : 'b list -> 'a reserr
-    = function
+let rec fold_left f acc = function
   | [] -> ok acc
   | x :: xs -> (
       match f acc x with
