@@ -60,43 +60,6 @@ let level kind =
       W.Error
   | _ -> W.level kind
 
-type 'a reserr = ('a, W.t list) result * W.t list
-
-let ok x = (Result.ok x, [])
-let error e = (Result.error [ e ], [])
-let warns ws = (Result.ok (), ws)
-let warn w = warns [ w ]
-
-let ( let* ) x f =
-  match x with
-  | Ok v, warns1 ->
-      let res, warns2 = f v in
-      (res, warns1 @ warns2)
-  | (Error _, _) as x -> x
-
-let ( >>= ) = ( let* )
-
-let ( and* ) (a, aw) (b, bw) =
-  let r =
-    match (a, b) with
-    | Error e0, Error e1 -> Error (e0 @ e1)
-    | Error e, _ | _, Error e -> Error e
-    | Ok a, Ok b -> Ok (a, b)
-  in
-  (r, aw @ bw)
-
-let fmap f r =
-  let* r = r in
-  ok (f r)
-
-let ( <$> ) = fmap
-
-let app f r =
-  let* f = f and* r = r in
-  ok (f r)
-
-let ( <*> ) = app
-
 let pp_kind ppf kind =
   let open Fmt in
   match kind with
@@ -269,6 +232,43 @@ let pp quiet pp_ok ppf r =
       if not quiet then
         match warns with [] -> () | warns -> pf stderr "%a@." pp_errors warns)
   | Error errs, warns -> pf stderr "%a@." pp_errors (errs @ warns)
+
+type 'a reserr = ('a, W.t list) result * W.t list
+
+let ok x = (Result.ok x, [])
+let error e = (Result.error [ e ], [])
+let warns ws = (Result.ok (), ws)
+let warn w = warns [ w ]
+
+let ( let* ) x f =
+  match x with
+  | Ok v, warns1 ->
+      let res, warns2 = f v in
+      (res, warns1 @ warns2)
+  | (Error _, _) as x -> x
+
+let ( >>= ) = ( let* )
+
+let ( and* ) (a, aw) (b, bw) =
+  let r =
+    match (a, b) with
+    | Error e0, Error e1 -> Error (e0 @ e1)
+    | Error e, _ | _, Error e -> Error e
+    | Ok a, Ok b -> Ok (a, b)
+  in
+  (r, aw @ bw)
+
+let fmap f r =
+  let* r = r in
+  ok (f r)
+
+let ( <$> ) = fmap
+
+let app f r =
+  let* f = f and* r = r in
+  ok (f r)
+
+let ( <*> ) = app
 
 let sequence r =
   let rec aux = function
