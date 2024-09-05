@@ -196,11 +196,11 @@ let pat_of_core_type inst typ =
         and pat_arg =
           match xs with
           | [] -> ok None
-          | xs -> (fun xs -> Some (ppat_tuple xs)) <$> map aux xs
+          | xs -> (fun xs -> Some (ppat_tuple xs)) <$> promote_map aux xs
         in
         ppat_construct <$> constr_str <*> pat_arg
     | Ptyp_tuple xs ->
-        let* pat_arg = ppat_tuple <$> map aux xs in
+        let* pat_arg = ppat_tuple <$> promote_map aux xs in
         ppat_construct
           (lident ("Tup" ^ string_of_int (List.length xs)))
           (Some pat_arg)
@@ -230,13 +230,13 @@ let exp_of_core_type ?(use_small = false) inst typ =
             else constr_str |> ok
         | xs ->
             pexp_apply constr_str
-            <$> (List.map (fun e -> (Nolabel, e)) <$> map aux xs))
+            <$> (List.map (fun e -> (Nolabel, e)) <$> promote_map aux xs))
     | Ptyp_tuple xs ->
         let tup_constr =
           pexp_ident (lident ("tup" ^ string_of_int (List.length xs)))
         in
         pexp_apply tup_constr
-        <$> (List.map (fun e -> (Nolabel, e)) <$> map aux xs)
+        <$> (List.map (fun e -> (Nolabel, e)) <$> promote_map aux xs)
     | _ ->
         error
           ( Type_not_supported (Fmt.str "%a" Pprintast.core_type typ),
@@ -281,7 +281,7 @@ let arb_cmd_case config value =
 
 let arb_cmd config ir =
   let open Reserr in
-  let* cmds = elist <$> map (arb_cmd_case config) ir.values in
+  let* cmds = elist <$> promote_map (arb_cmd_case config) ir.values in
   let open Ppxlib in
   let let_open str e =
     pexp_open Ast_helper.(Opn.mk (Mod.ident (lident str |> noloc))) e
@@ -377,7 +377,7 @@ let run config ir =
   let cmd_name = gen_symbol ~prefix:"cmd" () in
   let sut_name = gen_symbol ~prefix:"sut" () in
   let open Reserr in
-  let* cases = map (run_case config sut_name) ir.values in
+  let* cases = promote_map (run_case config sut_name) ir.values in
   let body = pexp_match (evar cmd_name) cases in
   let pat = pvar "run" in
   let expr = efun [ (Nolabel, pvar cmd_name); (Nolabel, pvar sut_name) ] body in
@@ -421,7 +421,7 @@ let next_state_case state config state_ident nb_models value =
         List.filter (fun (id, _) -> List.mem id modified_suts) sut_map
       in
       let* next_states =
-        map
+        promote_map
           (fun (sut, next_state) ->
             (* substitute state variable when under `old` operator and translate description into ocaml *)
             let descriptions =
@@ -439,7 +439,7 @@ let next_state_case state config state_ident nb_models value =
               List.find_opt (fun (_, m, _) -> Ident.equal id m) descriptions
             in
             let* descriptions =
-              map
+              promote_map
                 (fun (id, loc) ->
                   of_option
                     ~default:
@@ -506,7 +506,7 @@ let next_state_case state config state_ident nb_models value =
       let new_state = pexp_let Nonrecursive vbs_next_states push_expr in
       let idx = List.fold_left (fun acc (i, _, _) -> i @ acc) [] next_states in
       let translate_checks = translate_checks config state value sut_map in
-      let* checks = map translate_checks value.postcond.checks in
+      let* checks = promote_map translate_checks value.postcond.checks in
       match checks with
       | [] -> ok (idx, wrap new_state)
       | _ ->
@@ -525,7 +525,7 @@ let next_state config ir =
   let nb_models = List.length ir.state in
   let open Reserr in
   let* idx_cases =
-    map
+    promote_map
       (fun v ->
         let* i, c = next_state_case ir.state config state_ident nb_models v in
         ok ((v.id, i), c))
@@ -546,7 +546,7 @@ let precond_case config state state_ident value =
     let vbs, sut_map = pop_states state_ident value in
     let wrap e = (if vbs <> [] then pexp_let Nonrecursive vbs e else e) |> ok in
     list_and
-    <$> map
+    <$> promote_map
           (fun t ->
             subst_term state ~gos_t:value.sut_vars ~old_t:[] ~new_t:sut_map t
             >>= ocaml_of_term config)
@@ -560,7 +560,9 @@ let precond config ir =
   let state_name = gen_symbol ~prefix:"state" () in
   let state_ident = Ident.create ~loc:Location.none state_name in
   let open Reserr in
-  let* cases = map (precond_case config ir.state state_ident) ir.values in
+  let* cases =
+    promote_map (precond_case config ir.state state_ident) ir.values
+  in
   let body = pexp_match (evar cmd_name) cases in
   let pat = pvar "precond" in
   let expr =
@@ -585,12 +587,12 @@ let expected_returned_value translate_postcond value =
   | Ptyp_constr ({ txt = Lident "unit"; _ }, _), _ -> ret_res ty_show eunit
   | Ptyp_constr ({ txt = Lident "int"; _ }, _), [ (t :: _ as xs) ]
     when t.term.t_ty = Some Gospel.Ttypes.ty_integer ->
-      map translate_postcond xs
+      promote_map translate_postcond xs
       |> to_option
       >>= Fun.flip List.nth_opt 0
       >>= ret_res (Some ty_show_integer)
   | _, [ xs ] ->
-      map translate_postcond xs
+      promote_map translate_postcond xs
       |> to_option
       >>= Fun.flip List.nth_opt 0
       >>= ret_res ty_show
@@ -753,7 +755,7 @@ let postcond_case config state invariants idx state_ident new_state_ident value
     in
     (* [postcond] and [invariants] are specification of normal behaviour *)
     let* postcond =
-      map (fun t -> wrap_check t <$> translate_postcond t) normal
+      promote_map (fun t -> wrap_check t <$> translate_postcond t) normal
       (* only functions that do not return a sut can have postconditions
          referring to the returned value, therefore no shifting is needed *)
     and* invariants =
@@ -771,7 +773,7 @@ let postcond_case config state invariants idx state_ident new_state_ident value
           in
           promote_mapi
             (fun idx sut ->
-              map
+              promote_map
                 (fun t -> wrap_check t <$> translate_invariants idx sut id t)
                 xs)
             suts
@@ -796,7 +798,7 @@ let postcond_case config state invariants idx state_ident new_state_ident value
       in
       let* cases_error =
         Fun.flip ( @ ) [ case ~lhs:ppat_any ~guard:None ~rhs:enone ]
-        <$> map
+        <$> promote_map
               (fun (x, p, t) ->
                 let xstr = Fmt.str "%a" Ident.pp x.Gospel.Ttypes.xs_ident in
                 let lhs =
@@ -836,7 +838,7 @@ let postcond_case config state invariants idx state_ident new_state_ident value
       fun t -> wrap <$> translate_checks config state value sut_map t
     in
     let* checks =
-      map
+      promote_map
         (fun t ->
           wrap_check ~exn:(Some "Invalid_argument") t <$> translate_checks t)
         value.postcond.checks
@@ -889,7 +891,7 @@ let postcond config idx ir =
   let open Reserr in
   let* cases =
     (Fun.flip ( @ )) [ case ~lhs:ppat_any ~guard:None ~rhs:enone ]
-    <$> map
+    <$> promote_map
           (fun v ->
             postcond_case config ir.state ir.invariants (List.assoc v.id idx)
               state_ident new_state_ident v)
@@ -948,11 +950,12 @@ let pp_cmd_case config value =
   let rec pp_of_ty ty : expression reserr =
     match ty.ptyp_desc with
     | Ptyp_tuple xs ->
-        let* pps = map pp_of_ty xs in
+        let* pps = promote_map pp_of_ty xs in
         let func = qualify_pp ("pp_tuple" ^ string_of_int (List.length xs)) in
         ok (pexp_apply func (List.map (fun e -> (Nolabel, e)) pps))
     | Ptyp_constr (lid, xs) ->
-        let* xs = map pp_of_ty xs and* s = munge_longident false ty lid in
+        let* xs = promote_map pp_of_ty xs
+        and* s = munge_longident false ty lid in
         let pp = qualify_pp ("pp_" ^ s) in
         ok
           (match xs with
@@ -997,7 +1000,7 @@ let pp_cmd_case config value =
 let cmd_show config ir =
   let cmd_name = gen_symbol ~prefix:"cmd" () in
   let open Reserr in
-  let* cases = map (pp_cmd_case config) ir.values in
+  let* cases = promote_map (pp_cmd_case config) ir.values in
   let body = pexp_match (evar cmd_name) cases in
   let pat = pvar "show_cmd" in
   let expr = efun [ (Nolabel, pvar cmd_name) ] body in
@@ -1064,9 +1067,11 @@ let init_state config ir =
     in
     ok (model, desc)
   in
-  let* fields = map translate_field_desc ir.Ir.init_state.descriptions in
   let* fields =
-    map
+    promote_map translate_field_desc ir.Ir.init_state.descriptions
+  in
+  let* fields =
+    promote_map
       (fun (id, _) ->
         (fun d -> (longident_loc_of_ident id, d))
         <$> (List.assoc_opt id fields
@@ -1139,7 +1144,7 @@ let check_init_state config ir =
             [ value_binding ~pat:state_pat ~expr:init_state ]
             (pexp_ifthenelse (list_or xs) msg None))
     <$> Option.fold ~none:(ok [])
-          ~some:(fun (id, xs) -> map (translate_invariants id) xs)
+          ~some:(fun (id, xs) -> promote_map (translate_invariants id) xs)
           ir.invariants
   in
   let pat = pvar "check_init_state" and expr = efun [ (Nolabel, punit) ] expr in
@@ -1195,7 +1200,7 @@ let ghost_types config =
       | Gospel.Tast.Recursive -> Recursive
     in
     let* tds =
-      map
+      promote_map
         (fun td ->
           try
             ok
@@ -1206,7 +1211,7 @@ let ghost_types config =
     in
     ok (pstr_type rec_flag tds)
   in
-  map aux
+  promote_map aux
 
 let agree_prop =
   [%stri
@@ -1389,11 +1394,12 @@ let pp_ortac_cmd_case config suts last value =
   let rec pp_of_ty ty : expression reserr =
     match ty.ptyp_desc with
     | Ptyp_tuple xs ->
-        let* pps = map pp_of_ty xs in
+        let* pps = promote_map pp_of_ty xs in
         let func = qualify_pp ("pp_tuple" ^ string_of_int (List.length xs)) in
         ok (pexp_apply func (List.map (fun e -> (Nolabel, e)) pps))
     | Ptyp_constr (lid, xs) ->
-        let* xs = map pp_of_ty xs and* s = munge_longident false ty lid in
+        let* xs = promote_map pp_of_ty xs
+        and* s = munge_longident false ty lid in
         let pp = qualify_pp ("pp_" ^ s) in
         ok
           (match xs with
@@ -1494,7 +1500,9 @@ let ortac_cmd_show config ir =
   let res_name = gen_symbol ~prefix:"res" () in
   let last_name = gen_symbol ~prefix:"last" () in
   let open Reserr in
-  let* cases = map (pp_ortac_cmd_case config suts_name last_name) ir.values in
+  let* cases =
+    promote_map (pp_ortac_cmd_case config suts_name last_name) ir.values
+  in
   let default_case =
     case ~lhs:ppat_any ~guard:None ~rhs:(eapply (evar "assert") [ ebool false ])
   in

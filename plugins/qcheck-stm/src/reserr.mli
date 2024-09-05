@@ -65,6 +65,8 @@ val promote : 'a reserr list -> 'a list reserr
     no [errors] of level [Error] in [rs] and store the [errors] of level
     [Warning] in the warnings list *)
 
+val promote_map : ('a -> 'b reserr) -> 'a list -> 'b list reserr
+
 val promote_mapi : (int -> 'a -> 'b reserr) -> 'a list -> 'b list reserr
 (** [promote_mapi f xs] is [List.mapi f xs |> promote] with only one traversal *)
 
@@ -74,7 +76,6 @@ val promote_opt : 'a reserr -> 'a option reserr
 val fold_left : ('a -> 'b -> 'a reserr) -> 'a -> 'b list -> 'a reserr
 val of_option : default:W.t -> 'a option -> 'a reserr
 val to_option : 'a reserr -> 'a option
-val map : ('a -> 'b reserr) -> 'a list -> 'b list reserr
 val concat_map : ('a -> 'b list reserr) -> 'a list -> 'b list reserr
 val fmap : ('a -> 'b) -> 'a reserr -> 'b reserr
 val ( <$> ) : ('a -> 'b) -> 'a reserr -> 'b reserr

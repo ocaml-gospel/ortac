@@ -286,6 +286,8 @@ let rec promote = function
       let* _ = warns ws and* _ = filter_errs errs in
       promote xs
 
+let promote_map f l = List.map f l |> promote
+
 let promote_mapi f =
   let rec aux i = function
     | [] -> ok []
@@ -323,5 +325,4 @@ let rec fold_left (f : 'a -> 'b -> 'a reserr) (acc : 'a) : 'b list -> 'a reserr
 
 let of_option ~default = Option.fold ~none:(error default) ~some:ok
 let to_option = function Ok x, _ -> Some x | _ -> None
-let map f l = List.map f l |> promote
-let concat_map f l = fmap List.concat (map f l)
+let concat_map f l = fmap List.concat (promote_map f l)

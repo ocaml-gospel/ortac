@@ -96,10 +96,10 @@ let rec acceptable_type_parameter param =
   let str = Fmt.str "%a" Ppxlib_ast.Pprintast.core_type param in
   match param.ptyp_desc with
   | Ptyp_constr (_, cts) ->
-      let* _ = map acceptable_type_parameter cts in
+      let* _ = promote_map acceptable_type_parameter cts in
       ok ()
   | Ptyp_tuple args ->
-      let* _ = map acceptable_type_parameter args in
+      let* _ = promote_map acceptable_type_parameter args in
       ok ()
   | Ptyp_var _ | Ptyp_any ->
       error (Type_parameter_not_instantiated str, Location.none)
@@ -110,7 +110,7 @@ let core_type_is_a_well_formed_sut (core_type : Ppxlib.core_type) =
   let open Reserr in
   match core_type.ptyp_desc with
   | Ptyp_constr (_lid, cts) ->
-      let* _ = map acceptable_type_parameter cts in
+      let* _ = promote_map acceptable_type_parameter cts in
       ok ()
   | _ ->
       let str = Fmt.str "%a" Ppxlib_ast.Pprintast.core_type core_type in
