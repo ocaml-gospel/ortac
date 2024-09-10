@@ -1,5 +1,7 @@
 # Unreleased
 
+- Fix display of the runnable scenario for protected values
+  [\#251](https://github.com/ocaml-gospel/ortac/pull/251)
 - Fix sut as type argument or inside tuple bug
   [\#245](https://github.com/ocaml-gospel/ortac/pull/245)
 - Add support for multiple sut arguments
