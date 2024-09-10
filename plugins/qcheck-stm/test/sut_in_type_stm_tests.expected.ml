@@ -207,7 +207,7 @@ let ortac_postcond cmd__006_ state__007_ res__008_ =
                  else
                    Some
                      (Ortac_runtime.report "Sut_in_type" "make 16 0"
-                        (Either.left "Invalid_argument") "make"
+                        (Ortac_runtime.Exception "Invalid_argument") "make"
                         [("i >= 0",
                            {
                              Ortac_runtime.start =
@@ -261,7 +261,8 @@ let ortac_postcond cmd__006_ state__007_ res__008_ =
                     else
                       Some
                         (Ortac_runtime.report "Sut_in_type" "make 16 0"
-                           (Either.left "Invalid_argument") "make"
+                           (Ortac_runtime.Exception "Invalid_argument")
+                           "make"
                            [("i >= 0",
                               {
                                 Ortac_runtime.start =

@@ -942,7 +942,7 @@ let ortac_postcond cmd__042_ state__043_ res__044_ =
           else
             Some
               (Ortac_runtime.report "Array" "make 16 'a'"
-                 (Either.right
+                 (Ortac_runtime.Value
                     (Res
                        (integer,
                          (let t_old__046_ = Model.get state__043_ 0
@@ -1025,7 +1025,7 @@ let ortac_postcond cmd__042_ state__043_ res__044_ =
                  else
                    Some
                      (Ortac_runtime.report "Array" "make 16 'a'"
-                        (Either.left "Invalid_argument") "get"
+                        (Ortac_runtime.Exception "Invalid_argument") "get"
                         [("0 <= i < t.size",
                            {
                              Ortac_runtime.start =
@@ -1081,7 +1081,7 @@ let ortac_postcond cmd__042_ state__043_ res__044_ =
                     else
                       Some
                         (Ortac_runtime.report "Array" "make 16 'a'"
-                           (Either.right
+                           (Ortac_runtime.Protected_value
                               (Res
                                  (char,
                                    (let t_old__051_ = Model.get state__043_ 0
@@ -1174,7 +1174,7 @@ let ortac_postcond cmd__042_ state__043_ res__044_ =
                     else
                       Some
                         (Ortac_runtime.report "Array" "make 16 'a'"
-                           (Either.left "Invalid_argument") "get"
+                           (Ortac_runtime.Exception "Invalid_argument") "get"
                            [("0 <= i < t.size",
                               {
                                 Ortac_runtime.start =
@@ -1230,7 +1230,7 @@ let ortac_postcond cmd__042_ state__043_ res__044_ =
                  else
                    Some
                      (Ortac_runtime.report "Array" "make 16 'a'"
-                        (Either.left "Invalid_argument") "set"
+                        (Ortac_runtime.Exception "Invalid_argument") "set"
                         [("0 <= i < t.size",
                            {
                              Ortac_runtime.start =
@@ -1291,7 +1291,7 @@ let ortac_postcond cmd__042_ state__043_ res__044_ =
                     else
                       Some
                         (Ortac_runtime.report "Array" "make 16 'a'"
-                           (Either.left "Invalid_argument") "set"
+                           (Ortac_runtime.Exception "Invalid_argument") "set"
                            [("0 <= i < t.size",
                               {
                                 Ortac_runtime.start =
@@ -1340,7 +1340,7 @@ let ortac_postcond cmd__042_ state__043_ res__044_ =
                  else
                    Some
                      (Ortac_runtime.report "Array" "make 16 'a'"
-                        (Either.left "Invalid_argument") "make"
+                        (Ortac_runtime.Exception "Invalid_argument") "make"
                         [("i >= 0",
                            {
                              Ortac_runtime.start =
@@ -1394,7 +1394,8 @@ let ortac_postcond cmd__042_ state__043_ res__044_ =
                     else
                       Some
                         (Ortac_runtime.report "Array" "make 16 'a'"
-                           (Either.left "Invalid_argument") "make"
+                           (Ortac_runtime.Exception "Invalid_argument")
+                           "make"
                            [("i >= 0",
                               {
                                 Ortac_runtime.start =
@@ -1453,7 +1454,7 @@ let ortac_postcond cmd__042_ state__043_ res__044_ =
                     else
                       Some
                         (Ortac_runtime.report "Array" "make 16 'a'"
-                           (Either.left "Invalid_argument") "sub"
+                           (Ortac_runtime.Exception "Invalid_argument") "sub"
                            [("0 <= i <= Sequence.length t.contents",
                               {
                                 Ortac_runtime.start =
@@ -1513,7 +1514,7 @@ let ortac_postcond cmd__042_ state__043_ res__044_ =
                     else
                       Some
                         (Ortac_runtime.report "Array" "make 16 'a'"
-                           (Either.left "Invalid_argument") "sub"
+                           (Ortac_runtime.Exception "Invalid_argument") "sub"
                            [("i <= i + n <= Sequence.length t.contents",
                               {
                                 Ortac_runtime.start =
@@ -1576,7 +1577,8 @@ let ortac_postcond cmd__042_ state__043_ res__044_ =
                        else
                          Some
                            (Ortac_runtime.report "Array" "make 16 'a'"
-                              (Either.left "Invalid_argument") "sub"
+                              (Ortac_runtime.Exception "Invalid_argument")
+                              "sub"
                               [("0 <= i <= Sequence.length t.contents",
                                  {
                                    Ortac_runtime.start =
@@ -1640,7 +1642,8 @@ let ortac_postcond cmd__042_ state__043_ res__044_ =
                        else
                          Some
                            (Ortac_runtime.report "Array" "make 16 'a'"
-                              (Either.left "Invalid_argument") "sub"
+                              (Ortac_runtime.Exception "Invalid_argument")
+                              "sub"
                               [("i <= i + n <= Sequence.length t.contents",
                                  {
                                    Ortac_runtime.start =
@@ -1692,7 +1695,8 @@ let ortac_postcond cmd__042_ state__043_ res__044_ =
                     else
                       Some
                         (Ortac_runtime.report "Array" "make 16 'a'"
-                           (Either.left "Invalid_argument") "fill"
+                           (Ortac_runtime.Exception "Invalid_argument")
+                           "fill"
                            [("0 <= pos",
                               {
                                 Ortac_runtime.start =
@@ -1742,7 +1746,8 @@ let ortac_postcond cmd__042_ state__043_ res__044_ =
                        else
                          Some
                            (Ortac_runtime.report "Array" "make 16 'a'"
-                              (Either.left "Invalid_argument") "fill"
+                              (Ortac_runtime.Exception "Invalid_argument")
+                              "fill"
                               [("0 <= len",
                                  {
                                    Ortac_runtime.start =
@@ -1794,7 +1799,8 @@ let ortac_postcond cmd__042_ state__043_ res__044_ =
                        else
                          Some
                            (Ortac_runtime.report "Array" "make 16 'a'"
-                              (Either.left "Invalid_argument") "fill"
+                              (Ortac_runtime.Exception "Invalid_argument")
+                              "fill"
                               [("pos + len <= t.size",
                                  {
                                    Ortac_runtime.start =
@@ -1850,7 +1856,8 @@ let ortac_postcond cmd__042_ state__043_ res__044_ =
                        else
                          Some
                            (Ortac_runtime.report "Array" "make 16 'a'"
-                              (Either.left "Invalid_argument") "fill"
+                              (Ortac_runtime.Exception "Invalid_argument")
+                              "fill"
                               [("0 <= pos",
                                  {
                                    Ortac_runtime.start =
@@ -1901,7 +1908,8 @@ let ortac_postcond cmd__042_ state__043_ res__044_ =
                           else
                             Some
                               (Ortac_runtime.report "Array" "make 16 'a'"
-                                 (Either.left "Invalid_argument") "fill"
+                                 (Ortac_runtime.Exception "Invalid_argument")
+                                 "fill"
                                  [("0 <= len",
                                     {
                                       Ortac_runtime.start =
@@ -1953,7 +1961,8 @@ let ortac_postcond cmd__042_ state__043_ res__044_ =
                           else
                             Some
                               (Ortac_runtime.report "Array" "make 16 'a'"
-                                 (Either.left "Invalid_argument") "fill"
+                                 (Ortac_runtime.Exception "Invalid_argument")
+                                 "fill"
                                  [("pos + len <= t.size",
                                     {
                                       Ortac_runtime.start =
@@ -2004,7 +2013,7 @@ let ortac_postcond cmd__042_ state__043_ res__044_ =
           else
             Some
               (Ortac_runtime.report "Array" "make 16 'a'"
-                 (Either.right
+                 (Ortac_runtime.Value
                     (Res
                        ((list char),
                          (let t_old__070_ = Model.get state__043_ 0
@@ -2084,7 +2093,7 @@ let ortac_postcond cmd__042_ state__043_ res__044_ =
           else
             Some
               (Ortac_runtime.report "Array" "make 16 'a'"
-                 (Either.right (Res (Ortac_runtime.dummy, ()))) "mem"
+                 (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))) "mem"
                  [("b = Sequence.mem t.contents a",
                     {
                       Ortac_runtime.start =

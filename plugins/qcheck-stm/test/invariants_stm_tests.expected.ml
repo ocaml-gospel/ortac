@@ -541,7 +541,8 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
           else
             Some
               (Ortac_runtime.report "Invariants" "create 42"
-                 (Either.right (Res (Ortac_runtime.dummy, ()))) "create"
+                 (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
+                 "create"
                  [("Sequence.length x.contents > 0",
                     {
                       Ortac_runtime.start =
@@ -592,7 +593,7 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
           else
             Some
               (Ortac_runtime.report "Invariants" "create 42"
-                 (Either.right (Res (unit, ()))) "push"
+                 (Ortac_runtime.Value (Res (unit, ()))) "push"
                  [("Sequence.length x.contents > 0",
                     {
                       Ortac_runtime.start =
@@ -644,7 +645,7 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
              else
                Some
                  (Ortac_runtime.report "Invariants" "create 42"
-                    (Either.right (Res (unit, ()))) "transfer"
+                    (Ortac_runtime.Value (Res (unit, ()))) "transfer"
                     [("Sequence.length x.contents > 0",
                        {
                          Ortac_runtime.start =
@@ -694,7 +695,7 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
              else
                Some
                  (Ortac_runtime.report "Invariants" "create 42"
-                    (Either.right (Res (unit, ()))) "transfer"
+                    (Ortac_runtime.Value (Res (unit, ()))) "transfer"
                     [("Sequence.length x.contents > 0",
                        {
                          Ortac_runtime.start =
@@ -746,7 +747,8 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
              else
                Some
                  (Ortac_runtime.report "Invariants" "create 42"
-                    (Either.right (Res (Ortac_runtime.dummy, ()))) "copy"
+                    (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
+                    "copy"
                     [("Sequence.length x.contents > 0",
                        {
                          Ortac_runtime.start =
@@ -796,7 +798,8 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
              else
                Some
                  (Ortac_runtime.report "Invariants" "create 42"
-                    (Either.right (Res (Ortac_runtime.dummy, ()))) "copy"
+                    (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
+                    "copy"
                     [("Sequence.length x.contents > 0",
                        {
                          Ortac_runtime.start =
@@ -854,7 +857,7 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                     else
                       Some
                         (Ortac_runtime.report "Invariants" "create 42"
-                           (Either.left "Invalid_argument") "sub"
+                           (Ortac_runtime.Exception "Invalid_argument") "sub"
                            [("0 <= i <= Sequence.length t.contents",
                               {
                                 Ortac_runtime.start =
@@ -919,7 +922,8 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                        else
                          Some
                            (Ortac_runtime.report "Invariants" "create 42"
-                              (Either.left "Invalid_argument") "sub"
+                              (Ortac_runtime.Exception "Invalid_argument")
+                              "sub"
                               [("i <= i + n <= Sequence.length t.contents",
                                  {
                                    Ortac_runtime.start =
@@ -968,7 +972,8 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                        else
                          Some
                            (Ortac_runtime.report "Invariants" "create 42"
-                              (Either.left "Invalid_argument") "sub"
+                              (Ortac_runtime.Exception "Invalid_argument")
+                              "sub"
                               [("n >= 1",
                                  {
                                    Ortac_runtime.start =
@@ -1024,8 +1029,8 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                        else
                          Some
                            (Ortac_runtime.report "Invariants" "create 42"
-                              (Either.right (Res (Ortac_runtime.dummy, ())))
-                              "sub"
+                              (Ortac_runtime.Protected_value
+                                 (Res (Ortac_runtime.dummy, ()))) "sub"
                               [("Sequence.length x.contents > 0",
                                  {
                                    Ortac_runtime.start =
@@ -1076,8 +1081,8 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                        else
                          Some
                            (Ortac_runtime.report "Invariants" "create 42"
-                              (Either.right (Res (Ortac_runtime.dummy, ())))
-                              "sub"
+                              (Ortac_runtime.Protected_value
+                                 (Res (Ortac_runtime.dummy, ()))) "sub"
                               [("Sequence.length x.contents > 0",
                                  {
                                    Ortac_runtime.start =
@@ -1139,7 +1144,8 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                        else
                          Some
                            (Ortac_runtime.report "Invariants" "create 42"
-                              (Either.left "Invalid_argument") "sub"
+                              (Ortac_runtime.Exception "Invalid_argument")
+                              "sub"
                               [("0 <= i <= Sequence.length t.contents",
                                  {
                                    Ortac_runtime.start =
@@ -1205,7 +1211,8 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                           else
                             Some
                               (Ortac_runtime.report "Invariants" "create 42"
-                                 (Either.left "Invalid_argument") "sub"
+                                 (Ortac_runtime.Exception "Invalid_argument")
+                                 "sub"
                                  [("i <= i + n <= Sequence.length t.contents",
                                     {
                                       Ortac_runtime.start =
@@ -1254,7 +1261,8 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                           else
                             Some
                               (Ortac_runtime.report "Invariants" "create 42"
-                                 (Either.left "Invalid_argument") "sub"
+                                 (Ortac_runtime.Exception "Invalid_argument")
+                                 "sub"
                                  [("n >= 1",
                                     {
                                       Ortac_runtime.start =

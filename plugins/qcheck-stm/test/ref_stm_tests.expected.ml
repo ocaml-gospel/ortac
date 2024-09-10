@@ -173,7 +173,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
           else
             Some
               (Ortac_runtime.report "Ref" "make 42"
-                 (Either.right
+                 (Ortac_runtime.Value
                     (Res
                        (integer,
                          (let r_old__012_ = Model.get state__009_ 0
