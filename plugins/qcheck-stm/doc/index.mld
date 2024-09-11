@@ -368,33 +368,6 @@ Warning: Skipping incompatible_type: the type of its SUT-type argument is
 In the case you have functions specialized with different instantiations, you
 can always generate one test per possible instantiation, of course.
 
-{2 Empty command type} 
-
-During the translation of the Gospel annotations [ortac] will leave out 
-specifications that do not adhere to its requirements. In the extreme case this 
-may result in an empty set of commands that it can use to create test traces 
-from. 
-
-Given the following example: 
-
-{@ocaml file=example_empty_cmd.mli,part=fun-decl[
-type 'a t
-(*@ model size : int
-    mutable model contents : 'a list *)
-
-val make : int -> 'a -> 'a t
-(*@ t = make i a
-    checks i >= 0
-    ensures t.size = i
-    ensures t.contents = List.init i (fun j -> a) *)
-]}
-
-the command will generate the following error: 
-
-{@sh[
-$ ortac qcheck-stm example_empty_cmd.mli example_config.ml -o foo.ml 
-]}
-
 {2 [ortac] limitations}
 
 The second source of limitations is the [ocaml_of_gospel] translation provided
@@ -481,3 +454,19 @@ File "example_limitations.mli", line 23, characters 15-25:
                     ^^^^^^^^^^
 Warning: Skipping for_all: functions are not supported yet as arguments.
 ]}
+
+{2 Functions returning a SUT}
+
+Functions returning a SUT will be tested, however, there are some restrictions
+and peculiarities:
+
+{ul
+    {li Only functions returning a single SUT value are tested, if the SUT is
+        nested inside another structure (e.g., a tuple or a list) the function
+        will be skipped}
+    {li Many [init]/[create] like functions take an integer relating to the
+        initial size of the datastructure as an argument. In order to keep the
+        size of the created data structure manageable, a heuristic is used.
+        Whenever a functions returns a SUT, but does not take a SUT as an input
+        argument, any [Gen.int] generators in [Spec.arb_cmd] are automatically
+        exchanged with [Gen.small_signed_int]}}
