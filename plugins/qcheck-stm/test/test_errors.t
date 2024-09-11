@@ -164,12 +164,6 @@ Or specify it using clauses that cannot be executed:
            contain at least one "ensures x.value = expr" where x is the SUT and
            expr can refer to the SUT only under an old operator and can't refer
            to the returned value.
-  File "foo.mli", line 3, characters 0-119:
-  3 | val make : 'a -> 'a t
-  4 | (*@ t = make a
-  5 |     requires true
-  6 |     ensures t.value = if forall i. i = i then a :: [] else [] *)
-  Warning: Incomplete computation of the returned value in the specification of make. Failure message won't be able to display the expected returned value.
   File "foo.mli", line 6, characters 25-40:
   6 |     ensures t.value = if forall i. i = i then a :: [] else [] *)
                                ^^^^^^^^^^^^^^^
@@ -276,12 +270,6 @@ We shouldn't be able to define a model by itsef in the `make` function:
            contain at least one "ensures x.value = expr" where x is the SUT and
            expr can refer to the SUT only under an old operator and can't refer
            to the returned value.
-  File "foo.mli", line 3, characters 0-87:
-  3 | val make : 'a -> 'a t
-  4 | (*@ t = make a
-  5 |     requires true
-  6 |     ensures t.value = t.value *)
-  Warning: Incomplete computation of the returned value in the specification of make. Failure message won't be able to display the expected returned value.
   File "foo.mli", line 6, characters 22-23:
   6 |     ensures t.value = t.value *)
                             ^

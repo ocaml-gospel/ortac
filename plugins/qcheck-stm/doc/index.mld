@@ -161,13 +161,6 @@ write the generated code into a file, using the [-o] option.
 
 {@sh set-ORTAC_ONLY_PLUGIN=qcheck-stm[
 $ ortac qcheck-stm example.mli example_config.ml -o stm_example.ml
-File "example.mli", line 11, characters 0-139:
-11 | val make : int -> 'a -> 'a t
-12 | (*@ t = make i a
-13 |     checks i >= 0
-14 |     ensures t.size = i
-15 |     ensures t.contents = List.init i (fun j -> a) *)
-Warning: Incomplete computation of the returned value in the specification of make. Failure message won't be able to display the expected returned value.
 ]}
 
 The other information you can put in the configuration file are:
@@ -278,13 +271,6 @@ Warning: Skipping ensures_not_found_for_next_state: model contents is
          was found. Specifications should contain at least one "ensures
          x.contents = expr" where x is the SUT and expr can refer to the SUT
          only under an old operator and can't refer to the returned value.
-File "example_next_state.mli", line 5, characters 0-139:
-5 | val make : int -> 'a -> 'a t
-6 | (*@ t = make i a
-7 |     checks i >= 0
-8 |     ensures t.size = i
-9 |     ensures t.contents = List.init i (fun j -> a) *)
-Warning: Incomplete computation of the returned value in the specification of make. Failure message won't be able to display the expected returned value.
 ]}
 
 Note that you don't have to rewrite the clause. Maybe it contains information
@@ -351,13 +337,6 @@ File "example_ghost.mli", line 18, characters 20-21:
                          ^
 Warning: Skipping ghost_arg: functions with a ghost argument are not
          supported.
-File "example_ghost.mli", line 5, characters 0-139:
-5 | val make : int -> 'a -> 'a t
-6 | (*@ t = make i a
-7 |     checks i >= 0
-8 |     ensures t.size = i
-9 |     ensures t.contents = List.init i (fun j -> a) *)
-Warning: Incomplete computation of the returned value in the specification of make. Failure message won't be able to display the expected returned value.
 ]}
 
 You'll need to write your specifications without using [ghost] arguments or
@@ -384,13 +363,6 @@ File "example_incompatible_type.mli", line 17, characters 32-40:
                                      ^^^^^^^^
 Warning: Skipping incompatible_type: the type of its SUT-type argument is
          incompatible with the configured SUT type: char t.
-File "example_incompatible_type.mli", line 5, characters 0-139:
-5 | val make : int -> 'a -> 'a t
-6 | (*@ t = make i a
-7 |     checks i >= 0
-8 |     ensures t.size = i
-9 |     ensures t.contents = List.init i (fun j -> a) *)
-Warning: Incomplete computation of the returned value in the specification of make. Failure message won't be able to display the expected returned value.
 ]}
 
 In the case you have functions specialized with different instantiations, you
@@ -421,13 +393,6 @@ the command will generate the following error:
 
 {@sh[
 $ ortac qcheck-stm example_empty_cmd.mli example_config.ml -o foo.ml 
-File "example_empty_cmd.mli", line 7, characters 0-139:
- 7 | val make : int -> 'a -> 'a t
- 8 | (*@ t = make i a
- 9 |     checks i >= 0
-10 |     ensures t.size = i
-11 |     ensures t.contents = List.init i (fun j -> a) *)
-Warning: Incomplete computation of the returned value in the specification of make. Failure message won't be able to display the expected returned value.
 ]}
 
 {2 [ortac] limitations}
@@ -451,13 +416,6 @@ the command will generate the following warning:
 
 {@sh[
 $ ortac qcheck-stm example_ill_formed_quantification.mli example_config.ml -o foo.ml
-File "example_ill_formed_quantification.mli", line 5, characters 0-139:
-5 | val make : int -> 'a -> 'a t
-6 | (*@ t = make i a
-7 |     checks i >= 0
-8 |     ensures t.size = i
-9 |     ensures t.contents = List.init i (fun j -> a) *)
-Warning: Incomplete computation of the returned value in the specification of make. Failure message won't be able to display the expected returned value.
 File "example_ill_formed_quantification.mli", line 13, characters 0-142:
 13 | val unsupported_quantification : 'a t -> bool
 14 | (*@ b = unsupported_quantification t
@@ -522,11 +480,4 @@ File "example_limitations.mli", line 23, characters 15-25:
 23 | val for_all : ('a -> bool) -> 'a t -> bool
                     ^^^^^^^^^^
 Warning: Skipping for_all: functions are not supported yet as arguments.
-File "example_limitations.mli", line 5, characters 0-139:
-5 | val make : int -> 'a -> 'a t
-6 | (*@ t = make i a
-7 |     checks i >= 0
-8 |     ensures t.size = i
-9 |     ensures t.contents = List.init i (fun j -> a) *)
-Warning: Incomplete computation of the returned value in the specification of make. Failure message won't be able to display the expected returned value.
 ]}

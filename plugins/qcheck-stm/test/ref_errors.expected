@@ -1,8 +1,3 @@
-File "ref.mli", line 4, characters 0-61:
-4 | val make : int -> t
-5 | (*@ r = make i
-6 |     ensures r.value = i *)
-Warning: Incomplete computation of the returned value in the specification of make. Failure message won't be able to display the expected returned value.
 File "ref.mli", line 12, characters 26-27:
 12 |     ensures i + 1 = succ !r *)
                                ^

@@ -1,5 +1,0 @@
-File "integer_in_model.mli", line 4, characters 0-63:
-4 | val create : unit -> t
-5 | (*@ t = create ()
-6 |     ensures t.i = 0 *)
-Warning: Incomplete computation of the returned value in the specification of create. Failure message won't be able to display the expected returned value.

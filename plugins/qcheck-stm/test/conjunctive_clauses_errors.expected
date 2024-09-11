@@ -1,6 +1,0 @@
-File "conjunctive_clauses.mli", line 4, characters 0-132:
-4 | val make : int -> 'a -> 'a t
-5 | (*@ t = make i a
-6 |     checks i >= 0
-7 |     ensures true /\ true && t.contents = List.init i (fun _ -> a) *)
-Warning: Incomplete computation of the returned value in the specification of make. Failure message won't be able to display the expected returned value.

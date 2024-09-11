@@ -1,6 +1,0 @@
-File "test_without_sut.mli", line 4, characters 0-116:
-4 | val make : int -> 'a -> 'a t
-5 | (*@ t = make i a
-6 |     checks i >= 0
-7 |     ensures t.contents = List.init i (fun j -> a) *)
-Warning: Incomplete computation of the returned value in the specification of make. Failure message won't be able to display the expected returned value.

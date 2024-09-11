@@ -1,5 +1,0 @@
-File "test_cleanup.mli", line 4, characters 0-63:
-4 | val create : unit -> t
-5 | (*@ t = create ()
-6 |     ensures t.m = 0 *)
-Warning: Incomplete computation of the returned value in the specification of create. Failure message won't be able to display the expected returned value.

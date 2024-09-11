@@ -75,17 +75,6 @@ File "hashtbl.mli", line 106, characters 0-54:
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping seeded_hash_param: functions without specifications cannot
          be tested.
-File "hashtbl.mli", line 4, characters 0-143:
-4 | val create :
-5 |   ?random:(* thwart tools/sync_stdlib_docs *) bool -> int -> ('a, 'b) t
-6 | (*@ h = create ?random size
-7 |     ensures h.contents = [] *)
-Warning: Incomplete computation of the returned value in the specification of create. Failure message won't be able to display the expected returned value.
-File "hashtbl.mli", line 19, characters 0-93:
-19 | val copy : ('a, 'b) t -> ('a, 'b) t
-20 | (*@ h2 = copy h1
-21 |     ensures h2.contents = h1.contents *)
-Warning: Incomplete computation of the returned value in the specification of copy. Failure message won't be able to display the expected returned value.
 File "hashtbl.mli", line 28, characters 0-226:
 28 | val find : ('a, 'b) t -> 'a -> 'b
 29 | (*@ b = find h a

@@ -1,8 +1,3 @@
-File "tuples.mli", line 4, characters 0-80:
-4 | val create : unit -> ('a, 'b) t
-5 | (*@ h = create ()
-6 |     ensures h.contents = [] *)
-Warning: Incomplete computation of the returned value in the specification of create. Failure message won't be able to display the expected returned value.
 File "tuples.mli", line 32, characters 0-141:
 32 | val size_tup : ('a, 'b) t -> int * int
 33 | (*@ x, y = size_tup t

@@ -665,12 +665,15 @@ let postcond_case config state invariants idx state_ident new_state_ident value
        don't skip the function *)
     match expected_returned_value translate_postcond value with
     | None ->
-        let* () =
-          warn
-            ( Incomplete_ret_val_computation (Fmt.str "%a" Ident.pp value.id),
-              value.id.id_loc )
-        in
-        ok dummy
+        (* If the returned value is a SUT, we don't need to ever show it *)
+        if Cfg.does_return_sut config value.ty then ok dummy
+        else
+          let* () =
+            warn
+              ( Incomplete_ret_val_computation (Fmt.str "%a" Ident.pp value.id),
+                value.id.id_loc )
+          in
+          ok dummy
     | Some e -> ok e
   in
   let wrap_check ?(exn = None) t e =

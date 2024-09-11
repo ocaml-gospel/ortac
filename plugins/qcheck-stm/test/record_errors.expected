@@ -1,8 +1,3 @@
-File "record.mli", line 5, characters 0-61:
-5 | val make : int -> t
-6 | (*@ r = make i
-7 |     ensures r.value = i *)
-Warning: Incomplete computation of the returned value in the specification of make. Failure message won't be able to display the expected returned value.
 File "record.mli", line 3, characters 36-39:
 3 |     with x invariant integer_of_int x.c = x.value *)
                                         ^^^

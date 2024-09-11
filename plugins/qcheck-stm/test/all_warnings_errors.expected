@@ -51,11 +51,6 @@ Warning: Skipping term_refer_to_returned_value_next_state: model contents is
          was found. Specifications should contain at least one "ensures
          x.contents = expr" where x is the SUT and expr can refer to the SUT
          only under an old operator and can't refer to the returned value.
-File "all_warnings.mli", line 8, characters 0-98:
- 8 | val make : int -> 'a -> 'a t
- 9 | (*@ t = make i a
-10 |     ensures t.contents = List.init i (fun _ -> a) *)
-Warning: Incomplete computation of the returned value in the specification of make. Failure message won't be able to display the expected returned value.
 File "all_warnings.mli", line 19, characters 0-85:
 19 | val multiple_sut_argument : 'a t -> 'a t -> bool
 20 | (*@ b = multiple_sut_argument x y *)

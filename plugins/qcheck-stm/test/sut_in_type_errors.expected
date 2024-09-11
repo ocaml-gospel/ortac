@@ -14,9 +14,3 @@ File "sut_in_type.mli", line 21, characters 26-35:
 21 | val sut_nested_in_tuple : 'a t list * int -> bool
                                ^^^^^^^^^
 Warning: Skipping sut_nested_in_tuple: unsupported SUT type as type argument.
-File "sut_in_type.mli", line 4, characters 0-116:
-4 | val make : int -> 'a -> 'a t
-5 | (*@ t = make i a
-6 |     checks i >= 0
-7 |     ensures t.contents = List.init i (fun j -> a) *)
-Warning: Incomplete computation of the returned value in the specification of make. Failure message won't be able to display the expected returned value.
