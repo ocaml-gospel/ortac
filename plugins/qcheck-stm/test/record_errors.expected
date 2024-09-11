@@ -3,6 +3,11 @@ File "record.mli", line 5, characters 0-61:
 6 | (*@ r = make i
 7 |     ensures r.value = i *)
 Warning: Incomplete computation of the returned value in the specification of make. Failure message won't be able to display the expected returned value.
+File "record.mli", line 3, characters 36-39:
+3 |     with x invariant integer_of_int x.c = x.value *)
+                                        ^^^
+Warning: Skipping clause: occurrences of the SUT in clauses are only
+         supported to access its model fields.
 File "record.mli", line 24, characters 16-19:
 24 |     ensures i = r.c
                      ^^^

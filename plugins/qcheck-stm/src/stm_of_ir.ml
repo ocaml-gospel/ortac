@@ -744,17 +744,29 @@ let postcond_case config state invariants idx state_ident new_state_ident value
       aux idx value.postcond.normal
     in
     (* [postcond] and [invariants] are specification of normal behaviour *)
-    let* postcond = map (fun t -> wrap_check t <$> translate_postcond t) normal
+    let* postcond =
+      map (fun t -> wrap_check t <$> translate_postcond t) normal
+      (* only functions that do not return a sut can have postconditions
+         referring to the returned value, therefore no shifting is needed *)
     and* invariants =
       match invariants with
       | None -> ok []
       | Some (id, xs) ->
+          let suts =
+            if Cfg.does_return_sut config value.ty then
+              (* We only check the invariants when the function returned
+                 without raising an exception, so in that case we can just
+                 prepend the returned sut *)
+              let ret_id = List.hd value.ret in
+              ret_id :: value.sut_vars
+            else value.sut_vars
+          in
           List.mapi
             (fun idx sut ->
               map
                 (fun t -> wrap_check t <$> translate_invariants idx sut id t)
                 xs)
-            value.sut_vars
+            suts
           |> promote
     in
     list_append (postcond @ List.concat invariants) |> ok
