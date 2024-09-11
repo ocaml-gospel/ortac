@@ -3,3 +3,16 @@ File "invariants.mli", line 6, characters 0-89:
 7 | (*@ t = create a
 8 |     ensures t.contents = Sequence.singleton a *)
 Warning: Incomplete computation of the returned value in the specification of create. Failure message won't be able to display the expected returned value.
+File "invariants.mli", line 22, characters 0-77:
+22 | val copy : 'a t -> 'a t
+23 | (*@ r = copy t
+24 |     ensures r.contents = t.contents *)
+Warning: Incomplete computation of the returned value in the specification of copy. Failure message won't be able to display the expected returned value.
+File "invariants.mli", line 26, characters 0-255:
+26 | val sub : 'a t -> int -> int -> 'a t
+27 | (*@ r = sub t i n
+28 |     checks 0 <= i <= Sequence.length t.contents
+29 |     checks i <= i + n <= Sequence.length t.contents
+30 |     checks n >= 1
+31 |     ensures r.contents = if n = 0 then Sequence.empty else t.contents[i..i+n-1] *)
+Warning: Incomplete computation of the returned value in the specification of sub. Failure message won't be able to display the expected returned value.
