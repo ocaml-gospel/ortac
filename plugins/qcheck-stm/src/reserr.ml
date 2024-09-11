@@ -145,7 +145,7 @@ let pp_kind ppf kind =
         "functions returning tuples are not supported yet"
   | Returning_sut id ->
       pf ppf "Skipping %s:@ %a" id text
-        "functions returning a SUT value cannot be tested"
+        "functions returning a SUT nested inside another type cannot be tested"
   | Impossible_term_substitution why ->
       let msg =
         match why with
