@@ -4,6 +4,8 @@
   [\#245](https://github.com/ocaml-gospel/ortac/pull/245)
 - Add support for multiple sut arguments
   [\#247](https://github.com/ocaml-gospel/ortac/pull/247)
+- Add support for returning sut values
+  [\#253](https://github.com/ocaml-gospel/ortac/pull/253)
 
 # 0.3.0
 
