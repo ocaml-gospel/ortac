@@ -13,6 +13,7 @@ type W.kind +=
   | Constant_value of string
   | Empty_cmd_type
   | Ensures_not_found_for_next_state of (string * string)
+  | Ensures_not_found_for_ret_sut of (string * string list)
   | Functional_argument of string
   | Ghost_values of (string * [ `Arg | `Ret ])
   | Ignored_modifies
@@ -45,8 +46,8 @@ type W.kind +=
 let level kind =
   match kind with
   | Constant_value _ | Ensures_not_found_for_next_state _
-  | Functional_argument _ | Ghost_values _ | Ignored_modifies
-  | Impossible_term_substitution _ | Incompatible_type _
+  | Ensures_not_found_for_ret_sut _ | Functional_argument _ | Ghost_values _
+  | Ignored_modifies | Impossible_term_substitution _ | Incompatible_type _
   | Incomplete_ret_val_computation _ | Multiple_sut_arguments _ | No_spec _
   | Returned_tuple _ | Returning_sut _ | Sut_as_type_inst _ | Sut_in_tuple _
   | Tuple_arity _ | Type_not_supported _ ->
@@ -111,6 +112,15 @@ let pp_kind ppf kind =
         text "Specifications should contain at least one \"ensures x." m text
         " = expr\" where x is the SUT and expr can refer to the SUT only under \
          an old operator and can't refer to the returned value"
+  | Ensures_not_found_for_ret_sut (fct, models) ->
+      pf ppf "Skipping %s:@ %a@;%a@ %a@ %a" fct text
+        "the specification of the function does not specify all fields of the \
+         model for the returned SUT value."
+        text "Specifications should contain at least one"
+        (Fmt.list ~sep:(Fmt.any "@ and@ ") (Fmt.fmt "\"ensures x.%s = expr\""))
+        models text
+        "where x is the returned SUT and expr can refer to other SUTs only \
+         under an old operator"
   | Functional_argument f ->
       pf ppf "Skipping %s:@ %a" f text
         "functions are not supported yet as arguments"

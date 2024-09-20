@@ -506,6 +506,14 @@ Ortac/QCheck-STM will generate the following warnings:
 
 {@sh[
 $ ortac qcheck-stm example_limitations.mli example_config.ml -o foo.ml
+File "example_limitations.mli", line 18, characters 3-19:
+18 | (*@ t = of_list xs *)
+        ^^^^^^^^^^^^^^^^
+Warning: Skipping of_list: the specification of the function does not specify
+         all fields of the model for the returned SUT value. Specifications
+         should contain at least one "ensures x.size = expr" and
+         "ensures x.contents = expr" where x is the returned SUT and expr can
+         refer to other SUTs only under an old operator.
 File "example_limitations.mli", line 20, characters 16-63:
 20 | val g : 'a t -> 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a -> bool
                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -514,16 +522,6 @@ File "example_limitations.mli", line 23, characters 15-25:
 23 | val for_all : ('a -> bool) -> 'a t -> bool
                     ^^^^^^^^^^
 Warning: Skipping for_all: functions are not supported yet as arguments.
-Warning: Skipping of_list: model size is declared as modified by the function
-         but no suitable ensures clause was found. Specifications should
-         contain at least one "ensures x.size = expr" where x is the SUT and
-         expr can refer to the SUT only under an old operator and can't refer
-         to the returned value.
-Warning: Skipping of_list: model contents is declared as modified by the
-         function but no suitable ensures clause was found. Specifications
-         should contain at least one "ensures x.contents = expr" where x is
-         the SUT and expr can refer to the SUT only under an old operator and
-         can't refer to the returned value.
 File "example_limitations.mli", line 5, characters 0-139:
 5 | val make : int -> 'a -> 'a t
 6 | (*@ t = make i a
@@ -531,8 +529,4 @@ File "example_limitations.mli", line 5, characters 0-139:
 8 |     ensures t.size = i
 9 |     ensures t.contents = List.init i (fun j -> a) *)
 Warning: Incomplete computation of the returned value in the specification of make. Failure message won't be able to display the expected returned value.
-File "example_limitations.mli", line 17, characters 0-51:
-17 | val of_list : 'a list -> 'a t
-18 | (*@ t = of_list xs *)
-Warning: Incomplete computation of the returned value in the specification of of_list. Failure message won't be able to display the expected returned value.
 ]}

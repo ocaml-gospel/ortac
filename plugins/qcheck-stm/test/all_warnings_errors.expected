@@ -3,6 +3,14 @@ File "all_warnings.mli", line 12, characters 0-52:
 13 | (*@ constant
 14 |     ensures true *)
 Warning: Skipping constant: constants cannot be tested.
+File "all_warnings.mli", line 17, characters 3-24:
+17 | (*@ t = returning_sut a *)
+        ^^^^^^^^^^^^^^^^^^^^^
+Warning: Skipping returning_sut: the specification of the function does not
+         specify all fields of the model for the returned SUT value.
+         Specifications should contain at least one
+         "ensures x.contents = expr" where x is the returned SUT and expr can
+         refer to other SUTs only under an old operator.
 File "all_warnings.mli", line 22, characters 24-29:
 22 | val incompatible_type : int t -> bool
                              ^^^^^
@@ -27,11 +35,6 @@ File "all_warnings.mli", line 46, characters 6-7:
            ^
 Warning: Skipping ghost_returned_value: functions with a ghost returned value
          are not supported.
-Warning: Skipping returning_sut: model contents is declared as modified by
-         the function but no suitable ensures clause was found.
-         Specifications should contain at least one "ensures x.contents =
-         expr" where x is the SUT and expr can refer to the SUT only under an
-         old operator and can't refer to the returned value.
 File "all_warnings.mli", line 34, characters 13-23:
 34 |     modifies t.contents *)
                   ^^^^^^^^^^
@@ -53,10 +56,6 @@ File "all_warnings.mli", line 8, characters 0-98:
  9 | (*@ t = make i a
 10 |     ensures t.contents = List.init i (fun _ -> a) *)
 Warning: Incomplete computation of the returned value in the specification of make. Failure message won't be able to display the expected returned value.
-File "all_warnings.mli", line 16, characters 0-57:
-16 | val returning_sut : 'a -> 'a t
-17 | (*@ t = returning_sut a *)
-Warning: Incomplete computation of the returned value in the specification of returning_sut. Failure message won't be able to display the expected returned value.
 File "all_warnings.mli", line 19, characters 0-85:
 19 | val multiple_sut_argument : 'a t -> 'a t -> bool
 20 | (*@ b = multiple_sut_argument x y *)

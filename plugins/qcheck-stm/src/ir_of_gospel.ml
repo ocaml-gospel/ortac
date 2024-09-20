@@ -197,8 +197,28 @@ let ret_next_state config state vd =
     in
     let is_t vs = Ident.equal returned_sut vs.vs_name in
     let formulae = get_state_description_with_index is_t state spec in
-    (* TODO: Need to check that we actually specify all fields *)
     let modifies = List.map (fun (field, _) -> (field, Location.none)) state in
+    (* Check that there is at least one equation for each model field *)
+    let* () =
+      match
+        List.filter
+          (fun (id, _) ->
+            not
+              (List.exists
+                 (fun (_, Ir.{ model; _ }) -> Ident.equal model id)
+                 formulae))
+          state
+      with
+      | [] -> ok ()
+      | missing_models ->
+          let missing_models =
+            List.map (fun (id, _) -> id.Ident.id_str) missing_models
+          in
+          error
+            ( Ensures_not_found_for_ret_sut
+                (vd.vd_name.Ident.id_str, missing_models),
+              spec.sp_loc )
+    in
     Some (returned_sut, Ir.{ formulae; modifies }) |> ok
   else None |> ok
 
