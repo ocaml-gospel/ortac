@@ -306,11 +306,11 @@ val type_not_supported : new_type -> 'a t -> new_type
 $ ortac qcheck-stm example_unknown_type.mli example_config.ml -o foo.ml --quiet
 $ grep -A 1 "type cmd" foo.ml
     type cmd =
-      | Type_not_supported of new_type
+      | Make of int * char
 $ grep -A 3 "let run" foo.ml
-    let run cmd__014_ sut__015_ =
-      match cmd__014_ with
-      | Type_not_supported x ->
+    let run cmd__016_ sut__017_ =
+      match cmd__016_ with
+      | Make (i, a_1) ->
           Res
 ]}
 
@@ -367,34 +367,6 @@ Warning: Skipping incompatible_type: the type of its SUT-type argument is
 
 In the case you have functions specialized with different instantiations, you
 can always generate one test per possible instantiation, of course.
-
-{2 Empty command type} 
-
-During the translation of the Gospel annotations [ortac] will leave out 
-specifications that do not adhere to its requirements. In the extreme case this 
-may result in an empty set of commands that it can use to create test traces 
-from. 
-
-Given the following example: 
-
-{@ocaml file=example_empty_cmd.mli,part=fun-decl[
-type 'a t
-(*@ model size : int
-    mutable model contents : 'a list *)
-
-val make : int -> 'a -> 'a t
-(*@ t = make i a
-    checks i >= 0
-    ensures t.size = i
-    ensures t.contents = List.init i (fun j -> a) *)
-]}
-
-the command will generate the following error: 
-
-{@sh[
-$ ortac qcheck-stm example_empty_cmd.mli example_config.ml -o foo.ml 
-Error: The generated cmd type is empty.
-]}
 
 {2 [ortac] limitations}
 
@@ -465,10 +437,14 @@ Ortac/QCheck-STM will generate the following warnings:
 
 {@sh[
 $ ortac qcheck-stm example_limitations.mli example_config.ml -o foo.ml
-File "example_limitations.mli", line 17, characters 25-29:
-17 | val of_list : 'a list -> 'a t
-                              ^^^^
-Warning: Skipping of_list: functions returning a SUT value cannot be tested.
+File "example_limitations.mli", line 18, characters 3-19:
+18 | (*@ t = of_list xs *)
+        ^^^^^^^^^^^^^^^^
+Warning: Skipping of_list: the specification of the function does not specify
+         all fields of the model for the returned SUT value. Specifications
+         should contain at least one "ensures x.size = expr" and
+         "ensures x.contents = expr" where x is the returned SUT and expr can
+         refer to other SUTs only under an old operator.
 File "example_limitations.mli", line 20, characters 16-63:
 20 | val g : 'a t -> 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a -> bool
                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -478,3 +454,19 @@ File "example_limitations.mli", line 23, characters 15-25:
                     ^^^^^^^^^^
 Warning: Skipping for_all: functions are not supported yet as arguments.
 ]}
+
+{2 Functions returning a SUT}
+
+Functions returning a SUT will be tested, however, there are some restrictions
+and peculiarities:
+
+{ul
+    {li Only functions returning a single SUT value are tested, if the SUT is
+        nested inside another structure (e.g., a tuple or a list) the function
+        will be skipped}
+    {li Many [init]/[create] like functions take an integer relating to the
+        initial size of the datastructure as an argument. In order to keep the
+        size of the created data structure manageable, a heuristic is used.
+        Whenever a functions returns a SUT, but does not take a SUT as an input
+        argument, any [Gen.int] generators in [Spec.arb_cmd] are automatically
+        exchanged with [Gen.small_signed_int]}}

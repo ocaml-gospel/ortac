@@ -18,3 +18,14 @@ val transfer : 'a t -> 'a t -> unit
     modifies t2
     ensures t1.contents = Sequence.singleton (Sequence.hd (old t1.contents))
     ensures t2.contents = Sequence.tl (old t1.contents) ++ (old t2.contents) *)
+
+val copy : 'a t -> 'a t
+(*@ r = copy t
+    ensures r.contents = t.contents *)
+
+val sub : 'a t -> int -> int -> 'a t
+(*@ r = sub t i n
+    checks 0 <= i <= Sequence.length t.contents
+    checks i <= i + n <= Sequence.length t.contents
+    checks n >= 1
+    ensures r.contents = if n = 0 then Sequence.empty else t.contents[i..i+n-1] *)

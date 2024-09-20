@@ -1,5 +1,5 @@
-File "array.mli", line 38, characters 0-85:
-38 | val mem : 'a -> 'a t -> bool
-39 | (*@ b = mem a t
-40 |     ensures b = List.mem a t.contents *)
+File "array.mli", line 55, characters 0-89:
+55 | val mem : 'a -> 'a t -> bool
+56 | (*@ b = mem a t
+57 |     ensures b = Sequence.mem t.contents a *)
 Warning: Incomplete computation of the returned value in the specification of mem. Failure message won't be able to display the expected returned value.

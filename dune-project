@@ -157,7 +157,7 @@
   (ppxlib (>= 0.26.0))
   (mdx (and :with-test (>= 2.3.0)))
   (gospel (= 0.3.0))
-  (qcheck-stm (>= 0.3))
+  (qcheck-stm (>= 0.4))
   (ortac-core (= :version))
   (ortac-runtime-qcheck-stm (= :version)))
  (conflicts
@@ -191,7 +191,7 @@
  (authors "Nicolas Osborne <nicolas.osborne@tarides.com>")
  (depends
   (ocaml (>= 4.12.0))
-  (qcheck-stm (>= 0.3))
+  (qcheck-stm (>= 0.4))
   (ortac-runtime (= :version))))
 
 (package

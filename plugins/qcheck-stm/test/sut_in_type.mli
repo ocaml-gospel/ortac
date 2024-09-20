@@ -3,6 +3,7 @@ type 'a t
 
 val make : int -> 'a -> 'a t
 (*@ t = make i a
+    checks i >= 0
     ensures t.contents = List.init i (fun j -> a) *)
 
 val sut_in_type : 'a t list -> int

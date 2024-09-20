@@ -3,6 +3,7 @@ type 'a t
 
 val make : int -> 'a -> 'a t
 (*@ t = make i a
+    checks i >= 0
     ensures true /\ true && t.contents = List.init i (fun _ -> a) *)
 
 (*@ function set_contents (c : 'a list) (i : integer) (a : 'a) : 'a list =

@@ -3,11 +3,14 @@ File "all_warnings.mli", line 12, characters 0-52:
 13 | (*@ constant
 14 |     ensures true *)
 Warning: Skipping constant: constants cannot be tested.
-File "all_warnings.mli", line 16, characters 26-30:
-16 | val returning_sut : 'a -> 'a t
-                               ^^^^
-Warning: Skipping returning_sut: functions returning a SUT value cannot be
-         tested.
+File "all_warnings.mli", line 17, characters 3-24:
+17 | (*@ t = returning_sut a *)
+        ^^^^^^^^^^^^^^^^^^^^^
+Warning: Skipping returning_sut: the specification of the function does not
+         specify all fields of the model for the returned SUT value.
+         Specifications should contain at least one
+         "ensures x.contents = expr" where x is the returned SUT and expr can
+         refer to other SUTs only under an old operator.
 File "all_warnings.mli", line 22, characters 24-29:
 22 | val incompatible_type : int t -> bool
                              ^^^^^

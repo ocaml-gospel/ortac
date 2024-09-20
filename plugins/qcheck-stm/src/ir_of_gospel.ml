@@ -112,11 +112,13 @@ let ty_var_substitution config (vd : val_description) =
     | Ptyp_tuple _ ->
         let* () = check `Right ty in
         Reserr.ok insts
+    | Ptyp_constr _ when Cfg.is_sut config ty ->
+        let* () = check `Right ty in
+        let* x = unify (`Value value_name) config.sut_core_type ty in
+        insts @ x |> ok
     | Ptyp_constr (_, _) ->
-        if not (Cfg.is_sut config ty) then
-          let* () = check `Right ty in
-          Reserr.ok insts
-        else Reserr.(error (Returning_sut value_name, ty.ptyp_loc))
+        let* () = check `Right ty in
+        Reserr.ok insts
     (* not supported *)
     | Ptyp_object (_, _)
     | Ptyp_class (_, _)
@@ -181,6 +183,44 @@ let next_states suts state spec =
     (sut, Ir.{ formulae; modifies })
   in
   List.map next_state suts
+
+let ret_next_state config state vd =
+  let open Reserr in
+  let open Ppxlib in
+  let open Gospel.Symbols in
+  if Cfg.does_return_sut config vd.vd_type then
+    let spec = Option.get vd.vd_spec in
+    let returned_sut =
+      match spec.sp_ret with
+      | [ Lnone vs ] -> vs.vs_name
+      | _ -> failwith "should not happen"
+    in
+    let is_t vs = Ident.equal returned_sut vs.vs_name in
+    let formulae = get_state_description_with_index is_t state spec in
+    let modifies = List.map (fun (field, _) -> (field, Location.none)) state in
+    (* Check that there is at least one equation for each model field *)
+    let* () =
+      match
+        List.filter
+          (fun (id, _) ->
+            not
+              (List.exists
+                 (fun (_, Ir.{ model; _ }) -> Ident.equal model id)
+                 formulae))
+          state
+      with
+      | [] -> ok ()
+      | missing_models ->
+          let missing_models =
+            List.map (fun (id, _) -> id.Ident.id_str) missing_models
+          in
+          error
+            ( Ensures_not_found_for_ret_sut
+                (vd.vd_name.Ident.id_str, missing_models),
+              spec.sp_loc )
+    in
+    Some (returned_sut, Ir.{ formulae; modifies }) |> ok
+  else None |> ok
 
 (* returns the list of terms [t] such that [ret = t] appears in the [ensures] of
    the [spec] *)
@@ -259,16 +299,20 @@ let val_desc config state vd =
   in
   let ret_values = List.map (returned_value_description spec) ret in
   let next_states = next_states suts state spec in
+  let* ret_state = ret_next_state config state vd in
+  let next_states =
+    match ret_state with
+    | Some ret_state -> ret_state :: next_states
+    | None -> next_states
+  in
   let postcond = postcond spec in
   Ir.value vd.vd_name vd.vd_type inst suts args ret ret_values next_states
     spec.sp_pre postcond
   |> ok
 
-let sig_item config init_fct state s =
+let sig_item config state s =
   match s.sig_desc with
-  | Sig_val (vd, Nonghost) ->
-      if Fmt.str "%a" Ident.pp vd.vd_name = init_fct then None
-      else Some (val_desc config state vd)
+  | Sig_val (vd, Nonghost) -> Some (val_desc config state vd)
   | _ -> None
 
 let state_and_invariants config sigs =
@@ -415,10 +459,10 @@ let init_state config state sigs =
               (No_appropriate_specifications (fct_str, missing_models)),
             spec.sp_loc )
   in
-  ok (fct_str, Ir.{ arguments; returned_sut; descriptions })
+  Ir.{ arguments; returned_sut; descriptions } |> ok
 
-let signature config init_fct state sigs =
-  List.filter_map (sig_item config init_fct state) sigs |> Reserr.promote
+let signature config state sigs =
+  List.filter_map (sig_item config state) sigs |> Reserr.promote
 
 let ghost_functions =
   let open Tast in
@@ -438,8 +482,8 @@ let run sigs config =
   let open Reserr in
   let open Ir in
   let* state, invariants = state_and_invariants config sigs in
-  let* init_fct, init_state = init_state config state sigs in
+  let* init_state = init_state config state sigs in
   let ghost_functions = ghost_functions sigs in
   let ghost_types = ghost_types sigs in
-  let* values = signature config init_fct state sigs in
+  let* values = signature config state sigs in
   ok { state; invariants; init_state; ghost_functions; ghost_types; values }

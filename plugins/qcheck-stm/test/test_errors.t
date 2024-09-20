@@ -159,6 +159,15 @@ Or specify it using clauses that cannot be executed:
   Error: Unsupported INIT function: the specification of the function called in
          the INIT expression does not provide a translatable specification for
          the following field of the model: value.
+  Warning: Skipping make: model value is declared as modified by the function
+           but no suitable ensures clause was found. Specifications should
+           contain at least one "ensures x.value = expr" where x is the SUT and
+           expr can refer to the SUT only under an old operator and can't refer
+           to the returned value.
+  File "foo.mli", line 6, characters 25-40:
+  6 |     ensures t.value = if forall i. i = i then a :: [] else [] *)
+                               ^^^^^^^^^^^^^^^
+  Warning: Skipping clause: unsupported quantification.
   File "foo.mli", line 6, characters 25-40:
   6 |     ensures t.value = if forall i. i = i then a :: [] else [] *)
                                ^^^^^^^^^^^^^^^
@@ -256,6 +265,11 @@ We shouldn't be able to define a model by itsef in the `make` function:
   Error: Unsupported INIT function: the specification of the function called in
          the INIT expression does not provide a translatable specification for
          the following field of the model: value.
+  Warning: Skipping make: model value is declared as modified by the function
+           but no suitable ensures clause was found. Specifications should
+           contain at least one "ensures x.value = expr" where x is the SUT and
+           expr can refer to the SUT only under an old operator and can't refer
+           to the returned value.
   File "foo.mli", line 6, characters 22-23:
   6 |     ensures t.value = t.value *)
                             ^
