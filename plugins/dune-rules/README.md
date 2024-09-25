@@ -42,6 +42,11 @@ part of the `lib` library. It will write the generated tests in `lib_tests.ml`.
 If you want more control, you can use the `--config`, `--library` and
 `--output` command-line options to give custom names to these files.
 
+You can use the `--timeout x` command-line option to run each test in a separate
+process, which is automatically killed after `x` seconds. This is useful in case
+the test may cause a segmentation fault or include non-terminating computations.
+More information about this can be found in [Ortac/QCheck-STM].
+
 [Ortac/QCheck-STM]: ../qcheck-stm/README.md
 
 ## Supported plugins
