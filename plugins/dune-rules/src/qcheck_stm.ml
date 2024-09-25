@@ -5,6 +5,7 @@ type config = {
   library : string option;
   package_name : string option;
   dune_output : string option;
+  fork_timeout : int option;
 }
 
 open Fmt
@@ -33,18 +34,16 @@ let with_target k ppf config =
   let k ppf config = pf ppf "with-stdout-to@;%s@;%a" "%{targets}" k config in
   stanza k ppf config
 
-let setenv k ppf =
-  let k ppf config =
-    pf ppf "setenv@;ORTAC_ONLY_PLUGIN@;qcheck-stm@;%a" k config
-  in
+let setenv var value k ppf =
+  let k ppf config = pf ppf "setenv@;%s@;%s@;%a" var value k config in
   stanza k ppf
 
 let action ppf k =
   let k ppf config = pf ppf "action@;%a" k config in
   stanza k ppf
 
-let action_with_env ppf k =
-  let k ppf = setenv k ppf in
+let action_with_env var value ppf k =
+  let k ppf = setenv var value k ppf in
   action ppf k
 
 let rule ppf stanzas = pf ppf "rule@;%a" (concat stanzas)
@@ -96,7 +95,9 @@ let gen_ortac_rule ppf config =
   in
   let run ppf = run ppf args in
   let run = stanza run in
-  let action ppf = action_with_env ppf (with_target run) in
+  let action ppf =
+    action_with_env "ORTAC_ONLY_PLUGIN" "qcheck-stm" ppf (with_target run)
+  in
   let stanzas =
     [ runtest; promote ] @ package config @ [ deps; targets_ml; action ]
   in
@@ -113,7 +114,13 @@ let gen_test_rule ppf config =
         (fun ppf _ -> pf ppf "%s" "%{test}"); (fun ppf _ -> pf ppf "--verbose");
       ]
   in
-  let action ppf = action ppf (stanza run) in
+  let action ppf =
+    match config.fork_timeout with
+    | None -> action ppf (stanza run)
+    | Some timeout ->
+        action_with_env "ORTAC_QCHECK_STM_TIMEOUT" (string_of_int timeout) ppf
+          (stanza run)
+  in
   let test ppf =
     test ppf @@ [ name; modules; libraries ] @ package config @ [ action ]
   in

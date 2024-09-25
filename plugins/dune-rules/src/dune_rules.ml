@@ -67,8 +67,14 @@ end = struct
                line."
             ~docv:"DUNE_OUTPUT")
 
+    let fork_timeout =
+      Arg.(
+        value
+        & opt (some int) None
+        & info [ "t"; "timeout" ] ~doc:"Timeout for each test." ~docv:"TIMEOUT")
+
     let main interface_file config_file ocaml_output library package_name
-        dune_output =
+        dune_output fork_timeout =
       let open Qcheck_stm in
       let config =
         {
@@ -78,6 +84,7 @@ end = struct
           library;
           package_name;
           dune_output;
+          fork_timeout;
         }
       in
       let ppf = Registration.get_out_formatter dune_output in
@@ -91,7 +98,8 @@ end = struct
         $ ocaml_output
         $ library
         $ package_name
-        $ with_stdout_to)
+        $ with_stdout_to
+        $ fork_timeout)
 
     let cmd = Cmd.v info term
   end
