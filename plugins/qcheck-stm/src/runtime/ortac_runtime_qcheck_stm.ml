@@ -212,7 +212,21 @@ module Make (Spec : Spec) = struct
 
   let agree_test ~count ~name max_suts wrapped_init_state ortac_show_cmd
       postcond =
-    Test.make ~name ~count
-      (Internal.arb_cmds Spec.init_state)
-      (agree_prop max_suts wrapped_init_state ortac_show_cmd postcond)
+    let test_prop =
+      agree_prop max_suts wrapped_init_state ortac_show_cmd postcond
+    in
+    let env_var_fail () =
+      let msg = "ORTAC_QCHECK_STM_TIMEOUT must be set to a positive integer" in
+      Printf.eprintf "%s" msg;
+      exit 1
+    in
+    let wrapped_prop =
+      match Sys.getenv_opt "ORTAC_QCHECK_STM_TIMEOUT" with
+      | None -> test_prop
+      | Some time ->
+          let timeout = try int_of_string time with _ -> env_var_fail () in
+          if timeout <= 0 then env_var_fail ();
+          Util.fork_prop_with_timeout timeout test_prop
+    in
+    Test.make ~name ~count (Internal.arb_cmds Spec.init_state) wrapped_prop
 end
