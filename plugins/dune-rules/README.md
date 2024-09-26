@@ -38,9 +38,10 @@ The best way to use Ortac/Dune is in a dune stanza:
 
 This stanza assumes that you have written the configuration for
 [Ortac/QCheck-STM] in a file named `lib_config.ml` and that the `Lib` module is
-part of the `lib` library. It will write the generated tests in `lib_tests.ml`.
-If you want more control, you can use the `--config`, `--library` and
-`--output` command-line options to give custom names to these files.
+part of the `lib` library. It will write the generated tests in
+`lib_stm_tests.ml`. If you want more control, you can use the `--config`,
+`--library` and `--output` command-line options to give custom names to these
+files.
 
 You can use the `--timeout x` command-line option to run each test in a separate
 process, which is automatically killed after `x` seconds. This is useful in case
