@@ -15,7 +15,6 @@ type W.kind +=
   | Ensures_not_found_for_ret_sut of (string * string list)
   | Functional_argument of string
   | Ghost_values of (string * [ `Arg | `Ret ])
-  | Ignored_modifies
   | Impossible_init_state_generation of init_state_error
   | Impossible_term_substitution of
       [ `Never | `New | `Old | `NotModel | `OutOfScope ]
@@ -23,15 +22,13 @@ type W.kind +=
   | Incompatible_type of (string * string)
   | Incomplete_configuration_module of [ `Init_sut | `Sut ]
   | Incomplete_ret_val_computation of string
-  | Multiple_sut_arguments of string
   | No_configuration_file of string
   | No_init_function of string
   | No_models of string
   | No_spec of string
   | No_sut_type of string
   | Not_a_structure of string
-  | Returned_tuple of string
-  | Returning_sut of string
+  | Returning_nested_sut of string
   | Sut_as_type_inst of string
   | Sut_in_tuple of string
   | Sut_type_not_specified of string
@@ -52,6 +49,13 @@ val ( let* ) : 'a reserr -> ('a -> 'b reserr) -> 'b reserr
 val ( >>= ) : 'a reserr -> ('a -> 'b reserr) -> 'b reserr
 val ( and* ) : 'a reserr -> 'b reserr -> ('a * 'b) reserr
 
+val traverse : ('a -> 'b reserr) -> 'a list -> 'b list reserr
+(** [traverse f xs] maps [f] over [xs] and returns [ok] of the resulting list
+    iff it contains no [error] *)
+
+val traverse_ : ('a -> 'b reserr) -> 'a list -> unit reserr
+(** [traverse_ f xs] is [traverse f xs] ignoring the returned list *)
+
 val sequence : 'a reserr list -> 'a list reserr
 (** [sequence rs] returns [ok] of the list of ['a] iff there is no [error] in
     [rs] *)
@@ -61,14 +65,18 @@ val promote : 'a reserr list -> 'a list reserr
     no [errors] of level [Error] in [rs] and store the [errors] of level
     [Warning] in the warnings list *)
 
+val promote_map : ('a -> 'b reserr) -> 'a list -> 'b list reserr
+(** [promote_map f xs] is [List.map f xs |> promote] with only one traversal *)
+
+val promote_mapi : (int -> 'a -> 'b reserr) -> 'a list -> 'b list reserr
+(** [promote_mapi f xs] is [List.mapi f xs |> promote] with only one traversal *)
+
 val promote_opt : 'a reserr -> 'a option reserr
 (** [promote_opt r] is [promote] for a unique value *)
 
 val fold_left : ('a -> 'b -> 'a reserr) -> 'a -> 'b list -> 'a reserr
 val of_option : default:W.t -> 'a option -> 'a reserr
 val to_option : 'a reserr -> 'a option
-val map : ('a -> 'b reserr) -> 'a list -> 'b list reserr
-val concat_map : ('a -> 'b list reserr) -> 'a list -> 'b list reserr
 val fmap : ('a -> 'b) -> 'a reserr -> 'b reserr
 val ( <$> ) : ('a -> 'b) -> 'a reserr -> 'b reserr
 val app : ('a -> 'b) reserr -> 'a reserr -> 'b reserr

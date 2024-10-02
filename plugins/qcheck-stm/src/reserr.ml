@@ -15,7 +15,6 @@ type W.kind +=
   | Ensures_not_found_for_ret_sut of (string * string list)
   | Functional_argument of string
   | Ghost_values of (string * [ `Arg | `Ret ])
-  | Ignored_modifies
   | Impossible_init_state_generation of init_state_error
   | Impossible_term_substitution of
       [ `Never | `New | `Old | `NotModel | `OutOfScope ]
@@ -23,15 +22,13 @@ type W.kind +=
   | Incompatible_type of (string * string)
   | Incomplete_ret_val_computation of string
   | Incomplete_configuration_module of [ `Init_sut | `Sut ]
-  | Multiple_sut_arguments of string
   | No_configuration_file of string
   | No_init_function of string
   | No_models of string
   | No_spec of string
   | No_sut_type of string
   | Not_a_structure of string
-  | Returned_tuple of string
-  | Returning_sut of string
+  | Returning_nested_sut of string
   | Sut_as_type_inst of string
   | Sut_in_tuple of string
   | Sut_type_not_specified of string
@@ -46,10 +43,10 @@ let level kind =
   match kind with
   | Constant_value _ | Ensures_not_found_for_next_state _
   | Ensures_not_found_for_ret_sut _ | Functional_argument _ | Ghost_values _
-  | Ignored_modifies | Impossible_term_substitution _ | Incompatible_type _
-  | Incomplete_ret_val_computation _ | Multiple_sut_arguments _ | No_spec _
-  | Returned_tuple _ | Returning_sut _ | Sut_as_type_inst _ | Sut_in_tuple _
-  | Tuple_arity _ | Type_not_supported _ ->
+  | Impossible_term_substitution _ | Incompatible_type _
+  | Incomplete_ret_val_computation _ | No_spec _ | Returning_nested_sut _
+  | Sut_as_type_inst _ | Sut_in_tuple _ | Tuple_arity _ | Type_not_supported _
+    ->
       W.Warning
   | Impossible_init_state_generation _ | Incompatible_sut _
   | Incomplete_configuration_module _ | No_configuration_file _
@@ -59,43 +56,6 @@ let level kind =
   | Type_parameter_not_instantiated _ ->
       W.Error
   | _ -> W.level kind
-
-type 'a reserr = ('a, W.t list) result * W.t list
-
-let ok x = (Result.ok x, [])
-let error e = (Result.error [ e ], [])
-let warns ws = (Result.ok (), ws)
-let warn w = warns [ w ]
-
-let ( let* ) x f =
-  match x with
-  | Ok v, warns1 ->
-      let res, warns2 = f v in
-      (res, warns1 @ warns2)
-  | (Error _, _) as x -> x
-
-let ( >>= ) = ( let* )
-
-let ( and* ) (a, aw) (b, bw) =
-  let r =
-    match (a, b) with
-    | Error e0, Error e1 -> Error (e0 @ e1)
-    | Error e, _ | _, Error e -> Error e
-    | Ok a, Ok b -> Ok (a, b)
-  in
-  (r, aw @ bw)
-
-let fmap f r =
-  let* r = r in
-  ok (f r)
-
-let ( <$> ) = fmap
-
-let app f r =
-  let* f = f and* r = r in
-  ok (f r)
-
-let ( <*> ) = app
 
 let pp_kind ppf kind =
   let open Fmt in
@@ -126,24 +86,15 @@ let pp_kind ppf kind =
       pf ppf "Skipping %s:@ %a%a%a" id text "functions with a ghost " text
         (match k with `Arg -> "argument" | `Ret -> "returned value")
         text " are not supported"
-  | Ignored_modifies ->
-      pf ppf "Skipping unsupported modifies clause:@ %a" text
-        "expected \"modifies x\" or \"modifies x.model\" where x is the SUT"
   | Incompatible_type (v, t) ->
       pf ppf "Skipping %s:@ %a%s" v text
         "the type of its SUT-type argument is incompatible with the configured \
          SUT type: "
         t
-  | Multiple_sut_arguments id ->
-      pf ppf "Skipping %s:@ %a" id text
-        "functions with multiple SUT arguments cannot be tested"
   | No_spec fct ->
       pf ppf "Skipping %s:@ %a" fct text
         "functions without specifications cannot be tested"
-  | Returned_tuple f ->
-      pf ppf "Skipping %s:@ %a" f text
-        "functions returning tuples are not supported yet"
-  | Returning_sut id ->
+  | Returning_nested_sut id ->
       pf ppf "Skipping %s:@ %a" id text
         "functions returning a SUT nested inside another type cannot be tested"
   | Impossible_term_substitution why ->
@@ -270,15 +221,52 @@ let pp quiet pp_ok ppf r =
         match warns with [] -> () | warns -> pf stderr "%a@." pp_errors warns)
   | Error errs, warns -> pf stderr "%a@." pp_errors (errs @ warns)
 
-let sequence r =
-  let rec aux = function
-    | [] -> ok []
-    | ((Ok _, _) as x) :: xs ->
-        let* y = x and* ys = aux xs in
-        ok (y :: ys)
-    | ((Error _, _) as x) :: _ -> x
+type 'a reserr = ('a, W.t list) result * W.t list
+
+let ok x = (Result.ok x, [])
+let error e = (Result.error [ e ], [])
+let warns ws = (Result.ok (), ws)
+let warn w = warns [ w ]
+
+let ( let* ) x f =
+  match x with
+  | Ok v, warns1 ->
+      let res, warns2 = f v in
+      (res, warns1 @ warns2)
+  | (Error _, _) as x -> x
+
+let ( >>= ) = ( let* )
+
+let ( and* ) (a, aw) (b, bw) =
+  let r =
+    match (a, b) with
+    | Error e0, Error e1 -> Error (e0 @ e1)
+    | Error e, _ | _, Error e -> Error e
+    | Ok a, Ok b -> Ok (a, b)
   in
-  aux r
+  (r, aw @ bw)
+
+let fmap f r =
+  let* r = r in
+  ok (f r)
+
+let ( <$> ) = fmap
+
+let app f r =
+  let* f = f and* r = r in
+  ok (f r)
+
+let ( <*> ) = app
+
+let traverse f xs =
+  let cons_f x xs = List.cons <$> f x <*> xs in
+  List.fold_right cons_f xs (ok [])
+
+let traverse_ f xs =
+  let f x u = f x >>= Fun.const u in
+  List.fold_right f xs (ok ())
+
+let sequence xs = traverse Fun.id xs
 
 let rec filter_errs = function
   | [] -> ok ()
@@ -298,6 +286,34 @@ let rec promote = function
       let* _ = warns ws and* _ = filter_errs errs in
       promote xs
 
+let promote_map f =
+  let rec aux = function
+    | [] -> ok []
+    | x :: xs -> (
+        match f x with
+        | (Ok _, _) as x ->
+            let* y = x and* ys = aux xs in
+            ok (y :: ys)
+        | Error errs, ws ->
+            let* _ = warns ws and* _ = filter_errs errs in
+            aux xs)
+  in
+  aux
+
+let promote_mapi f =
+  let rec aux i = function
+    | [] -> ok []
+    | x :: xs -> (
+        match f i x with
+        | (Ok _, _) as x ->
+            let* y = x and* ys = aux (i + 1) xs in
+            ok (y :: ys)
+        | Error errs, ws ->
+            let* _ = warns ws and* _ = filter_errs errs in
+            aux (i + 1) xs)
+  in
+  aux 0
+
 let promote_opt r =
   match r with
   | (Ok _, _) as x ->
@@ -307,8 +323,7 @@ let promote_opt r =
       let* _ = warns ws and* _ = filter_errs errs in
       ok None
 
-let rec fold_left (f : 'a -> 'b -> 'a reserr) (acc : 'a) : 'b list -> 'a reserr
-    = function
+let rec fold_left f acc = function
   | [] -> ok acc
   | x :: xs -> (
       match f acc x with
@@ -321,5 +336,3 @@ let rec fold_left (f : 'a -> 'b -> 'a reserr) (acc : 'a) : 'b list -> 'a reserr
 
 let of_option ~default = Option.fold ~none:(error default) ~some:ok
 let to_option = function Ok x, _ -> Some x | _ -> None
-let map f l = List.map f l |> promote
-let concat_map f l = fmap List.concat (map f l)

@@ -1,5 +1,8 @@
 # Unreleased
 
+- Add `Reserr.{traverse,traverse_,promote_mapi}`, rename `Reserr.map` to
+  `Reserr.promote_map` and remove `Reserr.concat_map`
+  [\#250](https://github.com/ocaml-gospel/ortac/pull/250)
 - Fix display of the runnable scenario for protected values
   [\#251](https://github.com/ocaml-gospel/ortac/pull/251)
 - Fix sut as type argument or inside tuple bug
