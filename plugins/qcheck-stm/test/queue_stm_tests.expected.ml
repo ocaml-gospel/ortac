@@ -457,7 +457,7 @@ let ortac_postcond cmd__023_ state__024_ res__025_ =
                   else
                     Some
                       (Ortac_runtime.report "Queue" "create ()"
-                         (Either.right
+                         (Ortac_runtime.Protected_value
                             (Res
                                (int,
                                  (let t_old__028_ = Model.get state__024_ 0
@@ -539,7 +539,7 @@ let ortac_postcond cmd__023_ state__024_ res__025_ =
                   else
                     Some
                       (Ortac_runtime.report "Queue" "create ()"
-                         (Either.right
+                         (Ortac_runtime.Protected_value
                             (Res
                                (int,
                                  (let t_old__028_ = Model.get state__024_ 0
@@ -626,7 +626,7 @@ let ortac_postcond cmd__023_ state__024_ res__025_ =
                else
                  Some
                    (Ortac_runtime.report "Queue" "create ()"
-                      (Either.left "Empty") "pop"
+                      (Ortac_runtime.Exception "Empty") "pop"
                       [("t.contents = old t.contents = Sequence.empty",
                          {
                            Ortac_runtime.start =
@@ -681,7 +681,7 @@ let ortac_postcond cmd__023_ state__024_ res__025_ =
                else
                  Some
                    (Ortac_runtime.report "Queue" "create ()"
-                      (Either.right
+                      (Ortac_runtime.Protected_value
                          (Res
                             (int,
                               (let t_old__039_ = Model.get state__024_ 0
@@ -767,7 +767,7 @@ let ortac_postcond cmd__023_ state__024_ res__025_ =
                else
                  Some
                    (Ortac_runtime.report "Queue" "create ()"
-                      (Either.left "Empty") "peek"
+                      (Ortac_runtime.Exception "Empty") "peek"
                       [("t.contents = old t.contents = Sequence.empty",
                          {
                            Ortac_runtime.start =
@@ -831,7 +831,8 @@ let ortac_postcond cmd__023_ state__024_ res__025_ =
           else
             Some
               (Ortac_runtime.report "Queue" "create ()"
-                 (Either.right (Res (Ortac_runtime.dummy, ()))) "peek_opt"
+                 (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
+                 "peek_opt"
                  [("match v with\n        | None -> t.contents = Sequence.empty\n        | Some a -> a = Sequence.hd t.contents",
                     {
                       Ortac_runtime.start =
@@ -889,7 +890,7 @@ let ortac_postcond cmd__023_ state__024_ res__025_ =
           else
             Some
               (Ortac_runtime.report "Queue" "create ()"
-                 (Either.right
+                 (Ortac_runtime.Value
                     (Res
                        (bool,
                          (let t_old__052_ = Model.get state__024_ 0

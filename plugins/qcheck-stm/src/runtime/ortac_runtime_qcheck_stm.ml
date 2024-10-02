@@ -1,10 +1,15 @@
 open STM
 include Ortac_runtime
 
+type expected_result =
+  | Value of res
+  | Protected_value of res
+  | Exception of string
+
 type report = {
   mod_name : string;
   init_sut : string;
-  ret : (string, res) Either.t;
+  ret : expected_result;
   cmd : string;
   terms : (string * location) list;
 }
@@ -124,9 +129,11 @@ module Make (Spec : Spec) = struct
   let pp_trace max_suts ppf (trace, mod_name, init_sut, ret) =
     let open Fmt in
     let pp_expected ppf = function
-      | Either.Right ret when not @@ is_dummy ret ->
+      | Value ret when not @@ is_dummy ret ->
           pf ppf "assert (r = %s)@\n" (show_res ret)
-      | Either.Left exn ->
+      | Protected_value ret when not @@ is_dummy ret ->
+          pf ppf "assert (r = Ok %s)@\n" (show_res ret)
+      | Exception exn ->
           pf ppf
             "assert (@[match r with@\n\
             \  @[| Error (%s _) -> true@\n\

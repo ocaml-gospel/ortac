@@ -314,7 +314,8 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                  else
                    Some
                      (Ortac_runtime.report "Conjunctive_clauses"
-                        "make 42 'a'" (Either.left "Invalid_argument") "make"
+                        "make 42 'a'"
+                        (Ortac_runtime.Exception "Invalid_argument") "make"
                         [("i >= 0",
                            {
                              Ortac_runtime.start =
@@ -368,7 +369,8 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                     else
                       Some
                         (Ortac_runtime.report "Conjunctive_clauses"
-                           "make 42 'a'" (Either.left "Invalid_argument")
+                           "make 42 'a'"
+                           (Ortac_runtime.Exception "Invalid_argument")
                            "make"
                            [("i >= 0",
                               {
@@ -426,7 +428,8 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                  else
                    Some
                      (Ortac_runtime.report "Conjunctive_clauses"
-                        "make 42 'a'" (Either.left "Invalid_argument") "set"
+                        "make 42 'a'"
+                        (Ortac_runtime.Exception "Invalid_argument") "set"
                         [("0 <= i < List.length t.contents",
                            {
                              Ortac_runtime.start =
@@ -488,8 +491,8 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                     else
                       Some
                         (Ortac_runtime.report "Conjunctive_clauses"
-                           "make 42 'a'" (Either.left "Invalid_argument")
-                           "set"
+                           "make 42 'a'"
+                           (Ortac_runtime.Exception "Invalid_argument") "set"
                            [("0 <= i < List.length t.contents",
                               {
                                 Ortac_runtime.start =

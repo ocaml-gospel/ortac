@@ -516,7 +516,8 @@ let ortac_postcond cmd__023_ state__024_ res__025_ =
           else
             Some
               (Ortac_runtime.report "Lwt_dllist_spec" "create ()"
-                 (Either.right (Res (Ortac_runtime.dummy, ()))) "is_empty"
+                 (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
+                 "is_empty"
                  [("b <-> s.contents = Sequence.empty",
                     {
                       Ortac_runtime.start =
@@ -567,7 +568,7 @@ let ortac_postcond cmd__023_ state__024_ res__025_ =
           else
             Some
               (Ortac_runtime.report "Lwt_dllist_spec" "create ()"
-                 (Either.right
+                 (Ortac_runtime.Value
                     (Res
                        (integer,
                          (let s_old__030_ = Model.get state__024_ 0
@@ -657,7 +658,8 @@ let ortac_postcond cmd__023_ state__024_ res__025_ =
                else
                  Some
                    (Ortac_runtime.report "Lwt_dllist_spec" "create ()"
-                      (Either.right (Res (Ortac_runtime.dummy, ()))) "take_l"
+                      (Ortac_runtime.Protected_value
+                         (Res (Ortac_runtime.dummy, ()))) "take_l"
                       [("if old s.contents = Sequence.empty\n              then false\n              else a = Sequence.hd (old s.contents)",
                          {
                            Ortac_runtime.start =
@@ -713,7 +715,7 @@ let ortac_postcond cmd__023_ state__024_ res__025_ =
                else
                  Some
                    (Ortac_runtime.report "Lwt_dllist_spec" "create ()"
-                      (Either.left "Empty") "take_l"
+                      (Ortac_runtime.Exception "Empty") "take_l"
                       [("old s.contents = Sequence.empty = s.contents",
                          {
                            Ortac_runtime.start =
@@ -777,7 +779,8 @@ let ortac_postcond cmd__023_ state__024_ res__025_ =
                else
                  Some
                    (Ortac_runtime.report "Lwt_dllist_spec" "create ()"
-                      (Either.right (Res (Ortac_runtime.dummy, ()))) "take_r"
+                      (Ortac_runtime.Protected_value
+                         (Res (Ortac_runtime.dummy, ()))) "take_r"
                       [("if old s.contents = Sequence.empty\n              then false\n              else a = (old s.contents)[Sequence.length (old s.contents) - 1]",
                          {
                            Ortac_runtime.start =
@@ -833,7 +836,7 @@ let ortac_postcond cmd__023_ state__024_ res__025_ =
                else
                  Some
                    (Ortac_runtime.report "Lwt_dllist_spec" "create ()"
-                      (Either.left "Empty") "take_r"
+                      (Ortac_runtime.Exception "Empty") "take_r"
                       [("old s.contents = Sequence.empty = s.contents",
                          {
                            Ortac_runtime.start =
@@ -888,7 +891,8 @@ let ortac_postcond cmd__023_ state__024_ res__025_ =
           else
             Some
               (Ortac_runtime.report "Lwt_dllist_spec" "create ()"
-                 (Either.right (Res (Ortac_runtime.dummy, ()))) "take_opt_l"
+                 (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
+                 "take_opt_l"
                  [("old s.contents = match o with\n                                | None -> Sequence.empty\n                                | Some a -> Sequence.cons a s.contents",
                     {
                       Ortac_runtime.start =
@@ -942,7 +946,8 @@ let ortac_postcond cmd__023_ state__024_ res__025_ =
           else
             Some
               (Ortac_runtime.report "Lwt_dllist_spec" "create ()"
-                 (Either.right (Res (Ortac_runtime.dummy, ()))) "take_opt_r"
+                 (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
+                 "take_opt_r"
                  [("old s.contents = match o with\n                                | None -> Sequence.empty\n                                | Some a -> Sequence.snoc s.contents a",
                     {
                       Ortac_runtime.start =

@@ -293,7 +293,7 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                  else
                    Some
                      (Ortac_runtime.report "Custom_config" "empty ()"
-                        (Either.left "Invalid_argument") "top"
+                        (Ortac_runtime.Exception "Invalid_argument") "top"
                         [("t.contents <> Sequence.empty",
                            {
                              Ortac_runtime.start =
@@ -348,8 +348,8 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                     else
                       Some
                         (Ortac_runtime.report "Custom_config" "empty ()"
-                           (Either.right (Res (Ortac_runtime.dummy, ())))
-                           "top"
+                           (Ortac_runtime.Protected_value
+                              (Res (Ortac_runtime.dummy, ()))) "top"
                            [("proj a = Sequence.hd t.contents",
                               {
                                 Ortac_runtime.start =
@@ -403,7 +403,7 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                     else
                       Some
                         (Ortac_runtime.report "Custom_config" "empty ()"
-                           (Either.left "Invalid_argument") "top"
+                           (Ortac_runtime.Exception "Invalid_argument") "top"
                            [("t.contents <> Sequence.empty",
                               {
                                 Ortac_runtime.start =

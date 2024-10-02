@@ -11,11 +11,12 @@ let res_default = Ident.create ~loc:Location.none "res"
 let list_append = list_fold_expr (qualify [ "Ortac_runtime" ] "append") "None"
 let res = lident "Res"
 
-let eeither case e =
-  pexp_construct (noloc (Ldot (Lident "Either", case))) (Some e)
+let eexpected_value case e =
+  pexp_construct (noloc (Ldot (Lident "Ortac_runtime", case))) (Some e)
 
-let eleft = eeither "left"
-let eright = eeither "right"
+let evalue = eexpected_value "Value"
+let eprotected = eexpected_value "Protected_value"
+let eexception = eexpected_value "Exception"
 
 let eprotect call =
   let lazy_call = efun [ (Nolabel, punit) ] call in
@@ -681,7 +682,11 @@ let postcond_case config state invariants idx state_ident new_state_ident value
     and cmd = Fmt.str "%a" Ident.pp value.id |> estring
     and l = t.Ir.term.Gospel.Tterm.t_loc |> elocation
     and ret_val =
-      match exn with Some e -> eleft @@ estring e | None -> eright ret_val
+      match exn with
+      | Some e -> eexception @@ estring e
+      | None ->
+          if may_raise_exception value then eprotected ret_val
+          else evalue ret_val
     in
     pexp_ifthenelse e enone
       (Some

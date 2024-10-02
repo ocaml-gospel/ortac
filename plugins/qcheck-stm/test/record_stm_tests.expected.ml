@@ -225,7 +225,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
           else
             Some
               (Ortac_runtime.report "Record" "make 42"
-                 (Either.right
+                 (Ortac_runtime.Value
                     (Res
                        (integer,
                          (try
@@ -302,7 +302,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
           else
             Some
               (Ortac_runtime.report "Record" "make 42"
-                 (Either.right
+                 (Ortac_runtime.Value
                     (Res
                        (integer,
                          (try
@@ -381,7 +381,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
              else
                Some
                  (Ortac_runtime.report "Record" "make 42"
-                    (Either.right
+                    (Ortac_runtime.Value
                        (Res
                           (integer,
                             (let r_old__013_ = Model.get state__009_ 0
@@ -463,7 +463,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                 else
                   Some
                     (Ortac_runtime.report "Record" "make 42"
-                       (Either.right
+                       (Ortac_runtime.Value
                           (Res
                              (integer,
                                (let r_old__013_ = Model.get state__009_ 0
@@ -543,7 +543,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                 else
                   Some
                     (Ortac_runtime.report "Record" "make 42"
-                       (Either.right
+                       (Ortac_runtime.Value
                           (Res
                              (integer,
                                (let r_old__013_ = Model.get state__009_ 0

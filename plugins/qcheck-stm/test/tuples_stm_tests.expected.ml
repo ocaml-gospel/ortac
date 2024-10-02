@@ -428,7 +428,8 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
              else
                Some
                  (Ortac_runtime.report "Tuples" "create ()"
-                    (Either.right (Res (Ortac_runtime.dummy, ()))) "size_tup"
+                    (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
+                    "size_tup"
                     [("x = List.length t.contents",
                        {
                          Ortac_runtime.start =
@@ -479,7 +480,8 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
              else
                Some
                  (Ortac_runtime.report "Tuples" "create ()"
-                    (Either.right (Res (Ortac_runtime.dummy, ()))) "size_tup"
+                    (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
+                    "size_tup"
                     [("y = List.length t.contents",
                        {
                          Ortac_runtime.start =
@@ -532,7 +534,7 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
              else
                Some
                  (Ortac_runtime.report "Tuples" "create ()"
-                    (Either.right (Res (Ortac_runtime.dummy, ())))
+                    (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
                     "size_tup'"
                     [("x = List.length t.contents",
                        {
@@ -585,7 +587,7 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                 else
                   Some
                     (Ortac_runtime.report "Tuples" "create ()"
-                       (Either.right (Res (Ortac_runtime.dummy, ())))
+                       (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
                        "size_tup'"
                        [("y = List.length t.contents",
                           {
@@ -637,7 +639,7 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                 else
                   Some
                     (Ortac_runtime.report "Tuples" "create ()"
-                       (Either.right (Res (Ortac_runtime.dummy, ())))
+                       (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
                        "size_tup'"
                        [("z = List.length t.contents",
                           {
