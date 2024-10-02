@@ -15,7 +15,6 @@ type W.kind +=
   | Ensures_not_found_for_ret_sut of (string * string list)
   | Functional_argument of string
   | Ghost_values of (string * [ `Arg | `Ret ])
-  | Ignored_modifies
   | Impossible_init_state_generation of init_state_error
   | Impossible_term_substitution of
       [ `Never | `New | `Old | `NotModel | `OutOfScope ]
@@ -23,14 +22,12 @@ type W.kind +=
   | Incompatible_type of (string * string)
   | Incomplete_configuration_module of [ `Init_sut | `Sut ]
   | Incomplete_ret_val_computation of string
-  | Multiple_sut_arguments of string
   | No_configuration_file of string
   | No_init_function of string
   | No_models of string
   | No_spec of string
   | No_sut_type of string
   | Not_a_structure of string
-  | Returned_tuple of string
   | Returning_sut of string
   | Sut_as_type_inst of string
   | Sut_in_tuple of string

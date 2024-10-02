@@ -15,7 +15,6 @@ type W.kind +=
   | Ensures_not_found_for_ret_sut of (string * string list)
   | Functional_argument of string
   | Ghost_values of (string * [ `Arg | `Ret ])
-  | Ignored_modifies
   | Impossible_init_state_generation of init_state_error
   | Impossible_term_substitution of
       [ `Never | `New | `Old | `NotModel | `OutOfScope ]
@@ -23,14 +22,12 @@ type W.kind +=
   | Incompatible_type of (string * string)
   | Incomplete_ret_val_computation of string
   | Incomplete_configuration_module of [ `Init_sut | `Sut ]
-  | Multiple_sut_arguments of string
   | No_configuration_file of string
   | No_init_function of string
   | No_models of string
   | No_spec of string
   | No_sut_type of string
   | Not_a_structure of string
-  | Returned_tuple of string
   | Returning_sut of string
   | Sut_as_type_inst of string
   | Sut_in_tuple of string
@@ -46,10 +43,10 @@ let level kind =
   match kind with
   | Constant_value _ | Ensures_not_found_for_next_state _
   | Ensures_not_found_for_ret_sut _ | Functional_argument _ | Ghost_values _
-  | Ignored_modifies | Impossible_term_substitution _ | Incompatible_type _
-  | Incomplete_ret_val_computation _ | Multiple_sut_arguments _ | No_spec _
-  | Returned_tuple _ | Returning_sut _ | Sut_as_type_inst _ | Sut_in_tuple _
-  | Tuple_arity _ | Type_not_supported _ ->
+  | Impossible_term_substitution _ | Incompatible_type _
+  | Incomplete_ret_val_computation _ | No_spec _ | Returning_sut _
+  | Sut_as_type_inst _ | Sut_in_tuple _ | Tuple_arity _ | Type_not_supported _
+    ->
       W.Warning
   | Impossible_init_state_generation _ | Incompatible_sut _
   | Incomplete_configuration_module _ | No_configuration_file _
@@ -89,23 +86,14 @@ let pp_kind ppf kind =
       pf ppf "Skipping %s:@ %a%a%a" id text "functions with a ghost " text
         (match k with `Arg -> "argument" | `Ret -> "returned value")
         text " are not supported"
-  | Ignored_modifies ->
-      pf ppf "Skipping unsupported modifies clause:@ %a" text
-        "expected \"modifies x\" or \"modifies x.model\" where x is the SUT"
   | Incompatible_type (v, t) ->
       pf ppf "Skipping %s:@ %a%s" v text
         "the type of its SUT-type argument is incompatible with the configured \
          SUT type: "
         t
-  | Multiple_sut_arguments id ->
-      pf ppf "Skipping %s:@ %a" id text
-        "functions with multiple SUT arguments cannot be tested"
   | No_spec fct ->
       pf ppf "Skipping %s:@ %a" fct text
         "functions without specifications cannot be tested"
-  | Returned_tuple f ->
-      pf ppf "Skipping %s:@ %a" f text
-        "functions returning tuples are not supported yet"
   | Returning_sut id ->
       pf ppf "Skipping %s:@ %a" id text
         "functions returning a SUT nested inside another type cannot be tested"
