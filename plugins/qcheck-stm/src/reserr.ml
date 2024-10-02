@@ -28,7 +28,7 @@ type W.kind +=
   | No_spec of string
   | No_sut_type of string
   | Not_a_structure of string
-  | Returning_sut of string
+  | Returning_nested_sut of string
   | Sut_as_type_inst of string
   | Sut_in_tuple of string
   | Sut_type_not_specified of string
@@ -44,7 +44,7 @@ let level kind =
   | Constant_value _ | Ensures_not_found_for_next_state _
   | Ensures_not_found_for_ret_sut _ | Functional_argument _ | Ghost_values _
   | Impossible_term_substitution _ | Incompatible_type _
-  | Incomplete_ret_val_computation _ | No_spec _ | Returning_sut _
+  | Incomplete_ret_val_computation _ | No_spec _ | Returning_nested_sut _
   | Sut_as_type_inst _ | Sut_in_tuple _ | Tuple_arity _ | Type_not_supported _
     ->
       W.Warning
@@ -94,7 +94,7 @@ let pp_kind ppf kind =
   | No_spec fct ->
       pf ppf "Skipping %s:@ %a" fct text
         "functions without specifications cannot be tested"
-  | Returning_sut id ->
+  | Returning_nested_sut id ->
       pf ppf "Skipping %s:@ %a" id text
         "functions returning a SUT nested inside another type cannot be tested"
   | Impossible_term_substitution why ->

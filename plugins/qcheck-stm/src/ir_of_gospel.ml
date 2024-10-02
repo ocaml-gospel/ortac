@@ -84,7 +84,7 @@ let ty_var_substitution config (vd : val_description) =
         | Some _ -> (
             match pos with
             | `Left -> error (Sut_as_type_inst value_name, ty.ptyp_loc)
-            | `Right -> error (Returning_sut value_name, ty.ptyp_loc))
+            | `Right -> error (Returning_nested_sut value_name, ty.ptyp_loc))
         | None ->
             let* _ = List.map (check pos) args |> sequence in
             ok ())
@@ -93,7 +93,7 @@ let ty_var_substitution config (vd : val_description) =
         | Some _ -> (
             match pos with
             | `Left -> error (Sut_in_tuple value_name, ty.ptyp_loc)
-            | `Right -> error (Returning_sut value_name, ty.ptyp_loc))
+            | `Right -> error (Returning_nested_sut value_name, ty.ptyp_loc))
         | None ->
             let* _ = List.map (check pos) elems |> sequence in
             ok ())

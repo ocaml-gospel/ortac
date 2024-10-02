@@ -28,7 +28,7 @@ type W.kind +=
   | No_spec of string
   | No_sut_type of string
   | Not_a_structure of string
-  | Returning_sut of string
+  | Returning_nested_sut of string
   | Sut_as_type_inst of string
   | Sut_in_tuple of string
   | Sut_type_not_specified of string
