@@ -140,3 +140,13 @@ stated, such as `b >= i > a`, etc. but not much more).
 
 Additionally, each plugin has its own set of constraints on what it
 can handle. See the dedicated READMEs for details.
+
+## Found issues
+
+The QCheck-STM plugin has already proven itself useful as it has discovered a
+number of issues:
+
+- [A missing check of index out of bound in the `varray` library](https://github.com/art-w/varray/pull/1)
+- [An undefined behaviour still in the `varray` library](https://github.com/art-w/varray/issues/2)
+- [Some integer overflows in the `bitv` library](https://github.com/backtracking/bitv/issues/31)
+- [A peculiar behaviour in `Hashtbl.create` from the standard library](https://github.com/ocaml/ocaml/issues/13469)
