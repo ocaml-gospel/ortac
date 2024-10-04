@@ -11,6 +11,8 @@
   [\#247](https://github.com/ocaml-gospel/ortac/pull/247)
 - Add support for returning sut values
   [\#253](https://github.com/ocaml-gospel/ortac/pull/253)
+- Add support for running tests in separate processes with a timeout
+  [\#259](https://github.com/ocaml-gospel/ortac/pull/259)
 
 # 0.3.0
 
