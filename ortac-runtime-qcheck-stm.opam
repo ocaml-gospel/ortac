@@ -11,7 +11,10 @@ Ortac (OCaml Runtime Assertion Checking) is a tool to turn
 executable Gospel specifications into code to test they hold.
 """
 maintainer: ["Nicolas Osborne <nicolas.osborne@tarides.com>"]
-authors: ["Nicolas Osborne <nicolas.osborne@tarides.com>"]
+authors: [
+  "Nicolas Osborne <nicolas.osborne@tarides.com>"
+  "Nikolaus Huber <mail@n-huber.eu>"
+]
 license: "MIT"
 homepage: "https://github.com/ocaml-gospel/ortac"
 bug-reports: "https://github.com/ocaml-gospel/ortac/issues"

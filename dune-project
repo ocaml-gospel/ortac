@@ -188,7 +188,9 @@
   "\> Ortac (OCaml Runtime Assertion Checking) is a tool to turn
   "\> executable Gospel specifications into code to test they hold.
   )
- (authors "Nicolas Osborne <nicolas.osborne@tarides.com>")
+ (authors
+  "Nicolas Osborne <nicolas.osborne@tarides.com>"
+  "Nikolaus Huber <mail@n-huber.eu>")
  (depends
   (ocaml (>= 4.12.0))
   (qcheck-stm (>= 0.4))
