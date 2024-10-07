@@ -179,6 +179,11 @@ The [Gen] module should contain a [QCheck.Gen.t] for each of these types. It is
 also possible to shadow already defined generators. One use case for this last
 possibility is to limit the size of the generated integers.
 
+As explained in the {!returning-sut} section, integers as argument of a
+function returning a SUT are generated with [QCheck.Gen.small_signed_int]. When
+we want to customize the generation of those arguments, we need to overwrite
+this generator.
+
 The [Pp] module should contain a [Util.Pp.t] for each of these types. These
 values are used to print the runnable scenario if the test fails. We can refer
 to the {{:
@@ -424,7 +429,7 @@ File "example_limitations.mli", line 23, characters 15-25:
 Warning: Skipping for_all: functions are not supported yet as arguments.
 ]}
 
-{2 Functions returning a SUT}
+{2:returning-sut Functions returning a SUT}
 
 Functions returning a SUT will be tested, however, there are some restrictions
 and peculiarities:
