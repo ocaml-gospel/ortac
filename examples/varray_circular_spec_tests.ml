@@ -108,20 +108,13 @@ module Spec =
       struct
         include QCheck
         module Gen =
-          struct
-            include Gen
-            include QCheck.Gen
-            let int = small_signed_int
-            let elt gen = gen
-          end
+          struct include Gen
+                 let int = small_signed_int
+                 let elt gen = gen end
       end
     module Util =
-      struct
-        module Pp =
-          struct include Util.Pp
-                 include Util.Pp
-                 let pp_elt pp = pp end
-      end
+      struct module Pp = struct include Util.Pp
+                                let pp_elt pp = pp end end
     type _ ty +=  
       | Elt: 'a ty -> 'a elt ty 
     let elt spec =
