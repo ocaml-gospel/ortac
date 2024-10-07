@@ -141,6 +141,8 @@ In order to generate postcondition-checking, Ortac/QCheck-STM uses the
 [ensures] clauses that were not used for the [next_state] function but it also
 uses the [checks] clauses and the [raises] ones.
 
+{1 How to configure the generated tests?}
+
 Now you need a configuration file. Configuration files for Ortac/QCheck-STM are
 OCaml modules containing {e at least} a type declaration for `sut` (usually the
 type `t` of the module under test with all the type parameters instantiated)
@@ -170,26 +172,24 @@ The other information you can put in the configuration file are:
     {li custom [STM.ty] extensions and its functional constructors in a [Ty]
     module}}
 
-Let's say for example that you want to run the generated tests using a custom
-generator for the type [int] that only generates small positive integers. You
-can still rely on the generated command generator, you just have to override the
-[int] generator:
+These additional information are mostly necessary when the tested library
+exposes other types than the one used as SUT.
 
-{@ocaml file=example_config_qcheck.ml[
-open Example
+The [Gen] module should contain a [QCheck.Gen.t] for each of these types. It is
+also possible to shadow already defined generators. One use case for this last
+possibility is to limit the size of the generated integers.
 
-type sut = char t
+The [Pp] module should contain a [Util.Pp.t] for each of these types. These
+values are used to print the runnable scenario if the test fails. You can refer
+to the {{:
+https://ocaml-multicore.github.io/multicoretests/dev/qcheck-multicoretests-util/Util/Pp/index.html
+}module documentation} for more details.
 
-let init_sut = make 42 'a'
+The [Ty] module should contain an [STM.ty] extension and a corresponding
+[STM.ty_show] smart constructor for each of these types. An ['a STM.ty_show] is
+a pair of an ['a ty] value and an ['a -> string] function.
 
-module Gen = struct
-  let int = small_signed_int
-end
-]}
-
-When you have a user-defined type in the module under test, you have to declare
-an [STM] printer and an extension of the [STM.ty] type. This follows the same
-principle to include them in the configuration module.
+{1 Dependencies of the generated tests}
 
 The generated OCaml file has a bunch of dependencies:
 
