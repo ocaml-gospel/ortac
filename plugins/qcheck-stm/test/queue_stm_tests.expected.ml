@@ -302,116 +302,114 @@ module Spec =
     let precond cmd__061_ state__062_ =
       match cmd__061_ with
       | Create () -> true
-      | Push v -> let t_2__063_ = Model.get state__062_ 0 in true
-      | Pop -> let t_3__064_ = Model.get state__062_ 0 in true
-      | Peek -> let t_4__065_ = Model.get state__062_ 0 in true
-      | Peek_opt -> let t_5__066_ = Model.get state__062_ 0 in true
-      | Clear -> let t_6__067_ = Model.get state__062_ 0 in true
-      | Is_empty -> let t_7__068_ = Model.get state__062_ 0 in true
-      | Transfer ->
-          let t1__069_ = Model.get state__062_ 0
-          and t2__070_ = Model.get state__062_ 1 in true
+      | Push v -> true
+      | Pop -> true
+      | Peek -> true
+      | Peek_opt -> true
+      | Clear -> true
+      | Is_empty -> true
+      | Transfer -> true
     let postcond _ _ _ = true
-    let run cmd__071_ sut__072_ =
-      match cmd__071_ with
+    let run cmd__063_ sut__064_ =
+      match cmd__063_ with
       | Create () ->
           Res
             (sut,
-              (let res__073_ = create () in
-               (SUT.push sut__072_ res__073_; res__073_)))
+              (let res__065_ = create () in
+               (SUT.push sut__064_ res__065_; res__065_)))
       | Push v ->
           Res
             (unit,
-              (let t_2__074_ = SUT.pop sut__072_ in
-               let res__075_ = push v t_2__074_ in
-               (SUT.push sut__072_ t_2__074_; res__075_)))
+              (let t_2__066_ = SUT.pop sut__064_ in
+               let res__067_ = push v t_2__066_ in
+               (SUT.push sut__064_ t_2__066_; res__067_)))
       | Pop ->
           Res
             ((result int exn),
-              (let t_3__076_ = SUT.pop sut__072_ in
-               let res__077_ = protect (fun () -> pop t_3__076_) () in
-               (SUT.push sut__072_ t_3__076_; res__077_)))
+              (let t_3__068_ = SUT.pop sut__064_ in
+               let res__069_ = protect (fun () -> pop t_3__068_) () in
+               (SUT.push sut__064_ t_3__068_; res__069_)))
       | Peek ->
           Res
             ((result int exn),
-              (let t_4__078_ = SUT.pop sut__072_ in
-               let res__079_ = protect (fun () -> peek t_4__078_) () in
-               (SUT.push sut__072_ t_4__078_; res__079_)))
+              (let t_4__070_ = SUT.pop sut__064_ in
+               let res__071_ = protect (fun () -> peek t_4__070_) () in
+               (SUT.push sut__064_ t_4__070_; res__071_)))
       | Peek_opt ->
           Res
             ((option int),
-              (let t_5__080_ = SUT.pop sut__072_ in
-               let res__081_ = peek_opt t_5__080_ in
-               (SUT.push sut__072_ t_5__080_; res__081_)))
+              (let t_5__072_ = SUT.pop sut__064_ in
+               let res__073_ = peek_opt t_5__072_ in
+               (SUT.push sut__064_ t_5__072_; res__073_)))
       | Clear ->
           Res
             (unit,
-              (let t_6__082_ = SUT.pop sut__072_ in
-               let res__083_ = clear t_6__082_ in
-               (SUT.push sut__072_ t_6__082_; res__083_)))
+              (let t_6__074_ = SUT.pop sut__064_ in
+               let res__075_ = clear t_6__074_ in
+               (SUT.push sut__064_ t_6__074_; res__075_)))
       | Is_empty ->
           Res
             (bool,
-              (let t_7__084_ = SUT.pop sut__072_ in
-               let res__085_ = is_empty t_7__084_ in
-               (SUT.push sut__072_ t_7__084_; res__085_)))
+              (let t_7__076_ = SUT.pop sut__064_ in
+               let res__077_ = is_empty t_7__076_ in
+               (SUT.push sut__064_ t_7__076_; res__077_)))
       | Transfer ->
           Res
             (unit,
-              (let t1__086_ = SUT.pop sut__072_ in
-               let t2__087_ = SUT.pop sut__072_ in
-               let res__088_ = transfer t1__086_ t2__087_ in
-               (SUT.push sut__072_ t2__087_;
-                SUT.push sut__072_ t1__086_;
-                res__088_)))
+              (let t1__078_ = SUT.pop sut__064_ in
+               let t2__079_ = SUT.pop sut__064_ in
+               let res__080_ = transfer t1__078_ t2__079_ in
+               (SUT.push sut__064_ t2__079_;
+                SUT.push sut__064_ t1__078_;
+                res__080_)))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__090_ state__091_ last__093_ res__092_ =
+let ortac_show_cmd cmd__082_ state__083_ last__085_ res__084_ =
   let open Spec in
     let open STM in
-      match (cmd__090_, res__092_) with
+      match (cmd__082_, res__084_) with
       | (Create (), Res ((SUT, _), t_1)) ->
-          let lhs = if last__093_ then "r" else SUT.get_name state__091_ 0
+          let lhs = if last__085_ then "r" else SUT.get_name state__083_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a" lhs "create"
             (Util.Pp.pp_unit true) ()
       | (Push v, Res ((Unit, _), _)) ->
-          let lhs = if last__093_ then "r" else "_"
+          let lhs = if last__085_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a %s" lhs "push"
-            (Util.Pp.pp_int true) v (SUT.get_name state__091_ (0 + shift))
+            (Util.Pp.pp_int true) v (SUT.get_name state__083_ (0 + shift))
       | (Pop, Res ((Result (Int, Exn), _), _)) ->
-          let lhs = if last__093_ then "r" else "_"
+          let lhs = if last__085_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "pop"
-            (SUT.get_name state__091_ (0 + shift))
+            (SUT.get_name state__083_ (0 + shift))
       | (Peek, Res ((Result (Int, Exn), _), _)) ->
-          let lhs = if last__093_ then "r" else "_"
+          let lhs = if last__085_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "peek"
-            (SUT.get_name state__091_ (0 + shift))
+            (SUT.get_name state__083_ (0 + shift))
       | (Peek_opt, Res ((Option (Int), _), _)) ->
-          let lhs = if last__093_ then "r" else "_"
+          let lhs = if last__085_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "peek_opt"
-            (SUT.get_name state__091_ (0 + shift))
+            (SUT.get_name state__083_ (0 + shift))
       | (Clear, Res ((Unit, _), _)) ->
-          let lhs = if last__093_ then "r" else "_"
+          let lhs = if last__085_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "clear"
-            (SUT.get_name state__091_ (0 + shift))
+            (SUT.get_name state__083_ (0 + shift))
       | (Is_empty, Res ((Bool, _), _)) ->
-          let lhs = if last__093_ then "r" else "_"
+          let lhs = if last__085_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "is_empty"
-            (SUT.get_name state__091_ (0 + shift))
+            (SUT.get_name state__083_ (0 + shift))
       | (Transfer, Res ((Unit, _), _)) ->
-          let lhs = if last__093_ then "r" else "_"
+          let lhs = if last__085_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %s" lhs "transfer"
-            (SUT.get_name state__091_ (0 + shift))
-            (SUT.get_name state__091_ (1 + shift))
+            (SUT.get_name state__083_ (0 + shift))
+            (SUT.get_name state__083_ (1 + shift))
       | _ -> assert false
 let ortac_postcond cmd__023_ state__024_ res__025_ =
   let open Spec in

@@ -101,39 +101,37 @@ module Spec =
           let r_1__007_ = r_1__006_ in
           Model.push (Model.drop_n state__003_ 1) r_1__007_
     let precond cmd__019_ state__020_ =
-      match cmd__019_ with
-      | Make i -> true
-      | Get -> let r_1__021_ = Model.get state__020_ 0 in true
+      match cmd__019_ with | Make i -> true | Get -> true
     let postcond _ _ _ = true
-    let run cmd__022_ sut__023_ =
-      match cmd__022_ with
+    let run cmd__021_ sut__022_ =
+      match cmd__021_ with
       | Make i ->
           Res
             (sut,
-              (let res__024_ = make i in
-               (SUT.push sut__023_ res__024_; res__024_)))
+              (let res__023_ = make i in
+               (SUT.push sut__022_ res__023_; res__023_)))
       | Get ->
           Res
             (int,
-              (let r_1__025_ = SUT.pop sut__023_ in
-               let res__026_ = get r_1__025_ in
-               (SUT.push sut__023_ r_1__025_; res__026_)))
+              (let r_1__024_ = SUT.pop sut__022_ in
+               let res__025_ = get r_1__024_ in
+               (SUT.push sut__022_ r_1__024_; res__025_)))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__028_ state__029_ last__031_ res__030_ =
+let ortac_show_cmd cmd__027_ state__028_ last__030_ res__029_ =
   let open Spec in
     let open STM in
-      match (cmd__028_, res__030_) with
+      match (cmd__027_, res__029_) with
       | (Make i, Res ((SUT, _), r)) ->
-          let lhs = if last__031_ then "r" else SUT.get_name state__029_ 0
+          let lhs = if last__030_ then "r" else SUT.get_name state__028_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a" lhs "make" (Util.Pp.pp_int true) i
       | (Get, Res ((Int, _), _)) ->
-          let lhs = if last__031_ then "r" else "_"
+          let lhs = if last__030_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "get"
-            (SUT.get_name state__029_ (0 + shift))
+            (SUT.get_name state__028_ (0 + shift))
       | _ -> assert false
 let ortac_postcond cmd__008_ state__009_ res__010_ =
   let open Spec in

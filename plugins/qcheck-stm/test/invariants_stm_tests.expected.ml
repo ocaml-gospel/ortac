@@ -386,62 +386,60 @@ module Spec =
     let precond cmd__045_ state__046_ =
       match cmd__045_ with
       | Create a_1 -> true
-      | Push a_2 -> let t_2__047_ = Model.get state__046_ 0 in true
-      | Transfer ->
-          let t1__048_ = Model.get state__046_ 0
-          and t2__049_ = Model.get state__046_ 1 in true
-      | Copy -> let t_3__050_ = Model.get state__046_ 0 in true
-      | Sub (i, n) -> let t_4__051_ = Model.get state__046_ 0 in true
+      | Push a_2 -> true
+      | Transfer -> true
+      | Copy -> true
+      | Sub (i, n) -> true
     let postcond _ _ _ = true
-    let run cmd__052_ sut__053_ =
-      match cmd__052_ with
+    let run cmd__047_ sut__048_ =
+      match cmd__047_ with
       | Create a_1 ->
           Res
             (sut,
-              (let res__054_ = create a_1 in
-               (SUT.push sut__053_ res__054_; res__054_)))
+              (let res__049_ = create a_1 in
+               (SUT.push sut__048_ res__049_; res__049_)))
       | Push a_2 ->
           Res
             (unit,
-              (let t_2__055_ = SUT.pop sut__053_ in
-               let res__056_ = push a_2 t_2__055_ in
-               (SUT.push sut__053_ t_2__055_; res__056_)))
+              (let t_2__050_ = SUT.pop sut__048_ in
+               let res__051_ = push a_2 t_2__050_ in
+               (SUT.push sut__048_ t_2__050_; res__051_)))
       | Transfer ->
           Res
             (unit,
-              (let t1__057_ = SUT.pop sut__053_ in
-               let t2__058_ = SUT.pop sut__053_ in
-               let res__059_ = transfer t1__057_ t2__058_ in
-               (SUT.push sut__053_ t2__058_;
-                SUT.push sut__053_ t1__057_;
-                res__059_)))
+              (let t1__052_ = SUT.pop sut__048_ in
+               let t2__053_ = SUT.pop sut__048_ in
+               let res__054_ = transfer t1__052_ t2__053_ in
+               (SUT.push sut__048_ t2__053_;
+                SUT.push sut__048_ t1__052_;
+                res__054_)))
       | Copy ->
           Res
             (sut,
-              (let t_3__060_ = SUT.pop sut__053_ in
-               let res__061_ = copy t_3__060_ in
-               (SUT.push sut__053_ t_3__060_;
-                SUT.push sut__053_ res__061_;
-                res__061_)))
+              (let t_3__055_ = SUT.pop sut__048_ in
+               let res__056_ = copy t_3__055_ in
+               (SUT.push sut__048_ t_3__055_;
+                SUT.push sut__048_ res__056_;
+                res__056_)))
       | Sub (i, n) ->
           Res
             ((result sut exn),
-              (let t_4__062_ = SUT.pop sut__053_ in
-               let res__063_ = protect (fun () -> sub t_4__062_ i n) () in
-               (SUT.push sut__053_ t_4__062_;
-                (match res__063_ with
-                 | Ok res -> SUT.push sut__053_ res
+              (let t_4__057_ = SUT.pop sut__048_ in
+               let res__058_ = protect (fun () -> sub t_4__057_ i n) () in
+               (SUT.push sut__048_ t_4__057_;
+                (match res__058_ with
+                 | Ok res -> SUT.push sut__048_ res
                  | Error _ -> ());
-                res__063_)))
+                res__058_)))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () =
-  let __state__064_ = Model.get Spec.init_state 0 in
+  let __state__059_ = Model.get Spec.init_state 0 in
   if
     not
       (try
          Ortac_runtime.Gospelstdlib.(>)
-           (Ortac_runtime.Gospelstdlib.Sequence.length __state__064_.contents)
+           (Ortac_runtime.Gospelstdlib.Sequence.length __state__059_.contents)
            (Ortac_runtime.Gospelstdlib.integer_of_int 0)
        with
        | e ->
@@ -465,42 +463,42 @@ let check_init_state () =
                       }
                   })))
   then QCheck.Test.fail_report "INIT_SUT violates type invariants for SUT"
-let ortac_show_cmd cmd__065_ state__066_ last__068_ res__067_ =
+let ortac_show_cmd cmd__060_ state__061_ last__063_ res__062_ =
   let open Spec in
     let open STM in
-      match (cmd__065_, res__067_) with
+      match (cmd__060_, res__062_) with
       | (Create a_1, Res ((SUT, _), t_1)) ->
-          let lhs = if last__068_ then "r" else SUT.get_name state__066_ 0
+          let lhs = if last__063_ then "r" else SUT.get_name state__061_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a" lhs "create" (Util.Pp.pp_int true)
             a_1
       | (Push a_2, Res ((Unit, _), _)) ->
-          let lhs = if last__068_ then "r" else "_"
+          let lhs = if last__063_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a %s" lhs "push"
-            (Util.Pp.pp_int true) a_2 (SUT.get_name state__066_ (0 + shift))
+            (Util.Pp.pp_int true) a_2 (SUT.get_name state__061_ (0 + shift))
       | (Transfer, Res ((Unit, _), _)) ->
-          let lhs = if last__068_ then "r" else "_"
+          let lhs = if last__063_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %s" lhs "transfer"
-            (SUT.get_name state__066_ (0 + shift))
-            (SUT.get_name state__066_ (1 + shift))
+            (SUT.get_name state__061_ (0 + shift))
+            (SUT.get_name state__061_ (1 + shift))
       | (Copy, Res ((SUT, _), r)) ->
-          let lhs = if last__068_ then "r" else SUT.get_name state__066_ 0
+          let lhs = if last__063_ then "r" else SUT.get_name state__061_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %s" lhs "copy"
-            (SUT.get_name state__066_ (0 + shift))
+            (SUT.get_name state__061_ (0 + shift))
       | (Sub (i, n), Res ((Result (SUT, Exn), _), r_1)) ->
           let lhs =
-            if last__068_
+            if last__063_
             then "r"
             else
               (match r_1 with
-               | Ok _ -> "Ok " ^ (SUT.get_name state__066_ 0)
+               | Ok _ -> "Ok " ^ (SUT.get_name state__061_ 0)
                | Error _ -> "_")
           and shift = match r_1 with | Ok _ -> 1 | Error _ -> 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s %a %a)" lhs
-            "sub" (SUT.get_name state__066_ (0 + shift))
+            "sub" (SUT.get_name state__061_ (0 + shift))
             (Util.Pp.pp_int true) i (Util.Pp.pp_int true) n
       | _ -> assert false
 let ortac_postcond cmd__024_ state__025_ res__026_ =

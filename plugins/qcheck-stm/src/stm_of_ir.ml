@@ -543,15 +543,19 @@ let precond_case config state state_ident value =
   let lhs = mk_cmd_pattern value in
   let open Reserr in
   let* rhs =
-    let vbs, sut_map = pop_states state_ident value in
-    let wrap e = (if vbs <> [] then pexp_let Nonrecursive vbs e else e) |> ok in
-    list_and
-    <$> promote_map
-          (fun t ->
-            subst_term state ~gos_t:value.sut_vars ~old_t:[] ~new_t:sut_map t
-            >>= ocaml_of_term config)
-          value.precond
-    >>= wrap
+    if value.precond = [] then ok (ebool true)
+    else
+      let vbs, sut_map = pop_states state_ident value in
+      let wrap e =
+        (if vbs <> [] then pexp_let Nonrecursive vbs e else e) |> ok
+      in
+      list_and
+      <$> promote_map
+            (fun t ->
+              subst_term state ~gos_t:value.sut_vars ~old_t:[] ~new_t:sut_map t
+              >>= ocaml_of_term config)
+            value.precond
+      >>= wrap
   in
   ok (case ~lhs ~guard:None ~rhs)
 

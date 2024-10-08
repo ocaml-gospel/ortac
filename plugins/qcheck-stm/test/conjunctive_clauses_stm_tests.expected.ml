@@ -233,49 +233,47 @@ module Spec =
             Model.push (Model.drop_n state__003_ 1) t_2__007_
           else state__003_
     let precond cmd__017_ state__018_ =
-      match cmd__017_ with
-      | Make (i_1, a_2) -> true
-      | Set (i_2, a_3) -> let t_2__019_ = Model.get state__018_ 0 in true
+      match cmd__017_ with | Make (i_1, a_2) -> true | Set (i_2, a_3) -> true
     let postcond _ _ _ = true
-    let run cmd__020_ sut__021_ =
-      match cmd__020_ with
+    let run cmd__019_ sut__020_ =
+      match cmd__019_ with
       | Make (i_1, a_2) ->
           Res
             ((result sut exn),
-              (let res__022_ = protect (fun () -> make i_1 a_2) () in
-               ((match res__022_ with
-                 | Ok res -> SUT.push sut__021_ res
+              (let res__021_ = protect (fun () -> make i_1 a_2) () in
+               ((match res__021_ with
+                 | Ok res -> SUT.push sut__020_ res
                  | Error _ -> ());
-                res__022_)))
+                res__021_)))
       | Set (i_2, a_3) ->
           Res
             ((result unit exn),
-              (let t_2__023_ = SUT.pop sut__021_ in
-               let res__024_ = protect (fun () -> set t_2__023_ i_2 a_3) () in
-               (SUT.push sut__021_ t_2__023_; res__024_)))
+              (let t_2__022_ = SUT.pop sut__020_ in
+               let res__023_ = protect (fun () -> set t_2__022_ i_2 a_3) () in
+               (SUT.push sut__020_ t_2__022_; res__023_)))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__026_ state__027_ last__029_ res__028_ =
+let ortac_show_cmd cmd__025_ state__026_ last__028_ res__027_ =
   let open Spec in
     let open STM in
-      match (cmd__026_, res__028_) with
+      match (cmd__025_, res__027_) with
       | (Make (i_1, a_2), Res ((Result (SUT, Exn), _), t_1)) ->
           let lhs =
-            if last__029_
+            if last__028_
             then "r"
             else
               (match t_1 with
-               | Ok _ -> "Ok " ^ (SUT.get_name state__027_ 0)
+               | Ok _ -> "Ok " ^ (SUT.get_name state__026_ 0)
                | Error _ -> "_")
           and shift = match t_1 with | Ok _ -> 1 | Error _ -> 0 in
           Format.asprintf "let %s = protect (fun () -> %s %a %a)" lhs "make"
             (Util.Pp.pp_int true) i_1 (Util.Pp.pp_char true) a_2
       | (Set (i_2, a_3), Res ((Result (Unit, Exn), _), _)) ->
-          let lhs = if last__029_ then "r" else "_"
+          let lhs = if last__028_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s %a %a)" lhs
-            "set" (SUT.get_name state__027_ (0 + shift))
+            "set" (SUT.get_name state__026_ (0 + shift))
             (Util.Pp.pp_int true) i_2 (Util.Pp.pp_char true) a_3
       | _ -> assert false
 let ortac_postcond cmd__010_ state__011_ res__012_ =

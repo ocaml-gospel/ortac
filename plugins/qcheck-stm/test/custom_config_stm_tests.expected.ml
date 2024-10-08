@@ -201,57 +201,57 @@ module Spec =
       match cmd__018_ with
       | Proj __arg0 -> true
       | Empty () -> true
-      | Push e -> let t_2__020_ = Model.get state__019_ 0 in true
-      | Top -> let t_3__021_ = Model.get state__019_ 0 in true
+      | Push e -> true
+      | Top -> true
     let postcond _ _ _ = true
-    let run cmd__022_ sut__023_ =
-      match cmd__022_ with
-      | Proj __arg0 -> Res (char, (let res__024_ = proj __arg0 in res__024_))
+    let run cmd__020_ sut__021_ =
+      match cmd__020_ with
+      | Proj __arg0 -> Res (char, (let res__022_ = proj __arg0 in res__022_))
       | Empty () ->
           Res
             (sut,
-              (let res__025_ = empty () in
-               (SUT.push sut__023_ res__025_; res__025_)))
+              (let res__023_ = empty () in
+               (SUT.push sut__021_ res__023_; res__023_)))
       | Push e ->
           Res
             (unit,
-              (let t_2__026_ = SUT.pop sut__023_ in
-               let res__027_ = push t_2__026_ e in
-               (SUT.push sut__023_ t_2__026_; res__027_)))
+              (let t_2__024_ = SUT.pop sut__021_ in
+               let res__025_ = push t_2__024_ e in
+               (SUT.push sut__021_ t_2__024_; res__025_)))
       | Top ->
           Res
             ((result (elt int) exn),
-              (let t_3__028_ = SUT.pop sut__023_ in
-               let res__029_ = protect (fun () -> top t_3__028_) () in
-               (SUT.push sut__023_ t_3__028_; res__029_)))
+              (let t_3__026_ = SUT.pop sut__021_ in
+               let res__027_ = protect (fun () -> top t_3__026_) () in
+               (SUT.push sut__021_ t_3__026_; res__027_)))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__031_ state__032_ last__034_ res__033_ =
+let ortac_show_cmd cmd__029_ state__030_ last__032_ res__031_ =
   let open Spec in
     let open STM in
-      match (cmd__031_, res__033_) with
+      match (cmd__029_, res__031_) with
       | (Proj __arg0, Res ((Char, _), _)) ->
-          let lhs = if last__034_ then "r" else "_"
+          let lhs = if last__032_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a" lhs "proj"
             (Util.Pp.pp_elt Util.Pp.pp_char true) __arg0
       | (Empty (), Res ((SUT, _), t_1)) ->
-          let lhs = if last__034_ then "r" else SUT.get_name state__032_ 0
+          let lhs = if last__032_ then "r" else SUT.get_name state__030_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a" lhs "empty" (Util.Pp.pp_unit true)
             ()
       | (Push e, Res ((Unit, _), _)) ->
-          let lhs = if last__034_ then "r" else "_"
+          let lhs = if last__032_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "push"
-            (SUT.get_name state__032_ (0 + shift))
+            (SUT.get_name state__030_ (0 + shift))
             (Util.Pp.pp_elt Util.Pp.pp_int true) e
       | (Top, Res ((Result (Elt (Int), Exn), _), _)) ->
-          let lhs = if last__034_ then "r" else "_"
+          let lhs = if last__032_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "top"
-            (SUT.get_name state__032_ (0 + shift))
+            (SUT.get_name state__030_ (0 + shift))
       | _ -> assert false
 let ortac_postcond cmd__010_ state__011_ res__012_ =
   let open Spec in

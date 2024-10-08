@@ -379,162 +379,162 @@ module Spec =
     let precond cmd__061_ state__062_ =
       match cmd__061_ with
       | Create (random, size) -> true
-      | Clear -> let h_1__063_ = Model.get state__062_ 0 in true
-      | Reset -> let h_2__064_ = Model.get state__062_ 0 in true
-      | Copy -> let h1__065_ = Model.get state__062_ 0 in true
-      | Add (a_2, b_2) -> let h_3__066_ = Model.get state__062_ 0 in true
-      | Find a_3 -> let h_4__067_ = Model.get state__062_ 0 in true
-      | Find_opt a_4 -> let h_5__068_ = Model.get state__062_ 0 in true
-      | Find_all a_5 -> let h_6__069_ = Model.get state__062_ 0 in true
-      | Mem a_6 -> let h_7__070_ = Model.get state__062_ 0 in true
-      | Remove a_7 -> let h_8__071_ = Model.get state__062_ 0 in true
-      | Replace (a_8, b_3) -> let h_9__072_ = Model.get state__062_ 0 in true
-      | Length -> let h_10__073_ = Model.get state__062_ 0 in true
+      | Clear -> true
+      | Reset -> true
+      | Copy -> true
+      | Add (a_2, b_2) -> true
+      | Find a_3 -> true
+      | Find_opt a_4 -> true
+      | Find_all a_5 -> true
+      | Mem a_6 -> true
+      | Remove a_7 -> true
+      | Replace (a_8, b_3) -> true
+      | Length -> true
     let postcond _ _ _ = true
-    let run cmd__074_ sut__075_ =
-      match cmd__074_ with
+    let run cmd__063_ sut__064_ =
+      match cmd__063_ with
       | Create (random, size) ->
           Res
             (sut,
-              (let res__076_ = create ~random size in
-               (SUT.push sut__075_ res__076_; res__076_)))
+              (let res__065_ = create ~random size in
+               (SUT.push sut__064_ res__065_; res__065_)))
       | Clear ->
           Res
             (unit,
-              (let h_1__077_ = SUT.pop sut__075_ in
-               let res__078_ = clear h_1__077_ in
-               (SUT.push sut__075_ h_1__077_; res__078_)))
+              (let h_1__066_ = SUT.pop sut__064_ in
+               let res__067_ = clear h_1__066_ in
+               (SUT.push sut__064_ h_1__066_; res__067_)))
       | Reset ->
           Res
             (unit,
-              (let h_2__079_ = SUT.pop sut__075_ in
-               let res__080_ = reset h_2__079_ in
-               (SUT.push sut__075_ h_2__079_; res__080_)))
+              (let h_2__068_ = SUT.pop sut__064_ in
+               let res__069_ = reset h_2__068_ in
+               (SUT.push sut__064_ h_2__068_; res__069_)))
       | Copy ->
           Res
             (sut,
-              (let h1__081_ = SUT.pop sut__075_ in
-               let res__082_ = copy h1__081_ in
-               (SUT.push sut__075_ h1__081_;
-                SUT.push sut__075_ res__082_;
-                res__082_)))
+              (let h1__070_ = SUT.pop sut__064_ in
+               let res__071_ = copy h1__070_ in
+               (SUT.push sut__064_ h1__070_;
+                SUT.push sut__064_ res__071_;
+                res__071_)))
       | Add (a_2, b_2) ->
           Res
             (unit,
-              (let h_3__083_ = SUT.pop sut__075_ in
-               let res__084_ = add h_3__083_ a_2 b_2 in
-               (SUT.push sut__075_ h_3__083_; res__084_)))
+              (let h_3__072_ = SUT.pop sut__064_ in
+               let res__073_ = add h_3__072_ a_2 b_2 in
+               (SUT.push sut__064_ h_3__072_; res__073_)))
       | Find a_3 ->
           Res
             ((result int exn),
-              (let h_4__085_ = SUT.pop sut__075_ in
-               let res__086_ = protect (fun () -> find h_4__085_ a_3) () in
-               (SUT.push sut__075_ h_4__085_; res__086_)))
+              (let h_4__074_ = SUT.pop sut__064_ in
+               let res__075_ = protect (fun () -> find h_4__074_ a_3) () in
+               (SUT.push sut__064_ h_4__074_; res__075_)))
       | Find_opt a_4 ->
           Res
             ((option int),
-              (let h_5__087_ = SUT.pop sut__075_ in
-               let res__088_ = find_opt h_5__087_ a_4 in
-               (SUT.push sut__075_ h_5__087_; res__088_)))
+              (let h_5__076_ = SUT.pop sut__064_ in
+               let res__077_ = find_opt h_5__076_ a_4 in
+               (SUT.push sut__064_ h_5__076_; res__077_)))
       | Find_all a_5 ->
           Res
             ((list int),
-              (let h_6__089_ = SUT.pop sut__075_ in
-               let res__090_ = find_all h_6__089_ a_5 in
-               (SUT.push sut__075_ h_6__089_; res__090_)))
+              (let h_6__078_ = SUT.pop sut__064_ in
+               let res__079_ = find_all h_6__078_ a_5 in
+               (SUT.push sut__064_ h_6__078_; res__079_)))
       | Mem a_6 ->
           Res
             (bool,
-              (let h_7__091_ = SUT.pop sut__075_ in
-               let res__092_ = mem h_7__091_ a_6 in
-               (SUT.push sut__075_ h_7__091_; res__092_)))
+              (let h_7__080_ = SUT.pop sut__064_ in
+               let res__081_ = mem h_7__080_ a_6 in
+               (SUT.push sut__064_ h_7__080_; res__081_)))
       | Remove a_7 ->
           Res
             (unit,
-              (let h_8__093_ = SUT.pop sut__075_ in
-               let res__094_ = remove h_8__093_ a_7 in
-               (SUT.push sut__075_ h_8__093_; res__094_)))
+              (let h_8__082_ = SUT.pop sut__064_ in
+               let res__083_ = remove h_8__082_ a_7 in
+               (SUT.push sut__064_ h_8__082_; res__083_)))
       | Replace (a_8, b_3) ->
           Res
             (unit,
-              (let h_9__095_ = SUT.pop sut__075_ in
-               let res__096_ = replace h_9__095_ a_8 b_3 in
-               (SUT.push sut__075_ h_9__095_; res__096_)))
+              (let h_9__084_ = SUT.pop sut__064_ in
+               let res__085_ = replace h_9__084_ a_8 b_3 in
+               (SUT.push sut__064_ h_9__084_; res__085_)))
       | Length ->
           Res
             (int,
-              (let h_10__097_ = SUT.pop sut__075_ in
-               let res__098_ = length h_10__097_ in
-               (SUT.push sut__075_ h_10__097_; res__098_)))
+              (let h_10__086_ = SUT.pop sut__064_ in
+               let res__087_ = length h_10__086_ in
+               (SUT.push sut__064_ h_10__086_; res__087_)))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__100_ state__101_ last__103_ res__102_ =
+let ortac_show_cmd cmd__089_ state__090_ last__092_ res__091_ =
   let open Spec in
     let open STM in
-      match (cmd__100_, res__102_) with
+      match (cmd__089_, res__091_) with
       | (Create (random, size), Res ((SUT, _), h)) ->
-          let lhs = if last__103_ then "r" else SUT.get_name state__101_ 0
+          let lhs = if last__092_ then "r" else SUT.get_name state__090_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a %a" lhs "create"
             (Util.Pp.pp_bool true) random (Util.Pp.pp_int true) size
       | (Clear, Res ((Unit, _), _)) ->
-          let lhs = if last__103_ then "r" else "_"
+          let lhs = if last__092_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "clear"
-            (SUT.get_name state__101_ (0 + shift))
+            (SUT.get_name state__090_ (0 + shift))
       | (Reset, Res ((Unit, _), _)) ->
-          let lhs = if last__103_ then "r" else "_"
+          let lhs = if last__092_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "reset"
-            (SUT.get_name state__101_ (0 + shift))
+            (SUT.get_name state__090_ (0 + shift))
       | (Copy, Res ((SUT, _), h2)) ->
-          let lhs = if last__103_ then "r" else SUT.get_name state__101_ 0
+          let lhs = if last__092_ then "r" else SUT.get_name state__090_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %s" lhs "copy"
-            (SUT.get_name state__101_ (0 + shift))
+            (SUT.get_name state__090_ (0 + shift))
       | (Add (a_2, b_2), Res ((Unit, _), _)) ->
-          let lhs = if last__103_ then "r" else "_"
+          let lhs = if last__092_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a %a" lhs "add"
-            (SUT.get_name state__101_ (0 + shift)) (Util.Pp.pp_char true) a_2
+            (SUT.get_name state__090_ (0 + shift)) (Util.Pp.pp_char true) a_2
             (Util.Pp.pp_int true) b_2
       | (Find a_3, Res ((Result (Int, Exn), _), _)) ->
-          let lhs = if last__103_ then "r" else "_"
+          let lhs = if last__092_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s %a)" lhs "find"
-            (SUT.get_name state__101_ (0 + shift)) (Util.Pp.pp_char true) a_3
+            (SUT.get_name state__090_ (0 + shift)) (Util.Pp.pp_char true) a_3
       | (Find_opt a_4, Res ((Option (Int), _), _)) ->
-          let lhs = if last__103_ then "r" else "_"
+          let lhs = if last__092_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "find_opt"
-            (SUT.get_name state__101_ (0 + shift)) (Util.Pp.pp_char true) a_4
+            (SUT.get_name state__090_ (0 + shift)) (Util.Pp.pp_char true) a_4
       | (Find_all a_5, Res ((List (Int), _), _)) ->
-          let lhs = if last__103_ then "r" else "_"
+          let lhs = if last__092_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "find_all"
-            (SUT.get_name state__101_ (0 + shift)) (Util.Pp.pp_char true) a_5
+            (SUT.get_name state__090_ (0 + shift)) (Util.Pp.pp_char true) a_5
       | (Mem a_6, Res ((Bool, _), _)) ->
-          let lhs = if last__103_ then "r" else "_"
+          let lhs = if last__092_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "mem"
-            (SUT.get_name state__101_ (0 + shift)) (Util.Pp.pp_char true) a_6
+            (SUT.get_name state__090_ (0 + shift)) (Util.Pp.pp_char true) a_6
       | (Remove a_7, Res ((Unit, _), _)) ->
-          let lhs = if last__103_ then "r" else "_"
+          let lhs = if last__092_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "remove"
-            (SUT.get_name state__101_ (0 + shift)) (Util.Pp.pp_char true) a_7
+            (SUT.get_name state__090_ (0 + shift)) (Util.Pp.pp_char true) a_7
       | (Replace (a_8, b_3), Res ((Unit, _), _)) ->
-          let lhs = if last__103_ then "r" else "_"
+          let lhs = if last__092_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a %a" lhs "replace"
-            (SUT.get_name state__101_ (0 + shift)) (Util.Pp.pp_char true) a_8
+            (SUT.get_name state__090_ (0 + shift)) (Util.Pp.pp_char true) a_8
             (Util.Pp.pp_int true) b_3
       | (Length, Res ((Int, _), _)) ->
-          let lhs = if last__103_ then "r" else "_"
+          let lhs = if last__092_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "length"
-            (SUT.get_name state__101_ (0 + shift))
+            (SUT.get_name state__090_ (0 + shift))
       | _ -> assert false
 let ortac_postcond cmd__030_ state__031_ res__032_ =
   let open Spec in
