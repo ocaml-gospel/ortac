@@ -5,14 +5,10 @@ type sut = char t
 let init_sut = make 42 'a'
 
 module Pp = struct
-  include Util.Pp
-
   let pp_elt pp = pp
 end
 
 module Gen = struct
-  include QCheck.Gen
-
   let int = small_signed_int
   let elt gen = gen
 end

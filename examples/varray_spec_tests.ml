@@ -108,20 +108,13 @@ module Spec =
       struct
         include QCheck
         module Gen =
-          struct
-            include Gen
-            include QCheck.Gen
-            let int = small_signed_int
-            let elt gen = gen
-          end
+          struct include Gen
+                 let int = small_signed_int
+                 let elt gen = gen end
       end
     module Util =
-      struct
-        module Pp =
-          struct include Util.Pp
-                 include Util.Pp
-                 let pp_elt pp = pp end
-      end
+      struct module Pp = struct include Util.Pp
+                                let pp_elt pp = pp end end
     type _ ty +=  
       | Elt: 'a ty -> 'a elt ty 
     let elt spec =
@@ -133,8 +126,6 @@ module Spec =
     type _ ty +=  
       | SUT: SUT.elt ty 
     let sut = (SUT, (fun _ -> "<sut>"))
-    type _ ty +=  
-      | Model: ModelElt.elt ty 
     type sut = SUT.t
     let init_sut = SUT.create 2
     type state = Model.t
@@ -810,9 +801,7 @@ module Spec =
       | Append ->
           let a_1__036_ = Model.get state__005_ 0
           and b__037_ = Model.get state__005_ 1 in
-          let a_1__039_ = a_1__036_
-          and b__040_ = b__037_
-          and t_14__041_ =
+          let t_14__041_ =
             let open ModelElt in
               {
                 contents =
@@ -840,10 +829,12 @@ module Spec =
                                     pos_cnum = 10142
                                   }
                               })))
-              } in
+              }
+          and a_1__040_ = a_1__036_
+          and b__039_ = b__037_ in
           Model.push
-            (Model.push (Model.push (Model.drop_n state__005_ 2) b__040_)
-               a_1__039_) t_14__041_
+            (Model.push (Model.push (Model.drop_n state__005_ 2) b__039_)
+               a_1__040_) t_14__041_
       | Sub (i_6, n_1) ->
           let t_15__042_ = Model.get state__005_ 0 in
           if
@@ -917,8 +908,7 @@ module Spec =
                                }
                            }))))
           then
-            let t_15__044_ = t_15__042_
-            and r__045_ =
+            let r__045_ =
               let open ModelElt in
                 {
                   contents =
@@ -959,14 +949,14 @@ module Spec =
                                       pos_cnum = 11348
                                     }
                                 })))
-                } in
+                }
+            and t_15__044_ = t_15__042_ in
             Model.push (Model.push (Model.drop_n state__005_ 1) t_15__044_)
               r__045_
           else state__005_
       | Copy ->
           let t_16__050_ = Model.get state__005_ 0 in
-          let t_16__052_ = t_16__050_
-          and r_1__053_ =
+          let r_1__053_ =
             let open ModelElt in
               {
                 contents =
@@ -992,7 +982,8 @@ module Spec =
                                     pos_cnum = 11761
                                   }
                               })))
-              } in
+              }
+          and t_16__052_ = t_16__050_ in
           Model.push (Model.push (Model.drop_n state__005_ 1) t_16__052_)
             r_1__053_
       | Fill (pos, len, x_4) ->
@@ -1179,8 +1170,8 @@ module Spec =
                                }
                            }))))
           then
-            let src__043_ = src__040_
-            and dst__042_ =
+            let src__065_ = src__062_
+            and dst__064_ =
               let open ModelElt in
                 {
                   contents =
@@ -1256,8 +1247,8 @@ module Spec =
                                     }
                                 })))
                 } in
-            Model.push (Model.push (Model.drop_n state__005_ 2) dst__042_)
-              src__043_
+            Model.push (Model.push (Model.drop_n state__005_ 2) dst__064_)
+              src__065_
           else state__005_
     let precond cmd__138_ state__139_ =
       match cmd__138_ with
@@ -1418,62 +1409,127 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__197_ state__198_ =
+let ortac_show_cmd cmd__197_ state__198_ last__200_ res__199_ =
   let open Spec in
-    match cmd__197_ with
-    | Push_back x ->
-        Format.asprintf "%s %s %a" "push_back" (SUT.get_name state__198_ 0)
-          (Util.Pp.pp_elt Util.Pp.pp_char true) x
-    | Pop_back ->
-        Format.asprintf "protect (fun () -> %s %s)" "pop_back"
-          (SUT.get_name state__198_ 0)
-    | Push_front x_1 ->
-        Format.asprintf "%s %s %a" "push_front" (SUT.get_name state__198_ 0)
-          (Util.Pp.pp_elt Util.Pp.pp_char true) x_1
-    | Pop_front ->
-        Format.asprintf "protect (fun () -> %s %s)" "pop_front"
-          (SUT.get_name state__198_ 0)
-    | Insert_at (i_1, x_2) ->
-        Format.asprintf "protect (fun () -> %s %s %a %a)" "insert_at"
-          (SUT.get_name state__198_ 0) (Util.Pp.pp_int true) i_1
-          (Util.Pp.pp_elt Util.Pp.pp_char true) x_2
-    | Pop_at i_2 ->
-        Format.asprintf "protect (fun () -> %s %s %a)" "pop_at"
-          (SUT.get_name state__198_ 0) (Util.Pp.pp_int true) i_2
-    | Delete_at i_3 ->
-        Format.asprintf "protect (fun () -> %s %s %a)" "delete_at"
-          (SUT.get_name state__198_ 0) (Util.Pp.pp_int true) i_3
-    | Get i_4 ->
-        Format.asprintf "protect (fun () -> %s %s %a)" "get"
-          (SUT.get_name state__198_ 0) (Util.Pp.pp_int true) i_4
-    | Set (i_5, v) ->
-        Format.asprintf "protect (fun () -> %s %s %a %a)" "set"
-          (SUT.get_name state__198_ 0) (Util.Pp.pp_int true) i_5
-          (Util.Pp.pp_elt Util.Pp.pp_char true) v
-    | Length -> Format.asprintf "%s %s" "length" (SUT.get_name state__198_ 0)
-    | Make (n, x_3) ->
-        Format.asprintf "protect (fun () -> %s %a %a)" "make"
-          (Util.Pp.pp_int true) n (Util.Pp.pp_elt Util.Pp.pp_char true) x_3
-    | Empty () -> Format.asprintf "%s %a" "empty" (Util.Pp.pp_unit true) ()
-    | Is_empty ->
-        Format.asprintf "%s %s" "is_empty" (SUT.get_name state__198_ 0)
-    | Append ->
-        Format.asprintf "%s %s %s" "append" (SUT.get_name state__198_ 0)
-          (SUT.get_name state__198_ 1)
-    | Sub (i_6, n_1) ->
-        Format.asprintf "protect (fun () -> %s %s %a %a)" "sub"
-          (SUT.get_name state__198_ 0) (Util.Pp.pp_int true) i_6
-          (Util.Pp.pp_int true) n_1
-    | Copy -> Format.asprintf "%s %s" "copy" (SUT.get_name state__198_ 0)
-    | Fill (pos, len, x_4) ->
-        Format.asprintf "protect (fun () -> %s %s %a %a %a)" "fill"
-          (SUT.get_name state__198_ 0) (Util.Pp.pp_int true) pos
-          (Util.Pp.pp_int true) len (Util.Pp.pp_elt Util.Pp.pp_char true) x_4
-    | Blit (src_pos, dst_pos, len_1) ->
-        Format.asprintf "protect (fun () -> %s %s %a %s %a %a)" "blit"
-          (SUT.get_name state__198_ 0) (Util.Pp.pp_int true) src_pos
-          (SUT.get_name state__198_ 1) (Util.Pp.pp_int true) dst_pos
-          (Util.Pp.pp_int true) len_1
+    let open STM in
+      match (cmd__197_, res__199_) with
+      | (Push_back x, Res ((Unit, _), _)) ->
+          let lhs = if last__200_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s %a" lhs "push_back"
+            (SUT.get_name state__198_ (0 + shift))
+            (Util.Pp.pp_elt Util.Pp.pp_char true) x
+      | (Pop_back, Res ((Result (Elt (Char), Exn), _), _)) ->
+          let lhs = if last__200_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "pop_back"
+            (SUT.get_name state__198_ (0 + shift))
+      | (Push_front x_1, Res ((Unit, _), _)) ->
+          let lhs = if last__200_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s %a" lhs "push_front"
+            (SUT.get_name state__198_ (0 + shift))
+            (Util.Pp.pp_elt Util.Pp.pp_char true) x_1
+      | (Pop_front, Res ((Result (Elt (Char), Exn), _), _)) ->
+          let lhs = if last__200_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = protect (fun () -> %s %s)" lhs
+            "pop_front" (SUT.get_name state__198_ (0 + shift))
+      | (Insert_at (i_1, x_2), Res ((Result (Unit, Exn), _), _)) ->
+          let lhs = if last__200_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = protect (fun () -> %s %s %a %a)" lhs
+            "insert_at" (SUT.get_name state__198_ (0 + shift))
+            (Util.Pp.pp_int true) i_1 (Util.Pp.pp_elt Util.Pp.pp_char true)
+            x_2
+      | (Pop_at i_2, Res ((Result (Elt (Char), Exn), _), _)) ->
+          let lhs = if last__200_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = protect (fun () -> %s %s %a)" lhs
+            "pop_at" (SUT.get_name state__198_ (0 + shift))
+            (Util.Pp.pp_int true) i_2
+      | (Delete_at i_3, Res ((Result (Unit, Exn), _), _)) ->
+          let lhs = if last__200_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = protect (fun () -> %s %s %a)" lhs
+            "delete_at" (SUT.get_name state__198_ (0 + shift))
+            (Util.Pp.pp_int true) i_3
+      | (Get i_4, Res ((Result (Elt (Char), Exn), _), _)) ->
+          let lhs = if last__200_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = protect (fun () -> %s %s %a)" lhs "get"
+            (SUT.get_name state__198_ (0 + shift)) (Util.Pp.pp_int true) i_4
+      | (Set (i_5, v), Res ((Result (Unit, Exn), _), _)) ->
+          let lhs = if last__200_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = protect (fun () -> %s %s %a %a)" lhs
+            "set" (SUT.get_name state__198_ (0 + shift))
+            (Util.Pp.pp_int true) i_5 (Util.Pp.pp_elt Util.Pp.pp_char true) v
+      | (Length, Res ((Int, _), _)) ->
+          let lhs = if last__200_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s" lhs "length"
+            (SUT.get_name state__198_ (0 + shift))
+      | (Make (n, x_3), Res ((Result (SUT, Exn), _), t_11)) ->
+          let lhs =
+            if last__200_
+            then "r"
+            else
+              (match t_11 with
+               | Ok _ -> "Ok " ^ (SUT.get_name state__198_ 0)
+               | Error _ -> "_")
+          and shift = match t_11 with | Ok _ -> 1 | Error _ -> 0 in
+          Format.asprintf "let %s = protect (fun () -> %s %a %a)" lhs "make"
+            (Util.Pp.pp_int true) n (Util.Pp.pp_elt Util.Pp.pp_char true) x_3
+      | (Empty (), Res ((SUT, _), t_12)) ->
+          let lhs = if last__200_ then "r" else SUT.get_name state__198_ 0
+          and shift = 1 in
+          Format.asprintf "let %s = %s %a" lhs "empty" (Util.Pp.pp_unit true)
+            ()
+      | (Is_empty, Res ((Bool, _), _)) ->
+          let lhs = if last__200_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %s" lhs "is_empty"
+            (SUT.get_name state__198_ (0 + shift))
+      | (Append, Res ((SUT, _), t_14)) ->
+          let lhs = if last__200_ then "r" else SUT.get_name state__198_ 0
+          and shift = 1 in
+          Format.asprintf "let %s = %s %s %s" lhs "append"
+            (SUT.get_name state__198_ (0 + shift))
+            (SUT.get_name state__198_ (1 + shift))
+      | (Sub (i_6, n_1), Res ((Result (SUT, Exn), _), r)) ->
+          let lhs =
+            if last__200_
+            then "r"
+            else
+              (match r with
+               | Ok _ -> "Ok " ^ (SUT.get_name state__198_ 0)
+               | Error _ -> "_")
+          and shift = match r with | Ok _ -> 1 | Error _ -> 0 in
+          Format.asprintf "let %s = protect (fun () -> %s %s %a %a)" lhs
+            "sub" (SUT.get_name state__198_ (0 + shift))
+            (Util.Pp.pp_int true) i_6 (Util.Pp.pp_int true) n_1
+      | (Copy, Res ((SUT, _), r_1)) ->
+          let lhs = if last__200_ then "r" else SUT.get_name state__198_ 0
+          and shift = 1 in
+          Format.asprintf "let %s = %s %s" lhs "copy"
+            (SUT.get_name state__198_ (0 + shift))
+      | (Fill (pos, len, x_4), Res ((Result (Unit, Exn), _), _)) ->
+          let lhs = if last__200_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = protect (fun () -> %s %s %a %a %a)" lhs
+            "fill" (SUT.get_name state__198_ (0 + shift))
+            (Util.Pp.pp_int true) pos (Util.Pp.pp_int true) len
+            (Util.Pp.pp_elt Util.Pp.pp_char true) x_4
+      | (Blit (src_pos, dst_pos, len_1), Res ((Result (Unit, Exn), _), _)) ->
+          let lhs = if last__200_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = protect (fun () -> %s %s %a %s %a %a)"
+            lhs "blit" (SUT.get_name state__198_ (0 + shift))
+            (Util.Pp.pp_int true) src_pos
+            (SUT.get_name state__198_ (1 + shift)) (Util.Pp.pp_int true)
+            dst_pos (Util.Pp.pp_int true) len_1
+      | _ -> assert false
 let ortac_postcond cmd__074_ state__075_ res__076_ =
   let open Spec in
     let open STM in
@@ -2518,7 +2574,7 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                           pos_cnum = 8210
                         }
                     })])
-      | (Make (n, x_3), Res ((Result (Model, Exn), _), t_11)) ->
+      | (Make (n, x_3), Res ((Result (SUT, Exn), _), t_11)) ->
           (match if
                    try
                      Ortac_runtime.Gospelstdlib.(>=)
@@ -2549,7 +2605,7 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                  else
                    Some
                      (Ortac_runtime.report "Varray_spec" "make 42 'a'"
-                        (Either.left "Invalid_argument") "make"
+                        (Ortac_runtime.Exception "Invalid_argument") "make"
                         [("n >= 0",
                            {
                              Ortac_runtime.start =
@@ -2603,7 +2659,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                     else
                       Some
                         (Ortac_runtime.report "Varray_spec" "make 42 'a'"
-                           (Either.left "Invalid_argument") "make"
+                           (Ortac_runtime.Exception "Invalid_argument")
+                           "make"
                            [("n >= 0",
                               {
                                 Ortac_runtime.start =
@@ -2621,7 +2678,7 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                                     pos_cnum = 8636
                                   }
                               })])))
-      | (Empty (), Res ((Model, _), t_12)) -> None
+      | (Empty (), Res ((SUT, _), t_12)) -> None
       | (Is_empty, Res ((Bool, _), b_1)) ->
           if
             let t_old__112_ = Model.get state__075_ 0
@@ -2674,8 +2731,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                           pos_cnum = 9709
                         }
                     })])
-      | (Append, Res ((Model, _), t_14)) -> None
-      | (Sub (i_6, n_1), Res ((Result (Model, Exn), _), r)) ->
+      | (Append, Res ((SUT, _), t_14)) -> None
+      | (Sub (i_6, n_1), Res ((Result (SUT, Exn), _), r)) ->
           (match Ortac_runtime.append
                    (if
                       let tmp__117_ = Model.get state__075_ 0 in
@@ -2715,7 +2772,7 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                     else
                       Some
                         (Ortac_runtime.report "Varray_spec" "make 42 'a'"
-                           (Either.left "Invalid_argument") "sub"
+                           (Ortac_runtime.Exception "Invalid_argument") "sub"
                            [("0 <= i <= Sequence.length t.contents",
                               {
                                 Ortac_runtime.start =
@@ -2775,7 +2832,7 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                     else
                       Some
                         (Ortac_runtime.report "Varray_spec" "make 42 'a'"
-                           (Either.left "Invalid_argument") "sub"
+                           (Ortac_runtime.Exception "Invalid_argument") "sub"
                            [("i <= i + n <= Sequence.length t.contents",
                               {
                                 Ortac_runtime.start =
@@ -2838,7 +2895,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                        else
                          Some
                            (Ortac_runtime.report "Varray_spec" "make 42 'a'"
-                              (Either.left "Invalid_argument") "sub"
+                              (Ortac_runtime.Exception "Invalid_argument")
+                              "sub"
                               [("0 <= i <= Sequence.length t.contents",
                                  {
                                    Ortac_runtime.start =
@@ -2902,7 +2960,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                        else
                          Some
                            (Ortac_runtime.report "Varray_spec" "make 42 'a'"
-                              (Either.left "Invalid_argument") "sub"
+                              (Ortac_runtime.Exception "Invalid_argument")
+                              "sub"
                               [("i <= i + n <= Sequence.length t.contents",
                                  {
                                    Ortac_runtime.start =
@@ -2920,7 +2979,7 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                                        pos_cnum = 11266
                                      }
                                  })]))))
-      | (Copy, Res ((Model, _), r_1)) -> None
+      | (Copy, Res ((SUT, _), r_1)) -> None
       | (Fill (pos, len, x_4), Res ((Result (Unit, Exn), _), res)) ->
           (match if
                    let tmp__123_ = Model.get state__075_ 0 in
