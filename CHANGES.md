@@ -1,18 +1,18 @@
-# Unreleased
+# 0.4.0
 
+- Add support for running tests in separate processes with a timeout
+  [\#259](https://github.com/ocaml-gospel/ortac/pull/259)
 - Add `Reserr.{traverse,traverse_,promote_mapi}`, rename `Reserr.map` to
   `Reserr.promote_map` and remove `Reserr.concat_map`
   [\#250](https://github.com/ocaml-gospel/ortac/pull/250)
 - Fix display of the runnable scenario for protected values
   [\#251](https://github.com/ocaml-gospel/ortac/pull/251)
-- Fix sut as type argument or inside tuple bug
-  [\#245](https://github.com/ocaml-gospel/ortac/pull/245)
-- Add support for multiple sut arguments
-  [\#247](https://github.com/ocaml-gospel/ortac/pull/247)
 - Add support for returning sut values
   [\#253](https://github.com/ocaml-gospel/ortac/pull/253)
-- Add support for running tests in separate processes with a timeout
-  [\#259](https://github.com/ocaml-gospel/ortac/pull/259)
+- Add support for multiple sut arguments
+  [\#247](https://github.com/ocaml-gospel/ortac/pull/247)
+- Fix sut as type argument or inside tuple bug
+  [\#245](https://github.com/ocaml-gospel/ortac/pull/245)
 
 # 0.3.0
 
