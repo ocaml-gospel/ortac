@@ -26,7 +26,7 @@ depends: [
   "gospel" {= "0.3.0"}
   "monolith" {with-test & >= "20201026"}
   "pprint" {with-test}
-  "ortac-core"
+  "ortac-core" {= version}
   "ortac-wrapper"
   "ortac-runtime-monolith" {with-test}
   "odoc" {with-doc}

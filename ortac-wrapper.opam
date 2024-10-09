@@ -26,8 +26,8 @@ depends: [
   "ppxlib" {>= "0.26.0"}
   "gospel" {= "0.3.0"}
   "alcotest" {with-test & >= "0.8.1"}
-  "ortac-core"
-  "ortac-runtime" {with-test}
+  "ortac-core" {= version}
+  "ortac-runtime" {with-test & = version}
   "odoc" {with-doc}
 ]
 build: [

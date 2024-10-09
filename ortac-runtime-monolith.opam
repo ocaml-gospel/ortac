@@ -21,7 +21,7 @@ depends: [
   "monolith" {>= "20201026"}
   "pprint"
   "fmt" {>= "0.9.0"}
-  "ortac-runtime"
+  "ortac-runtime" {= version}
   "odoc" {with-doc}
 ]
 build: [
