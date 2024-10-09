@@ -38,7 +38,7 @@
   (ppxlib (>= 0.26.0))
   (gospel (= 0.3.0))
   (alcotest (and :with-test (>= 0.8.1)))
-  (ortac-runtime :with-test))
+  (ortac-runtime (and :with-test (= :version))))
  (sites
   (lib plugins))
  (conflicts
@@ -82,8 +82,8 @@
   (ppxlib (>= 0.26.0))
   (gospel (= 0.3.0))
   (alcotest (and :with-test (>= 0.8.1)))
-  ortac-core
-  (ortac-runtime :with-test)))
+  (ortac-core (= :version))
+  (ortac-runtime (and :with-test (= :version)))))
 
 ; Monolith plugin
 (package
@@ -108,7 +108,7 @@
   (gospel (= 0.3.0))
   (monolith (and :with-test (>= 20201026)))
   (pprint :with-test)
-  ortac-core
+  (ortac-core (= :version))
   ortac-wrapper
   (ortac-runtime-monolith :with-test)))
 
@@ -129,7 +129,7 @@
   (monolith (>= 20201026))
   pprint
   (fmt (>= 0.9.0))
-  ortac-runtime))
+  (ortac-runtime (= :version))))
 
 ; QCheck-STM plugin
 (package
@@ -175,7 +175,7 @@
   fmt
   (cmdliner (>= 1.1.0))
   (ortac-core (= :version))
-  (ortac-qcheck-stm :with-test)))
+  (ortac-qcheck-stm (and :with-test (= :version)))))
 
 (package
  (name ortac-runtime-qcheck-stm)
