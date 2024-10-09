@@ -1,3 +1,8 @@
+# Unreleased
+
+- Remove unnecessary stack access from precondition
+  [\#264](https://github.com/ocaml-gospel/ortac/pull/264)
+
 # 0.4.0
 
 - Add support for running tests in separate processes with a timeout
