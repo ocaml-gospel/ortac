@@ -142,50 +142,50 @@ module Spec =
       | Make i_1 -> true
       | Plus1 i_2 -> true
       | Plus2 i_3 -> true
-      | Get -> let r_1__029_ = Model.get state__028_ 0 in true
+      | Get -> true
     let postcond _ _ _ = true
-    let run cmd__030_ sut__031_ =
-      match cmd__030_ with
+    let run cmd__029_ sut__030_ =
+      match cmd__029_ with
       | Make i_1 ->
           Res
             (sut,
-              (let res__032_ = make i_1 in
-               (SUT.push sut__031_ res__032_; res__032_)))
-      | Plus1 i_2 -> Res (int, (let res__033_ = plus1 i_2 in res__033_))
-      | Plus2 i_3 -> Res (int, (let res__034_ = plus2 i_3 in res__034_))
+              (let res__031_ = make i_1 in
+               (SUT.push sut__030_ res__031_; res__031_)))
+      | Plus1 i_2 -> Res (int, (let res__032_ = plus1 i_2 in res__032_))
+      | Plus2 i_3 -> Res (int, (let res__033_ = plus2 i_3 in res__033_))
       | Get ->
           Res
             (int,
-              (let r_1__035_ = SUT.pop sut__031_ in
-               let res__036_ = get r_1__035_ in
-               (SUT.push sut__031_ r_1__035_; res__036_)))
+              (let r_1__034_ = SUT.pop sut__030_ in
+               let res__035_ = get r_1__034_ in
+               (SUT.push sut__030_ r_1__034_; res__035_)))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__038_ state__039_ last__041_ res__040_ =
+let ortac_show_cmd cmd__037_ state__038_ last__040_ res__039_ =
   let open Spec in
     let open STM in
-      match (cmd__038_, res__040_) with
+      match (cmd__037_, res__039_) with
       | (Make i_1, Res ((SUT, _), r)) ->
-          let lhs = if last__041_ then "r" else SUT.get_name state__039_ 0
+          let lhs = if last__040_ then "r" else SUT.get_name state__038_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a" lhs "make" (Util.Pp.pp_int true)
             i_1
       | (Plus1 i_2, Res ((Int, _), _)) ->
-          let lhs = if last__041_ then "r" else "_"
+          let lhs = if last__040_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a" lhs "plus1" (Util.Pp.pp_int true)
             i_2
       | (Plus2 i_3, Res ((Int, _), _)) ->
-          let lhs = if last__041_ then "r" else "_"
+          let lhs = if last__040_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a" lhs "plus2" (Util.Pp.pp_int true)
             i_3
       | (Get, Res ((Int, _), _)) ->
-          let lhs = if last__041_ then "r" else "_"
+          let lhs = if last__040_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "get"
-            (SUT.get_name state__039_ (0 + shift))
+            (SUT.get_name state__038_ (0 + shift))
       | _ -> assert false
 let ortac_postcond cmd__008_ state__009_ res__010_ =
   let open Spec in

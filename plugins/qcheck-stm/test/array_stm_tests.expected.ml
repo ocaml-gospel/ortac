@@ -742,168 +742,166 @@ module Spec =
           Model.push (Model.drop_n state__003_ 1) t_10__041_
     let precond cmd__078_ state__079_ =
       match cmd__078_ with
-      | Length -> let t_1__080_ = Model.get state__079_ 0 in true
-      | Get i -> let t_2__081_ = Model.get state__079_ 0 in true
-      | Set (i_1, a_1) -> let t_3__082_ = Model.get state__079_ 0 in true
+      | Length -> true
+      | Get i -> true
+      | Set (i_1, a_1) -> true
       | Make (i_2, a_2) -> true
-      | Append ->
-          let a_4__083_ = Model.get state__079_ 0
-          and b__084_ = Model.get state__079_ 1 in true
-      | Sub (i_3, n) -> let t_6__085_ = Model.get state__079_ 0 in true
-      | Copy -> let t_7__086_ = Model.get state__079_ 0 in true
-      | Fill (pos, len, x) -> let t_8__087_ = Model.get state__079_ 0 in true
-      | To_list -> let t_9__088_ = Model.get state__079_ 0 in true
-      | Mem a_3 -> let t_10__089_ = Model.get state__079_ 0 in true
+      | Append -> true
+      | Sub (i_3, n) -> true
+      | Copy -> true
+      | Fill (pos, len, x) -> true
+      | To_list -> true
+      | Mem a_3 -> true
     let postcond _ _ _ = true
-    let run cmd__090_ sut__091_ =
-      match cmd__090_ with
+    let run cmd__080_ sut__081_ =
+      match cmd__080_ with
       | Length ->
           Res
             (int,
-              (let t_1__092_ = SUT.pop sut__091_ in
-               let res__093_ = length t_1__092_ in
-               (SUT.push sut__091_ t_1__092_; res__093_)))
+              (let t_1__082_ = SUT.pop sut__081_ in
+               let res__083_ = length t_1__082_ in
+               (SUT.push sut__081_ t_1__082_; res__083_)))
       | Get i ->
           Res
             ((result char exn),
-              (let t_2__094_ = SUT.pop sut__091_ in
-               let res__095_ = protect (fun () -> get t_2__094_ i) () in
-               (SUT.push sut__091_ t_2__094_; res__095_)))
+              (let t_2__084_ = SUT.pop sut__081_ in
+               let res__085_ = protect (fun () -> get t_2__084_ i) () in
+               (SUT.push sut__081_ t_2__084_; res__085_)))
       | Set (i_1, a_1) ->
           Res
             ((result unit exn),
-              (let t_3__096_ = SUT.pop sut__091_ in
-               let res__097_ = protect (fun () -> set t_3__096_ i_1 a_1) () in
-               (SUT.push sut__091_ t_3__096_; res__097_)))
+              (let t_3__086_ = SUT.pop sut__081_ in
+               let res__087_ = protect (fun () -> set t_3__086_ i_1 a_1) () in
+               (SUT.push sut__081_ t_3__086_; res__087_)))
       | Make (i_2, a_2) ->
           Res
             ((result sut exn),
-              (let res__098_ = protect (fun () -> make i_2 a_2) () in
-               ((match res__098_ with
-                 | Ok res -> SUT.push sut__091_ res
+              (let res__088_ = protect (fun () -> make i_2 a_2) () in
+               ((match res__088_ with
+                 | Ok res -> SUT.push sut__081_ res
                  | Error _ -> ());
-                res__098_)))
+                res__088_)))
       | Append ->
           Res
             (sut,
-              (let a_4__099_ = SUT.pop sut__091_ in
-               let b__100_ = SUT.pop sut__091_ in
-               let res__101_ = append a_4__099_ b__100_ in
-               (SUT.push sut__091_ b__100_;
-                SUT.push sut__091_ a_4__099_;
-                SUT.push sut__091_ res__101_;
-                res__101_)))
+              (let a_4__089_ = SUT.pop sut__081_ in
+               let b__090_ = SUT.pop sut__081_ in
+               let res__091_ = append a_4__089_ b__090_ in
+               (SUT.push sut__081_ b__090_;
+                SUT.push sut__081_ a_4__089_;
+                SUT.push sut__081_ res__091_;
+                res__091_)))
       | Sub (i_3, n) ->
           Res
             ((result sut exn),
-              (let t_6__102_ = SUT.pop sut__091_ in
-               let res__103_ = protect (fun () -> sub t_6__102_ i_3 n) () in
-               (SUT.push sut__091_ t_6__102_;
-                (match res__103_ with
-                 | Ok res -> SUT.push sut__091_ res
+              (let t_6__092_ = SUT.pop sut__081_ in
+               let res__093_ = protect (fun () -> sub t_6__092_ i_3 n) () in
+               (SUT.push sut__081_ t_6__092_;
+                (match res__093_ with
+                 | Ok res -> SUT.push sut__081_ res
                  | Error _ -> ());
-                res__103_)))
+                res__093_)))
       | Copy ->
           Res
             (sut,
-              (let t_7__104_ = SUT.pop sut__091_ in
-               let res__105_ = copy t_7__104_ in
-               (SUT.push sut__091_ t_7__104_;
-                SUT.push sut__091_ res__105_;
-                res__105_)))
+              (let t_7__094_ = SUT.pop sut__081_ in
+               let res__095_ = copy t_7__094_ in
+               (SUT.push sut__081_ t_7__094_;
+                SUT.push sut__081_ res__095_;
+                res__095_)))
       | Fill (pos, len, x) ->
           Res
             ((result unit exn),
-              (let t_8__106_ = SUT.pop sut__091_ in
-               let res__107_ =
-                 protect (fun () -> fill t_8__106_ pos len x) () in
-               (SUT.push sut__091_ t_8__106_; res__107_)))
+              (let t_8__096_ = SUT.pop sut__081_ in
+               let res__097_ =
+                 protect (fun () -> fill t_8__096_ pos len x) () in
+               (SUT.push sut__081_ t_8__096_; res__097_)))
       | To_list ->
           Res
             ((list char),
-              (let t_9__108_ = SUT.pop sut__091_ in
-               let res__109_ = to_list t_9__108_ in
-               (SUT.push sut__091_ t_9__108_; res__109_)))
+              (let t_9__098_ = SUT.pop sut__081_ in
+               let res__099_ = to_list t_9__098_ in
+               (SUT.push sut__081_ t_9__098_; res__099_)))
       | Mem a_3 ->
           Res
             (bool,
-              (let t_10__110_ = SUT.pop sut__091_ in
-               let res__111_ = mem a_3 t_10__110_ in
-               (SUT.push sut__091_ t_10__110_; res__111_)))
+              (let t_10__100_ = SUT.pop sut__081_ in
+               let res__101_ = mem a_3 t_10__100_ in
+               (SUT.push sut__081_ t_10__100_; res__101_)))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__113_ state__114_ last__116_ res__115_ =
+let ortac_show_cmd cmd__103_ state__104_ last__106_ res__105_ =
   let open Spec in
     let open STM in
-      match (cmd__113_, res__115_) with
+      match (cmd__103_, res__105_) with
       | (Length, Res ((Int, _), _)) ->
-          let lhs = if last__116_ then "r" else "_"
+          let lhs = if last__106_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "length"
-            (SUT.get_name state__114_ (0 + shift))
+            (SUT.get_name state__104_ (0 + shift))
       | (Get i, Res ((Result (Char, Exn), _), _)) ->
-          let lhs = if last__116_ then "r" else "_"
+          let lhs = if last__106_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s %a)" lhs "get"
-            (SUT.get_name state__114_ (0 + shift)) (Util.Pp.pp_int true) i
+            (SUT.get_name state__104_ (0 + shift)) (Util.Pp.pp_int true) i
       | (Set (i_1, a_1), Res ((Result (Unit, Exn), _), _)) ->
-          let lhs = if last__116_ then "r" else "_"
+          let lhs = if last__106_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s %a %a)" lhs
-            "set" (SUT.get_name state__114_ (0 + shift))
+            "set" (SUT.get_name state__104_ (0 + shift))
             (Util.Pp.pp_int true) i_1 (Util.Pp.pp_char true) a_1
       | (Make (i_2, a_2), Res ((Result (SUT, Exn), _), t_4)) ->
           let lhs =
-            if last__116_
+            if last__106_
             then "r"
             else
               (match t_4 with
-               | Ok _ -> "Ok " ^ (SUT.get_name state__114_ 0)
+               | Ok _ -> "Ok " ^ (SUT.get_name state__104_ 0)
                | Error _ -> "_")
           and shift = match t_4 with | Ok _ -> 1 | Error _ -> 0 in
           Format.asprintf "let %s = protect (fun () -> %s %a %a)" lhs "make"
             (Util.Pp.pp_int true) i_2 (Util.Pp.pp_char true) a_2
       | (Append, Res ((SUT, _), t_5)) ->
-          let lhs = if last__116_ then "r" else SUT.get_name state__114_ 0
+          let lhs = if last__106_ then "r" else SUT.get_name state__104_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %s %s" lhs "append"
-            (SUT.get_name state__114_ (0 + shift))
-            (SUT.get_name state__114_ (1 + shift))
+            (SUT.get_name state__104_ (0 + shift))
+            (SUT.get_name state__104_ (1 + shift))
       | (Sub (i_3, n), Res ((Result (SUT, Exn), _), r)) ->
           let lhs =
-            if last__116_
+            if last__106_
             then "r"
             else
               (match r with
-               | Ok _ -> "Ok " ^ (SUT.get_name state__114_ 0)
+               | Ok _ -> "Ok " ^ (SUT.get_name state__104_ 0)
                | Error _ -> "_")
           and shift = match r with | Ok _ -> 1 | Error _ -> 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s %a %a)" lhs
-            "sub" (SUT.get_name state__114_ (0 + shift))
+            "sub" (SUT.get_name state__104_ (0 + shift))
             (Util.Pp.pp_int true) i_3 (Util.Pp.pp_int true) n
       | (Copy, Res ((SUT, _), r_1)) ->
-          let lhs = if last__116_ then "r" else SUT.get_name state__114_ 0
+          let lhs = if last__106_ then "r" else SUT.get_name state__104_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %s" lhs "copy"
-            (SUT.get_name state__114_ (0 + shift))
+            (SUT.get_name state__104_ (0 + shift))
       | (Fill (pos, len, x), Res ((Result (Unit, Exn), _), _)) ->
-          let lhs = if last__116_ then "r" else "_"
+          let lhs = if last__106_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s %a %a %a)" lhs
-            "fill" (SUT.get_name state__114_ (0 + shift))
+            "fill" (SUT.get_name state__104_ (0 + shift))
             (Util.Pp.pp_int true) pos (Util.Pp.pp_int true) len
             (Util.Pp.pp_char true) x
       | (To_list, Res ((List (Char), _), _)) ->
-          let lhs = if last__116_ then "r" else "_"
+          let lhs = if last__106_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "to_list"
-            (SUT.get_name state__114_ (0 + shift))
+            (SUT.get_name state__104_ (0 + shift))
       | (Mem a_3, Res ((Bool, _), _)) ->
-          let lhs = if last__116_ then "r" else "_"
+          let lhs = if last__106_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a %s" lhs "mem"
-            (Util.Pp.pp_char true) a_3 (SUT.get_name state__114_ (0 + shift))
+            (Util.Pp.pp_char true) a_3 (SUT.get_name state__104_ (0 + shift))
       | _ -> assert false
 let ortac_postcond cmd__042_ state__043_ res__044_ =
   let open Spec in

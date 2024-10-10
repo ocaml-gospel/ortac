@@ -360,122 +360,122 @@ module Spec =
     let precond cmd__057_ state__058_ =
       match cmd__057_ with
       | Create () -> true
-      | Is_empty -> let s_1__059_ = Model.get state__058_ 0 in true
-      | Length -> let s_2__060_ = Model.get state__058_ 0 in true
-      | Add_l a_1 -> let s_3__061_ = Model.get state__058_ 0 in true
-      | Add_r a_2 -> let s_4__062_ = Model.get state__058_ 0 in true
-      | Take_l -> let s_5__063_ = Model.get state__058_ 0 in true
-      | Take_r -> let s_6__064_ = Model.get state__058_ 0 in true
-      | Take_opt_l -> let s_7__065_ = Model.get state__058_ 0 in true
-      | Take_opt_r -> let s_8__066_ = Model.get state__058_ 0 in true
+      | Is_empty -> true
+      | Length -> true
+      | Add_l a_1 -> true
+      | Add_r a_2 -> true
+      | Take_l -> true
+      | Take_r -> true
+      | Take_opt_l -> true
+      | Take_opt_r -> true
     let postcond _ _ _ = true
-    let run cmd__067_ sut__068_ =
-      match cmd__067_ with
+    let run cmd__059_ sut__060_ =
+      match cmd__059_ with
       | Create () ->
           Res
             (sut,
-              (let res__069_ = create () in
-               (SUT.push sut__068_ res__069_; res__069_)))
+              (let res__061_ = create () in
+               (SUT.push sut__060_ res__061_; res__061_)))
       | Is_empty ->
           Res
             (bool,
-              (let s_1__070_ = SUT.pop sut__068_ in
-               let res__071_ = is_empty s_1__070_ in
-               (SUT.push sut__068_ s_1__070_; res__071_)))
+              (let s_1__062_ = SUT.pop sut__060_ in
+               let res__063_ = is_empty s_1__062_ in
+               (SUT.push sut__060_ s_1__062_; res__063_)))
       | Length ->
           Res
             (int,
-              (let s_2__072_ = SUT.pop sut__068_ in
-               let res__073_ = length s_2__072_ in
-               (SUT.push sut__068_ s_2__072_; res__073_)))
+              (let s_2__064_ = SUT.pop sut__060_ in
+               let res__065_ = length s_2__064_ in
+               (SUT.push sut__060_ s_2__064_; res__065_)))
       | Add_l a_1 ->
           Res
             ((node int),
-              (let s_3__074_ = SUT.pop sut__068_ in
-               let res__075_ = add_l a_1 s_3__074_ in
-               (SUT.push sut__068_ s_3__074_; res__075_)))
+              (let s_3__066_ = SUT.pop sut__060_ in
+               let res__067_ = add_l a_1 s_3__066_ in
+               (SUT.push sut__060_ s_3__066_; res__067_)))
       | Add_r a_2 ->
           Res
             ((node int),
-              (let s_4__076_ = SUT.pop sut__068_ in
-               let res__077_ = add_r a_2 s_4__076_ in
-               (SUT.push sut__068_ s_4__076_; res__077_)))
+              (let s_4__068_ = SUT.pop sut__060_ in
+               let res__069_ = add_r a_2 s_4__068_ in
+               (SUT.push sut__060_ s_4__068_; res__069_)))
       | Take_l ->
           Res
             ((result int exn),
-              (let s_5__078_ = SUT.pop sut__068_ in
-               let res__079_ = protect (fun () -> take_l s_5__078_) () in
-               (SUT.push sut__068_ s_5__078_; res__079_)))
+              (let s_5__070_ = SUT.pop sut__060_ in
+               let res__071_ = protect (fun () -> take_l s_5__070_) () in
+               (SUT.push sut__060_ s_5__070_; res__071_)))
       | Take_r ->
           Res
             ((result int exn),
-              (let s_6__080_ = SUT.pop sut__068_ in
-               let res__081_ = protect (fun () -> take_r s_6__080_) () in
-               (SUT.push sut__068_ s_6__080_; res__081_)))
+              (let s_6__072_ = SUT.pop sut__060_ in
+               let res__073_ = protect (fun () -> take_r s_6__072_) () in
+               (SUT.push sut__060_ s_6__072_; res__073_)))
       | Take_opt_l ->
           Res
             ((option int),
-              (let s_7__082_ = SUT.pop sut__068_ in
-               let res__083_ = take_opt_l s_7__082_ in
-               (SUT.push sut__068_ s_7__082_; res__083_)))
+              (let s_7__074_ = SUT.pop sut__060_ in
+               let res__075_ = take_opt_l s_7__074_ in
+               (SUT.push sut__060_ s_7__074_; res__075_)))
       | Take_opt_r ->
           Res
             ((option int),
-              (let s_8__084_ = SUT.pop sut__068_ in
-               let res__085_ = take_opt_r s_8__084_ in
-               (SUT.push sut__068_ s_8__084_; res__085_)))
+              (let s_8__076_ = SUT.pop sut__060_ in
+               let res__077_ = take_opt_r s_8__076_ in
+               (SUT.push sut__060_ s_8__076_; res__077_)))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__087_ state__088_ last__090_ res__089_ =
+let ortac_show_cmd cmd__079_ state__080_ last__082_ res__081_ =
   let open Spec in
     let open STM in
-      match (cmd__087_, res__089_) with
+      match (cmd__079_, res__081_) with
       | (Create (), Res ((SUT, _), s)) ->
-          let lhs = if last__090_ then "r" else SUT.get_name state__088_ 0
+          let lhs = if last__082_ then "r" else SUT.get_name state__080_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a" lhs "create"
             (Util.Pp.pp_unit true) ()
       | (Is_empty, Res ((Bool, _), _)) ->
-          let lhs = if last__090_ then "r" else "_"
+          let lhs = if last__082_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "is_empty"
-            (SUT.get_name state__088_ (0 + shift))
+            (SUT.get_name state__080_ (0 + shift))
       | (Length, Res ((Int, _), _)) ->
-          let lhs = if last__090_ then "r" else "_"
+          let lhs = if last__082_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "length"
-            (SUT.get_name state__088_ (0 + shift))
+            (SUT.get_name state__080_ (0 + shift))
       | (Add_l a_1, Res ((Node (Int), _), _)) ->
-          let lhs = if last__090_ then "r" else "_"
+          let lhs = if last__082_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a %s" lhs "add_l"
-            (Util.Pp.pp_int true) a_1 (SUT.get_name state__088_ (0 + shift))
+            (Util.Pp.pp_int true) a_1 (SUT.get_name state__080_ (0 + shift))
       | (Add_r a_2, Res ((Node (Int), _), _)) ->
-          let lhs = if last__090_ then "r" else "_"
+          let lhs = if last__082_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a %s" lhs "add_r"
-            (Util.Pp.pp_int true) a_2 (SUT.get_name state__088_ (0 + shift))
+            (Util.Pp.pp_int true) a_2 (SUT.get_name state__080_ (0 + shift))
       | (Take_l, Res ((Result (Int, Exn), _), _)) ->
-          let lhs = if last__090_ then "r" else "_"
+          let lhs = if last__082_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "take_l"
-            (SUT.get_name state__088_ (0 + shift))
+            (SUT.get_name state__080_ (0 + shift))
       | (Take_r, Res ((Result (Int, Exn), _), _)) ->
-          let lhs = if last__090_ then "r" else "_"
+          let lhs = if last__082_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "take_r"
-            (SUT.get_name state__088_ (0 + shift))
+            (SUT.get_name state__080_ (0 + shift))
       | (Take_opt_l, Res ((Option (Int), _), _)) ->
-          let lhs = if last__090_ then "r" else "_"
+          let lhs = if last__082_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "take_opt_l"
-            (SUT.get_name state__088_ (0 + shift))
+            (SUT.get_name state__080_ (0 + shift))
       | (Take_opt_r, Res ((Option (Int), _), _)) ->
-          let lhs = if last__090_ then "r" else "_"
+          let lhs = if last__082_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "take_opt_r"
-            (SUT.get_name state__088_ (0 + shift))
+            (SUT.get_name state__080_ (0 + shift))
       | _ -> assert false
 let ortac_postcond cmd__023_ state__024_ res__025_ =
   let open Spec in

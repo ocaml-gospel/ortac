@@ -285,103 +285,103 @@ module Spec =
     let precond cmd__038_ state__039_ =
       match cmd__038_ with
       | Create () -> true
-      | Clear -> let h_1__040_ = Model.get state__039_ 0 in true
-      | Add tup -> let h_2__041_ = Model.get state__039_ 0 in true
-      | Add' tup_1 -> let h_3__042_ = Model.get state__039_ 0 in true
-      | Add'' tup_2 -> let h_4__043_ = Model.get state__039_ 0 in true
-      | Size_tup -> let t_1__044_ = Model.get state__039_ 0 in true
-      | Size_tup' -> let t_2__045_ = Model.get state__039_ 0 in true
+      | Clear -> true
+      | Add tup -> true
+      | Add' tup_1 -> true
+      | Add'' tup_2 -> true
+      | Size_tup -> true
+      | Size_tup' -> true
     let postcond _ _ _ = true
-    let run cmd__046_ sut__047_ =
-      match cmd__046_ with
+    let run cmd__040_ sut__041_ =
+      match cmd__040_ with
       | Create () ->
           Res
             (sut,
-              (let res__048_ = create () in
-               (SUT.push sut__047_ res__048_; res__048_)))
+              (let res__042_ = create () in
+               (SUT.push sut__041_ res__042_; res__042_)))
       | Clear ->
           Res
             (unit,
-              (let h_1__049_ = SUT.pop sut__047_ in
-               let res__050_ = clear h_1__049_ in
-               (SUT.push sut__047_ h_1__049_; res__050_)))
+              (let h_1__043_ = SUT.pop sut__041_ in
+               let res__044_ = clear h_1__043_ in
+               (SUT.push sut__041_ h_1__043_; res__044_)))
       | Add tup ->
           Res
             (unit,
-              (let h_2__051_ = SUT.pop sut__047_ in
-               let res__052_ = add h_2__051_ tup in
-               (SUT.push sut__047_ h_2__051_; res__052_)))
+              (let h_2__045_ = SUT.pop sut__041_ in
+               let res__046_ = add h_2__045_ tup in
+               (SUT.push sut__041_ h_2__045_; res__046_)))
       | Add' tup_1 ->
           Res
             (unit,
-              (let h_3__053_ = SUT.pop sut__047_ in
-               let res__054_ = add' h_3__053_ tup_1 in
-               (SUT.push sut__047_ h_3__053_; res__054_)))
+              (let h_3__047_ = SUT.pop sut__041_ in
+               let res__048_ = add' h_3__047_ tup_1 in
+               (SUT.push sut__041_ h_3__047_; res__048_)))
       | Add'' tup_2 ->
           Res
             (unit,
-              (let h_4__055_ = SUT.pop sut__047_ in
-               let res__056_ = add'' h_4__055_ tup_2 in
-               (SUT.push sut__047_ h_4__055_; res__056_)))
+              (let h_4__049_ = SUT.pop sut__041_ in
+               let res__050_ = add'' h_4__049_ tup_2 in
+               (SUT.push sut__041_ h_4__049_; res__050_)))
       | Size_tup ->
           Res
             ((tup2 int int),
-              (let t_1__057_ = SUT.pop sut__047_ in
-               let res__058_ = size_tup t_1__057_ in
-               (SUT.push sut__047_ t_1__057_; res__058_)))
+              (let t_1__051_ = SUT.pop sut__041_ in
+               let res__052_ = size_tup t_1__051_ in
+               (SUT.push sut__041_ t_1__051_; res__052_)))
       | Size_tup' ->
           Res
             ((tup3 int int int),
-              (let t_2__059_ = SUT.pop sut__047_ in
-               let res__060_ = size_tup' t_2__059_ in
-               (SUT.push sut__047_ t_2__059_; res__060_)))
+              (let t_2__053_ = SUT.pop sut__041_ in
+               let res__054_ = size_tup' t_2__053_ in
+               (SUT.push sut__041_ t_2__053_; res__054_)))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__062_ state__063_ last__065_ res__064_ =
+let ortac_show_cmd cmd__056_ state__057_ last__059_ res__058_ =
   let open Spec in
     let open STM in
-      match (cmd__062_, res__064_) with
+      match (cmd__056_, res__058_) with
       | (Create (), Res ((SUT, _), h)) ->
-          let lhs = if last__065_ then "r" else SUT.get_name state__063_ 0
+          let lhs = if last__059_ then "r" else SUT.get_name state__057_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a" lhs "create"
             (Util.Pp.pp_unit true) ()
       | (Clear, Res ((Unit, _), _)) ->
-          let lhs = if last__065_ then "r" else "_"
+          let lhs = if last__059_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "clear"
-            (SUT.get_name state__063_ (0 + shift))
+            (SUT.get_name state__057_ (0 + shift))
       | (Add tup, Res ((Unit, _), _)) ->
-          let lhs = if last__065_ then "r" else "_"
+          let lhs = if last__059_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "add"
-            (SUT.get_name state__063_ (0 + shift))
+            (SUT.get_name state__057_ (0 + shift))
             (Util.Pp.pp_tuple2 Util.Pp.pp_char Util.Pp.pp_int true) tup
       | (Add' tup_1, Res ((Unit, _), _)) ->
-          let lhs = if last__065_ then "r" else "_"
+          let lhs = if last__059_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "add'"
-            (SUT.get_name state__063_ (0 + shift))
+            (SUT.get_name state__057_ (0 + shift))
             (Util.Pp.pp_tuple3 Util.Pp.pp_bool Util.Pp.pp_char Util.Pp.pp_int
                true) tup_1
       | (Add'' tup_2, Res ((Unit, _), _)) ->
-          let lhs = if last__065_ then "r" else "_"
+          let lhs = if last__059_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "add''"
-            (SUT.get_name state__063_ (0 + shift))
+            (SUT.get_name state__057_ (0 + shift))
             (Util.Pp.pp_tuple2 Util.Pp.pp_bool
                (Util.Pp.pp_tuple2 Util.Pp.pp_char Util.Pp.pp_int) true) tup_2
       | (Size_tup, Res ((Tup2 (Int, Int), _), _)) ->
-          let lhs = if last__065_ then "r" else "_"
+          let lhs = if last__059_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "size_tup"
-            (SUT.get_name state__063_ (0 + shift))
+            (SUT.get_name state__057_ (0 + shift))
       | (Size_tup', Res ((Tup3 (Int, Int, Int), _), _)) ->
-          let lhs = if last__065_ then "r" else "_"
+          let lhs = if last__059_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "size_tup'"
-            (SUT.get_name state__063_ (0 + shift))
+            (SUT.get_name state__057_ (0 + shift))
       | _ -> assert false
 let ortac_postcond cmd__018_ state__019_ res__020_ =
   let open Spec in
