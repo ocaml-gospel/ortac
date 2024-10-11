@@ -30,3 +30,5 @@ sut_in_type
 sut_in_type_config
 queue
 queue_config
+stack
+stack_config
