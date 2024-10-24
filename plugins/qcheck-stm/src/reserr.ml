@@ -34,6 +34,7 @@ type W.kind +=
   | Sut_type_not_specified of string
   | Sut_type_not_supported of string
   | Syntax_error_in_config_module of string
+  | Third_order_function_argument of string
   | Tuple_arity of string
   | Type_not_supported of string
   | Type_not_supported_for_sut_parameter of string
@@ -45,8 +46,8 @@ let level kind =
   | Ensures_not_found_for_ret_sut _ | Functional_argument _ | Ghost_values _
   | Impossible_term_substitution _ | Incompatible_type _
   | Incomplete_ret_val_computation _ | No_spec _ | Returning_nested_sut _
-  | Sut_as_type_inst _ | Sut_in_tuple _ | Tuple_arity _ | Type_not_supported _
-    ->
+  | Sut_as_type_inst _ | Sut_in_tuple _ | Third_order_function_argument _
+  | Tuple_arity _ | Type_not_supported _ ->
       W.Warning
   | Impossible_init_state_generation _ | Incompatible_sut _
   | Incomplete_configuration_module _ | No_configuration_file _
@@ -120,6 +121,8 @@ let pp_kind ppf kind =
              next_state function"
       in
       pf ppf "Skipping clause:@ %a" text msg
+  | Third_order_function_argument name ->
+      pf ppf "Third-order functions and above are not supported in %s" name
   | Tuple_arity fct ->
       pf ppf "Skipping %s:@ %a" fct text "Can only test tuples with arity < 10"
   (* This following message is broad and used in seemingly different contexts
