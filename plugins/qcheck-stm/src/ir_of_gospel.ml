@@ -10,22 +10,58 @@ let constant_test vd =
       (Constant_value (Fmt.str "%a" Ident.pp vd.vd_name), vd.vd_loc) |> error
   | _ -> ok ()
 
-let no_functional_arg_or_big_tuple vd =
+let no_third_order_fun_or_big_tuple vd =
   let open Reserr in
   let open Ppxlib in
   let rec contains_arrow ty =
     match ty.ptyp_desc with
-    | Ptyp_arrow (_, _, _) ->
-        error (Functional_argument vd.vd_name.id_str, ty.ptyp_loc)
-    | Ptyp_tuple xs when List.length xs > 9 ->
-        error (Tuple_arity vd.vd_name.id_str, ty.ptyp_loc)
-    | Ptyp_tuple xs | Ptyp_constr (_, xs) -> traverse_ contains_arrow xs
-    | _ -> ok ()
+    | Ptyp_arrow (_, _, _) -> true
+    | Ptyp_tuple xs | Ptyp_constr (_, xs) -> List.exists contains_arrow xs
+    | Ptyp_alias (t, _) -> contains_arrow t
+    | _ -> false
+  in
+  let rec contains_nested_arrow ty =
+    match ty.ptyp_desc with
+    | Ptyp_arrow (_, l, r) -> contains_arrow l || contains_nested_arrow r
+    | Ptyp_tuple xs | Ptyp_constr (_, xs) ->
+        List.exists contains_nested_arrow xs
+    | Ptyp_alias (t, _) -> contains_nested_arrow t
+    | _ -> false
+  in
+  let rec highest_arity_arrow ty =
+    match ty.ptyp_desc with
+    | Ptyp_arrow (_, _l, r) -> 1 + highest_arity_arrow r
+    | Ptyp_tuple xs | Ptyp_constr (_, xs) ->
+        List.fold_left max 0 (List.map highest_arity_arrow xs)
+    | Ptyp_alias (t, _) -> highest_arity_arrow t
+    | _ -> 0
+  in
+  let rec contains_big_tuple ty =
+    match ty.ptyp_desc with
+    | Ptyp_arrow (_, l, r) -> contains_big_tuple l || contains_big_tuple r
+    | Ptyp_tuple xs when List.length xs > 9 -> true
+    | Ptyp_tuple xs | Ptyp_constr (_, xs) -> List.exists contains_big_tuple xs
+    | Ptyp_alias (t, _) -> contains_big_tuple t
+    | _ -> false
   in
   let rec aux ty =
     match ty.ptyp_desc with
     | Ptyp_arrow (_, l, r) ->
-        let* _ = contains_arrow l in
+        let* _ =
+          if contains_big_tuple l then
+            error (Tuple_arity vd.vd_name.id_str, l.ptyp_loc)
+          else ok ()
+        in
+        let* _ =
+          if contains_nested_arrow l then
+            error (Third_order_function_argument vd.vd_name.id_str, l.ptyp_loc)
+          else ok ()
+        in
+        let* _ =
+          if highest_arity_arrow ty > 4 then
+            error (Function_arity vd.vd_name.id_str, ty.ptyp_loc)
+          else ok ()
+        in
         aux r
     | _ -> ok ()
   in
@@ -58,6 +94,8 @@ let unify case sut_ty ty =
           | _, Ptyp_any -> ok i
           | _, Ptyp_var a -> add_if_needed a x i
           | Ptyp_tuple xs, Ptyp_tuple ys -> aux i (xs, ys)
+          | Ptyp_arrow (_, l, r), Ptyp_arrow (_, l', r') ->
+              aux i ([ l; r ], [ l'; r' ])
           | Ptyp_constr (c, xs), Ptyp_constr (d, ys) when c.txt = d.txt ->
               aux i (xs, ys)
           | _ -> fail ()
@@ -128,20 +166,22 @@ let split_args config vd args =
   let open Ppxlib in
   let open Reserr in
   let module Ident = Identifier.Ident in
-  let rec aux suts acc ty args =
+  let rec aux suts funs acc ty args =
     match (ty.ptyp_desc, args) with
     | _, Lghost vs :: _ ->
         error (Ghost_values (vd.vd_name.id_str, `Arg), vs.vs_name.id_loc)
     | Ptyp_arrow (_, l, r), Lnone vs :: xs
     | Ptyp_arrow (_, l, r), Loptional vs :: xs
     | Ptyp_arrow (_, l, r), Lnamed vs :: xs ->
-        if Cfg.is_sut config l then aux (vs.vs_name :: suts) acc r xs
-        else aux suts ((l, Some vs.vs_name) :: acc) r xs
-    | Ptyp_arrow (_, l, r), Lunit :: xs -> aux suts ((l, None) :: acc) r xs
-    | _, [] -> ok (List.rev suts, List.rev acc)
+        if Cfg.is_sut config l then aux (vs.vs_name :: suts) funs acc r xs
+        else if is_a_function l then
+          aux suts (vs.vs_name :: funs) ((l, Some vs.vs_name) :: acc) r xs
+        else aux suts funs ((l, Some vs.vs_name) :: acc) r xs
+    | Ptyp_arrow (_, l, r), Lunit :: xs -> aux suts funs ((l, None) :: acc) r xs
+    | _, [] -> ok (List.rev suts, List.rev funs, List.rev acc)
     | _, _ -> failwith "shouldn't happen (too few parameters)"
   in
-  aux [] [] vd.vd_type args
+  aux [] [] [] vd.vd_type args
 
 let get_state_description_with_index is_t state spec =
   let open Tterm in
@@ -274,12 +314,12 @@ let postcond spec =
 
 let val_desc config state vd =
   let open Reserr in
-  let* () = constant_test vd and* () = no_functional_arg_or_big_tuple vd in
+  let* () = constant_test vd and* () = no_third_order_fun_or_big_tuple vd in
   let* inst = ty_var_substitution config vd
   and* spec =
     of_option ~default:(No_spec vd.vd_name.id_str, vd.vd_loc) vd.vd_spec
   in
-  let* suts, args = split_args config vd spec.sp_args
+  let* suts, fun_vars, args = split_args config vd spec.sp_args
   and* ret =
     let p = function
       | Lnone vs -> ok vs.vs_name
@@ -300,8 +340,8 @@ let val_desc config state vd =
     | None -> next_states
   in
   let postcond = postcond spec in
-  Ir.value vd.vd_name vd.vd_type inst suts args ret ret_values next_states
-    spec.sp_pre postcond
+  Ir.value vd.vd_name vd.vd_type inst suts fun_vars args ret ret_values
+    next_states spec.sp_pre postcond
   |> ok
 
 let sig_item config state s =
