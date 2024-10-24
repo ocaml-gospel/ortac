@@ -44,6 +44,7 @@ type value = {
   sut_vars : Ident.t list;
       (* invariant: suts must be in the order in which they appear, so for
          example in [test (t1 : sut) (t2 : sut)] the list must be [t1; t2] *)
+  fun_vars : Ident.t list;
   args : (Ppxlib.core_type * Ident.t option) list;
       (* arguments of unit types can be nameless *)
   ret : Ident.t list;
@@ -67,12 +68,13 @@ let get_return_type value =
   in
   aux value.ty
 
-let value id ty inst sut_vars args ret ret_values next_states precond postcond =
+let value id ty inst sut_vars fun_vars args ret ret_values next_states precond postcond =
   {
     id;
     ty;
     inst;
     sut_vars;
+    fun_vars;
     args;
     ret;
     ret_values;
