@@ -5,14 +5,14 @@ type level = Warning | Error
 type kind = ..
 type kind += GospelError of Gospel.Warnings.kind | Unsupported of string
 
-exception Unkown_kind
+exception Unknown_kind
 
 type t = kind * Location.t
 
 let level = function
   | GospelError _ -> Error
   | Unsupported _ -> Warning
-  | _ -> raise Unkown_kind
+  | _ -> raise Unknown_kind
 
 exception Error of t
 
@@ -25,7 +25,7 @@ let pp_level ppf = function
 let pp_kind ppf = function
   | GospelError k -> pf ppf "Gospel error: %a" Gospel.Warnings.pp_kind k
   | Unsupported msg -> pf ppf "Skipping clause:@ unsupported %s" msg
-  | _ -> raise Unkown_kind
+  | _ -> raise Unknown_kind
 
 let pp_param pp_kind level ppf (k, loc) =
   let pp_sort ppf k = pp_level ppf (level k) in
