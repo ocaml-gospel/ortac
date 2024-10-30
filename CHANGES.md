@@ -1,5 +1,7 @@
 # Unreleased
 
+- Extend QCheck-STM plugin tests
+  [\#271](https://github.com/ocaml-gospel/ortac/pull/271)
 - Remove unnecessary stack access from precondition
   [\#264](https://github.com/ocaml-gospel/ortac/pull/264)
 
