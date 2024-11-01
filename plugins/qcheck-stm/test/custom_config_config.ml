@@ -7,6 +7,10 @@ module Gen = struct
   let elt gen = elt <$> gen
 end
 
+module Shrink = struct
+  let elt shrink elem = Iter.map elt (shrink (proj elem))
+end
+
 module Pp = struct
   let pp_elt pp par fmt e =
     let open Format in

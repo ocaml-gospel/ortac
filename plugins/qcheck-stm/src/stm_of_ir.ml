@@ -1233,13 +1233,20 @@ let prepend_include_in_module name lident structure =
   [ pstr_module @@ module_binding ~name ~expr ]
 
 let qcheck config =
-  match config.Cfg.gen_mod with
-  | None -> []
-  | Some structure ->
-      let structure =
-        prepend_include_in_module "Gen" (lident "Gen") structure
-      in
-      prepend_include_in_module "QCheck" (lident "QCheck") structure
+  let gen =
+    match config.Cfg.gen_mod with
+    | None -> []
+    | Some structure -> prepend_include_in_module "Gen" (lident "Gen") structure
+  in
+  let shrink =
+    match config.Cfg.shrink_mod with
+    | None -> []
+    | Some structure ->
+        prepend_include_in_module "Shrink" (lident "Shrink") structure
+  in
+  let qcheck = gen @ shrink in
+  if qcheck = [] then []
+  else prepend_include_in_module "QCheck" (lident "QCheck") qcheck
 
 let util config =
   match config.Cfg.pp_mod with

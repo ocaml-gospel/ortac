@@ -13,6 +13,10 @@ module Gen = struct
   let elt gen = gen
 end
 
+module Shrink = struct
+  let elt shrink = shrink
+end
+
 module Ty = struct
   type _ ty += Elt : 'a ty -> 'a elt ty
 

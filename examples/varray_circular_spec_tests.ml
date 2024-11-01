@@ -111,6 +111,8 @@ module Spec =
           struct include Gen
                  let int = small_signed_int
                  let elt gen = gen end
+        module Shrink = struct include Shrink
+                               let elt shrink = shrink end
       end
     module Util =
       struct module Pp = struct include Util.Pp

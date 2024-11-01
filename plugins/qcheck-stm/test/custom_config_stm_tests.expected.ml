@@ -51,6 +51,11 @@ module Spec =
             let int = small_signed_int
             let elt gen = elt <$> gen
           end
+        module Shrink =
+          struct
+            include Shrink
+            let elt shrink elem = Iter.map elt (shrink (proj elem))
+          end
       end
     module Util =
       struct
