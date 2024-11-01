@@ -97,10 +97,25 @@ module Spec =
                (Util.Pp.pp_tuple2 Util.Pp.pp_char Util.Pp.pp_int) true) tup_2
       | Size_tup -> Format.asprintf "%s <sut>" "size_tup"
       | Size_tup' -> Format.asprintf "%s <sut>" "size_tup'"
+    let shrink_cmd cmd__002_ =
+      let open QCheck in
+        let open Shrink in
+          let open Iter in
+            match cmd__002_ with
+            | Create () -> map (fun () -> Create ()) (unit ())
+            | Clear -> empty
+            | Add tup -> map (fun tup -> Add tup) (tup2 char int tup)
+            | Add' tup_1 ->
+                map (fun tup_1 -> Add' tup_1) (tup3 nil char int tup_1)
+            | Add'' tup_2 ->
+                map (fun tup_2 -> Add'' tup_2)
+                  (tup2 nil (tup2 char int) tup_2)
+            | Size_tup -> empty
+            | Size_tup' -> empty
     let cleanup _ = ()
     let arb_cmd _ =
       let open QCheck in
-        make ~print:show_cmd
+        make ~print:show_cmd ~shrink:shrink_cmd
           (let open Gen in
              oneof
                [(pure (fun () -> Create ())) <*> unit;
@@ -111,10 +126,10 @@ module Spec =
                  (tup2 bool (tup2 char int));
                pure Size_tup;
                pure Size_tup'])
-    let next_state cmd__002_ state__003_ =
-      match cmd__002_ with
+    let next_state cmd__003_ state__004_ =
+      match cmd__003_ with
       | Create () ->
-          let h__005_ =
+          let h__006_ =
             let open ModelElt in
               {
                 contents =
@@ -141,10 +156,10 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 0) h__005_
+          Model.push (Model.drop_n state__004_ 0) h__006_
       | Clear ->
-          let h_1__006_ = Model.get state__003_ 0 in
-          let h_1__007_ =
+          let h_1__007_ = Model.get state__004_ 0 in
+          let h_1__008_ =
             let open ModelElt in
               {
                 contents =
@@ -171,16 +186,16 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 1) h_1__007_
+          Model.push (Model.drop_n state__004_ 1) h_1__008_
       | Add tup ->
-          let h_2__008_ = Model.get state__003_ 0 in
-          let h_2__009_ =
+          let h_2__009_ = Model.get state__004_ 0 in
+          let h_2__010_ =
             let open ModelElt in
               {
                 contents =
                   (try
                      match tup with
-                     | (a_1, b_1) -> (a_1, b_1) :: h_2__008_.contents
+                     | (a_1, b_1) -> (a_1, b_1) :: h_2__009_.contents
                    with
                    | e ->
                        raise
@@ -203,10 +218,10 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 1) h_2__009_
+          Model.push (Model.drop_n state__004_ 1) h_2__010_
       | Add' tup_1 ->
-          let h_3__010_ = Model.get state__003_ 0 in
-          let h_3__011_ =
+          let h_3__011_ = Model.get state__004_ 0 in
+          let h_3__012_ =
             let open ModelElt in
               {
                 contents =
@@ -214,8 +229,8 @@ module Spec =
                      match tup_1 with
                      | (c, a_2, b_2) ->
                          if c = true
-                         then (a_2, b_2) :: h_3__010_.contents
-                         else h_3__010_.contents
+                         then (a_2, b_2) :: h_3__011_.contents
+                         else h_3__011_.contents
                    with
                    | e ->
                        raise
@@ -238,10 +253,10 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 1) h_3__011_
+          Model.push (Model.drop_n state__004_ 1) h_3__012_
       | Add'' tup_2 ->
-          let h_4__012_ = Model.get state__003_ 0 in
-          let h_4__013_ =
+          let h_4__013_ = Model.get state__004_ 0 in
+          let h_4__014_ =
             let open ModelElt in
               {
                 contents =
@@ -249,8 +264,8 @@ module Spec =
                      match tup_2 with
                      | (c_1, (a_3, b_3)) ->
                          if c_1 = true
-                         then (a_3, b_3) :: h_4__012_.contents
-                         else h_4__012_.contents
+                         then (a_3, b_3) :: h_4__013_.contents
+                         else h_4__013_.contents
                    with
                    | e ->
                        raise
@@ -273,17 +288,17 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 1) h_4__013_
+          Model.push (Model.drop_n state__004_ 1) h_4__014_
       | Size_tup ->
-          let t_1__014_ = Model.get state__003_ 0 in
-          let t_1__015_ = t_1__014_ in
-          Model.push (Model.drop_n state__003_ 1) t_1__015_
+          let t_1__015_ = Model.get state__004_ 0 in
+          let t_1__016_ = t_1__015_ in
+          Model.push (Model.drop_n state__004_ 1) t_1__016_
       | Size_tup' ->
-          let t_2__016_ = Model.get state__003_ 0 in
-          let t_2__017_ = t_2__016_ in
-          Model.push (Model.drop_n state__003_ 1) t_2__017_
-    let precond cmd__038_ state__039_ =
-      match cmd__038_ with
+          let t_2__017_ = Model.get state__004_ 0 in
+          let t_2__018_ = t_2__017_ in
+          Model.push (Model.drop_n state__004_ 1) t_2__018_
+    let precond cmd__039_ state__040_ =
+      match cmd__039_ with
       | Create () -> true
       | Clear -> true
       | Add tup -> true
@@ -292,102 +307,102 @@ module Spec =
       | Size_tup -> true
       | Size_tup' -> true
     let postcond _ _ _ = true
-    let run cmd__040_ sut__041_ =
-      match cmd__040_ with
+    let run cmd__041_ sut__042_ =
+      match cmd__041_ with
       | Create () ->
           Res
             (sut,
-              (let res__042_ = create () in
-               (SUT.push sut__041_ res__042_; res__042_)))
+              (let res__043_ = create () in
+               (SUT.push sut__042_ res__043_; res__043_)))
       | Clear ->
           Res
             (unit,
-              (let h_1__043_ = SUT.pop sut__041_ in
-               let res__044_ = clear h_1__043_ in
-               (SUT.push sut__041_ h_1__043_; res__044_)))
+              (let h_1__044_ = SUT.pop sut__042_ in
+               let res__045_ = clear h_1__044_ in
+               (SUT.push sut__042_ h_1__044_; res__045_)))
       | Add tup ->
           Res
             (unit,
-              (let h_2__045_ = SUT.pop sut__041_ in
-               let res__046_ = add h_2__045_ tup in
-               (SUT.push sut__041_ h_2__045_; res__046_)))
+              (let h_2__046_ = SUT.pop sut__042_ in
+               let res__047_ = add h_2__046_ tup in
+               (SUT.push sut__042_ h_2__046_; res__047_)))
       | Add' tup_1 ->
           Res
             (unit,
-              (let h_3__047_ = SUT.pop sut__041_ in
-               let res__048_ = add' h_3__047_ tup_1 in
-               (SUT.push sut__041_ h_3__047_; res__048_)))
+              (let h_3__048_ = SUT.pop sut__042_ in
+               let res__049_ = add' h_3__048_ tup_1 in
+               (SUT.push sut__042_ h_3__048_; res__049_)))
       | Add'' tup_2 ->
           Res
             (unit,
-              (let h_4__049_ = SUT.pop sut__041_ in
-               let res__050_ = add'' h_4__049_ tup_2 in
-               (SUT.push sut__041_ h_4__049_; res__050_)))
+              (let h_4__050_ = SUT.pop sut__042_ in
+               let res__051_ = add'' h_4__050_ tup_2 in
+               (SUT.push sut__042_ h_4__050_; res__051_)))
       | Size_tup ->
           Res
             ((tup2 int int),
-              (let t_1__051_ = SUT.pop sut__041_ in
-               let res__052_ = size_tup t_1__051_ in
-               (SUT.push sut__041_ t_1__051_; res__052_)))
+              (let t_1__052_ = SUT.pop sut__042_ in
+               let res__053_ = size_tup t_1__052_ in
+               (SUT.push sut__042_ t_1__052_; res__053_)))
       | Size_tup' ->
           Res
             ((tup3 int int int),
-              (let t_2__053_ = SUT.pop sut__041_ in
-               let res__054_ = size_tup' t_2__053_ in
-               (SUT.push sut__041_ t_2__053_; res__054_)))
+              (let t_2__054_ = SUT.pop sut__042_ in
+               let res__055_ = size_tup' t_2__054_ in
+               (SUT.push sut__042_ t_2__054_; res__055_)))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__056_ state__057_ last__059_ res__058_ =
+let ortac_show_cmd cmd__057_ state__058_ last__060_ res__059_ =
   let open Spec in
     let open STM in
-      match (cmd__056_, res__058_) with
+      match (cmd__057_, res__059_) with
       | (Create (), Res ((SUT, _), h)) ->
-          let lhs = if last__059_ then "r" else SUT.get_name state__057_ 0
+          let lhs = if last__060_ then "r" else SUT.get_name state__058_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a" lhs "create"
             (Util.Pp.pp_unit true) ()
       | (Clear, Res ((Unit, _), _)) ->
-          let lhs = if last__059_ then "r" else "_"
+          let lhs = if last__060_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "clear"
-            (SUT.get_name state__057_ (0 + shift))
+            (SUT.get_name state__058_ (0 + shift))
       | (Add tup, Res ((Unit, _), _)) ->
-          let lhs = if last__059_ then "r" else "_"
+          let lhs = if last__060_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "add"
-            (SUT.get_name state__057_ (0 + shift))
+            (SUT.get_name state__058_ (0 + shift))
             (Util.Pp.pp_tuple2 Util.Pp.pp_char Util.Pp.pp_int true) tup
       | (Add' tup_1, Res ((Unit, _), _)) ->
-          let lhs = if last__059_ then "r" else "_"
+          let lhs = if last__060_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "add'"
-            (SUT.get_name state__057_ (0 + shift))
+            (SUT.get_name state__058_ (0 + shift))
             (Util.Pp.pp_tuple3 Util.Pp.pp_bool Util.Pp.pp_char Util.Pp.pp_int
                true) tup_1
       | (Add'' tup_2, Res ((Unit, _), _)) ->
-          let lhs = if last__059_ then "r" else "_"
+          let lhs = if last__060_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "add''"
-            (SUT.get_name state__057_ (0 + shift))
+            (SUT.get_name state__058_ (0 + shift))
             (Util.Pp.pp_tuple2 Util.Pp.pp_bool
                (Util.Pp.pp_tuple2 Util.Pp.pp_char Util.Pp.pp_int) true) tup_2
       | (Size_tup, Res ((Tup2 (Int, Int), _), _)) ->
-          let lhs = if last__059_ then "r" else "_"
+          let lhs = if last__060_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "size_tup"
-            (SUT.get_name state__057_ (0 + shift))
+            (SUT.get_name state__058_ (0 + shift))
       | (Size_tup', Res ((Tup3 (Int, Int, Int), _), _)) ->
-          let lhs = if last__059_ then "r" else "_"
+          let lhs = if last__060_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "size_tup'"
-            (SUT.get_name state__057_ (0 + shift))
+            (SUT.get_name state__058_ (0 + shift))
       | _ -> assert false
-let ortac_postcond cmd__018_ state__019_ res__020_ =
+let ortac_postcond cmd__019_ state__020_ res__021_ =
   let open Spec in
     let open STM in
-      let new_state__021_ = lazy (next_state cmd__018_ state__019_) in
-      match (cmd__018_, res__020_) with
+      let new_state__022_ = lazy (next_state cmd__019_ state__020_) in
+      match (cmd__019_, res__021_) with
       | (Create (), Res ((SUT, _), h)) -> None
       | (Clear, Res ((Unit, _), _)) -> None
       | (Add tup, Res ((Unit, _), _)) -> None
@@ -396,13 +411,13 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
       | (Size_tup, Res ((Tup2 (Int, Int), _), (x, y))) ->
           Ortac_runtime.append
             (if
-               let t_old__026_ = Model.get state__019_ 0
-               and t_new__027_ =
-                 lazy (Model.get (Lazy.force new_state__021_) 0) in
+               let t_old__027_ = Model.get state__020_ 0
+               and t_new__028_ =
+                 lazy (Model.get (Lazy.force new_state__022_) 0) in
                try
                  (Ortac_runtime.Gospelstdlib.integer_of_int x) =
                    (Ortac_runtime.Gospelstdlib.List.length
-                      (Lazy.force t_new__027_).contents)
+                      (Lazy.force t_new__028_).contents)
                with
                | e ->
                    raise
@@ -448,13 +463,13 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                            }
                        })]))
             (if
-               let t_old__028_ = Model.get state__019_ 0
-               and t_new__029_ =
-                 lazy (Model.get (Lazy.force new_state__021_) 0) in
+               let t_old__029_ = Model.get state__020_ 0
+               and t_new__030_ =
+                 lazy (Model.get (Lazy.force new_state__022_) 0) in
                try
                  (Ortac_runtime.Gospelstdlib.integer_of_int y) =
                    (Ortac_runtime.Gospelstdlib.List.length
-                      (Lazy.force t_new__029_).contents)
+                      (Lazy.force t_new__030_).contents)
                with
                | e ->
                    raise
@@ -502,13 +517,13 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
       | (Size_tup', Res ((Tup3 (Int, Int, Int), _), (x_1, y_1, z))) ->
           Ortac_runtime.append
             (if
-               let t_old__031_ = Model.get state__019_ 0
-               and t_new__032_ =
-                 lazy (Model.get (Lazy.force new_state__021_) 0) in
+               let t_old__032_ = Model.get state__020_ 0
+               and t_new__033_ =
+                 lazy (Model.get (Lazy.force new_state__022_) 0) in
                try
                  (Ortac_runtime.Gospelstdlib.integer_of_int x_1) =
                    (Ortac_runtime.Gospelstdlib.List.length
-                      (Lazy.force t_new__032_).contents)
+                      (Lazy.force t_new__033_).contents)
                with
                | e ->
                    raise
@@ -555,13 +570,13 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                        })]))
             (Ortac_runtime.append
                (if
-                  let t_old__033_ = Model.get state__019_ 0
-                  and t_new__034_ =
-                    lazy (Model.get (Lazy.force new_state__021_) 0) in
+                  let t_old__034_ = Model.get state__020_ 0
+                  and t_new__035_ =
+                    lazy (Model.get (Lazy.force new_state__022_) 0) in
                   try
                     (Ortac_runtime.Gospelstdlib.integer_of_int y_1) =
                       (Ortac_runtime.Gospelstdlib.List.length
-                         (Lazy.force t_new__034_).contents)
+                         (Lazy.force t_new__035_).contents)
                   with
                   | e ->
                       raise
@@ -607,13 +622,13 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                               }
                           })]))
                (if
-                  let t_old__035_ = Model.get state__019_ 0
-                  and t_new__036_ =
-                    lazy (Model.get (Lazy.force new_state__021_) 0) in
+                  let t_old__036_ = Model.get state__020_ 0
+                  and t_new__037_ =
+                    lazy (Model.get (Lazy.force new_state__022_) 0) in
                   try
                     (Ortac_runtime.Gospelstdlib.integer_of_int z) =
                       (Ortac_runtime.Gospelstdlib.List.length
-                         (Lazy.force t_new__036_).contents)
+                         (Lazy.force t_new__037_).contents)
                   with
                   | e ->
                       raise
