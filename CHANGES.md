@@ -1,5 +1,7 @@
 # Unreleased
 
+- Add command shrinker function
+  [\#272](https://github.com/ocaml-gospel/ortac/pull/272)
 - Remove unnecessary stack access from precondition
   [\#264](https://github.com/ocaml-gospel/ortac/pull/264)
 

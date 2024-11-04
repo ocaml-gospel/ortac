@@ -246,6 +246,75 @@ let exp_of_core_type ?(use_small = false) inst typ =
 
 let exp_of_ident id = pexp_ident (lident (str_of_ident id))
 
+let shrink_cmd_case value =
+  let open Reserr in
+  let cstr =
+    let name = String.capitalize_ascii (str_of_ident value.id) |> lident in
+    pexp_construct name
+      (pexp_tuple_opt
+         (List.map
+            (function _, None -> eunit | _, Some id -> evar (str_of_ident id))
+            value.args))
+  in
+  let rec shrinker_of_ty ty =
+    match ty.ptyp_desc with
+    | Ptyp_constr (lid, xs) -> (
+        let* s = munge_longident false ty lid in
+        match s with
+        | "bool" -> ok (evar "nil")
+        | "list" | "array" ->
+            let* shrinker = shrinker_of_ty (List.hd xs) in
+            pexp_apply (evar s) [ (Labelled "shrink", shrinker) ] |> ok
+        | _ ->
+            (* TODO: check that a custom shrinker is actually defined *)
+            let* shrinkers = promote_map shrinker_of_ty xs in
+            eapply (evar s) shrinkers |> ok)
+    | Ptyp_tuple tys ->
+        let* shrinkers = promote_map shrinker_of_ty tys in
+        let tup_fun = evar ("tup" ^ (List.length tys |> string_of_int)) in
+        eapply tup_fun shrinkers |> ok
+    | _ -> ok (evar "nil")
+  in
+  let gen_itermap (ty, id) =
+    let name_expr, name_pat =
+      match id with
+      | None -> (eunit, punit)
+      | Some id ->
+          let name = str_of_ident id in
+          (evar name, pvar name)
+    in
+    let ty = subst_core_type value.inst ty in
+    let* shrinker = shrinker_of_ty ty in
+    let shrink_expr = eapply shrinker [ name_expr ] in
+    let cstr_fun = efun [ (Nolabel, name_pat) ] cstr in
+    eapply (evar "map") [ cstr_fun; shrink_expr ] |> ok
+  in
+  let* iter_maps = promote_map gen_itermap value.args in
+  let combine l r = eapply (evar "( <+> )") [ l; r ] in
+  let rhs =
+    match iter_maps with
+    | [] -> evar "empty"
+    | [ x ] -> x
+    | x :: xs -> List.fold_left combine x xs
+  in
+  let lhs = mk_cmd_pattern value in
+  case ~lhs ~guard:None ~rhs |> ok
+
+let shrink_cmd ir =
+  let open Reserr in
+  let cmd_name = gen_symbol ~prefix:"cmd" () in
+  let* cases = promote_map shrink_cmd_case ir.values in
+  let open Ppxlib in
+  let let_open str e =
+    pexp_open Ast_helper.(Opn.mk (Mod.ident (lident str |> noloc))) e
+  in
+  let body = pexp_match (evar cmd_name) cases in
+
+  let body = let_open "QCheck" (let_open "Shrink" (let_open "Iter" body)) in
+  let pat = pvar "shrink_cmd" in
+  let expr = efun [ (Nolabel, pvar cmd_name) ] body in
+  pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
+
 let arb_cmd_case config value =
   let open Reserr in
   let is_create = value.sut_vars = [] && Cfg.does_return_sut config value.ty in
@@ -290,7 +359,11 @@ let arb_cmd config ir =
   let body =
     let_open "QCheck"
       (pexp_apply (evar "make")
-         [ (Labelled "print", evar "show_cmd"); (Nolabel, oneof) ])
+         [
+           (Labelled "print", evar "show_cmd");
+           (Labelled "shrink", evar "shrink_cmd");
+           (Nolabel, oneof);
+         ])
   in
   let pat = pvar "arb_cmd" in
   let expr = efun [ (Nolabel, ppat_any (* for now we don't use it *)) ] body in
@@ -1233,13 +1306,20 @@ let prepend_include_in_module name lident structure =
   [ pstr_module @@ module_binding ~name ~expr ]
 
 let qcheck config =
-  match config.Cfg.gen_mod with
-  | None -> []
-  | Some structure ->
-      let structure =
-        prepend_include_in_module "Gen" (lident "Gen") structure
-      in
-      prepend_include_in_module "QCheck" (lident "QCheck") structure
+  let gen =
+    match config.Cfg.gen_mod with
+    | None -> []
+    | Some structure -> prepend_include_in_module "Gen" (lident "Gen") structure
+  in
+  let shrink =
+    match config.Cfg.shrink_mod with
+    | None -> []
+    | Some structure ->
+        prepend_include_in_module "Shrink" (lident "Shrink") structure
+  in
+  let qcheck = gen @ shrink in
+  if qcheck = [] then []
+  else prepend_include_in_module "QCheck" (lident "QCheck") qcheck
 
 let util config =
   match config.Cfg.pp_mod with
@@ -1549,6 +1629,7 @@ let stm config ir =
   let warn = [%stri [@@@ocaml.warning "-26-27-69-32-38"]] in
   let cmd = cmd_type ir in
   let* cmd_show = cmd_show config ir in
+  let* cmd_shrink = shrink_cmd ir in
   let* idx, next_state = next_state config ir in
   let* postcond = postcond config idx ir in
   let* precond = precond config ir in
@@ -1580,6 +1661,7 @@ let stm config ir =
       @ [
           cmd;
           cmd_show;
+          cmd_shrink;
           cleanup;
           arb_cmd;
           next_state;

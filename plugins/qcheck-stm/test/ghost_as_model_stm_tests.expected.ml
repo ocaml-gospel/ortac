@@ -62,16 +62,23 @@ module Spec =
       | Create () ->
           Format.asprintf "%s %a" "create" (Util.Pp.pp_unit true) ()
       | Use -> Format.asprintf "%s <sut>" "use"
+    let shrink_cmd cmd__002_ =
+      let open QCheck in
+        let open Shrink in
+          let open Iter in
+            match cmd__002_ with
+            | Create () -> map (fun () -> Create ()) (unit ())
+            | Use -> empty
     let cleanup _ = ()
     let arb_cmd _ =
       let open QCheck in
-        make ~print:show_cmd
+        make ~print:show_cmd ~shrink:shrink_cmd
           (let open Gen in
              oneof [(pure (fun () -> Create ())) <*> unit; pure Use])
-    let next_state cmd__002_ state__003_ =
-      match cmd__002_ with
+    let next_state cmd__003_ state__004_ =
+      match cmd__003_ with
       | Create () ->
-          let t_1__005_ =
+          let t_1__006_ =
             let open ModelElt in
               {
                 m_1 =
@@ -98,15 +105,15 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 0) t_1__005_
+          Model.push (Model.drop_n state__004_ 0) t_1__006_
       | Use ->
-          let t_2__006_ = Model.get state__003_ 0 in
-          let t_2__007_ =
+          let t_2__007_ = Model.get state__004_ 0 in
+          let t_2__008_ =
             let open ModelElt in
               {
                 m_1 =
                   (try
-                     match t_2__006_.m_1 with
+                     match t_2__007_.m_1 with
                      | A x -> A (Ortac_runtime.Gospelstdlib.succ x)
                    with
                    | e ->
@@ -130,46 +137,46 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 1) t_2__007_
-    let precond cmd__013_ state__014_ =
-      match cmd__013_ with | Create () -> true | Use -> true
+          Model.push (Model.drop_n state__004_ 1) t_2__008_
+    let precond cmd__014_ state__015_ =
+      match cmd__014_ with | Create () -> true | Use -> true
     let postcond _ _ _ = true
-    let run cmd__015_ sut__016_ =
-      match cmd__015_ with
+    let run cmd__016_ sut__017_ =
+      match cmd__016_ with
       | Create () ->
           Res
             (sut,
-              (let res__017_ = create () in
-               (SUT.push sut__016_ res__017_; res__017_)))
+              (let res__018_ = create () in
+               (SUT.push sut__017_ res__018_; res__018_)))
       | Use ->
           Res
             (unit,
-              (let t_2__018_ = SUT.pop sut__016_ in
-               let res__019_ = use t_2__018_ in
-               (SUT.push sut__016_ t_2__018_; res__019_)))
+              (let t_2__019_ = SUT.pop sut__017_ in
+               let res__020_ = use t_2__019_ in
+               (SUT.push sut__017_ t_2__019_; res__020_)))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__021_ state__022_ last__024_ res__023_ =
+let ortac_show_cmd cmd__022_ state__023_ last__025_ res__024_ =
   let open Spec in
     let open STM in
-      match (cmd__021_, res__023_) with
+      match (cmd__022_, res__024_) with
       | (Create (), Res ((SUT, _), t_1)) ->
-          let lhs = if last__024_ then "r" else SUT.get_name state__022_ 0
+          let lhs = if last__025_ then "r" else SUT.get_name state__023_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a" lhs "create"
             (Util.Pp.pp_unit true) ()
       | (Use, Res ((Unit, _), _)) ->
-          let lhs = if last__024_ then "r" else "_"
+          let lhs = if last__025_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "use"
-            (SUT.get_name state__022_ (0 + shift))
+            (SUT.get_name state__023_ (0 + shift))
       | _ -> assert false
-let ortac_postcond cmd__008_ state__009_ res__010_ =
+let ortac_postcond cmd__009_ state__010_ res__011_ =
   let open Spec in
     let open STM in
-      let new_state__011_ = lazy (next_state cmd__008_ state__009_) in
-      match (cmd__008_, res__010_) with
+      let new_state__012_ = lazy (next_state cmd__009_ state__010_) in
+      match (cmd__009_, res__011_) with
       | (Create (), Res ((SUT, _), t_1)) -> None
       | (Use, Res ((Unit, _), _)) -> None
       | _ -> None

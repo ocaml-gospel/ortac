@@ -6,6 +6,7 @@ type config_under_construction = {
   sut_core_type' : Ppxlib.core_type option;
   init_sut' : Ppxlib.expression option;
   gen_mod' : Ppxlib.structure option;
+  shrink_mod' : Ppxlib.structure option;
   pp_mod' : Ppxlib.structure option;
   ty_mod' : Ppxlib.structure option;
   cleanup' : Ppxlib.structure_item option;
@@ -16,6 +17,7 @@ let config_under_construction =
     sut_core_type' = None;
     init_sut' = None;
     gen_mod' = None;
+    shrink_mod' = None;
     pp_mod' = None;
     ty_mod' = None;
     cleanup' = None;
@@ -27,6 +29,7 @@ type t = {
   init_sut : Ppxlib.expression;
   init_sut_txt : string;
   gen_mod : Ppxlib.structure option; (* Containing custom QCheck generators *)
+  shrink_mod : Ppxlib.structure option; (* Containing custom QCheck shrinkers *)
   pp_mod : Ppxlib.structure option; (* Containing custom pretty printers *)
   ty_mod : Ppxlib.structure option; (* Containing custom STM.ty extensions *)
   cleanup : Ppxlib.structure_item option;
@@ -45,6 +48,7 @@ let mk_config context cfg_uc =
   in
   let init_sut_txt = Fmt.str "%a" Pprintast.expression init_sut
   and gen_mod = cfg_uc.gen_mod'
+  and shrink_mod = cfg_uc.shrink_mod'
   and pp_mod = cfg_uc.pp_mod'
   and ty_mod = cfg_uc.ty_mod'
   and cleanup = cfg_uc.cleanup' in
@@ -55,6 +59,7 @@ let mk_config context cfg_uc =
       init_sut;
       init_sut_txt;
       gen_mod;
+      shrink_mod;
       pp_mod;
       ty_mod;
       cleanup;
@@ -160,6 +165,7 @@ let type_declarations cfg_uc =
 (* Inspect module definition in config module in order to collect information
    about:
      - the custom [QCheck] generators
+     - the custom [QCheck] shrinkers
      - the custom [STM] pretty printers
      - the custom [STM.ty] extensions and function constructors *)
 let module_binding cfg_uc (mb : Ppxlib.module_binding) =
@@ -177,6 +183,9 @@ let module_binding cfg_uc (mb : Ppxlib.module_binding) =
   | Some name when String.equal "Gen" name ->
       let* content = get_structure name mb in
       ok { cfg_uc with gen_mod' = Some content }
+  | Some name when String.equal "Shrink" name ->
+      let* content = get_structure name mb in
+      ok { cfg_uc with shrink_mod' = Some content }
   | Some name when String.equal "Pp" name ->
       let* content = get_structure name mb in
       ok { cfg_uc with pp_mod' = Some content }
