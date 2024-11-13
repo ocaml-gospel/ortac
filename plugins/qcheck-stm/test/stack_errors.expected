@@ -1,0 +1,7 @@
+File "stack.mli", line 37, characters 0-170:
+37 | val top_opt : 'a t -> 'a option
+38 | (*@ v = top_opt t
+39 |     ensures match v with
+40 |         | None -> t.contents = Sequence.empty
+41 |         | Some x -> x = Sequence.hd t.contents *)
+Warning: Incomplete computation of the returned value in the specification of top_opt. Failure message won't be able to display the expected returned value.

@@ -52,6 +52,11 @@ val to_list : 'a t -> 'a list
 (*@ l = to_list t
     ensures l = List.of_seq t.contents *)
 
+val of_list : 'a list -> 'a t
+(*@ t = of_list l
+    ensures t.size = List.length l
+    ensures t.contents = List.to_seq l *)
+
 val mem : 'a -> 'a t -> bool
 (*@ b = mem a t
     ensures b = Sequence.mem t.contents a *)

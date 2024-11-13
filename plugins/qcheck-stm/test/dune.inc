@@ -846,3 +846,56 @@
  (action
   (run %{dep:queue_stm_tests.exe} -v)))
 
+(library
+ (name stack)
+ (modules stack))
+
+(rule
+ (target stack_stm_tests.ml)
+ (package ortac-qcheck-stm)
+ (deps
+  (package ortac-core)
+  (package ortac-qcheck-stm))
+ (action
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   qcheck-stm
+   (with-stderr-to
+    stack_errors
+    (run
+     ortac
+     qcheck-stm
+     %{dep:stack.mli}
+     %{dep:stack_config.ml}
+     -o
+     %{target})))))
+
+(test
+ (name stack_stm_tests)
+ (package ortac-qcheck-stm)
+ (modules stack_stm_tests)
+ (libraries
+  qcheck-core
+  qcheck-core.runner
+  qcheck-stm.stm
+  qcheck-stm.sequential
+  qcheck-multicoretests-util
+  ortac-runtime-qcheck-stm
+  stack)
+ (action
+  (echo
+   "\n%{dep:stack_stm_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))
+
+(rule
+ (alias runtest)
+ (package ortac-qcheck-stm)
+ (action
+  (progn
+   (diff stack_errors.expected stack_errors)
+   (diff stack_stm_tests.expected.ml stack_stm_tests.ml))))
+
+(rule
+ (alias launchtests)
+ (action
+  (run %{dep:stack_stm_tests.exe} -v)))
+
