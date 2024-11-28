@@ -20,11 +20,6 @@ File "all_warnings.mli", line 25, characters 0-26:
 25 | val no_spec : 'a t -> bool
      ^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping no_spec: functions without specifications cannot be tested.
-File "all_warnings.mli", line 39, characters 27-37:
-39 | val functional_argument : ('a -> bool) -> 'a t -> bool
-                                ^^^^^^^^^^
-Warning: Skipping functional_argument: functions are not supported yet as
-         arguments.
 File "all_warnings.mli", line 43, characters 24-25:
 43 | (*@ b = ghost_argument [x : bool] t *)
                              ^
@@ -59,6 +54,10 @@ File "all_warnings.mli", line 36, characters 0-66:
 36 | val type_not_supported : 'a t -> s
 37 | (*@ s = type_not_supported t *)
 Warning: Incomplete computation of the returned value in the specification of type_not_supported. Failure message won't be able to display the expected returned value.
+File "all_warnings.mli", line 39, characters 0-89:
+39 | val functional_argument : ('a -> bool) -> 'a t -> bool
+40 | (*@ b = functional_argument p t *)
+Warning: Incomplete computation of the returned value in the specification of functional_argument. Failure message won't be able to display the expected returned value.
 File "all_warnings.mli", line 48, characters 0-144:
 48 | val unsupported_quantification : 'a t -> bool
 49 | (*@ b = unsupported_quantification t
