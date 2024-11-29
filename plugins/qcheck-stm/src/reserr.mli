@@ -13,6 +13,7 @@ type W.kind +=
   | Constant_value of string
   | Ensures_not_found_for_next_state of (string * string)
   | Ensures_not_found_for_ret_sut of (string * string list)
+  | Function_arity of string
   | Functional_argument of string
   | Ghost_values of (string * [ `Arg | `Ret ])
   | Impossible_init_state_generation of init_state_error
