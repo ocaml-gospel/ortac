@@ -170,15 +170,32 @@ let split_args config vd args =
   in
   aux [] [] [] vd.vd_type args
 
+(* (Tapp =,[(Tapp to_seq,[Tfield content]); right]) *)
+let rec get_inner_field node =
+  let open Tterm in
+  match node.t_node with
+  | Tfield ({ t_node = Tvar vs; _ }, m) -> Some (vs, m)
+  | Tapp (_sym, [arg]) -> get_inner_field arg
+  | _ -> None
+
 let get_state_description_with_index is_t state spec =
   let open Tterm in
   let rec pred i t =
-    match t.t_node with
-    | Tapp (ls, [ { t_node = Tfield ({ t_node = Tvar vs; _ }, m); _ }; right ])
-      when Symbols.(ls_equal ps_equ ls) && is_t vs ->
-        if List.exists (fun (id, _) -> Ident.equal id m.ls_name) state then
-          Some (i, Ir.{ model = m.ls_name; description = right })
-        else None
+    match t.t_node with (* "h.content = ..." is repr as Tapp (infix =, [h.content;...]) *)
+    | Tapp (ls, [ node; right ]) ->
+      (*| Tapp (ls, [ { t_node = Tfield ({ t_node = Tvar vs; _ }, m); _ }; right ]) ->*)
+      (match get_inner_field node with
+       | None -> None
+       | Some (vs, m) ->
+      (*when Symbols.(ls_equal ps_equ ls) && is_t vs ->*)
+      if
+        Symbols.(ls_equal ps_equ ls) && is_t vs
+        &&
+        List.exists (fun (id, _) -> Ident.equal id m.ls_name) state then
+        Some (i, Ir.{ model = m.ls_name; description = right })
+        else
+           None
+          )
     | Tbinop ((Tand | Tand_asym), l, r) -> (
         match pred i l with None -> pred i r | o -> o)
     | _ -> None
@@ -205,6 +222,7 @@ let next_states suts state spec =
   in
   List.map next_state suts
 
+(* returns an option indicating whether vd returns a new state, eg. from copy *)
 let ret_next_state config state vd =
   let open Reserr in
   let open Ppxlib in
