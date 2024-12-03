@@ -124,13 +124,7 @@ README].
 
 [main README]: ../../README.md#supported-gospel
 
-It also inherits the limitations of QCheck-STM. In particular, it can
-track the state of only one value, which has the consequence that
-functions expecting more than one argument of type `t` or returning
-values of type `t` are not tested.
-
-At the moment, the plugin comes with the following limiting
-expectations:
+At the moment, the plugin also comes with the following limitations:
 
 - every argument of the functions that will be tested will be
   generated using the generator of [`QCheck.Gen`] whose name matches
