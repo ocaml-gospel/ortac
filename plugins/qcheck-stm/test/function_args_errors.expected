@@ -1,0 +1,4 @@
+File "function_args.mli", line 16, characters 19-47:
+16 | val third_order : (char -> (int -> int) -> char) -> t -> int
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Warning: Third-order functions and above are not supported in third_order.

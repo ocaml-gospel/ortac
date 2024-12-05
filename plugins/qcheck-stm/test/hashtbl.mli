@@ -39,7 +39,7 @@ val find_opt : ('a, 'b) t -> 'a -> 'b option
 
 val find_all : ('a, 'b) t -> 'a -> 'b list
 (*@ bs = find_all h a
-    ensures bs = Sequence.filter_map (fun (x, y) -> if x = a then Some y else None) h.contents *)
+    ensures bs = List.filter_map (fun (x, y) -> if x = a then Some y else None) h.contents *)
 
 val mem : ('a, 'b) t -> 'a -> bool
 (*@ b = mem h a
@@ -64,7 +64,7 @@ val iter : ('a -> 'b -> unit) -> ('a, 'b) t -> unit
 val filter_map_inplace : ('a -> 'b -> 'b option) -> ('a, 'b) t -> unit
 (*@ filter_map_inplace f h
     modifies h
-    ensures h.contents = Sequence.filter_map
+    ensures h.contents = List.filter_map
                             (fun (x,y) -> match f x y with
                                           | None -> None
                                           | Some b' -> Some (x, b'))

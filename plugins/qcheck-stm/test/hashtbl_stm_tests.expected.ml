@@ -94,6 +94,7 @@ module Spec =
       | Mem of char 
       | Remove of char 
       | Replace of char * int 
+      | Filter_map_inplace of (char -> int -> int option) QCheck.fun_ 
       | Length 
     let show_cmd cmd__001_ =
       match cmd__001_ with
@@ -120,6 +121,9 @@ module Spec =
       | Replace (a_8, b_3) ->
           Format.asprintf "%s <sut> %a %a" "replace" (Util.Pp.pp_char true)
             a_8 (Util.Pp.pp_int true) b_3
+      | Filter_map_inplace f ->
+          Format.asprintf "%s %a <sut>" "filter_map_inplace"
+            (Util.Pp.pp_fun_ true) f
       | Length -> Format.asprintf "%s <sut>" "length"
     let cleanup _ = ()
     let arb_cmd _ =
@@ -142,6 +146,9 @@ module Spec =
                (pure (fun a_7 -> Remove a_7)) <*> char;
                ((pure (fun a_8 -> fun b_3 -> Replace (a_8, b_3))) <*> char)
                  <*> int;
+               (pure (fun f -> Filter_map_inplace f)) <*>
+                 (fun2 Observable.char Observable.int
+                    (QCheck.option QCheck.int)).gen;
                pure Length])
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
@@ -372,12 +379,49 @@ module Spec =
                               })))
               } in
           Model.push (Model.drop_n state__003_ 1) h_9__027_
-      | Length ->
+      | Filter_map_inplace f ->
           let h_10__028_ = Model.get state__003_ 0 in
-          let h_10__029_ = h_10__028_ in
+          let h_10__029_ =
+            let open ModelElt in
+              {
+                contents =
+                  (try
+                     Ortac_runtime.Gospelstdlib.Sequence.filter_map
+                       (fun (x_1, y) ->
+                          match QCheck.Fn.apply f x_1 y with
+                          | None -> None
+                          | Some b' -> Some (x_1, b'))
+                       (Ortac_runtime.Gospelstdlib.List.to_seq
+                          h_10__028_.contents)
+                   with
+                   | e ->
+                       raise
+                         (Ortac_runtime.Partial_function
+                            (e,
+                              {
+                                Ortac_runtime.start =
+                                  {
+                                    pos_fname = "hashtbl.mli";
+                                    pos_lnum = 67;
+                                    pos_bol = 3244;
+                                    pos_cnum = 3269
+                                  };
+                                Ortac_runtime.stop =
+                                  {
+                                    pos_fname = "hashtbl.mli";
+                                    pos_lnum = 71;
+                                    pos_bol = 3474;
+                                    pos_cnum = 3518
+                                  }
+                              })))
+              } in
           Model.push (Model.drop_n state__003_ 1) h_10__029_
-    let precond cmd__061_ state__062_ =
-      match cmd__061_ with
+      | Length ->
+          let h_11__030_ = Model.get state__003_ 0 in
+          let h_11__031_ = h_11__030_ in
+          Model.push (Model.drop_n state__003_ 1) h_11__031_
+    let precond cmd__064_ state__065_ =
+      match cmd__064_ with
       | Create (random, size) -> true
       | Clear -> true
       | Reset -> true
@@ -389,158 +433,171 @@ module Spec =
       | Mem a_6 -> true
       | Remove a_7 -> true
       | Replace (a_8, b_3) -> true
+      | Filter_map_inplace f -> true
       | Length -> true
     let postcond _ _ _ = true
-    let run cmd__063_ sut__064_ =
-      match cmd__063_ with
+    let run cmd__066_ sut__067_ =
+      match cmd__066_ with
       | Create (random, size) ->
           Res
             (sut,
-              (let res__065_ = create ~random size in
-               (SUT.push sut__064_ res__065_; res__065_)))
+              (let res__068_ = create ~random size in
+               (SUT.push sut__067_ res__068_; res__068_)))
       | Clear ->
           Res
             (unit,
-              (let h_1__066_ = SUT.pop sut__064_ in
-               let res__067_ = clear h_1__066_ in
-               (SUT.push sut__064_ h_1__066_; res__067_)))
+              (let h_1__069_ = SUT.pop sut__067_ in
+               let res__070_ = clear h_1__069_ in
+               (SUT.push sut__067_ h_1__069_; res__070_)))
       | Reset ->
           Res
             (unit,
-              (let h_2__068_ = SUT.pop sut__064_ in
-               let res__069_ = reset h_2__068_ in
-               (SUT.push sut__064_ h_2__068_; res__069_)))
+              (let h_2__071_ = SUT.pop sut__067_ in
+               let res__072_ = reset h_2__071_ in
+               (SUT.push sut__067_ h_2__071_; res__072_)))
       | Copy ->
           Res
             (sut,
-              (let h1__070_ = SUT.pop sut__064_ in
-               let res__071_ = copy h1__070_ in
-               (SUT.push sut__064_ h1__070_;
-                SUT.push sut__064_ res__071_;
-                res__071_)))
+              (let h1__073_ = SUT.pop sut__067_ in
+               let res__074_ = copy h1__073_ in
+               (SUT.push sut__067_ h1__073_;
+                SUT.push sut__067_ res__074_;
+                res__074_)))
       | Add (a_2, b_2) ->
           Res
             (unit,
-              (let h_3__072_ = SUT.pop sut__064_ in
-               let res__073_ = add h_3__072_ a_2 b_2 in
-               (SUT.push sut__064_ h_3__072_; res__073_)))
+              (let h_3__075_ = SUT.pop sut__067_ in
+               let res__076_ = add h_3__075_ a_2 b_2 in
+               (SUT.push sut__067_ h_3__075_; res__076_)))
       | Find a_3 ->
           Res
             ((result int exn),
-              (let h_4__074_ = SUT.pop sut__064_ in
-               let res__075_ = protect (fun () -> find h_4__074_ a_3) () in
-               (SUT.push sut__064_ h_4__074_; res__075_)))
+              (let h_4__077_ = SUT.pop sut__067_ in
+               let res__078_ = protect (fun () -> find h_4__077_ a_3) () in
+               (SUT.push sut__067_ h_4__077_; res__078_)))
       | Find_opt a_4 ->
           Res
             ((option int),
-              (let h_5__076_ = SUT.pop sut__064_ in
-               let res__077_ = find_opt h_5__076_ a_4 in
-               (SUT.push sut__064_ h_5__076_; res__077_)))
+              (let h_5__079_ = SUT.pop sut__067_ in
+               let res__080_ = find_opt h_5__079_ a_4 in
+               (SUT.push sut__067_ h_5__079_; res__080_)))
       | Find_all a_5 ->
           Res
             ((list int),
-              (let h_6__078_ = SUT.pop sut__064_ in
-               let res__079_ = find_all h_6__078_ a_5 in
-               (SUT.push sut__064_ h_6__078_; res__079_)))
+              (let h_6__081_ = SUT.pop sut__067_ in
+               let res__082_ = find_all h_6__081_ a_5 in
+               (SUT.push sut__067_ h_6__081_; res__082_)))
       | Mem a_6 ->
           Res
             (bool,
-              (let h_7__080_ = SUT.pop sut__064_ in
-               let res__081_ = mem h_7__080_ a_6 in
-               (SUT.push sut__064_ h_7__080_; res__081_)))
+              (let h_7__083_ = SUT.pop sut__067_ in
+               let res__084_ = mem h_7__083_ a_6 in
+               (SUT.push sut__067_ h_7__083_; res__084_)))
       | Remove a_7 ->
           Res
             (unit,
-              (let h_8__082_ = SUT.pop sut__064_ in
-               let res__083_ = remove h_8__082_ a_7 in
-               (SUT.push sut__064_ h_8__082_; res__083_)))
+              (let h_8__085_ = SUT.pop sut__067_ in
+               let res__086_ = remove h_8__085_ a_7 in
+               (SUT.push sut__067_ h_8__085_; res__086_)))
       | Replace (a_8, b_3) ->
           Res
             (unit,
-              (let h_9__084_ = SUT.pop sut__064_ in
-               let res__085_ = replace h_9__084_ a_8 b_3 in
-               (SUT.push sut__064_ h_9__084_; res__085_)))
+              (let h_9__087_ = SUT.pop sut__067_ in
+               let res__088_ = replace h_9__087_ a_8 b_3 in
+               (SUT.push sut__067_ h_9__087_; res__088_)))
+      | Filter_map_inplace f ->
+          Res
+            (unit,
+              (let h_10__089_ = SUT.pop sut__067_ in
+               let res__090_ =
+                 filter_map_inplace (QCheck.Fn.apply f) h_10__089_ in
+               (SUT.push sut__067_ h_10__089_; res__090_)))
       | Length ->
           Res
             (int,
-              (let h_10__086_ = SUT.pop sut__064_ in
-               let res__087_ = length h_10__086_ in
-               (SUT.push sut__064_ h_10__086_; res__087_)))
+              (let h_11__091_ = SUT.pop sut__067_ in
+               let res__092_ = length h_11__091_ in
+               (SUT.push sut__067_ h_11__091_; res__092_)))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__089_ state__090_ last__092_ res__091_ =
+let ortac_show_cmd cmd__094_ state__095_ last__097_ res__096_ =
   let open Spec in
     let open STM in
-      match (cmd__089_, res__091_) with
+      match (cmd__094_, res__096_) with
       | (Create (random, size), Res ((SUT, _), h)) ->
-          let lhs = if last__092_ then "r" else SUT.get_name state__090_ 0
+          let lhs = if last__097_ then "r" else SUT.get_name state__095_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a %a" lhs "create"
             (Util.Pp.pp_bool true) random (Util.Pp.pp_int true) size
       | (Clear, Res ((Unit, _), _)) ->
-          let lhs = if last__092_ then "r" else "_"
+          let lhs = if last__097_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "clear"
-            (SUT.get_name state__090_ (0 + shift))
+            (SUT.get_name state__095_ (0 + shift))
       | (Reset, Res ((Unit, _), _)) ->
-          let lhs = if last__092_ then "r" else "_"
+          let lhs = if last__097_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "reset"
-            (SUT.get_name state__090_ (0 + shift))
+            (SUT.get_name state__095_ (0 + shift))
       | (Copy, Res ((SUT, _), h2)) ->
-          let lhs = if last__092_ then "r" else SUT.get_name state__090_ 0
+          let lhs = if last__097_ then "r" else SUT.get_name state__095_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %s" lhs "copy"
-            (SUT.get_name state__090_ (0 + shift))
+            (SUT.get_name state__095_ (0 + shift))
       | (Add (a_2, b_2), Res ((Unit, _), _)) ->
-          let lhs = if last__092_ then "r" else "_"
+          let lhs = if last__097_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a %a" lhs "add"
-            (SUT.get_name state__090_ (0 + shift)) (Util.Pp.pp_char true) a_2
+            (SUT.get_name state__095_ (0 + shift)) (Util.Pp.pp_char true) a_2
             (Util.Pp.pp_int true) b_2
       | (Find a_3, Res ((Result (Int, Exn), _), _)) ->
-          let lhs = if last__092_ then "r" else "_"
+          let lhs = if last__097_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s %a)" lhs "find"
-            (SUT.get_name state__090_ (0 + shift)) (Util.Pp.pp_char true) a_3
+            (SUT.get_name state__095_ (0 + shift)) (Util.Pp.pp_char true) a_3
       | (Find_opt a_4, Res ((Option (Int), _), _)) ->
-          let lhs = if last__092_ then "r" else "_"
+          let lhs = if last__097_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "find_opt"
-            (SUT.get_name state__090_ (0 + shift)) (Util.Pp.pp_char true) a_4
+            (SUT.get_name state__095_ (0 + shift)) (Util.Pp.pp_char true) a_4
       | (Find_all a_5, Res ((List (Int), _), _)) ->
-          let lhs = if last__092_ then "r" else "_"
+          let lhs = if last__097_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "find_all"
-            (SUT.get_name state__090_ (0 + shift)) (Util.Pp.pp_char true) a_5
+            (SUT.get_name state__095_ (0 + shift)) (Util.Pp.pp_char true) a_5
       | (Mem a_6, Res ((Bool, _), _)) ->
-          let lhs = if last__092_ then "r" else "_"
+          let lhs = if last__097_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "mem"
-            (SUT.get_name state__090_ (0 + shift)) (Util.Pp.pp_char true) a_6
+            (SUT.get_name state__095_ (0 + shift)) (Util.Pp.pp_char true) a_6
       | (Remove a_7, Res ((Unit, _), _)) ->
-          let lhs = if last__092_ then "r" else "_"
+          let lhs = if last__097_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "remove"
-            (SUT.get_name state__090_ (0 + shift)) (Util.Pp.pp_char true) a_7
+            (SUT.get_name state__095_ (0 + shift)) (Util.Pp.pp_char true) a_7
       | (Replace (a_8, b_3), Res ((Unit, _), _)) ->
-          let lhs = if last__092_ then "r" else "_"
+          let lhs = if last__097_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a %a" lhs "replace"
-            (SUT.get_name state__090_ (0 + shift)) (Util.Pp.pp_char true) a_8
+            (SUT.get_name state__095_ (0 + shift)) (Util.Pp.pp_char true) a_8
             (Util.Pp.pp_int true) b_3
+      | (Filter_map_inplace f, Res ((Unit, _), _)) ->
+          let lhs = if last__097_ then "r" else "_"
+          and shift = 0 in
+          Format.asprintf "let %s = %s %a %s" lhs "filter_map_inplace"
+            (Util.Pp.pp_fun_ true) f (SUT.get_name state__095_ (0 + shift))
       | (Length, Res ((Int, _), _)) ->
-          let lhs = if last__092_ then "r" else "_"
+          let lhs = if last__097_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "length"
-            (SUT.get_name state__090_ (0 + shift))
+            (SUT.get_name state__095_ (0 + shift))
       | _ -> assert false
-let ortac_postcond cmd__030_ state__031_ res__032_ =
+let ortac_postcond cmd__032_ state__033_ res__034_ =
   let open Spec in
     let open STM in
-      let new_state__033_ = lazy (next_state cmd__030_ state__031_) in
-      match (cmd__030_, res__032_) with
+      let new_state__035_ = lazy (next_state cmd__032_ state__033_) in
+      match (cmd__032_, res__034_) with
       | (Create (random, size), Res ((SUT, _), h)) -> None
       | (Clear, Res ((Unit, _), _)) -> None
       | (Reset, Res ((Unit, _), _)) -> None
@@ -550,12 +607,12 @@ let ortac_postcond cmd__030_ state__031_ res__032_ =
           (match b_4 with
            | Ok b_4 ->
                if
-                 let h_old__038_ = Model.get state__031_ 0
-                 and h_new__039_ =
-                   lazy (Model.get (Lazy.force new_state__033_) 0) in
+                 let h_old__040_ = Model.get state__033_ 0
+                 and h_new__041_ =
+                   lazy (Model.get (Lazy.force new_state__035_) 0) in
                  (try
                     Ortac_runtime.Gospelstdlib.List.mem (a_3, b_4)
-                      (Lazy.force h_new__039_).contents
+                      (Lazy.force h_new__041_).contents
                   with
                   | e ->
                       raise
@@ -602,15 +659,15 @@ let ortac_postcond cmd__030_ state__031_ res__032_ =
                          })])
            | Error (Not_found) ->
                if
-                 let h_old__042_ = Model.get state__031_ 0
-                 and h_new__043_ =
-                   lazy (Model.get (Lazy.force new_state__033_) 0) in
+                 let h_old__044_ = Model.get state__033_ 0
+                 and h_new__045_ =
+                   lazy (Model.get (Lazy.force new_state__035_) 0) in
                  (try
                     not
                       (Ortac_runtime.Gospelstdlib.List.mem a_3
                          (Ortac_runtime.Gospelstdlib.List.map
                             Ortac_runtime.Gospelstdlib.fst
-                            (Lazy.force h_new__043_).contents))
+                            (Lazy.force h_new__045_).contents))
                   with
                   | e ->
                       raise
@@ -657,8 +714,8 @@ let ortac_postcond cmd__030_ state__031_ res__032_ =
            | _ -> None)
       | (Find_opt a_4, Res ((Option (Int), _), o)) ->
           if
-            let h_old__045_ = Model.get state__031_ 0
-            and h_new__046_ = lazy (Model.get (Lazy.force new_state__033_) 0) in
+            let h_old__047_ = Model.get state__033_ 0
+            and h_new__048_ = lazy (Model.get (Lazy.force new_state__035_) 0) in
             (try
                (match o with
                 | None ->
@@ -667,13 +724,13 @@ let ortac_postcond cmd__030_ state__031_ res__032_ =
                         (Ortac_runtime.Gospelstdlib.List.mem a_4
                            (Ortac_runtime.Gospelstdlib.List.map
                               Ortac_runtime.Gospelstdlib.fst
-                              (Lazy.force h_new__046_).contents))
+                              (Lazy.force h_new__048_).contents))
                     then true
                     else false
                 | Some b_5 ->
                     if
                       Ortac_runtime.Gospelstdlib.List.mem (a_4, b_5)
-                        (Lazy.force h_new__046_).contents
+                        (Lazy.force h_new__048_).contents
                     then true
                     else false)
                  = true
@@ -723,14 +780,14 @@ let ortac_postcond cmd__030_ state__031_ res__032_ =
                     })])
       | (Find_all a_5, Res ((List (Int), _), bs)) ->
           if
-            let h_old__048_ = Model.get state__031_ 0
-            and h_new__049_ = lazy (Model.get (Lazy.force new_state__033_) 0) in
+            let h_old__050_ = Model.get state__033_ 0
+            and h_new__051_ = lazy (Model.get (Lazy.force new_state__035_) 0) in
             (try
                (Ortac_runtime.Gospelstdlib.List.to_seq bs) =
                  (Ortac_runtime.Gospelstdlib.Sequence.filter_map
-                    (fun (x_1, y) -> if x_1 = a_5 then Some y else None)
+                    (fun (x_2, y_1) -> if x_2 = a_5 then Some y_1 else None)
                     (Ortac_runtime.Gospelstdlib.List.to_seq
-                       (Lazy.force h_new__049_).contents))
+                       (Lazy.force h_new__051_).contents))
              with
              | e ->
                  raise
@@ -777,14 +834,14 @@ let ortac_postcond cmd__030_ state__031_ res__032_ =
                     })])
       | (Mem a_6, Res ((Bool, _), b_6)) ->
           if
-            let h_old__051_ = Model.get state__031_ 0
-            and h_new__052_ = lazy (Model.get (Lazy.force new_state__033_) 0) in
+            let h_old__053_ = Model.get state__033_ 0
+            and h_new__054_ = lazy (Model.get (Lazy.force new_state__035_) 0) in
             (try
                (b_6 = true) =
                  (Ortac_runtime.Gospelstdlib.List.mem a_6
                     (Ortac_runtime.Gospelstdlib.List.map
                        Ortac_runtime.Gospelstdlib.fst
-                       (Lazy.force h_new__052_).contents))
+                       (Lazy.force h_new__054_).contents))
              with
              | e ->
                  raise
@@ -830,14 +887,15 @@ let ortac_postcond cmd__030_ state__031_ res__032_ =
                     })])
       | (Remove a_7, Res ((Unit, _), _)) -> None
       | (Replace (a_8, b_3), Res ((Unit, _), _)) -> None
+      | (Filter_map_inplace f, Res ((Unit, _), _)) -> None
       | (Length, Res ((Int, _), i)) ->
           if
-            let h_old__058_ = Model.get state__031_ 0
-            and h_new__059_ = lazy (Model.get (Lazy.force new_state__033_) 0) in
+            let h_old__061_ = Model.get state__033_ 0
+            and h_new__062_ = lazy (Model.get (Lazy.force new_state__035_) 0) in
             (try
                (Ortac_runtime.Gospelstdlib.integer_of_int i) =
                  (Ortac_runtime.Gospelstdlib.List.length
-                    (Lazy.force h_new__059_).contents)
+                    (Lazy.force h_new__062_).contents)
              with
              | e ->
                  raise
@@ -866,12 +924,12 @@ let ortac_postcond cmd__030_ state__031_ res__032_ =
                  (Ortac_runtime.Value
                     (Res
                        (integer,
-                         (let h_old__056_ = Model.get state__031_ 0
-                          and h_new__057_ =
-                            lazy (Model.get (Lazy.force new_state__033_) 0) in
+                         (let h_old__059_ = Model.get state__033_ 0
+                          and h_new__060_ =
+                            lazy (Model.get (Lazy.force new_state__035_) 0) in
                           try
                             Ortac_runtime.Gospelstdlib.List.length
-                              (Lazy.force h_new__057_).contents
+                              (Lazy.force h_new__060_).contents
                           with
                           | e ->
                               raise

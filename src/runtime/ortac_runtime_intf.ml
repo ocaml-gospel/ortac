@@ -146,6 +146,8 @@ module type S = sig
       val init : integer -> (integer -> 'a) -> 'a t
       val map : ('a -> 'b) -> 'a t -> 'b t
       val mapi : (integer -> 'a -> 'b) -> 'a t -> 'b t
+      val filter : ('a -> bool) -> 'a t -> 'a t
+      val filter_map : ('a -> 'b option) -> 'a t -> 'b t
       val fold_left : ('a -> 'b -> 'a) -> 'a -> 'b t -> 'a
       val fold_right : ('b -> 'a -> 'a) -> 'b t -> 'a -> 'a
       val map2 : ('a -> 'b -> 'c) -> 'a t -> 'b t -> 'c t
