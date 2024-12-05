@@ -240,6 +240,8 @@ module Gospelstdlib = struct
       let f i = f (Z.of_int i) in
       List.mapi f
 
+    let filter = Stdlib.List.filter
+    let filter_map = Stdlib.List.filter_map
     let fold_left = List.fold_left
     let fold_right = List.fold_right
     let map2 = List.map2
