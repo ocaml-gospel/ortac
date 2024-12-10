@@ -16,3 +16,7 @@ val map : (char -> char) -> t -> t
 val third_order : (char -> (int -> int) -> char) -> t -> int
 (*@ i = third_order f input
     ensures i = 0 *)
+
+val arity_over_four : (char -> char -> char -> char -> char -> int) -> t -> int
+(*@ i = arity_over_four f input
+    ensures i = 0 *)
