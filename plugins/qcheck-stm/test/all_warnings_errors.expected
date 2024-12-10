@@ -20,6 +20,11 @@ File "all_warnings.mli", line 25, characters 0-26:
 25 | val no_spec : 'a t -> bool
      ^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping no_spec: functions without specifications cannot be tested.
+File "all_warnings.mli", line 39, characters 33-67:
+39 | val functional_argument_arity : ('a -> 'a -> 'a -> 'a -> 'a -> bool) -> 'a t -> bool
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Warning: Skipping functional_argument_arity: Can only test function arguments
+         with arity < 5.
 File "all_warnings.mli", line 43, characters 24-25:
 43 | (*@ b = ghost_argument [x : bool] t *)
                              ^
