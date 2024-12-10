@@ -1,20 +1,20 @@
 type (!'a, !'b) t
-(*@ mutable model contents : ('a * 'b) list *)
+(*@ mutable model contents : ('a * 'b) sequence *)
 
 val create :
   ?random:(* thwart tools/sync_stdlib_docs *) bool -> int -> ('a, 'b) t
 (*@ h = create ?random size
-    ensures h.contents = [] *)
+    ensures h.contents = Sequence.empty *)
 
 val clear : ('a, 'b) t -> unit
 (*@ clear h
     modifies h
-    ensures h.contents = [] *)
+    ensures h.contents = Sequence.empty *)
 
 val reset : ('a, 'b) t -> unit
 (*@ reset h
     modifies h
-    ensures h.contents = [] *)
+    ensures h.contents = Sequence.empty *)
 
 val copy : ('a, 'b) t -> ('a, 'b) t
 (*@ h2 = copy h1
@@ -23,19 +23,19 @@ val copy : ('a, 'b) t -> ('a, 'b) t
 val add : ('a, 'b) t -> 'a -> 'b -> unit
 (*@ add h a b
     modifies h
-    ensures h.contents = (a, b) :: old h.contents *)
+    ensures h.contents = Sequence.cons (a, b) (old h.contents) *)
 
 val find : ('a, 'b) t -> 'a -> 'b
 (*@ b = find h a
-    raises Not_found -> forall x. not (List.mem (a, x) h.contents)
-    raises Not_found -> not (List.mem a (List.map fst h.contents))
-    ensures List.mem (a, b) h.contents *)
+    raises Not_found -> forall x. not (Sequence.mem h.contents (a, x))
+    raises Not_found -> not (Sequence.mem (Sequence.map fst h.contents) a)
+    ensures Sequence.mem h.contents (a, b) *)
 
 val find_opt : ('a, 'b) t -> 'a -> 'b option
 (*@ o = find_opt h a
     ensures match o with
-      | None -> not (List.mem a (List.map fst h.contents))
-      | Some b -> List.mem (a, b) h.contents *)
+      | None -> not (Sequence.mem (Sequence.map fst h.contents) a)
+      | Some b -> Sequence.mem h.contents (a, b) *)
 
 val find_all : ('a, 'b) t -> 'a -> 'b list
 (*@ bs = find_all h a
@@ -43,12 +43,14 @@ val find_all : ('a, 'b) t -> 'a -> 'b list
 
 val mem : ('a, 'b) t -> 'a -> bool
 (*@ b = mem h a
-    ensures b = List.mem a (List.map fst h.contents) *)
+    ensures b = Sequence.mem (Sequence.map fst h.contents) a *)
 
-(*@ function rec remove_first (x: 'a) (xs : ('a * 'b) list) : ('a * 'b) list =
-      match xs with
-      | (a, b) :: xs -> if a = x then xs else (a, b) :: (remove_first x xs)
-      | [] -> [] *)
+(*@ function rec remove_first (x: 'a) (xs : ('a * 'b) sequence) : ('a * 'b) sequence =
+      if Sequence.empty = xs
+      then xs
+      else if fst (Sequence.hd xs) = x
+           then Sequence.tl xs
+           else Sequence.cons (Sequence.hd xs) (remove_first x (Sequence.tl xs)) *)
 
 val remove : ('a, 'b) t -> 'a -> unit
 (*@ remove h a
@@ -58,7 +60,7 @@ val remove : ('a, 'b) t -> 'a -> unit
 val replace : ('a, 'b) t -> 'a -> 'b -> unit
 (*@ replace h a b
     modifies h
-    ensures h.contents = (a, b) :: remove_first a (old h.contents) *)
+    ensures h.contents = Sequence.cons (a, b) (remove_first a (old h.contents)) *)
 
 val iter : ('a -> 'b -> unit) -> ('a, 'b) t -> unit
 val filter_map_inplace : ('a -> 'b -> 'b option) -> ('a, 'b) t -> unit
@@ -73,7 +75,7 @@ val filter_map_inplace : ('a -> 'b -> 'b option) -> ('a, 'b) t -> unit
 val fold : ('a -> 'b -> 'c -> 'c) -> ('a, 'b) t -> 'c -> 'c
 val length : ('a, 'b) t -> int
 (*@ i = length h
-    ensures i = List.length h.contents *)
+    ensures i = Sequence.length h.contents *)
 
 val randomize : unit -> unit
 val is_randomized : unit -> bool

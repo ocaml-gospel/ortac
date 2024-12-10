@@ -9,14 +9,14 @@ module SUT =
 module ModelElt =
   struct
     type nonrec elt = {
-      contents: int list }
+      contents: int Ortac_runtime.Gospelstdlib.sequence }
     let init =
       let i = 16
       and a_1 = 0 in
       {
         contents =
           (try
-             Ortac_runtime.Gospelstdlib.List.init
+             Ortac_runtime.Gospelstdlib.Sequence.init
                (Ortac_runtime.Gospelstdlib.integer_of_int i) (fun j -> a_1)
            with
            | e ->
@@ -28,15 +28,15 @@ module ModelElt =
                           {
                             pos_fname = "sut_in_type.mli";
                             pos_lnum = 7;
-                            pos_bol = 263;
-                            pos_cnum = 288
+                            pos_bol = 271;
+                            pos_cnum = 296
                           };
                         Ortac_runtime.stop =
                           {
                             pos_fname = "sut_in_type.mli";
                             pos_lnum = 7;
-                            pos_bol = 263;
-                            pos_cnum = 312
+                            pos_bol = 271;
+                            pos_cnum = 324
                           }
                       })))
       }
@@ -95,15 +95,15 @@ module Spec =
                             {
                               pos_fname = "sut_in_type.mli";
                               pos_lnum = 6;
-                              pos_bol = 245;
-                              pos_cnum = 256
+                              pos_bol = 253;
+                              pos_cnum = 264
                             };
                           Ortac_runtime.stop =
                             {
                               pos_fname = "sut_in_type.mli";
                               pos_lnum = 6;
-                              pos_bol = 245;
-                              pos_cnum = 262
+                              pos_bol = 253;
+                              pos_cnum = 270
                             }
                         })))
           then
@@ -112,7 +112,7 @@ module Spec =
                 {
                   contents =
                     (try
-                       Ortac_runtime.Gospelstdlib.List.init
+                       Ortac_runtime.Gospelstdlib.Sequence.init
                          (Ortac_runtime.Gospelstdlib.integer_of_int i)
                          (fun j -> a_1)
                      with
@@ -125,15 +125,15 @@ module Spec =
                                     {
                                       pos_fname = "sut_in_type.mli";
                                       pos_lnum = 7;
-                                      pos_bol = 263;
-                                      pos_cnum = 288
+                                      pos_bol = 271;
+                                      pos_cnum = 296
                                     };
                                   Ortac_runtime.stop =
                                     {
                                       pos_fname = "sut_in_type.mli";
                                       pos_lnum = 7;
-                                      pos_bol = 263;
-                                      pos_cnum = 312
+                                      pos_bol = 271;
+                                      pos_cnum = 324
                                     }
                                 })))
                 } in
@@ -192,15 +192,15 @@ let ortac_postcond cmd__006_ state__007_ res__008_ =
                                   {
                                     pos_fname = "sut_in_type.mli";
                                     pos_lnum = 6;
-                                    pos_bol = 245;
-                                    pos_cnum = 256
+                                    pos_bol = 253;
+                                    pos_cnum = 264
                                   };
                                 Ortac_runtime.stop =
                                   {
                                     pos_fname = "sut_in_type.mli";
                                     pos_lnum = 6;
-                                    pos_bol = 245;
-                                    pos_cnum = 262
+                                    pos_bol = 253;
+                                    pos_cnum = 270
                                   }
                               }))
                  then None
@@ -214,15 +214,15 @@ let ortac_postcond cmd__006_ state__007_ res__008_ =
                                {
                                  pos_fname = "sut_in_type.mli";
                                  pos_lnum = 6;
-                                 pos_bol = 245;
-                                 pos_cnum = 256
+                                 pos_bol = 253;
+                                 pos_cnum = 264
                                };
                              Ortac_runtime.stop =
                                {
                                  pos_fname = "sut_in_type.mli";
                                  pos_lnum = 6;
-                                 pos_bol = 245;
-                                 pos_cnum = 262
+                                 pos_bol = 253;
+                                 pos_cnum = 270
                                }
                            })])
            with
@@ -246,15 +246,15 @@ let ortac_postcond cmd__006_ state__007_ res__008_ =
                                       {
                                         pos_fname = "sut_in_type.mli";
                                         pos_lnum = 6;
-                                        pos_bol = 245;
-                                        pos_cnum = 256
+                                        pos_bol = 253;
+                                        pos_cnum = 264
                                       };
                                     Ortac_runtime.stop =
                                       {
                                         pos_fname = "sut_in_type.mli";
                                         pos_lnum = 6;
-                                        pos_bol = 245;
-                                        pos_cnum = 262
+                                        pos_bol = 253;
+                                        pos_cnum = 270
                                       }
                                   })))
                     then None
@@ -269,15 +269,15 @@ let ortac_postcond cmd__006_ state__007_ res__008_ =
                                   {
                                     pos_fname = "sut_in_type.mli";
                                     pos_lnum = 6;
-                                    pos_bol = 245;
-                                    pos_cnum = 256
+                                    pos_bol = 253;
+                                    pos_cnum = 264
                                   };
                                 Ortac_runtime.stop =
                                   {
                                     pos_fname = "sut_in_type.mli";
                                     pos_lnum = 6;
-                                    pos_bol = 245;
-                                    pos_cnum = 262
+                                    pos_bol = 253;
+                                    pos_cnum = 270
                                   }
                               })])))
       | _ -> None

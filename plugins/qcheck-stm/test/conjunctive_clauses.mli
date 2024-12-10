@@ -1,16 +1,13 @@
 type 'a t
-(*@ mutable model contents : 'a list *)
+(*@ mutable model contents : 'a sequence *)
 
 val make : int -> 'a -> 'a t
 (*@ t = make i a
     checks i >= 0
-    ensures true /\ true && t.contents = List.init i (fun _ -> a) *)
-
-(*@ function set_contents (c : 'a list) (i : integer) (a : 'a) : 'a list =
-          List.mapi (fun j x -> if i = j then a else x) c *)
+    ensures true /\ true && t.contents = Sequence.init i (fun _ -> a) *)
 
 val set : 'a t -> int -> 'a -> unit
 (*@ set t i a
-    checks 0 <= i < List.length t.contents
+    checks 0 <= i < Sequence.length t.contents
     modifies t
-    ensures true /\ true && t.contents = set_contents (old t.contents) i a *)
+    ensures true /\ true && t.contents = Sequence.set (old t.contents) i a *)
