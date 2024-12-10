@@ -25,13 +25,17 @@ File "all_warnings.mli", line 39, characters 33-67:
                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping functional_argument_arity: Can only test function arguments
          with arity < 5.
-File "all_warnings.mli", line 43, characters 24-25:
-43 | (*@ b = ghost_argument [x : bool] t *)
+File "all_warnings.mli", line 42, characters 39-71:
+42 | val functional_argument_third_order : ('a -> ('a -> 'a -> bool) -> bool) -> 'a t -> bool
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Warning: Third-order functions and above are not supported in functional_argument_third_order.
+File "all_warnings.mli", line 46, characters 24-25:
+46 | (*@ b = ghost_argument [x : bool] t *)
                              ^
 Warning: Skipping ghost_argument: functions with a ghost argument are not
          supported.
-File "all_warnings.mli", line 46, characters 6-7:
-46 | (*@ [ x : bool ], b = ghost_returned_value t *)
+File "all_warnings.mli", line 49, characters 6-7:
+49 | (*@ [ x : bool ], b = ghost_returned_value t *)
            ^
 Warning: Skipping ghost_returned_value: functions with a ghost returned value
          are not supported.
@@ -43,8 +47,8 @@ Warning: Skipping ensures_not_found_for_next_state: model contents is
          was found. Specifications should contain at least one "ensures
          x.contents = expr" where x is the SUT and expr can refer to the SUT
          only under an old operator and can't refer to the returned value.
-File "all_warnings.mli", line 61, characters 13-23:
-61 |     modifies t.contents
+File "all_warnings.mli", line 64, characters 13-23:
+64 |     modifies t.contents
                   ^^^^^^^^^^
 Warning: Skipping term_refer_to_returned_value_next_state: model contents is
          declared as modified by the function but no suitable ensures clause
@@ -59,34 +63,34 @@ File "all_warnings.mli", line 36, characters 0-66:
 36 | val type_not_supported : 'a t -> s
 37 | (*@ s = type_not_supported t *)
 Warning: Incomplete computation of the returned value in the specification of type_not_supported. Failure message won't be able to display the expected returned value.
-File "all_warnings.mli", line 48, characters 0-144:
-48 | val unsupported_quantification : 'a t -> bool
-49 | (*@ b = unsupported_quantification t
-50 |     ensures b = forall a. Sequence.mem a t.contents -> p a *)
+File "all_warnings.mli", line 51, characters 0-144:
+51 | val unsupported_quantification : 'a t -> bool
+52 | (*@ b = unsupported_quantification t
+53 |     ensures b = forall a. Sequence.mem a t.contents -> p a *)
 Warning: Incomplete computation of the returned value in the specification of unsupported_quantification. Failure message won't be able to display the expected returned value.
-File "all_warnings.mli", line 50, characters 16-58:
-50 |     ensures b = forall a. Sequence.mem a t.contents -> p a *)
+File "all_warnings.mli", line 53, characters 16-58:
+53 |     ensures b = forall a. Sequence.mem a t.contents -> p a *)
                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping clause: unsupported quantification.
-File "all_warnings.mli", line 52, characters 0-111:
-52 | val record_not_model_field : 'a t -> bool
-53 | (*@ b = record_not_model_field t
-54 |     requires Array.length t.v > 0 *)
+File "all_warnings.mli", line 55, characters 0-111:
+55 | val record_not_model_field : 'a t -> bool
+56 | (*@ b = record_not_model_field t
+57 |     requires Array.length t.v > 0 *)
 Warning: Incomplete computation of the returned value in the specification of record_not_model_field. Failure message won't be able to display the expected returned value.
-File "all_warnings.mli", line 56, characters 0-67:
-56 | val return_tuple : 'a t -> 'a * bool
-57 | (*@ (a, b) = return_tuple t *)
+File "all_warnings.mli", line 59, characters 0-67:
+59 | val return_tuple : 'a t -> 'a * bool
+60 | (*@ (a, b) = return_tuple t *)
 Warning: Incomplete computation of the returned value in the specification of return_tuple. Failure message won't be able to display the expected returned value.
-File "all_warnings.mli", line 59, characters 0-278:
-59 | val term_refer_to_returned_value_next_state : 'a t -> 'a option
-60 | (*@ o = term_refer_to_returned_value_next_state t
-61 |     modifies t.contents
-62 |     ensures t.contents = match o with
-63 |                         | None -> old t.contents
-64 |                         | Some _ -> old t.contents *)
+File "all_warnings.mli", line 62, characters 0-278:
+62 | val term_refer_to_returned_value_next_state : 'a t -> 'a option
+63 | (*@ o = term_refer_to_returned_value_next_state t
+64 |     modifies t.contents
+65 |     ensures t.contents = match o with
+66 |                         | None -> old t.contents
+67 |                         | Some _ -> old t.contents *)
 Warning: Incomplete computation of the returned value in the specification of term_refer_to_returned_value_next_state. Failure message won't be able to display the expected returned value.
-File "all_warnings.mli", line 54, characters 26-29:
-54 |     requires Array.length t.v > 0 *)
+File "all_warnings.mli", line 57, characters 26-29:
+57 |     requires Array.length t.v > 0 *)
                                ^^^
 Warning: Skipping clause: occurrences of the SUT in clauses are only
          supported to access its model fields.

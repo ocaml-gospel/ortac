@@ -39,6 +39,9 @@ val type_not_supported : 'a t -> s
 val functional_argument_arity : ('a -> 'a -> 'a -> 'a -> 'a -> bool) -> 'a t -> bool
 (*@ b = functional_argument_arity p t *)
 
+val functional_argument_third_order : ('a -> ('a -> 'a -> bool) -> bool) -> 'a t -> bool
+(*@ b = functional_argument_third_order p t *)
+
 val ghost_argument : 'a t -> bool
 (*@ b = ghost_argument [x : bool] t *)
 
