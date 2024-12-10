@@ -42,3 +42,6 @@ build: [
   ["dune" "install" "-p" name "--create-install-files" name]
 ]
 dev-repo: "git+https://github.com/ocaml-gospel/ortac.git"
+pin-depends: [
+  ["qcheck-multicoretests-util.0.4"  "git+https://github.com/ocaml-multicore/multicoretests#main"]
+]
