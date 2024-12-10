@@ -50,7 +50,7 @@ let no_third_order_fun_or_big_tuple vd =
       let* _ =
         if contains_nested_arrow l then error (Type_not_supported_in_function_argument vd.vd_name.id_str, l.ptyp_loc) else ok () in
       let* _ =
-        if highest_arity_arrow l > 4 then error (Function_arity vd.vd_name.id_str, ty.ptyp_loc) else ok () in
+        if highest_arity_arrow l > 4 then error (Function_arity vd.vd_name.id_str, l.ptyp_loc) else ok () in
       aux r
     | _ -> ok ()
   in
