@@ -1,105 +1,105 @@
-File "hashtbl.mli", line 63, characters 12-28:
-63 | val iter : ('a -> 'b -> unit) -> ('a, 'b) t -> unit
+File "hashtbl.mli", line 65, characters 12-28:
+65 | val iter : ('a -> 'b -> unit) -> ('a, 'b) t -> unit
                  ^^^^^^^^^^^^^^^^
 Warning: Skipping iter: functions are not supported yet as arguments.
-File "hashtbl.mli", line 64, characters 26-47:
-64 | val filter_map_inplace : ('a -> 'b -> 'b option) -> ('a, 'b) t -> unit
+File "hashtbl.mli", line 66, characters 26-47:
+66 | val filter_map_inplace : ('a -> 'b -> 'b option) -> ('a, 'b) t -> unit
                                ^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping filter_map_inplace: functions are not supported yet as
          arguments.
-File "hashtbl.mli", line 73, characters 12-32:
-73 | val fold : ('a -> 'b -> 'c -> 'c) -> ('a, 'b) t -> 'c -> 'c
+File "hashtbl.mli", line 75, characters 12-32:
+75 | val fold : ('a -> 'b -> 'c -> 'c) -> ('a, 'b) t -> 'c -> 'c
                  ^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping fold: functions are not supported yet as arguments.
-File "hashtbl.mli", line 78, characters 0-28:
-78 | val randomize : unit -> unit
+File "hashtbl.mli", line 80, characters 0-28:
+80 | val randomize : unit -> unit
      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping randomize: functions without specifications cannot be
          tested.
-File "hashtbl.mli", line 79, characters 0-32:
-79 | val is_randomized : unit -> bool
+File "hashtbl.mli", line 81, characters 0-32:
+81 | val is_randomized : unit -> bool
      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping is_randomized: functions without specifications cannot be
          tested.
-File "hashtbl.mli", line 81, characters 0-92:
-81 | val rebuild :
-82 |   ?random:(* thwart tools/sync_stdlib_docs *) bool -> ('a, 'b) t -> ('a, 'b) t
+File "hashtbl.mli", line 83, characters 0-92:
+83 | val rebuild :
+84 |   ?random:(* thwart tools/sync_stdlib_docs *) bool -> ('a, 'b) t -> ('a, 'b) t
 Warning: Skipping rebuild: functions without specifications cannot be tested.
-File "hashtbl.mli", line 96, characters 0-36:
-96 | val stats : ('a, 'b) t -> statistics
+File "hashtbl.mli", line 98, characters 0-36:
+98 | val stats : ('a, 'b) t -> statistics
      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping stats: functions without specifications cannot be tested.
-File "hashtbl.mli", line 97, characters 0-42:
-97 | val to_seq : ('a, 'b) t -> ('a * 'b) Seq.t
+File "hashtbl.mli", line 99, characters 0-42:
+99 | val to_seq : ('a, 'b) t -> ('a * 'b) Seq.t
      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping to_seq: functions without specifications cannot be tested.
-File "hashtbl.mli", line 98, characters 0-39:
-98 | val to_seq_keys : ('a, _) t -> 'a Seq.t
-     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "hashtbl.mli", line 100, characters 0-39:
+100 | val to_seq_keys : ('a, _) t -> 'a Seq.t
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping to_seq_keys: functions without specifications cannot be
          tested.
-File "hashtbl.mli", line 99, characters 0-41:
-99 | val to_seq_values : (_, 'b) t -> 'b Seq.t
-     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "hashtbl.mli", line 101, characters 0-41:
+101 | val to_seq_values : (_, 'b) t -> 'b Seq.t
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping to_seq_values: functions without specifications cannot be
          tested.
-File "hashtbl.mli", line 100, characters 0-51:
-100 | val add_seq : ('a, 'b) t -> ('a * 'b) Seq.t -> unit
+File "hashtbl.mli", line 102, characters 0-51:
+102 | val add_seq : ('a, 'b) t -> ('a * 'b) Seq.t -> unit
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping add_seq: functions without specifications cannot be tested.
-File "hashtbl.mli", line 101, characters 0-55:
-101 | val replace_seq : ('a, 'b) t -> ('a * 'b) Seq.t -> unit
+File "hashtbl.mli", line 103, characters 0-55:
+103 | val replace_seq : ('a, 'b) t -> ('a * 'b) Seq.t -> unit
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping replace_seq: functions without specifications cannot be
          tested.
-File "hashtbl.mli", line 102, characters 0-42:
-102 | val of_seq : ('a * 'b) Seq.t -> ('a, 'b) t
+File "hashtbl.mli", line 104, characters 0-42:
+104 | val of_seq : ('a * 'b) Seq.t -> ('a, 'b) t
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping of_seq: functions without specifications cannot be tested.
-File "hashtbl.mli", line 103, characters 0-20:
-103 | val hash : 'a -> int
+File "hashtbl.mli", line 105, characters 0-20:
+105 | val hash : 'a -> int
       ^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping hash: functions without specifications cannot be tested.
-File "hashtbl.mli", line 104, characters 0-34:
-104 | val seeded_hash : int -> 'a -> int
+File "hashtbl.mli", line 106, characters 0-34:
+106 | val seeded_hash : int -> 'a -> int
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping seeded_hash: functions without specifications cannot be
          tested.
-File "hashtbl.mli", line 105, characters 0-40:
-105 | val hash_param : int -> int -> 'a -> int
+File "hashtbl.mli", line 107, characters 0-40:
+107 | val hash_param : int -> int -> 'a -> int
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping hash_param: functions without specifications cannot be
          tested.
-File "hashtbl.mli", line 106, characters 0-54:
-106 | val seeded_hash_param : int -> int -> int -> 'a -> int
+File "hashtbl.mli", line 108, characters 0-54:
+108 | val seeded_hash_param : int -> int -> int -> 'a -> int
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping seeded_hash_param: functions without specifications cannot
          be tested.
-File "hashtbl.mli", line 28, characters 0-226:
+File "hashtbl.mli", line 28, characters 0-242:
 28 | val find : ('a, 'b) t -> 'a -> 'b
 29 | (*@ b = find h a
-30 |     raises Not_found -> forall x. not (List.mem (a, x) h.contents)
-31 |     raises Not_found -> not (List.mem a (List.map fst h.contents))
-32 |     ensures List.mem (a, b) h.contents *)
+30 |     raises Not_found -> forall x. not (Sequence.mem h.contents (a, x))
+31 |     raises Not_found -> not (Sequence.mem (Sequence.map fst h.contents) a)
+32 |     ensures Sequence.mem h.contents (a, b) *)
 Warning: Incomplete computation of the returned value in the specification of find. Failure message won't be able to display the expected returned value.
-File "hashtbl.mli", line 30, characters 24-66:
-30 |     raises Not_found -> forall x. not (List.mem (a, x) h.contents)
-                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "hashtbl.mli", line 30, characters 24-70:
+30 |     raises Not_found -> forall x. not (Sequence.mem h.contents (a, x))
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping clause: unsupported quantification.
-File "hashtbl.mli", line 34, characters 0-197:
+File "hashtbl.mli", line 34, characters 0-209:
 34 | val find_opt : ('a, 'b) t -> 'a -> 'b option
 35 | (*@ o = find_opt h a
 36 |     ensures match o with
-37 |       | None -> not (List.mem a (List.map fst h.contents))
-38 |       | Some b -> List.mem (a, b) h.contents *)
+37 |       | None -> not (Sequence.mem (Sequence.map fst h.contents) a)
+38 |       | Some b -> Sequence.mem h.contents (a, b) *)
 Warning: Incomplete computation of the returned value in the specification of find_opt. Failure message won't be able to display the expected returned value.
 File "hashtbl.mli", line 40, characters 0-162:
 40 | val find_all : ('a, 'b) t -> 'a -> 'b list
 41 | (*@ bs = find_all h a
 42 |     ensures bs = Sequence.filter_map (fun (x, y) -> if x = a then Some y else None) h.contents *)
 Warning: Incomplete computation of the returned value in the specification of find_all. Failure message won't be able to display the expected returned value.
-File "hashtbl.mli", line 44, characters 0-106:
+File "hashtbl.mli", line 44, characters 0-114:
 44 | val mem : ('a, 'b) t -> 'a -> bool
 45 | (*@ b = mem h a
-46 |     ensures b = List.mem a (List.map fst h.contents) *)
+46 |     ensures b = Sequence.mem (Sequence.map fst h.contents) a *)
 Warning: Incomplete computation of the returned value in the specification of mem. Failure message won't be able to display the expected returned value.

@@ -10,13 +10,14 @@ module SUT =
                            end)
 module ModelElt =
   struct
-    type nonrec elt = {
-      contents: (char * int) list }
+    type nonrec elt =
+      {
+      contents: (char * int) Ortac_runtime.Gospelstdlib.sequence }
     let init =
       let () = () in
       {
         contents =
-          (try []
+          (try Ortac_runtime.Gospelstdlib.Sequence.empty
            with
            | e ->
                raise
@@ -27,15 +28,15 @@ module ModelElt =
                           {
                             pos_fname = "tuples.mli";
                             pos_lnum = 6;
-                            pos_bol = 251;
-                            pos_cnum = 276
+                            pos_bol = 259;
+                            pos_cnum = 284
                           };
                         Ortac_runtime.stop =
                           {
                             pos_fname = "tuples.mli";
                             pos_lnum = 6;
-                            pos_bol = 251;
-                            pos_cnum = 278
+                            pos_bol = 259;
+                            pos_cnum = 298
                           }
                       })))
       }
@@ -118,7 +119,7 @@ module Spec =
             let open ModelElt in
               {
                 contents =
-                  (try []
+                  (try Ortac_runtime.Gospelstdlib.Sequence.empty
                    with
                    | e ->
                        raise
@@ -129,15 +130,15 @@ module Spec =
                                   {
                                     pos_fname = "tuples.mli";
                                     pos_lnum = 6;
-                                    pos_bol = 251;
-                                    pos_cnum = 276
+                                    pos_bol = 259;
+                                    pos_cnum = 284
                                   };
                                 Ortac_runtime.stop =
                                   {
                                     pos_fname = "tuples.mli";
                                     pos_lnum = 6;
-                                    pos_bol = 251;
-                                    pos_cnum = 278
+                                    pos_bol = 259;
+                                    pos_cnum = 298
                                   }
                               })))
               } in
@@ -148,7 +149,7 @@ module Spec =
             let open ModelElt in
               {
                 contents =
-                  (try []
+                  (try Ortac_runtime.Gospelstdlib.Sequence.empty
                    with
                    | e ->
                        raise
@@ -159,15 +160,15 @@ module Spec =
                                   {
                                     pos_fname = "tuples.mli";
                                     pos_lnum = 11;
-                                    pos_bol = 416;
-                                    pos_cnum = 441
+                                    pos_bol = 448;
+                                    pos_cnum = 473
                                   };
                                 Ortac_runtime.stop =
                                   {
                                     pos_fname = "tuples.mli";
                                     pos_lnum = 11;
-                                    pos_bol = 416;
-                                    pos_cnum = 443
+                                    pos_bol = 448;
+                                    pos_cnum = 487
                                   }
                               })))
               } in
@@ -180,7 +181,9 @@ module Spec =
                 contents =
                   (try
                      match tup with
-                     | (a_1, b_1) -> (a_1, b_1) :: h_2__008_.contents
+                     | (a_1, b_1) ->
+                         Ortac_runtime.Gospelstdlib.Sequence.cons (a_1, b_1)
+                           h_2__008_.contents
                    with
                    | e ->
                        raise
@@ -191,15 +194,15 @@ module Spec =
                                   {
                                     pos_fname = "tuples.mli";
                                     pos_lnum = 16;
-                                    pos_bol = 594;
-                                    pos_cnum = 619
+                                    pos_bol = 650;
+                                    pos_cnum = 675
                                   };
                                 Ortac_runtime.stop =
                                   {
                                     pos_fname = "tuples.mli";
                                     pos_lnum = 16;
-                                    pos_bol = 594;
-                                    pos_cnum = 666
+                                    pos_bol = 650;
+                                    pos_cnum = 735
                                   }
                               })))
               } in
@@ -214,7 +217,9 @@ module Spec =
                      match tup_1 with
                      | (c, a_2, b_2) ->
                          if c = true
-                         then (a_2, b_2) :: h_3__010_.contents
+                         then
+                           Ortac_runtime.Gospelstdlib.Sequence.cons
+                             (a_2, b_2) h_3__010_.contents
                          else h_3__010_.contents
                    with
                    | e ->
@@ -226,15 +231,15 @@ module Spec =
                                   {
                                     pos_fname = "tuples.mli";
                                     pos_lnum = 21;
-                                    pos_bol = 871;
-                                    pos_cnum = 896
+                                    pos_bol = 953;
+                                    pos_cnum = 978
                                   };
                                 Ortac_runtime.stop =
                                   {
                                     pos_fname = "tuples.mli";
                                     pos_lnum = 23;
-                                    pos_bol = 965;
-                                    pos_cnum = 992
+                                    pos_bol = 1060;
+                                    pos_cnum = 1087
                                   }
                               })))
               } in
@@ -249,7 +254,9 @@ module Spec =
                      match tup_2 with
                      | (c_1, (a_3, b_3)) ->
                          if c_1 = true
-                         then (a_3, b_3) :: h_4__012_.contents
+                         then
+                           Ortac_runtime.Gospelstdlib.Sequence.cons
+                             (a_3, b_3) h_4__012_.contents
                          else h_4__012_.contents
                    with
                    | e ->
@@ -261,15 +268,15 @@ module Spec =
                                   {
                                     pos_fname = "tuples.mli";
                                     pos_lnum = 28;
-                                    pos_bol = 1156;
-                                    pos_cnum = 1181
+                                    pos_bol = 1251;
+                                    pos_cnum = 1276
                                   };
                                 Ortac_runtime.stop =
                                   {
                                     pos_fname = "tuples.mli";
                                     pos_lnum = 30;
-                                    pos_bol = 1252;
-                                    pos_cnum = 1279
+                                    pos_bol = 1360;
+                                    pos_cnum = 1387
                                   }
                               })))
               } in
@@ -401,7 +408,7 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                  lazy (Model.get (Lazy.force new_state__021_) 0) in
                try
                  (Ortac_runtime.Gospelstdlib.integer_of_int x) =
-                   (Ortac_runtime.Gospelstdlib.List.length
+                   (Ortac_runtime.Gospelstdlib.Sequence.length
                       (Lazy.force t_new__027_).contents)
                with
                | e ->
@@ -413,15 +420,15 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                               {
                                 pos_fname = "tuples.mli";
                                 pos_lnum = 34;
-                                pos_bol = 1422;
-                                pos_cnum = 1434
+                                pos_bol = 1530;
+                                pos_cnum = 1542
                               };
                             Ortac_runtime.stop =
                               {
                                 pos_fname = "tuples.mli";
                                 pos_lnum = 34;
-                                pos_bol = 1422;
-                                pos_cnum = 1460
+                                pos_bol = 1530;
+                                pos_cnum = 1572
                               }
                           }))
              then None
@@ -430,21 +437,21 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                  (Ortac_runtime.report "Tuples" "create ()"
                     (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
                     "size_tup"
-                    [("x = List.length t.contents",
+                    [("x = Sequence.length t.contents",
                        {
                          Ortac_runtime.start =
                            {
                              pos_fname = "tuples.mli";
                              pos_lnum = 34;
-                             pos_bol = 1422;
-                             pos_cnum = 1434
+                             pos_bol = 1530;
+                             pos_cnum = 1542
                            };
                          Ortac_runtime.stop =
                            {
                              pos_fname = "tuples.mli";
                              pos_lnum = 34;
-                             pos_bol = 1422;
-                             pos_cnum = 1460
+                             pos_bol = 1530;
+                             pos_cnum = 1572
                            }
                        })]))
             (if
@@ -453,7 +460,7 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                  lazy (Model.get (Lazy.force new_state__021_) 0) in
                try
                  (Ortac_runtime.Gospelstdlib.integer_of_int y) =
-                   (Ortac_runtime.Gospelstdlib.List.length
+                   (Ortac_runtime.Gospelstdlib.Sequence.length
                       (Lazy.force t_new__029_).contents)
                with
                | e ->
@@ -465,15 +472,15 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                               {
                                 pos_fname = "tuples.mli";
                                 pos_lnum = 35;
-                                pos_bol = 1461;
-                                pos_cnum = 1473
+                                pos_bol = 1573;
+                                pos_cnum = 1585
                               };
                             Ortac_runtime.stop =
                               {
                                 pos_fname = "tuples.mli";
                                 pos_lnum = 35;
-                                pos_bol = 1461;
-                                pos_cnum = 1499
+                                pos_bol = 1573;
+                                pos_cnum = 1615
                               }
                           }))
              then None
@@ -482,21 +489,21 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                  (Ortac_runtime.report "Tuples" "create ()"
                     (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
                     "size_tup"
-                    [("y = List.length t.contents",
+                    [("y = Sequence.length t.contents",
                        {
                          Ortac_runtime.start =
                            {
                              pos_fname = "tuples.mli";
                              pos_lnum = 35;
-                             pos_bol = 1461;
-                             pos_cnum = 1473
+                             pos_bol = 1573;
+                             pos_cnum = 1585
                            };
                          Ortac_runtime.stop =
                            {
                              pos_fname = "tuples.mli";
                              pos_lnum = 35;
-                             pos_bol = 1461;
-                             pos_cnum = 1499
+                             pos_bol = 1573;
+                             pos_cnum = 1615
                            }
                        })]))
       | (Size_tup', Res ((Tup3 (Int, Int, Int), _), (x_1, y_1, z))) ->
@@ -507,7 +514,7 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                  lazy (Model.get (Lazy.force new_state__021_) 0) in
                try
                  (Ortac_runtime.Gospelstdlib.integer_of_int x_1) =
-                   (Ortac_runtime.Gospelstdlib.List.length
+                   (Ortac_runtime.Gospelstdlib.Sequence.length
                       (Lazy.force t_new__032_).contents)
                with
                | e ->
@@ -519,15 +526,15 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                               {
                                 pos_fname = "tuples.mli";
                                 pos_lnum = 39;
-                                pos_bol = 1664;
-                                pos_cnum = 1676
+                                pos_bol = 1784;
+                                pos_cnum = 1796
                               };
                             Ortac_runtime.stop =
                               {
                                 pos_fname = "tuples.mli";
                                 pos_lnum = 39;
-                                pos_bol = 1664;
-                                pos_cnum = 1702
+                                pos_bol = 1784;
+                                pos_cnum = 1826
                               }
                           }))
              then None
@@ -536,21 +543,21 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                  (Ortac_runtime.report "Tuples" "create ()"
                     (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
                     "size_tup'"
-                    [("x = List.length t.contents",
+                    [("x = Sequence.length t.contents",
                        {
                          Ortac_runtime.start =
                            {
                              pos_fname = "tuples.mli";
                              pos_lnum = 39;
-                             pos_bol = 1664;
-                             pos_cnum = 1676
+                             pos_bol = 1784;
+                             pos_cnum = 1796
                            };
                          Ortac_runtime.stop =
                            {
                              pos_fname = "tuples.mli";
                              pos_lnum = 39;
-                             pos_bol = 1664;
-                             pos_cnum = 1702
+                             pos_bol = 1784;
+                             pos_cnum = 1826
                            }
                        })]))
             (Ortac_runtime.append
@@ -560,7 +567,7 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                     lazy (Model.get (Lazy.force new_state__021_) 0) in
                   try
                     (Ortac_runtime.Gospelstdlib.integer_of_int y_1) =
-                      (Ortac_runtime.Gospelstdlib.List.length
+                      (Ortac_runtime.Gospelstdlib.Sequence.length
                          (Lazy.force t_new__034_).contents)
                   with
                   | e ->
@@ -572,15 +579,15 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                                  {
                                    pos_fname = "tuples.mli";
                                    pos_lnum = 40;
-                                   pos_bol = 1703;
-                                   pos_cnum = 1715
+                                   pos_bol = 1827;
+                                   pos_cnum = 1839
                                  };
                                Ortac_runtime.stop =
                                  {
                                    pos_fname = "tuples.mli";
                                    pos_lnum = 40;
-                                   pos_bol = 1703;
-                                   pos_cnum = 1741
+                                   pos_bol = 1827;
+                                   pos_cnum = 1869
                                  }
                              }))
                 then None
@@ -589,21 +596,21 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                     (Ortac_runtime.report "Tuples" "create ()"
                        (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
                        "size_tup'"
-                       [("y = List.length t.contents",
+                       [("y = Sequence.length t.contents",
                           {
                             Ortac_runtime.start =
                               {
                                 pos_fname = "tuples.mli";
                                 pos_lnum = 40;
-                                pos_bol = 1703;
-                                pos_cnum = 1715
+                                pos_bol = 1827;
+                                pos_cnum = 1839
                               };
                             Ortac_runtime.stop =
                               {
                                 pos_fname = "tuples.mli";
                                 pos_lnum = 40;
-                                pos_bol = 1703;
-                                pos_cnum = 1741
+                                pos_bol = 1827;
+                                pos_cnum = 1869
                               }
                           })]))
                (if
@@ -612,7 +619,7 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                     lazy (Model.get (Lazy.force new_state__021_) 0) in
                   try
                     (Ortac_runtime.Gospelstdlib.integer_of_int z) =
-                      (Ortac_runtime.Gospelstdlib.List.length
+                      (Ortac_runtime.Gospelstdlib.Sequence.length
                          (Lazy.force t_new__036_).contents)
                   with
                   | e ->
@@ -624,15 +631,15 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                                  {
                                    pos_fname = "tuples.mli";
                                    pos_lnum = 41;
-                                   pos_bol = 1742;
-                                   pos_cnum = 1754
+                                   pos_bol = 1870;
+                                   pos_cnum = 1882
                                  };
                                Ortac_runtime.stop =
                                  {
                                    pos_fname = "tuples.mli";
                                    pos_lnum = 41;
-                                   pos_bol = 1742;
-                                   pos_cnum = 1780
+                                   pos_bol = 1870;
+                                   pos_cnum = 1912
                                  }
                              }))
                 then None
@@ -641,21 +648,21 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                     (Ortac_runtime.report "Tuples" "create ()"
                        (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
                        "size_tup'"
-                       [("z = List.length t.contents",
+                       [("z = Sequence.length t.contents",
                           {
                             Ortac_runtime.start =
                               {
                                 pos_fname = "tuples.mli";
                                 pos_lnum = 41;
-                                pos_bol = 1742;
-                                pos_cnum = 1754
+                                pos_bol = 1870;
+                                pos_cnum = 1882
                               };
                             Ortac_runtime.stop =
                               {
                                 pos_fname = "tuples.mli";
                                 pos_lnum = 41;
-                                pos_bol = 1742;
-                                pos_cnum = 1780
+                                pos_bol = 1870;
+                                pos_cnum = 1912
                               }
                           })])))
       | _ -> None

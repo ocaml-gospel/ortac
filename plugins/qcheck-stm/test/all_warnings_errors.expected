@@ -59,14 +59,14 @@ File "all_warnings.mli", line 36, characters 0-66:
 36 | val type_not_supported : 'a t -> s
 37 | (*@ s = type_not_supported t *)
 Warning: Incomplete computation of the returned value in the specification of type_not_supported. Failure message won't be able to display the expected returned value.
-File "all_warnings.mli", line 48, characters 0-140:
+File "all_warnings.mli", line 48, characters 0-144:
 48 | val unsupported_quantification : 'a t -> bool
 49 | (*@ b = unsupported_quantification t
-50 |     ensures b = forall a. List.mem a t.contents -> p a *)
+50 |     ensures b = forall a. Sequence.mem a t.contents -> p a *)
 Warning: Incomplete computation of the returned value in the specification of unsupported_quantification. Failure message won't be able to display the expected returned value.
-File "all_warnings.mli", line 50, characters 16-54:
-50 |     ensures b = forall a. List.mem a t.contents -> p a *)
-                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "all_warnings.mli", line 50, characters 16-58:
+50 |     ensures b = forall a. Sequence.mem a t.contents -> p a *)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping clause: unsupported quantification.
 File "all_warnings.mli", line 52, characters 0-111:
 52 | val record_not_model_field : 'a t -> bool
