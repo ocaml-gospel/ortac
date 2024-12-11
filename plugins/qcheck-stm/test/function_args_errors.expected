@@ -1,0 +1,9 @@
+File "function_args.mli", line 16, characters 19-47:
+16 | val third_order : (char -> (int -> int) -> char) -> t -> int
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Warning: Third-order functions and above are not supported in third_order.
+File "function_args.mli", line 20, characters 23-66:
+20 | val arity_over_four : (char -> char -> char -> char -> char -> int) -> t -> int
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Warning: Skipping arity_over_four: Can only test function arguments with
+         arity < 5.

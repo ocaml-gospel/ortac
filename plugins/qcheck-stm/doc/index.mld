@@ -392,7 +392,8 @@ val for_all : 'a t -> bool
 
 Finally, note that this tool is still fairly new and comes with limitations
 that should be lifted in the future. Fow now, we only support tuples with less
-than 10 elements and we only support first-order functions.
+than 10 elements and we only support first-order functions and second-order
+functions up to arity four.
 
 If we add the following declarations to our example file,
 
@@ -403,8 +404,9 @@ val of_list : 'a list -> 'a t
 val g : 'a t -> 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a -> bool
 (*@ b = g t x *)
 
-val for_all : ('a -> bool) -> 'a t -> bool
-(*@ b = for_all p t *)
+val large_second_order_arity :
+  ('a -> 'a -> 'a -> 'a -> 'a -> bool) -> 'a t -> bool
+(*@ b = large_second_order_arity p t *)
 ]}
 
 Ortac/QCheck-STM will generate the following warnings:
@@ -423,10 +425,11 @@ File "example_limitations.mli", line 20, characters 16-63:
 20 | val g : 'a t -> 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a -> bool
                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping g: Can only test tuples with arity < 10.
-File "example_limitations.mli", line 23, characters 15-25:
-23 | val for_all : ('a -> bool) -> 'a t -> bool
-                    ^^^^^^^^^^
-Warning: Skipping for_all: functions are not supported yet as arguments.
+File "example_limitations.mli", line 24, characters 3-37:
+24 |   ('a -> 'a -> 'a -> 'a -> 'a -> bool) -> 'a t -> bool
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Warning: Skipping large_second_order_arity: Can only test function arguments
+         with arity < 5.
 ]}
 
 {2:returning-sut Functions returning a SUT}

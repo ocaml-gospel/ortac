@@ -35,7 +35,9 @@ type W.kind +=
   | Sut_type_not_supported of string
   | Syntax_error_in_config_module of string
   | Tuple_arity of string
+  | Function_arity of string
   | Type_not_supported of string
+  | Type_not_supported_in_function_argument of string
   | Type_not_supported_for_sut_parameter of string
   | Type_parameter_not_instantiated of string
 
@@ -45,8 +47,8 @@ let level kind =
   | Ensures_not_found_for_ret_sut _ | Functional_argument _ | Ghost_values _
   | Impossible_term_substitution _ | Incompatible_type _
   | Incomplete_ret_val_computation _ | No_spec _ | Returning_nested_sut _
-  | Sut_as_type_inst _ | Sut_in_tuple _ | Tuple_arity _ | Type_not_supported _
-    ->
+  | Sut_as_type_inst _ | Sut_in_tuple _ | Tuple_arity _ | Function_arity _
+  | Type_not_supported _ | Type_not_supported_in_function_argument _ ->
       W.Warning
   | Impossible_init_state_generation _ | Incompatible_sut _
   | Incomplete_configuration_module _ | No_configuration_file _
@@ -122,10 +124,15 @@ let pp_kind ppf kind =
       pf ppf "Skipping clause:@ %a" text msg
   | Tuple_arity fct ->
       pf ppf "Skipping %s:@ %a" fct text "Can only test tuples with arity < 10"
+  | Function_arity fct ->
+      pf ppf "Skipping %s:@ %a" fct text
+        "Can only test function arguments with arity < 5"
   (* This following message is broad and used in seemingly different contexts
      but in fact we support all the types that the Gospel type-checker supports,
      so that error message should never get reported to the end user *)
   | Type_not_supported ty -> pf ppf "Type %s not supported" ty
+  | Type_not_supported_in_function_argument name ->
+      pf ppf "Third-order functions and above are not supported in %s" name
   (* Errors *)
   | Impossible_init_state_generation (Mismatch_number_of_arguments fct) ->
       pf ppf "Error in INIT expression %s:@ %a" fct text
