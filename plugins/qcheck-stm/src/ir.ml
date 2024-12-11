@@ -68,7 +68,8 @@ let get_return_type value =
   in
   aux value.ty
 
-let value id ty inst sut_vars fun_vars args ret ret_values next_states precond postcond =
+let value id ty inst sut_vars fun_vars args ret ret_values next_states precond
+    postcond =
   {
     id;
     ty;

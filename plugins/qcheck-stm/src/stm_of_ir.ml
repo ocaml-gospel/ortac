@@ -47,12 +47,11 @@ let subst_core_type ~insert_prefix inst ty =
         | Ptyp_arrow (x, l, r) ->
             let l = aux ~inside_arrow:true l and r = aux ~inside_arrow:true r in
             let arrow = Ptyp_arrow (x, l, r) in
-            if inside_arrow
-            then arrow
+            if inside_arrow then arrow
             else
               let fun_name = if insert_prefix then "QCheck.fun_" else "fun_" in
               (* "int -> char" ~~> "(int -> char) fun_" *)
-              Ptyp_constr (lident fun_name, [{ty with ptyp_desc = arrow}])
+              Ptyp_constr (lident fun_name, [ { ty with ptyp_desc = arrow } ])
         | Ptyp_tuple elems ->
             let elems = List.map (aux ~inside_arrow) elems in
             Ptyp_tuple elems
@@ -86,15 +85,15 @@ let ocaml_of_term cfg t =
   try term_with_catch ~context:cfg.Cfg.context t |> ok
   with W.Error e -> error e
 
-(** [subst_term state ~gos_t ?old_lz ~old_t ?new_lz ~new_t ~fun_vars trm] will substitute
-    occurrences in [gos_t] with the associated values from [new_t] or [old_t]
-    depending on whether the occurrence appears above or under the [old]
+(** [subst_term state ~gos_t ?old_lz ~old_t ?new_lz ~new_t ~fun_vars trm] will
+    substitute occurrences in [gos_t] with the associated values from [new_t] or
+    [old_t] depending on whether the occurrence appears above or under the [old]
     operator, adding a [Lazy.force] if the corresponding [xxx_lz] is [true]
     (defaults to [false]). [gos_t] must always be in a position in which it is
     applied to one of its model fields. Calling [subst_term] with [new_t] and
     [old_t] as the empty list will check that the term does not contain [gos_t] *)
-let subst_term state ?(out_of_scope = []) ~gos_t ?(old_lz = false) ~fun_vars ~old_t
-    ?(new_lz = false) ~new_t term =
+let subst_term state ?(out_of_scope = []) ~gos_t ?(old_lz = false) ~fun_vars
+    ~old_t ?(new_lz = false) ~new_t term =
   let exception
     ImpossibleSubst of
       (Gospel.Tterm.term * [ `Never | `New | `Old | `NotModel | `OutOfScope ])
@@ -127,8 +126,14 @@ let subst_term state ?(out_of_scope = []) ~gos_t ?(old_lz = false) ~fun_vars ~ol
         let open Gospel in
         let fn_apply_name = Ident.create ~loc:Location.none "QCheck.Fn.apply" in
         let fn_apply_ty = Ttypes.fresh_ty_var "a" in
-        let fn_apply_term = Tterm_helper.mk_term (Tvar { vs_name = fn_apply_name; vs_ty = fn_apply_ty}) None Location.none in
-        Tterm_helper.mk_term (Tapp (Symbols.fs_apply, [fn_apply_term; term])) None Location.none
+        let fn_apply_term =
+          Tterm_helper.mk_term
+            (Tvar { vs_name = fn_apply_name; vs_ty = fn_apply_ty })
+            None Location.none
+        in
+        Tterm_helper.mk_term
+          (Tapp (Symbols.fs_apply, [ fn_apply_term; term ]))
+          None Location.none
     (* If the first case didn't match, it must be because [gos_t] is not used to
        access one of its model fields, so we error out *)
     | Tvar { vs_name; _ } when List.mem vs_name gos_t ->
@@ -168,7 +173,8 @@ let subst_term state ?(out_of_scope = []) ~gos_t ?(old_lz = false) ~fun_vars ~ol
 
 let translate_checks config state value sut_map t =
   let open Reserr in
-  subst_term state ~gos_t:value.sut_vars ~old_t:sut_map ~new_t:sut_map ~fun_vars:value.fun_vars t.term
+  subst_term state ~gos_t:value.sut_vars ~old_t:sut_map ~new_t:sut_map
+    ~fun_vars:value.fun_vars t.term
   >>= ocaml_of_term config
 
 let str_of_ident = Fmt.str "%a" Ident.pp
@@ -232,15 +238,17 @@ let pat_of_core_type inst typ =
 
 let prefix_identifier ~prefix id =
   let name = Printf.sprintf "%s.%s" prefix id in
-  (*pexp_apply*) (evar name) (*[]*)
+  (*pexp_apply*) evar name
+(*[]*)
 
 let exp_of_core_type ?(use_small = false) inst typ =
   let rec collect_args_and_ret ty =
     match ty.ptyp_desc with
     | Ptyp_arrow (_, t1, t2) ->
-      let args,ret = collect_args_and_ret t2 in
-      t1::args,ret
-    | _ -> [],ty in
+        let args, ret = collect_args_and_ret t2 in
+        (t1 :: args, ret)
+    | _ -> ([], ty)
+  in
   let rec aux ty =
     let open Reserr in
     match ty.ptyp_desc with
@@ -266,56 +274,71 @@ let exp_of_core_type ?(use_small = false) inst typ =
         pexp_apply tup_constr
         <$> (List.map (fun e -> (Nolabel, e)) <$> promote_map aux xs)
     | Ptyp_arrow (_, _, _) ->
-      (* Idea:      "int -> bool" ~~> "(fun1 Observable.int QCheck.bool).gen"
-          "int -> string -> bool" ~~> "(fun2 Observable.int Observable.string QCheck.bool).gen" *)
-      let args,ret = collect_args_and_ret typ in
-      let arity = List.length args in
-      let fun_gen_name = Printf.sprintf "fun%i" arity in
-      let rec build_observable t = match t.ptyp_desc with
-        | Ptyp_constr (c, xs) ->
-          let* constr_id = munge_longident false t c in
-          let constr = prefix_identifier ~prefix:"Observable" constr_id in
-          (match xs with
-           | [] -> constr |> ok (* example: int -> Observable.int *)
-           | _ ->               (* example: int option -> Observable.option Observable.int *)
-             pexp_apply constr <$> (List.map (fun e -> (Nolabel, e)) <$> promote_map build_observable xs))
-        | Ptyp_var v ->
-          (match List.assoc_opt v inst with
-           | None -> prefix_identifier ~prefix:"Observable" ty_default_name |> ok
-           | Some t -> build_observable t) (*recurse on instantiated arg type*)
-        | _ ->
-          error
-            (Type_not_supported_in_function_argument (Fmt.str "%a" Pprintast.core_type t),
-             typ.ptyp_loc) in
-      (* range is an arbitrary, but for unit, bool, char, int, float, tup, ... names agress *)
-      let rec build_arbitrary t = match t.ptyp_desc with
-        | Ptyp_constr (c, xs) ->
-          let* constr_id = munge_longident false t c in
-          let constr = prefix_identifier ~prefix:"QCheck" constr_id in
-          (match xs with
-           | [] -> constr |> ok (* example: int -> QCheck.int *)
-           | _ ->               (* example: int option -> QCheck.option QCheck.int *)
-             pexp_apply constr <$> (List.map (fun e -> (Nolabel, e)) <$> promote_map build_arbitrary xs))
-        | Ptyp_var v ->
-          (match List.assoc_opt v inst with
-           | None -> prefix_identifier ~prefix:"QCheck" ty_default_name |> ok
-           | Some t -> build_arbitrary t) (*recurse on instantiated result type*)
-        | _ ->
-          error
-            (Type_not_supported_in_function_argument (Fmt.str "%a" Pprintast.core_type t),
-             t.ptyp_loc) in
-      (fun gen ->
-        pexp_field (* add the final field projection [.gen] to obtain a Gen.t from an arbitrary *)
-          (pexp_apply (pexp_ident (lident fun_gen_name)) gen)
-          (lident "gen"))
-        <$>
-        (List.map (fun e -> (Nolabel, e))
-         <$>
-          (* visit all args, prefix with "Observable." *)
-         (let observable_args = List.map build_observable args in
-          (* the final arg is an arbitrary, hence we prefix with QCheck to avoid picking from QCheck.Gen *)
-          let final_arg = build_arbitrary ret in
-          (observable_args @ [final_arg]) |> promote))
+        (* Idea:      "int -> bool" ~~> "(fun1 Observable.int QCheck.bool).gen"
+            "int -> string -> bool" ~~> "(fun2 Observable.int Observable.string QCheck.bool).gen" *)
+        let args, ret = collect_args_and_ret typ in
+        let arity = List.length args in
+        let fun_gen_name = Printf.sprintf "fun%i" arity in
+        let rec build_observable t =
+          match t.ptyp_desc with
+          | Ptyp_constr (c, xs) -> (
+              let* constr_id = munge_longident false t c in
+              let constr = prefix_identifier ~prefix:"Observable" constr_id in
+              match xs with
+              | [] -> constr |> ok (* example: int -> Observable.int *)
+              | _ ->
+                  (* example: int option -> Observable.option Observable.int *)
+                  pexp_apply constr
+                  <$> (List.map (fun e -> (Nolabel, e))
+                      <$> promote_map build_observable xs))
+          | Ptyp_var v -> (
+              match List.assoc_opt v inst with
+              | None ->
+                  prefix_identifier ~prefix:"Observable" ty_default_name |> ok
+              | Some t ->
+                  build_observable t (*recurse on instantiated arg type*))
+          | _ ->
+              error
+                ( Type_not_supported_in_function_argument
+                    (Fmt.str "%a" Pprintast.core_type t),
+                  typ.ptyp_loc )
+        in
+        (* range is an arbitrary, but for unit, bool, char, int, float, tup, ... names agress *)
+        let rec build_arbitrary t =
+          match t.ptyp_desc with
+          | Ptyp_constr (c, xs) -> (
+              let* constr_id = munge_longident false t c in
+              let constr = prefix_identifier ~prefix:"QCheck" constr_id in
+              match xs with
+              | [] -> constr |> ok (* example: int -> QCheck.int *)
+              | _ ->
+                  (* example: int option -> QCheck.option QCheck.int *)
+                  pexp_apply constr
+                  <$> (List.map (fun e -> (Nolabel, e))
+                      <$> promote_map build_arbitrary xs))
+          | Ptyp_var v -> (
+              match List.assoc_opt v inst with
+              | None -> prefix_identifier ~prefix:"QCheck" ty_default_name |> ok
+              | Some t ->
+                  build_arbitrary t (*recurse on instantiated result type*))
+          | _ ->
+              error
+                ( Type_not_supported_in_function_argument
+                    (Fmt.str "%a" Pprintast.core_type t),
+                  t.ptyp_loc )
+        in
+        (fun gen ->
+          pexp_field
+            (* add the final field projection [.gen] to obtain a Gen.t from an arbitrary *)
+            (pexp_apply (pexp_ident (lident fun_gen_name)) gen)
+            (lident "gen"))
+        <$> (List.map (fun e -> (Nolabel, e))
+            <$>
+            (* visit all args, prefix with "Observable." *)
+            let observable_args = List.map build_observable args in
+            (* the final arg is an arbitrary, hence we prefix with QCheck to avoid picking from QCheck.Gen *)
+            let final_arg = build_arbitrary ret in
+            observable_args @ [ final_arg ] |> promote)
     | _ ->
         error
           ( Type_not_supported (Fmt.str "%a" Pprintast.core_type typ),
@@ -400,12 +423,17 @@ let run_case config sut_name value =
       let trans_lb = function Optional l -> Labelled l | l -> l in
       let rec aux ty args sut_vars fun_vars =
         match (ty.ptyp_desc, args, sut_vars, fun_vars) with
-        | Ptyp_arrow (lb, l, r), xs, sut :: rest, fun_vars when Cfg.is_sut config l ->
+        | Ptyp_arrow (lb, l, r), xs, sut :: rest, fun_vars
+          when Cfg.is_sut config l ->
             let tmp = gen_symbol ~prefix:(str_of_ident sut) () in
             let suts, args = aux r xs rest fun_vars in
             (tmp :: suts, (trans_lb lb, evar tmp) :: args)
-        | Ptyp_arrow (lb, l, r), _x::xs, sut_vars, f::fun_vars when is_a_function l ->
-            let app = pexp_apply (evar "QCheck.Fn.apply") [(trans_lb lb, exp_of_ident f)] in
+        | Ptyp_arrow (lb, l, r), _x :: xs, sut_vars, f :: fun_vars
+          when is_a_function l ->
+            let app =
+              pexp_apply (evar "QCheck.Fn.apply")
+                [ (trans_lb lb, exp_of_ident f) ]
+            in
             let suts, args = aux r xs sut_vars fun_vars in
             (suts, (trans_lb lb, app) :: args)
         | Ptyp_arrow (lb, _, r), x :: xs, suts, fun_vars ->
@@ -417,7 +445,9 @@ let run_case config sut_name value =
               "shouldn't happen (list of arguments should be consistent with \
                type)"
       in
-      let suts, args = aux value.ty (List.map snd value.args) value.sut_vars value.fun_vars in
+      let suts, args =
+        aux value.ty (List.map snd value.args) value.sut_vars value.fun_vars
+      in
       (suts, pexp_apply efun args)
     in
     let call = if may_raise_exception value then eprotect call else call in
@@ -515,8 +545,9 @@ let next_state_case state config state_ident nb_models value =
             let descriptions =
               List.filter_map
                 (fun (i, { model; description }) ->
-                  subst_term ~out_of_scope:value.ret state ~gos_t:value.sut_vars ~fun_vars:value.fun_vars
-                    ~old_t:sut_map ~new_t:modified_sut_map description
+                  subst_term ~out_of_scope:value.ret state ~gos_t:value.sut_vars
+                    ~fun_vars:value.fun_vars ~old_t:sut_map
+                    ~new_t:modified_sut_map description
                   >>= ocaml_of_term config
                   |> to_option
                   |> Option.map (fun description -> (i, model, description)))
@@ -640,7 +671,8 @@ let precond_case config state state_ident value =
       list_and
       <$> promote_map
             (fun t ->
-              subst_term state ~gos_t:value.sut_vars ~fun_vars:value.fun_vars ~old_t:[] ~new_t:sut_map t
+              subst_term state ~gos_t:value.sut_vars ~fun_vars:value.fun_vars
+                ~old_t:[] ~new_t:sut_map t
               >>= ocaml_of_term config)
             value.precond
       >>= wrap
@@ -722,8 +754,8 @@ let postcond_case config state invariants idx state_ident new_state_ident value
       List.fold_left aux ([], [], []) value.sut_vars
     in
     let wrap e = (if vbs <> [] then pexp_let Nonrecursive vbs e else e) |> ok in
-    subst_term state ~gos_t:value.sut_vars ~fun_vars:value.fun_vars ~old_lz:false ~old_t:sut_map_old
-      ~new_lz:true ~new_t:sut_map_new t.term
+    subst_term state ~gos_t:value.sut_vars ~fun_vars:value.fun_vars
+      ~old_lz:false ~old_t:sut_map_old ~new_lz:true ~new_t:sut_map_new t.term
     >>= ocaml_of_term config
     >>= wrap
   and translate_invariants idx sut id t =
@@ -745,8 +777,8 @@ let postcond_case config state invariants idx state_ident new_state_ident value
     in
     let wrap = pexp_let Nonrecursive [ vbs ] in
     let* subst_term =
-      subst_term state ~gos_t:[ id ] ~fun_vars:value.fun_vars ~old_t:[] ~new_t:[ sut_map ] ~new_lz:true
-        t.term
+      subst_term state ~gos_t:[ id ] ~fun_vars:value.fun_vars ~old_t:[]
+        ~new_t:[ sut_map ] ~new_lz:true t.term
     in
     let* ocaml_term = ocaml_of_term config subst_term in
     ocaml_term |> wrap |> ok
@@ -1020,7 +1052,9 @@ let dummy_postcond =
 let cmd_constructor value =
   let name = String.capitalize_ascii value.id.Ident.id_str |> noloc in
   let args =
-    List.map (fun (ty, _) -> subst_core_type ~insert_prefix:true value.inst ty) value.args
+    List.map
+      (fun (ty, _) -> subst_core_type ~insert_prefix:true value.inst ty)
+      value.args
   in
   constructor_declaration ~name ~args:(Pcstr_tuple args) ~res:None
 
@@ -1045,13 +1079,13 @@ let pp_cmd_case config value =
         let* pps = promote_map pp_of_ty xs in
         let func = qualify_pp ("pp_tuple" ^ string_of_int (List.length xs)) in
         ok (pexp_apply func (List.map (fun e -> (Nolabel, e)) pps))
-    | Ptyp_constr (lid, xs) ->
+    | Ptyp_constr (lid, xs) -> (
         let* s = munge_longident false ty lid in
         let pp = qualify_pp ("pp_" ^ s) in
-          (match s,xs with
-          | "fun_",_ -> ok pp (* functions have embedded printers *)
-          | _,[] -> ok pp
-          | _ ->
+        match (s, xs) with
+        | "fun_", _ -> ok pp (* functions have embedded printers *)
+        | _, [] -> ok pp
+        | _ ->
             let* xs = promote_map pp_of_ty xs in
             ok (pexp_apply pp (List.map (fun x -> (Nolabel, x)) xs)))
     | _ ->
@@ -1154,8 +1188,8 @@ let init_state config ir =
   let translate_field_desc Ir.{ model; description } =
     let* desc =
       subst_term ir.state
-        ~gos_t:[ ir.init_state.returned_sut ] ~fun_vars:[]
-        ~old_t:[] ~new_t:[] description
+        ~gos_t:[ ir.init_state.returned_sut ]
+        ~fun_vars:[] ~old_t:[] ~new_t:[] description
       >>= ocaml_of_term config
     in
     ok (model, desc)
@@ -1490,15 +1524,15 @@ let pp_ortac_cmd_case config suts last value =
         let* pps = promote_map pp_of_ty xs in
         let func = qualify_pp ("pp_tuple" ^ string_of_int (List.length xs)) in
         ok (pexp_apply func (List.map (fun e -> (Nolabel, e)) pps))
-    | Ptyp_constr (lid, xs) ->
+    | Ptyp_constr (lid, xs) -> (
         let* s = munge_longident false ty lid in
         let pp = qualify_pp ("pp_" ^ s) in
-        (match s,xs with
-        | "fun_",_ -> ok pp (* functions have embedded printers *)
-        | _,[] -> ok pp
+        match (s, xs) with
+        | "fun_", _ -> ok pp (* functions have embedded printers *)
+        | _, [] -> ok pp
         | _ ->
-          let* xs = promote_map pp_of_ty xs in
-          ok (pexp_apply pp (List.map (fun x -> (Nolabel, x)) xs)))
+            let* xs = promote_map pp_of_ty xs in
+            ok (pexp_apply pp (List.map (fun x -> (Nolabel, x)) xs)))
     | _ ->
         error
           (Type_not_supported (Fmt.str "%a" Pprintast.core_type ty), ty.ptyp_loc)
