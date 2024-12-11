@@ -1,5 +1,7 @@
 # Unreleased
 
+- Add support for generating function values
+  [\#277](https://github.com/ocaml-gospel/ortac/pull/277)
 - Extend QCheck-STM plugin tests
   [\#271](https://github.com/ocaml-gospel/ortac/pull/271)
 - Remove unnecessary stack access from precondition
