@@ -404,7 +404,8 @@ val of_list : 'a list -> 'a t
 val g : 'a t -> 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a -> bool
 (*@ b = g t x *)
 
-val large_second_order_arity : ('a -> 'a -> 'a -> 'a -> 'a -> bool) -> 'a t -> bool
+val large_second_order_arity :
+  ('a -> 'a -> 'a -> 'a -> 'a -> bool) -> 'a t -> bool
 (*@ b = large_second_order_arity p t *)
 ]}
 
@@ -424,9 +425,9 @@ File "example_limitations.mli", line 20, characters 16-63:
 20 | val g : 'a t -> 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a -> bool
                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping g: Can only test tuples with arity < 10.
-File "example_limitations.mli", line 23, characters 32-66:
-23 | val large_second_order_arity : ('a -> 'a -> 'a -> 'a -> 'a -> bool) -> 'a t -> bool
-                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "example_limitations.mli", line 24, characters 3-37:
+24 |   ('a -> 'a -> 'a -> 'a -> 'a -> bool) -> 'a t -> bool
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Warning: Skipping large_second_order_arity: Can only test function arguments
          with arity < 5.
 ]}
