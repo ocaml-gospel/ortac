@@ -1686,12 +1686,14 @@ let stm config ir =
     in
     Option.value config.cleanup ~default
   in
-  let open_mod m = pstr_open Ast_helper.(Opn.mk (Mod.ident (lident m))) in
+  let open_mod i =
+    pstr_open (open_infos ~expr:(pmod_ident i) ~override:Fresh)
+  in
   let sut_defs = sut_defs ir in
   let state_defs = state_defs ir in
   let spec_expr =
     pmod_structure
-      ((open_mod "STM" :: qcheck config)
+      ((open_mod (lident "STM") :: qcheck config)
       @ util config
       @ Option.value config.ty_mod ~default:[]
       @ integer_ty_ext
@@ -1739,7 +1741,7 @@ let stm config ir =
   let* model_mod = model_module config ir in
   ok
     (warn
-     :: open_mod module_name
+     :: open_mod (lident module_name)
      :: [%stri module Ortac_runtime = Ortac_runtime_qcheck_stm]
      :: ghost_types
     @ ghost_functions
