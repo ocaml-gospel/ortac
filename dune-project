@@ -157,7 +157,7 @@
   (ppxlib (>= 0.26.0))
   (mdx (and :with-test (>= 2.3.0)))
   (gospel (= 0.3.0))
-  (qcheck-stm (>= 0.4))
+  (qcheck-stm (>= 0.5))
   (ortac-core (= :version))
   (ortac-runtime-qcheck-stm (= :version)))
  (conflicts
@@ -193,7 +193,7 @@
   "Nikolaus Huber <mail@n-huber.eu>")
  (depends
   (ocaml (>= 4.12.0))
-  (qcheck-stm (>= 0.4))
+  (qcheck-stm (>= 0.5))
   (ortac-runtime (= :version))))
 
 (package
