@@ -13,6 +13,7 @@ type W.kind +=
   | Constant_value of string
   | Ensures_not_found_for_next_state of (string * string)
   | Ensures_not_found_for_ret_sut of (string * string list)
+  | Function_arity of string
   | Functional_argument of string
   | Ghost_values of (string * [ `Arg | `Ret ])
   | Impossible_init_state_generation of init_state_error
@@ -34,6 +35,7 @@ type W.kind +=
   | Sut_type_not_specified of string
   | Sut_type_not_supported of string
   | Syntax_error_in_config_module of string
+  | Third_order_function_argument of string
   | Tuple_arity of string
   | Type_not_supported of string
   | Type_not_supported_for_sut_parameter of string

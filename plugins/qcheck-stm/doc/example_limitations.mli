@@ -20,7 +20,8 @@ val of_list : 'a list -> 'a t
 val g : 'a t -> 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a * 'a -> bool
 (*@ b = g t x *)
 
-val for_all : ('a -> bool) -> 'a t -> bool
-(*@ b = for_all p t *)
+val large_second_order_arity :
+  ('a -> 'a -> 'a -> 'a -> 'a -> bool) -> 'a t -> bool
+(*@ b = large_second_order_arity p t *)
 
 (* $MDX part-end *)

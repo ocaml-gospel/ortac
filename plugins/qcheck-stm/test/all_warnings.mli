@@ -36,8 +36,13 @@ val ensures_not_found_for_next_state : 'a t -> unit
 val type_not_supported : 'a t -> s
 (*@ s = type_not_supported t *)
 
-val functional_argument : ('a -> bool) -> 'a t -> bool
-(*@ b = functional_argument p t *)
+val functional_argument_arity :
+  ('a -> 'a -> 'a -> 'a -> 'a -> bool) -> 'a t -> bool
+(*@ b = functional_argument_arity p t *)
+
+val functional_argument_third_order :
+  ('a -> ('a -> 'a -> bool) -> bool) -> 'a t -> bool
+(*@ b = functional_argument_third_order p t *)
 
 val ghost_argument : 'a t -> bool
 (*@ b = ghost_argument [x : bool] t *)
