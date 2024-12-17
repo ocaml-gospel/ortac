@@ -30,6 +30,7 @@ type W.kind +=
   | No_sut_type of string
   | Not_a_structure of string
   | Returning_nested_sut of string
+  | Sub_module_not_found of string
   | Sut_as_type_inst of string
   | Sut_in_tuple of string
   | Sut_type_not_specified of string
@@ -53,7 +54,7 @@ let level kind =
   | Impossible_init_state_generation _ | Incompatible_sut _
   | Incomplete_configuration_module _ | No_configuration_file _
   | No_init_function _ | No_models _ | No_sut_type _ | Not_a_structure _
-  | Sut_type_not_specified _ | Sut_type_not_supported _
+  | Sub_module_not_found _ | Sut_type_not_specified _ | Sut_type_not_supported _
   | Syntax_error_in_config_module _ | Type_not_supported_for_sut_parameter _
   | Type_parameter_not_instantiated _ ->
       W.Error
@@ -192,6 +193,7 @@ let pp_kind ppf kind =
   | Not_a_structure mod_name ->
       pf ppf "Unsupported %s module definition:@ %a" mod_name text
         "only structures are allowed as module definition here"
+  | Sub_module_not_found m -> pf ppf "Sub-module %s not found in file" m
   | Sut_as_type_inst f ->
       pf ppf "Skipping %s:@ %a" f text "unsupported SUT type as type argument"
   | Sut_in_tuple f ->
