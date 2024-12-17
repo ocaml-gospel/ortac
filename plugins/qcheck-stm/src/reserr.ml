@@ -255,6 +255,8 @@ let ( and* ) (a, aw) (b, bw) =
   in
   (r, aw @ bw)
 
+let ( <|> ) a b = match a with Ok _, _ -> a | _ -> Lazy.force b
+
 let fmap f r =
   let* r = r in
   ok (f r)

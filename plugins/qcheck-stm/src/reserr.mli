@@ -52,6 +52,11 @@ val ( let* ) : 'a reserr -> ('a -> 'b reserr) -> 'b reserr
 val ( >>= ) : 'a reserr -> ('a -> 'b reserr) -> 'b reserr
 val ( and* ) : 'a reserr -> 'b reserr -> ('a * 'b) reserr
 
+val ( <|> ) : 'a reserr -> 'a reserr Lazy.t -> 'a reserr
+(** [a <|> b] is the alternative between [a] and [b]. It picks the first one
+    that succeed, looking first at [a]. IT doesn't store the warnings of the one
+    it doesn't pick. *)
+
 val traverse : ('a -> 'b reserr) -> 'a list -> 'b list reserr
 (** [traverse f xs] maps [f] over [xs] and returns [ok] of the resulting list
     iff it contains no [error] *)
