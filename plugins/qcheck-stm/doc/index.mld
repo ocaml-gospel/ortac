@@ -143,11 +143,14 @@ uses the [checks] clauses and the [raises] ones.
 
 {1 How to configure the generated tests?}
 
-Now we need a configuration file. Configuration files for Ortac/QCheck-STM are
-OCaml modules containing {e at least} a type declaration for `sut` (usually the
-type `t` of the module under test with all the type parameters instantiated)
-and a value declaration for `init_sut` (a call to a function from the module
-under test returning a value of type `sut`)
+Configuration of the Ortac/QCheck-STM tool is done via both a configuration file
+and the command-line arguments.
+
+Configuration files for Ortac/QCheck-STM are OCaml modules containing {e at
+least} a type declaration for `sut` (usually the type `t` of the module under
+test with all the type parameters instantiated) and a value declaration for
+`init_sut` (a call to a function from the module under test returning a value
+of type `sut`)
 
 {@ocaml file=example_config.ml[
 open Example
@@ -193,6 +196,22 @@ https://ocaml-multicore.github.io/multicoretests/dev/qcheck-multicoretests-util/
 The [Ty] module should contain an [STM.ty] extension and a corresponding
 [STM.ty_show] smart constructor for each of these types. An ['a STM.ty_show] is
 a pair of an ['a ty] value and an ['a -> string] function.
+
+Apart from the OCaml file, the configuration file and the output file, the other
+cli arguments available are:
+
+{ul {li a [quiet] flag}
+    {li a [module-prefix] optional argument}}
+
+The [--quiet] flag simply stops the warnings from being printed out. Ortac/QCheck-STM
+can generate a lot of warnings, that are not always meaningful depending on
+which stage of the development the user is.
+
+In some Dune settings, a module defined in its own file is exposed as a
+submodule of a library. For example, when the library's [name] declared in the
+Dune stanza is not the same as the module's one. In these cases, the
+[--module-prefix] optional argument allows to specify the actual path the
+generated code should open to find the content of the module under test.
 
 {1 Dependencies of the generated tests}
 
