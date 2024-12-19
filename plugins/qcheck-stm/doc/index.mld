@@ -201,7 +201,8 @@ Apart from the OCaml file, the configuration file and the output file, the other
 cli arguments available are:
 
 {ul {li a [quiet] flag}
-    {li a [module-prefix] optional argument}}
+    {li a [module-prefix] optional argument}
+    {li a [submodule] optional argument}}
 
 The [--quiet] flag simply stops the warnings from being printed out. Ortac/QCheck-STM
 can generate a lot of warnings, that are not always meaningful depending on
@@ -212,6 +213,9 @@ submodule of a library. For example, when the library's [name] declared in the
 Dune stanza is not the same as the module's one. In these cases, the
 [--module-prefix] optional argument allows to specify the actual path the
 generated code should open to find the content of the module under test.
+
+The [--submodule] optional argument allows to generate tests for a submodule
+declared in the file given as input to the tool.
 
 {1 Dependencies of the generated tests}
 

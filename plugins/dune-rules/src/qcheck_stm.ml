@@ -6,6 +6,7 @@ type config = {
   package_name : string option;
   dune_output : string option;
   module_prefix : string option;
+  submodule : string option;
   fork_timeout : int option;
 }
 
@@ -90,9 +91,14 @@ let package config =
 
 let targets_ml ppf config = pf ppf "(targets %s)" @@ get_ocaml_output config
 
-let module_prefix o =
+let optional_argument s prj cfg =
   Option.to_list
-  @@ Option.map (fun pref ppf _ -> pf ppf "--module-prefix=%s" pref) o
+  @@ Option.map (fun pref ppf _ -> pf ppf "%s=%s" s pref) (prj cfg)
+
+let module_prefix =
+  optional_argument "--module-prefix" (fun cfg -> cfg.module_prefix)
+
+let submodule = optional_argument "--submodule" (fun cfg -> cfg.submodule)
 
 let gen_ortac_rule ppf config =
   let args =
@@ -101,7 +107,8 @@ let gen_ortac_rule ppf config =
     :: dep interface
     :: dep config_file
     :: quiet
-    :: module_prefix config.module_prefix
+    :: module_prefix config
+    @ submodule config
   in
   let run ppf = run ppf args in
   let run = stanza run in

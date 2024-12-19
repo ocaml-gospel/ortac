@@ -6,6 +6,7 @@ type config = {
   package_name : string option;
   dune_output : string option;
   module_prefix : string option;
+  submodule : string option;
   fork_timeout : int option;
 }
 
