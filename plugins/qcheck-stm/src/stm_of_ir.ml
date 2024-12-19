@@ -1686,12 +1686,14 @@ let stm config ir =
     in
     Option.value config.cleanup ~default
   in
-  let open_mod m = pstr_open Ast_helper.(Opn.mk (Mod.ident (lident m))) in
+  let open_mod i =
+    pstr_open (open_infos ~expr:(pmod_ident i) ~override:Fresh)
+  in
   let sut_defs = sut_defs ir in
   let state_defs = state_defs ir in
   let spec_expr =
     pmod_structure
-      ((open_mod "STM" :: qcheck config)
+      ((open_mod (lident "STM") :: qcheck config)
       @ util config
       @ Option.value config.ty_mod ~default:[]
       @ integer_ty_ext
@@ -1737,9 +1739,19 @@ let stm config ir =
   in
   let sut_mod = sut_module config in
   let* model_mod = model_module config ir in
+  let opened_mod =
+    let aux prefix =
+      (* Precondition: prefix is not the empty string *)
+      let xs = String.split_on_char '.' prefix in
+      let m, ms = (List.hd xs, List.tl xs) in
+      let pref = List.fold_left (fun acc x -> Ldot (acc, x)) (Lident m) ms in
+      noloc @@ Ldot (pref, module_name)
+    in
+    Option.(value ~default:(lident module_name) @@ map aux config.module_prefix)
+  in
   ok
     (warn
-     :: open_mod module_name
+     :: open_mod opened_mod
      :: [%stri module Ortac_runtime = Ortac_runtime_qcheck_stm]
      :: ghost_types
     @ ghost_functions

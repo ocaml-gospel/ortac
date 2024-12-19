@@ -30,9 +30,10 @@ type t = {
   pp_mod : Ppxlib.structure option; (* Containing custom pretty printers *)
   ty_mod : Ppxlib.structure option; (* Containing custom STM.ty extensions *)
   cleanup : Ppxlib.structure_item option;
+  module_prefix : string option;
 }
 
-let mk_config context cfg_uc =
+let mk_config context module_prefix cfg_uc =
   let open Reserr in
   let* sut_core_type =
     of_option
@@ -58,6 +59,7 @@ let mk_config context cfg_uc =
       pp_mod;
       ty_mod;
       cleanup;
+      module_prefix;
     }
 
 let get_sut_type_name config =
@@ -226,7 +228,7 @@ let scan_config cfg_uc config_mod =
   in
   fold_left aux cfg_uc ast
 
-let init gospel config_module =
+let init gospel config_module module_prefix =
   let open Reserr in
   try
     let module_name = Utils.module_name_of_path gospel in
@@ -248,7 +250,8 @@ let init gospel config_module =
     in
     let context = List.fold_left add context sigs in
     let* config =
-      scan_config config_under_construction config_module >>= mk_config context
+      scan_config config_under_construction config_module
+      >>= mk_config context module_prefix
     in
     ok (sigs, config)
   with Gospel.Warnings.Error (l, k) ->

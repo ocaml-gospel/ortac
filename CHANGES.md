@@ -1,5 +1,7 @@
 # Unreleased
 
+- Add `module-prefix` optional argument to Ortac/QCheck-STM and Ortac/Dune
+  [\#280](https://github.com/ocaml-gospel/ortac/pull/280)
 - Add support for generating function values
   [\#277](https://github.com/ocaml-gospel/ortac/pull/277)
 - Extend QCheck-STM plugin tests

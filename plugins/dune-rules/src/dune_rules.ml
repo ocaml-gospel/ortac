@@ -67,6 +67,16 @@ end = struct
                line."
             ~docv:"DUNE_OUTPUT")
 
+    let module_prefix =
+      Arg.(
+        value
+        & opt (some string) None
+        & info [ "m"; "module-prefix" ]
+            ~doc:
+              "Prefix for opening the module corresponding to FILE when it is \
+               part of a library that has MODULE_PREFIX as name."
+            ~docv:"MODULE_PREFIX")
+
     let fork_timeout =
       Arg.(
         value
@@ -74,7 +84,7 @@ end = struct
         & info [ "t"; "timeout" ] ~doc:"Timeout for each test." ~docv:"TIMEOUT")
 
     let main interface_file config_file ocaml_output library package_name
-        dune_output fork_timeout =
+        dune_output module_prefix fork_timeout =
       let open Qcheck_stm in
       let config =
         {
@@ -84,6 +94,7 @@ end = struct
           library;
           package_name;
           dune_output;
+          module_prefix;
           fork_timeout;
         }
       in
@@ -99,6 +110,7 @@ end = struct
         $ library
         $ package_name
         $ with_stdout_to
+        $ module_prefix
         $ fork_timeout)
 
     let cmd = Cmd.v info term
