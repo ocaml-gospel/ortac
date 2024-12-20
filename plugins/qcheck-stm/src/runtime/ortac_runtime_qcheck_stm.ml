@@ -41,7 +41,8 @@ module Model = struct
     (** The type of a model of a single state *)
 
     type t
-    (** A value of type [t] represents an immutable model of a stack of states *)
+    (** A value of type [t] represents an immutable model of a stack of states
+    *)
 
     val create : int -> unit -> t
     (** [create n ()] creates a model with [n] initial elements *)
@@ -50,7 +51,8 @@ module Model = struct
     (** [size t] returns the number of elements in the model [t] *)
 
     val drop_n : t -> int -> t
-    (** [drop_n t n] returns a new model with the [n] uppermost elements removed *)
+    (** [drop_n t n] returns a new model with the [n] uppermost elements removed
+    *)
 
     val push : t -> elt -> t
     (** [push t e] returns a new model with [e] as the topmost element *)
@@ -175,7 +177,8 @@ module Make (Spec : Spec) = struct
       \  @[%a@]@\n\
        when executing the following sequence of operations:@\n\
        @;\
-      \  @[%a@]@." report.cmd pp_terms report.terms (pp_trace max_suts)
+      \  @[%a@]@."
+      report.cmd pp_terms report.terms (pp_trace max_suts)
       (trace, report.mod_name, report.init_sut, report.ret)
 
   let rec check_disagree postcond ortac_show_cmd s sut cs =

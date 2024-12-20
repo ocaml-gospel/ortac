@@ -71,24 +71,26 @@ let pp_error ppf = function
         "it raised an %a:@\n\
         \  @[%a@]@\n\
          only the following exceptions were declared:@\n\
-        \  @[%a@]" (styled `Red string) "unexpected exception" pp_exn exn
-        pp_allowed_exn allowed_exn
+        \  @[%a@]"
+        (styled `Red string) "unexpected exception" pp_exn exn pp_allowed_exn
+        allowed_exn
   | Uncaught_checks { term } ->
       pf ppf
         "a %a in@\n\
         \  @[%a@]@\n\
          was not detected.@\n\
-         Function should have raised %a." (styled `Red string)
-        "`checks' precondition violation" pp_term term pp_quoted_exn
-        "Invalid_argument"
+         Function should have raised %a."
+        (styled `Red string) "`checks' precondition violation" pp_term term
+        pp_quoted_exn "Invalid_argument"
   | Unexpected_checks { terms } ->
       pf ppf
         "it %a@\n\
         \   @[%a@]\n\
          but none of the declared `checks' preconditions@\n\
         \  @[%a@]\n\
-         were violated." (styled `Red string) "raised exception" pp_quoted_exn
-        "Invalid_argument" pp_terms terms
+         were violated."
+        (styled `Red string) "raised exception" pp_quoted_exn "Invalid_argument"
+        pp_terms terms
 
 type error_report = {
   loc : location;

@@ -92,7 +92,8 @@ let ocaml_of_term cfg t =
     operator, adding a [Lazy.force] if the corresponding [xxx_lz] is [true]
     (defaults to [false]). [gos_t] must always be in a position in which it is
     applied to one of its model fields. Calling [subst_term] with [new_t] and
-    [old_t] as the empty list will check that the term does not contain [gos_t] *)
+    [old_t] as the empty list will check that the term does not contain [gos_t]
+*)
 let subst_term state ?(out_of_scope = []) ~gos_t ?(old_lz = false) ~fun_vars
     ~old_t ?(new_lz = false) ~new_t term =
   let exception
@@ -880,7 +881,7 @@ let postcond_case config state invariants idx state_ident new_state_ident value
     (* [postcond] and [invariants] are specification of normal behaviour *)
     let* postcond =
       promote_map (fun t -> wrap_check t <$> translate_postcond t) normal
-      (* only functions that do not return a sut can have postconditions
+    (* only functions that do not return a sut can have postconditions
          referring to the returned value, therefore no shifting is needed *)
     and* invariants =
       match invariants with
@@ -1262,12 +1263,12 @@ let check_init_state config ir =
     eapply f [ s ]
   in
   let* expr =
-    (function
-      | [] -> eunit
-      | xs ->
-          pexp_let Nonrecursive
-            [ value_binding ~pat:state_pat ~expr:init_state ]
-            (pexp_ifthenelse (list_or xs) msg None))
+    ( function
+    | [] -> eunit
+    | xs ->
+        pexp_let Nonrecursive
+          [ value_binding ~pat:state_pat ~expr:init_state ]
+          (pexp_ifthenelse (list_or xs) msg None) )
     <$> Option.fold ~none:(ok [])
           ~some:(fun (id, xs) -> promote_map (translate_invariants id) xs)
           ir.invariants
