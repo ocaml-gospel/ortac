@@ -1740,14 +1740,12 @@ let stm config ir =
   let sut_mod = sut_module config in
   let* model_mod = model_module config ir in
   let opened_mod =
-    let aux prefix =
-      (* Precondition: prefix is not the empty string *)
-      let xs = String.split_on_char '.' prefix in
-      let m, ms = (List.hd xs, List.tl xs) in
-      let pref = List.fold_left (fun acc x -> Ldot (acc, x)) (Lident m) ms in
-      noloc @@ Ldot (pref, module_name)
-    in
-    Option.(value ~default:(lident module_name) @@ map aux config.module_prefix)
+    let split_str = Option.fold ~none:[] ~some:(String.split_on_char '.')
+    and split_list xs = (List.hd xs, List.tl xs) in
+    let prefix = split_str config.module_prefix
+    and submodule = split_str config.submodule in
+    let m, ms = split_list @@ prefix @ (module_name :: submodule) in
+    noloc @@ List.fold_left (fun acc x -> Ldot (acc, x)) (Lident m) ms
   in
   ok
     (warn

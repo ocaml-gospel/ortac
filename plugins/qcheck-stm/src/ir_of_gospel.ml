@@ -512,9 +512,36 @@ let ghost_types =
       | Sig_type (rec_flag, type_decls, Ghost) -> Some (rec_flag, type_decls)
       | _ -> None)
 
+let find_signature (sigs : Tast.signature) config =
+  let open Reserr in
+  let p x item =
+    match item.Tast.sig_desc with
+    | Tast.Sig_module md ->
+        if String.equal x md.md_name.id_str then
+          match md.md_type.mt_desc with
+          | Tast.Mod_signature s -> ok s
+          | _ -> error (Sub_module_not_found x, Location.none)
+        else error (Sub_module_not_found x, Location.none)
+    | _ -> error (Sub_module_not_found x, Location.none)
+  in
+  let rec find x = function
+    | [] -> error (Sub_module_not_found x, Location.none)
+    | item :: items -> p x item <|> lazy (find x items)
+  in
+  let rec aux signature = function
+    | [] -> ok signature
+    | x :: xs ->
+        let* signature = find x signature in
+        aux signature xs
+  in
+  match config.Cfg.submodule with
+  | None -> ok sigs
+  | Some prefix -> aux sigs (String.split_on_char '.' prefix)
+
 let run sigs config =
   let open Reserr in
   let open Ir in
+  let* sigs = find_signature sigs config in
   let* state, invariants = state_and_invariants config sigs in
   let* init_state = init_state config state sigs in
   let ghost_functions = ghost_functions sigs in
