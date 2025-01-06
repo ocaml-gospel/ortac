@@ -41,3 +41,4 @@ build: [
   ["dune" "install" "-p" name "--create-install-files" name]
 ]
 dev-repo: "git+https://github.com/ocaml-gospel/ortac.git"
+x-maintenance-intent: [("latest")]
