@@ -31,11 +31,13 @@ let pp_kind ppf = function
   | MonolithPrinter msg ->
       pf ppf
         "unsupported %s Monolith printer@\n\
-         the Monolith program may not work as expected" msg
+         the Monolith program may not work as expected"
+        msg
   | MonolithGen msg ->
       pf ppf
         "unsupported %s Monolith generator@\n\
-         the Monolith program may not work as expected" msg
+         the Monolith program may not work as expected"
+        msg
 
 let pp ppf (k, loc) =
   pf ppf "%a@\n%a@[%a@]"

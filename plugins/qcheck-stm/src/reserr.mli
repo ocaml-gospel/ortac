@@ -77,7 +77,8 @@ val promote_map : ('a -> 'b reserr) -> 'a list -> 'b list reserr
 (** [promote_map f xs] is [List.map f xs |> promote] with only one traversal *)
 
 val promote_mapi : (int -> 'a -> 'b reserr) -> 'a list -> 'b list reserr
-(** [promote_mapi f xs] is [List.mapi f xs |> promote] with only one traversal *)
+(** [promote_mapi f xs] is [List.mapi f xs |> promote] with only one traversal
+*)
 
 val promote_opt : 'a reserr -> 'a option reserr
 (** [promote_opt r] is [promote] for a unique value *)

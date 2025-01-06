@@ -95,7 +95,7 @@ module Mutability = struct
     List.map
       (* if a model is annotated as mutable, it is mutable, if not we look at
          the type of the model *)
-        (fun (ls, b) -> if b then Ir.Mutable else lsymbol ~ir ls)
+      (fun (ls, b) -> if b then Ir.Mutable else lsymbol ~ir ls)
       ty_fields
     (* the mutability of a type is here the max of the mutability of its models *)
     |> List.fold_left max min_mut

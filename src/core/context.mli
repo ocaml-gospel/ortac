@@ -19,7 +19,8 @@ val translate_stdlib : Symbols.lsymbol -> t -> string option
 
 val translate_tystdlib : Ttypes.tysymbol -> t -> string option
 (** [translate_tystdlib ls t] finds the name of the OCaml type to use to
-    translate [ts] if it is a type of the Gospel standard library or a built-in *)
+    translate [ts] if it is a type of the Gospel standard library or a built-in
+*)
 
 val get_ls : t -> string list -> Symbols.lsymbol
 (** [get_ls context qualid_name] gets the Gospel logical symbol corresponding to
