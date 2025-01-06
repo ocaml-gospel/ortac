@@ -1,4 +1,4 @@
-# Unreleased
+# 0.5.0
 
 - Add `submodule` optional argument to Ortac/QCheck-STM and Ortac/Dune
   [\#281](https://github.com/ocaml-gospel/ortac/pull/281)
