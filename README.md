@@ -149,4 +149,5 @@ number of issues:
 - [A missing check of index out of bound in the `varray` library](https://github.com/art-w/varray/pull/1)
 - [An undefined behaviour still in the `varray` library](https://github.com/art-w/varray/issues/2)
 - [Some integer overflows in the `bitv` library](https://github.com/backtracking/bitv/issues/31)
+- [Some inconsistent behavior with zero-length vectors in the `bitv` library](https://github.com/backtracking/bitv/issues/32)
 - [A peculiar behaviour in `Hashtbl.create` from the standard library](https://github.com/ocaml/ocaml/issues/13469)
