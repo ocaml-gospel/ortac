@@ -624,27 +624,7 @@ let ortac_postcond cmd__032_ state__033_ res__034_ =
                  (try
                     Ortac_runtime.Gospelstdlib.Sequence.mem
                       (Lazy.force h_new__041_).contents (a_2, b_3)
-                  with
-                  | e ->
-                      raise
-                        (Ortac_runtime.Partial_function
-                           (e,
-                             {
-                               Ortac_runtime.start =
-                                 {
-                                   pos_fname = "hashtbl.mli";
-                                   pos_lnum = 32;
-                                   pos_bol = 1478;
-                                   pos_cnum = 1490
-                                 };
-                               Ortac_runtime.stop =
-                                 {
-                                   pos_fname = "hashtbl.mli";
-                                   pos_lnum = 32;
-                                   pos_bol = 1478;
-                                   pos_cnum = 1520
-                                 }
-                             })))
+                  with | e -> false)
                then None
                else
                  Some
@@ -679,27 +659,7 @@ let ortac_postcond cmd__032_ state__033_ res__034_ =
                          (Ortac_runtime.Gospelstdlib.Sequence.map
                             Ortac_runtime.Gospelstdlib.fst
                             (Lazy.force h_new__045_).contents) a_2)
-                  with
-                  | e ->
-                      raise
-                        (Ortac_runtime.Partial_function
-                           (e,
-                             {
-                               Ortac_runtime.start =
-                                 {
-                                   pos_fname = "hashtbl.mli";
-                                   pos_lnum = 31;
-                                   pos_bol = 1403;
-                                   pos_cnum = 1427
-                                 };
-                               Ortac_runtime.stop =
-                                 {
-                                   pos_fname = "hashtbl.mli";
-                                   pos_lnum = 31;
-                                   pos_bol = 1403;
-                                   pos_cnum = 1477
-                                 }
-                             })))
+                  with | e -> false)
                then None
                else
                  Some
@@ -745,27 +705,7 @@ let ortac_postcond cmd__032_ state__033_ res__034_ =
                     then true
                     else false)
                  = true
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "hashtbl.mli";
-                              pos_lnum = 36;
-                              pos_bol = 1685;
-                              pos_cnum = 1697
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "hashtbl.mli";
-                              pos_lnum = 38;
-                              pos_bol = 1777;
-                              pos_cnum = 1825
-                            }
-                        })))
+             with | e -> false)
           then None
           else
             Some
@@ -798,27 +738,7 @@ let ortac_postcond cmd__032_ state__033_ res__034_ =
                  (Ortac_runtime.Gospelstdlib.Sequence.filter_map
                     (fun (x_2, y_1) -> if x_2 = a_4 then Some y_1 else None)
                     (Lazy.force h_new__051_).contents)
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "hashtbl.mli";
-                              pos_lnum = 42;
-                              pos_bol = 1995;
-                              pos_cnum = 2007
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "hashtbl.mli";
-                              pos_lnum = 42;
-                              pos_bol = 1995;
-                              pos_cnum = 2089
-                            }
-                        })))
+             with | e -> false)
           then None
           else
             Some
@@ -852,27 +772,7 @@ let ortac_postcond cmd__032_ state__033_ res__034_ =
                     (Ortac_runtime.Gospelstdlib.Sequence.map
                        Ortac_runtime.Gospelstdlib.fst
                        (Lazy.force h_new__054_).contents) a_5)
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "hashtbl.mli";
-                              pos_lnum = 46;
-                              pos_bol = 2291;
-                              pos_cnum = 2303
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "hashtbl.mli";
-                              pos_lnum = 46;
-                              pos_bol = 2291;
-                              pos_cnum = 2351
-                            }
-                        })))
+             with | e -> false)
           then None
           else
             Some
@@ -906,27 +806,7 @@ let ortac_postcond cmd__032_ state__033_ res__034_ =
                (Ortac_runtime.Gospelstdlib.integer_of_int i) =
                  (Ortac_runtime.Gospelstdlib.Sequence.length
                     (Lazy.force h_new__062_).contents)
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "hashtbl.mli";
-                              pos_lnum = 78;
-                              pos_bol = 4064;
-                              pos_cnum = 4076
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "hashtbl.mli";
-                              pos_lnum = 78;
-                              pos_bol = 4064;
-                              pos_cnum = 4106
-                            }
-                        })))
+             with | e -> false)
           then None
           else
             Some

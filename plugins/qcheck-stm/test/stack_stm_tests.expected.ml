@@ -446,27 +446,7 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                       v_1 =
                         (Ortac_runtime.Gospelstdlib.Sequence.hd
                            t_old__031_.contents)
-                    with
-                    | e ->
-                        raise
-                          (Ortac_runtime.Partial_function
-                             (e,
-                               {
-                                 Ortac_runtime.start =
-                                   {
-                                     pos_fname = "stack.mli";
-                                     pos_lnum = 21;
-                                     pos_bol = 861;
-                                     pos_cnum = 873
-                                   };
-                                 Ortac_runtime.stop =
-                                   {
-                                     pos_fname = "stack.mli";
-                                     pos_lnum = 21;
-                                     pos_bol = 861;
-                                     pos_cnum = 905
-                                   }
-                               }))
+                    with | e -> false
                   then None
                   else
                     Some
@@ -528,27 +508,7 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                       not
                         (t_old__033_.contents =
                            Ortac_runtime.Gospelstdlib.Sequence.empty)
-                    with
-                    | e ->
-                        raise
-                          (Ortac_runtime.Partial_function
-                             (e,
-                               {
-                                 Ortac_runtime.start =
-                                   {
-                                     pos_fname = "stack.mli";
-                                     pos_lnum = 22;
-                                     pos_bol = 906;
-                                     pos_cnum = 918
-                                   };
-                                 Ortac_runtime.stop =
-                                   {
-                                     pos_fname = "stack.mli";
-                                     pos_lnum = 22;
-                                     pos_bol = 906;
-                                     pos_cnum = 950
-                                   }
-                               }))
+                    with | e -> false
                   then None
                   else
                     Some
@@ -615,27 +575,7 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                       t_old__035_.contents =
                         Ortac_runtime.Gospelstdlib.Sequence.empty in
                     __t1__037_ && __t2__038_
-                  with
-                  | e ->
-                      raise
-                        (Ortac_runtime.Partial_function
-                           (e,
-                             {
-                               Ortac_runtime.start =
-                                 {
-                                   pos_fname = "stack.mli";
-                                   pos_lnum = 18;
-                                   pos_bol = 667;
-                                   pos_cnum = 687
-                                 };
-                               Ortac_runtime.stop =
-                                 {
-                                   pos_fname = "stack.mli";
-                                   pos_lnum = 18;
-                                   pos_bol = 667;
-                                   pos_cnum = 731
-                                 }
-                             })))
+                  with | e -> false)
                then None
                else
                  Some
@@ -673,27 +613,7 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                     Some
                       (Ortac_runtime.Gospelstdlib.Sequence.hd
                          t_old__042_.contents))
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "stack.mli";
-                              pos_lnum = 29;
-                              pos_bol = 1248;
-                              pos_cnum = 1260
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "stack.mli";
-                              pos_lnum = 30;
-                              pos_bol = 1306;
-                              pos_cnum = 1359
-                            }
-                        })))
+             with | e -> false)
           then None
           else
             Some
@@ -762,27 +682,7 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                     v_3 =
                       (Ortac_runtime.Gospelstdlib.Sequence.hd
                          (Lazy.force t_new__048_).contents)
-                  with
-                  | e ->
-                      raise
-                        (Ortac_runtime.Partial_function
-                           (e,
-                             {
-                               Ortac_runtime.start =
-                                 {
-                                   pos_fname = "stack.mli";
-                                   pos_lnum = 35;
-                                   pos_bol = 1565;
-                                   pos_cnum = 1577
-                                 };
-                               Ortac_runtime.stop =
-                                 {
-                                   pos_fname = "stack.mli";
-                                   pos_lnum = 35;
-                                   pos_bol = 1565;
-                                   pos_cnum = 1603
-                                 }
-                             })))
+                  with | e -> false)
                then None
                else
                  Some
@@ -848,27 +748,7 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                       t_old__049_.contents =
                         Ortac_runtime.Gospelstdlib.Sequence.empty in
                     __t1__051_ && __t2__052_
-                  with
-                  | e ->
-                      raise
-                        (Ortac_runtime.Partial_function
-                           (e,
-                             {
-                               Ortac_runtime.start =
-                                 {
-                                   pos_fname = "stack.mli";
-                                   pos_lnum = 34;
-                                   pos_bol = 1500;
-                                   pos_cnum = 1520
-                                 };
-                               Ortac_runtime.stop =
-                                 {
-                                   pos_fname = "stack.mli";
-                                   pos_lnum = 34;
-                                   pos_bol = 1500;
-                                   pos_cnum = 1564
-                                 }
-                             })))
+                  with | e -> false)
                then None
                else
                  Some
@@ -912,27 +792,7 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                     then true
                     else false)
                  = true
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "stack.mli";
-                              pos_lnum = 39;
-                              pos_bol = 1744;
-                              pos_cnum = 1756
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "stack.mli";
-                              pos_lnum = 41;
-                              pos_bol = 1815;
-                              pos_cnum = 1861
-                            }
-                        })))
+             with | e -> false)
           then None
           else
             Some
@@ -972,27 +832,7 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                         (Ortac_runtime.Gospelstdlib.integer_of_int 0)
                       -> true
                   | _ -> false)
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "stack.mli";
-                              pos_lnum = 54;
-                              pos_bol = 2361;
-                              pos_cnum = 2373
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "stack.mli";
-                              pos_lnum = 56;
-                              pos_bol = 2435;
-                              pos_cnum = 2455
-                            }
-                        })))
+             with | e -> false)
           then None
           else
             Some

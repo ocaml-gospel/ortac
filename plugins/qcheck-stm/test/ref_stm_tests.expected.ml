@@ -146,27 +146,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
             (try
                (Ortac_runtime.Gospelstdlib.integer_of_int i_1) =
                  (Lazy.force r_new__015_).value
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "ref.mli";
-                              pos_lnum = 11;
-                              pos_bol = 346;
-                              pos_cnum = 358
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "ref.mli";
-                              pos_lnum = 11;
-                              pos_bol = 346;
-                              pos_cnum = 369
-                            }
-                        })))
+             with | e -> false)
           then None
           else
             Some

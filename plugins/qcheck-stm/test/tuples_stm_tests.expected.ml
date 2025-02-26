@@ -410,27 +410,7 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                  (Ortac_runtime.Gospelstdlib.integer_of_int x) =
                    (Ortac_runtime.Gospelstdlib.Sequence.length
                       (Lazy.force t_new__027_).contents)
-               with
-               | e ->
-                   raise
-                     (Ortac_runtime.Partial_function
-                        (e,
-                          {
-                            Ortac_runtime.start =
-                              {
-                                pos_fname = "tuples.mli";
-                                pos_lnum = 34;
-                                pos_bol = 1530;
-                                pos_cnum = 1542
-                              };
-                            Ortac_runtime.stop =
-                              {
-                                pos_fname = "tuples.mli";
-                                pos_lnum = 34;
-                                pos_bol = 1530;
-                                pos_cnum = 1572
-                              }
-                          }))
+               with | e -> false
              then None
              else
                Some
@@ -462,27 +442,7 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                  (Ortac_runtime.Gospelstdlib.integer_of_int y) =
                    (Ortac_runtime.Gospelstdlib.Sequence.length
                       (Lazy.force t_new__029_).contents)
-               with
-               | e ->
-                   raise
-                     (Ortac_runtime.Partial_function
-                        (e,
-                          {
-                            Ortac_runtime.start =
-                              {
-                                pos_fname = "tuples.mli";
-                                pos_lnum = 35;
-                                pos_bol = 1573;
-                                pos_cnum = 1585
-                              };
-                            Ortac_runtime.stop =
-                              {
-                                pos_fname = "tuples.mli";
-                                pos_lnum = 35;
-                                pos_bol = 1573;
-                                pos_cnum = 1615
-                              }
-                          }))
+               with | e -> false
              then None
              else
                Some
@@ -516,27 +476,7 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                  (Ortac_runtime.Gospelstdlib.integer_of_int x_1) =
                    (Ortac_runtime.Gospelstdlib.Sequence.length
                       (Lazy.force t_new__032_).contents)
-               with
-               | e ->
-                   raise
-                     (Ortac_runtime.Partial_function
-                        (e,
-                          {
-                            Ortac_runtime.start =
-                              {
-                                pos_fname = "tuples.mli";
-                                pos_lnum = 39;
-                                pos_bol = 1784;
-                                pos_cnum = 1796
-                              };
-                            Ortac_runtime.stop =
-                              {
-                                pos_fname = "tuples.mli";
-                                pos_lnum = 39;
-                                pos_bol = 1784;
-                                pos_cnum = 1826
-                              }
-                          }))
+               with | e -> false
              then None
              else
                Some
@@ -569,27 +509,7 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                     (Ortac_runtime.Gospelstdlib.integer_of_int y_1) =
                       (Ortac_runtime.Gospelstdlib.Sequence.length
                          (Lazy.force t_new__034_).contents)
-                  with
-                  | e ->
-                      raise
-                        (Ortac_runtime.Partial_function
-                           (e,
-                             {
-                               Ortac_runtime.start =
-                                 {
-                                   pos_fname = "tuples.mli";
-                                   pos_lnum = 40;
-                                   pos_bol = 1827;
-                                   pos_cnum = 1839
-                                 };
-                               Ortac_runtime.stop =
-                                 {
-                                   pos_fname = "tuples.mli";
-                                   pos_lnum = 40;
-                                   pos_bol = 1827;
-                                   pos_cnum = 1869
-                                 }
-                             }))
+                  with | e -> false
                 then None
                 else
                   Some
@@ -621,27 +541,7 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                     (Ortac_runtime.Gospelstdlib.integer_of_int z) =
                       (Ortac_runtime.Gospelstdlib.Sequence.length
                          (Lazy.force t_new__036_).contents)
-                  with
-                  | e ->
-                      raise
-                        (Ortac_runtime.Partial_function
-                           (e,
-                             {
-                               Ortac_runtime.start =
-                                 {
-                                   pos_fname = "tuples.mli";
-                                   pos_lnum = 41;
-                                   pos_bol = 1870;
-                                   pos_cnum = 1882
-                                 };
-                               Ortac_runtime.stop =
-                                 {
-                                   pos_fname = "tuples.mli";
-                                   pos_lnum = 41;
-                                   pos_bol = 1870;
-                                   pos_cnum = 1912
-                                 }
-                             }))
+                  with | e -> false
                 then None
                 else
                   Some

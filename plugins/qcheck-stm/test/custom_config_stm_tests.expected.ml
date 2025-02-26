@@ -172,27 +172,7 @@ module Spec =
                not
                  (t_3__008_.contents =
                     Ortac_runtime.Gospelstdlib.Sequence.empty)
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "custom_config.mli";
-                              pos_lnum = 21;
-                              pos_bol = 875;
-                              pos_cnum = 886
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "custom_config.mli";
-                              pos_lnum = 21;
-                              pos_bol = 875;
-                              pos_cnum = 914
-                            }
-                        })))
+             with | e -> false)
           then
             let t_3__009_ = t_3__008_ in
             Model.push (Model.drop_n state__003_ 1) t_3__009_
@@ -268,27 +248,7 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                      not
                        (tmp__017_.contents =
                           Ortac_runtime.Gospelstdlib.Sequence.empty)
-                   with
-                   | e ->
-                       raise
-                         (Ortac_runtime.Partial_function
-                            (e,
-                              {
-                                Ortac_runtime.start =
-                                  {
-                                    pos_fname = "custom_config.mli";
-                                    pos_lnum = 21;
-                                    pos_bol = 875;
-                                    pos_cnum = 886
-                                  };
-                                Ortac_runtime.stop =
-                                  {
-                                    pos_fname = "custom_config.mli";
-                                    pos_lnum = 21;
-                                    pos_bol = 875;
-                                    pos_cnum = 914
-                                  }
-                              }))
+                   with | e -> false
                  then None
                  else
                    Some
@@ -323,27 +283,7 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                          (proj a_1) =
                            (Ortac_runtime.Gospelstdlib.Sequence.hd
                               (Lazy.force t_new__016_).contents)
-                       with
-                       | e ->
-                           raise
-                             (Ortac_runtime.Partial_function
-                                (e,
-                                  {
-                                    Ortac_runtime.start =
-                                      {
-                                        pos_fname = "custom_config.mli";
-                                        pos_lnum = 22;
-                                        pos_bol = 915;
-                                        pos_cnum = 927
-                                      };
-                                    Ortac_runtime.stop =
-                                      {
-                                        pos_fname = "custom_config.mli";
-                                        pos_lnum = 22;
-                                        pos_bol = 915;
-                                        pos_cnum = 958
-                                      }
-                                  })))
+                       with | e -> false)
                     then None
                     else
                       Some
@@ -378,27 +318,7 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                          not
                            (tmp__017_.contents =
                               Ortac_runtime.Gospelstdlib.Sequence.empty)
-                       with
-                       | e ->
-                           raise
-                             (Ortac_runtime.Partial_function
-                                (e,
-                                  {
-                                    Ortac_runtime.start =
-                                      {
-                                        pos_fname = "custom_config.mli";
-                                        pos_lnum = 21;
-                                        pos_bol = 875;
-                                        pos_cnum = 886
-                                      };
-                                    Ortac_runtime.stop =
-                                      {
-                                        pos_fname = "custom_config.mli";
-                                        pos_lnum = 21;
-                                        pos_bol = 875;
-                                        pos_cnum = 914
-                                      }
-                                  })))
+                       with | e -> false)
                     then None
                     else
                       Some
