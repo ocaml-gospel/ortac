@@ -727,7 +727,7 @@ let expected_returned_value translate_postcond value =
 let postcond_case config state invariants idx state_ident new_state_ident value
     =
   let open Reserr in
-  let translate_postcond t =
+  let translate_postcond ocaml_of_term t =
     let vbs, sut_map_old, sut_map_new =
       let aux (acc_vbs, acc_old, acc_new) sut_var =
         let id = sut_var.Ident.id_str in
@@ -791,7 +791,7 @@ let postcond_case config state invariants idx state_ident new_state_ident value
   let* ret_val =
     (* simply warn the user if we can't compute the expected returned value,
        don't skip the function *)
-    match expected_returned_value translate_postcond value with
+    match expected_returned_value (translate_postcond ocaml_of_term) value with
     | None ->
         (* If the returned value is a SUT, we don't need to ever show it *)
         if Cfg.does_return_sut config value.ty then ok dummy
@@ -880,7 +880,9 @@ let postcond_case config state invariants idx state_ident new_state_ident value
     in
     (* [postcond] and [invariants] are specification of normal behaviour *)
     let* postcond =
-      promote_map (fun t -> wrap_check t <$> translate_postcond t) normal
+      promote_map
+        (fun t -> wrap_check t <$> translate_postcond ocaml_of_term t)
+        normal
     (* only functions that do not return a sut can have postconditions
          referring to the returned value, therefore no shifting is needed *)
     and* invariants =
@@ -932,7 +934,8 @@ let postcond_case config state invariants idx state_ident new_state_ident value
                 in
                 let lhs = ppat_construct (lident "Error") (Some lhs) in
                 let* rhs =
-                  wrap_check ~exn:(Some xstr) t <$> translate_postcond t
+                  wrap_check ~exn:(Some xstr) t
+                  <$> translate_postcond ocaml_of_term t
                 in
                 case ~lhs ~guard:None ~rhs |> ok)
               value.postcond.exceptional
