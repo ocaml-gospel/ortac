@@ -451,38 +451,18 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                   else
                     Some
                       (Ortac_runtime.report "Stack" "create ()"
-                         (Ortac_runtime.Protected_value
-                            (Res
-                               (char,
-                                 (let t_old__029_ = Model.get state__025_ 0
-                                  and t_new__030_ =
-                                    lazy
-                                      (Model.get (Lazy.force new_state__027_)
-                                         0) in
-                                  try
+                         (try
+                            Ortac_runtime.Protected_value
+                              (Res
+                                 (char,
+                                   (let t_old__029_ = Model.get state__025_ 0
+                                    and t_new__030_ =
+                                      lazy
+                                        (Model.get
+                                           (Lazy.force new_state__027_) 0) in
                                     Ortac_runtime.Gospelstdlib.Sequence.hd
-                                      t_old__029_.contents
-                                  with
-                                  | e ->
-                                      raise
-                                        (Ortac_runtime.Partial_function
-                                           (e,
-                                             {
-                                               Ortac_runtime.start =
-                                                 {
-                                                   pos_fname = "stack.mli";
-                                                   pos_lnum = 21;
-                                                   pos_bol = 861;
-                                                   pos_cnum = 877
-                                                 };
-                                               Ortac_runtime.stop =
-                                                 {
-                                                   pos_fname = "stack.mli";
-                                                   pos_lnum = 21;
-                                                   pos_bol = 861;
-                                                   pos_cnum = 905
-                                                 }
-                                             })))))) "pop"
+                                      t_old__029_.contents)))
+                          with | e -> Ortac_runtime.Out_of_domain) "pop"
                          [("v = Sequence.hd (old t.contents)",
                             {
                               Ortac_runtime.start =
@@ -513,38 +493,18 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                   else
                     Some
                       (Ortac_runtime.report "Stack" "create ()"
-                         (Ortac_runtime.Protected_value
-                            (Res
-                               (char,
-                                 (let t_old__029_ = Model.get state__025_ 0
-                                  and t_new__030_ =
-                                    lazy
-                                      (Model.get (Lazy.force new_state__027_)
-                                         0) in
-                                  try
+                         (try
+                            Ortac_runtime.Protected_value
+                              (Res
+                                 (char,
+                                   (let t_old__029_ = Model.get state__025_ 0
+                                    and t_new__030_ =
+                                      lazy
+                                        (Model.get
+                                           (Lazy.force new_state__027_) 0) in
                                     Ortac_runtime.Gospelstdlib.Sequence.hd
-                                      t_old__029_.contents
-                                  with
-                                  | e ->
-                                      raise
-                                        (Ortac_runtime.Partial_function
-                                           (e,
-                                             {
-                                               Ortac_runtime.start =
-                                                 {
-                                                   pos_fname = "stack.mli";
-                                                   pos_lnum = 21;
-                                                   pos_bol = 861;
-                                                   pos_cnum = 877
-                                                 };
-                                               Ortac_runtime.stop =
-                                                 {
-                                                   pos_fname = "stack.mli";
-                                                   pos_lnum = 21;
-                                                   pos_bol = 861;
-                                                   pos_cnum = 905
-                                                 }
-                                             })))))) "pop"
+                                      t_old__029_.contents)))
+                          with | e -> Ortac_runtime.Out_of_domain) "pop"
                          [("old t.contents <> Sequence.empty",
                             {
                               Ortac_runtime.start =
@@ -580,7 +540,8 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                else
                  Some
                    (Ortac_runtime.report "Stack" "create ()"
-                      (Ortac_runtime.Exception "Empty") "pop"
+                      (try Ortac_runtime.Exception "Empty"
+                       with | e -> Ortac_runtime.Out_of_domain) "pop"
                       [("t.contents = old t.contents = Sequence.empty",
                          {
                            Ortac_runtime.start =
@@ -618,13 +579,13 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
           else
             Some
               (Ortac_runtime.report "Stack" "create ()"
-                 (Ortac_runtime.Value
-                    (Res
-                       ((option char),
-                         (let t_old__040_ = Model.get state__025_ 0
-                          and t_new__041_ =
-                            lazy (Model.get (Lazy.force new_state__027_) 0) in
-                          try
+                 (try
+                    Ortac_runtime.Value
+                      (Res
+                         ((option char),
+                           (let t_old__040_ = Model.get state__025_ 0
+                            and t_new__041_ =
+                              lazy (Model.get (Lazy.force new_state__027_) 0) in
                             if
                               t_old__040_.contents =
                                 Ortac_runtime.Gospelstdlib.Sequence.empty
@@ -632,28 +593,8 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                             else
                               Some
                                 (Ortac_runtime.Gospelstdlib.Sequence.hd
-                                   t_old__040_.contents)
-                          with
-                          | e ->
-                              raise
-                                (Ortac_runtime.Partial_function
-                                   (e,
-                                     {
-                                       Ortac_runtime.start =
-                                         {
-                                           pos_fname = "stack.mli";
-                                           pos_lnum = 29;
-                                           pos_bol = 1248;
-                                           pos_cnum = 1264
-                                         };
-                                       Ortac_runtime.stop =
-                                         {
-                                           pos_fname = "stack.mli";
-                                           pos_lnum = 30;
-                                           pos_bol = 1306;
-                                           pos_cnum = 1359
-                                         }
-                                     })))))) "pop_opt"
+                                   t_old__040_.contents))))
+                  with | e -> Ortac_runtime.Out_of_domain) "pop_opt"
                  [("v = if (old t.contents) = Sequence.empty then\n        None else Some (Sequence.hd (old t.contents))",
                     {
                       Ortac_runtime.start =
@@ -687,37 +628,18 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                else
                  Some
                    (Ortac_runtime.report "Stack" "create ()"
-                      (Ortac_runtime.Protected_value
-                         (Res
-                            (char,
-                              (let t_old__045_ = Model.get state__025_ 0
-                               and t_new__046_ =
-                                 lazy
-                                   (Model.get (Lazy.force new_state__027_) 0) in
-                               try
+                      (try
+                         Ortac_runtime.Protected_value
+                           (Res
+                              (char,
+                                (let t_old__045_ = Model.get state__025_ 0
+                                 and t_new__046_ =
+                                   lazy
+                                     (Model.get (Lazy.force new_state__027_)
+                                        0) in
                                  Ortac_runtime.Gospelstdlib.Sequence.hd
-                                   (Lazy.force t_new__046_).contents
-                               with
-                               | e ->
-                                   raise
-                                     (Ortac_runtime.Partial_function
-                                        (e,
-                                          {
-                                            Ortac_runtime.start =
-                                              {
-                                                pos_fname = "stack.mli";
-                                                pos_lnum = 35;
-                                                pos_bol = 1565;
-                                                pos_cnum = 1581
-                                              };
-                                            Ortac_runtime.stop =
-                                              {
-                                                pos_fname = "stack.mli";
-                                                pos_lnum = 35;
-                                                pos_bol = 1565;
-                                                pos_cnum = 1603
-                                              }
-                                          })))))) "top"
+                                   (Lazy.force t_new__046_).contents)))
+                       with | e -> Ortac_runtime.Out_of_domain) "top"
                       [("v = Sequence.hd t.contents",
                          {
                            Ortac_runtime.start =
@@ -753,7 +675,8 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                else
                  Some
                    (Ortac_runtime.report "Stack" "create ()"
-                      (Ortac_runtime.Exception "Empty") "top"
+                      (try Ortac_runtime.Exception "Empty"
+                       with | e -> Ortac_runtime.Out_of_domain) "top"
                       [("t.contents = old t.contents = Sequence.empty",
                          {
                            Ortac_runtime.start =
@@ -797,8 +720,8 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
           else
             Some
               (Ortac_runtime.report "Stack" "create ()"
-                 (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
-                 "top_opt"
+                 (try Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
+                  with | e -> Ortac_runtime.Out_of_domain) "top_opt"
                  [("match v with\n        | None -> t.contents = Sequence.empty\n        | Some x -> x = Sequence.hd t.contents",
                     {
                       Ortac_runtime.start =
@@ -837,13 +760,13 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
           else
             Some
               (Ortac_runtime.report "Stack" "create ()"
-                 (Ortac_runtime.Value
-                    (Res
-                       (bool,
-                         (let t_old__059_ = Model.get state__025_ 0
-                          and t_new__060_ =
-                            lazy (Model.get (Lazy.force new_state__027_) 0) in
-                          try
+                 (try
+                    Ortac_runtime.Value
+                      (Res
+                         (bool,
+                           (let t_old__059_ = Model.get state__025_ 0
+                            and t_new__060_ =
+                              lazy (Model.get (Lazy.force new_state__027_) 0) in
                             match Ortac_runtime.Gospelstdlib.Sequence.length
                                     (Lazy.force t_new__060_).contents
                             with
@@ -852,28 +775,8 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                                   (Ortac_runtime.Gospelstdlib.integer_of_int
                                      0)
                                 -> true
-                            | _ -> false
-                          with
-                          | e ->
-                              raise
-                                (Ortac_runtime.Partial_function
-                                   (e,
-                                     {
-                                       Ortac_runtime.start =
-                                         {
-                                           pos_fname = "stack.mli";
-                                           pos_lnum = 54;
-                                           pos_bol = 2361;
-                                           pos_cnum = 2377
-                                         };
-                                       Ortac_runtime.stop =
-                                         {
-                                           pos_fname = "stack.mli";
-                                           pos_lnum = 56;
-                                           pos_bol = 2435;
-                                           pos_cnum = 2455
-                                         }
-                                     })))))) "is_empty"
+                            | _ -> false)))
+                  with | e -> Ortac_runtime.Out_of_domain) "is_empty"
                  [("b = match Sequence.length t.contents with\n        | 0 -> true\n        | _ -> false",
                     {
                       Ortac_runtime.start =

@@ -205,34 +205,14 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
           else
             Some
               (Ortac_runtime.report "Record" "make 42"
-                 (Ortac_runtime.Value
-                    (Res
-                       (integer,
-                         (try
-                            Ortac_runtime.Gospelstdlib.(+)
+                 (try
+                    Ortac_runtime.Value
+                      (Res
+                         (integer,
+                           (Ortac_runtime.Gospelstdlib.(+)
                               (Ortac_runtime.Gospelstdlib.integer_of_int i_2)
-                              (Ortac_runtime.Gospelstdlib.integer_of_int 1)
-                          with
-                          | e ->
-                              raise
-                                (Ortac_runtime.Partial_function
-                                   (e,
-                                     {
-                                       Ortac_runtime.start =
-                                         {
-                                           pos_fname = "record.mli";
-                                           pos_lnum = 11;
-                                           pos_bol = 425;
-                                           pos_cnum = 444
-                                         };
-                                       Ortac_runtime.stop =
-                                         {
-                                           pos_fname = "record.mli";
-                                           pos_lnum = 11;
-                                           pos_bol = 425;
-                                           pos_cnum = 445
-                                         }
-                                     })))))) "plus1"
+                              (Ortac_runtime.Gospelstdlib.integer_of_int 1))))
+                  with | e -> Ortac_runtime.Out_of_domain) "plus1"
                  [("i1 = i + 1",
                     {
                       Ortac_runtime.start =
@@ -262,34 +242,14 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
           else
             Some
               (Ortac_runtime.report "Record" "make 42"
-                 (Ortac_runtime.Value
-                    (Res
-                       (integer,
-                         (try
-                            Ortac_runtime.Gospelstdlib.(+)
+                 (try
+                    Ortac_runtime.Value
+                      (Res
+                         (integer,
+                           (Ortac_runtime.Gospelstdlib.(+)
                               (Ortac_runtime.Gospelstdlib.integer_of_int i_3)
-                              (Ortac_runtime.Gospelstdlib.integer_of_int 2)
-                          with
-                          | e ->
-                              raise
-                                (Ortac_runtime.Partial_function
-                                   (e,
-                                     {
-                                       Ortac_runtime.start =
-                                         {
-                                           pos_fname = "record.mli";
-                                           pos_lnum = 18;
-                                           pos_bol = 727;
-                                           pos_cnum = 746
-                                         };
-                                       Ortac_runtime.stop =
-                                         {
-                                           pos_fname = "record.mli";
-                                           pos_lnum = 18;
-                                           pos_bol = 727;
-                                           pos_cnum = 747
-                                         }
-                                     })))))) "plus2"
+                              (Ortac_runtime.Gospelstdlib.integer_of_int 2))))
+                  with | e -> Ortac_runtime.Out_of_domain) "plus2"
                  [("i2 = i + 2",
                     {
                       Ortac_runtime.start =
@@ -321,35 +281,16 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
              else
                Some
                  (Ortac_runtime.report "Record" "make 42"
-                    (Ortac_runtime.Value
-                       (Res
-                          (integer,
-                            (let r_old__013_ = Model.get state__009_ 0
-                             and r_new__014_ =
-                               lazy
-                                 (Model.get (Lazy.force new_state__011_) 0) in
-                             try (Lazy.force r_new__014_).value
-                             with
-                             | e ->
-                                 raise
-                                   (Ortac_runtime.Partial_function
-                                      (e,
-                                        {
-                                          Ortac_runtime.start =
-                                            {
-                                              pos_fname = "record.mli";
-                                              pos_lnum = 23;
-                                              pos_bol = 868;
-                                              pos_cnum = 884
-                                            };
-                                          Ortac_runtime.stop =
-                                            {
-                                              pos_fname = "record.mli";
-                                              pos_lnum = 23;
-                                              pos_bol = 868;
-                                              pos_cnum = 891
-                                            }
-                                        })))))) "get"
+                    (try
+                       Ortac_runtime.Value
+                         (Res
+                            (integer,
+                              (let r_old__013_ = Model.get state__009_ 0
+                               and r_new__014_ =
+                                 lazy
+                                   (Model.get (Lazy.force new_state__011_) 0) in
+                               (Lazy.force r_new__014_).value)))
+                     with | e -> Ortac_runtime.Out_of_domain) "get"
                     [("i = r.value",
                        {
                          Ortac_runtime.start =
@@ -383,35 +324,17 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                 else
                   Some
                     (Ortac_runtime.report "Record" "make 42"
-                       (Ortac_runtime.Value
-                          (Res
-                             (integer,
-                               (let r_old__013_ = Model.get state__009_ 0
-                                and r_new__014_ =
-                                  lazy
-                                    (Model.get (Lazy.force new_state__011_) 0) in
-                                try (Lazy.force r_new__014_).value
-                                with
-                                | e ->
-                                    raise
-                                      (Ortac_runtime.Partial_function
-                                         (e,
-                                           {
-                                             Ortac_runtime.start =
-                                               {
-                                                 pos_fname = "record.mli";
-                                                 pos_lnum = 23;
-                                                 pos_bol = 868;
-                                                 pos_cnum = 884
-                                               };
-                                             Ortac_runtime.stop =
-                                               {
-                                                 pos_fname = "record.mli";
-                                                 pos_lnum = 23;
-                                                 pos_bol = 868;
-                                                 pos_cnum = 891
-                                               }
-                                           })))))) "get"
+                       (try
+                          Ortac_runtime.Value
+                            (Res
+                               (integer,
+                                 (let r_old__013_ = Model.get state__009_ 0
+                                  and r_new__014_ =
+                                    lazy
+                                      (Model.get (Lazy.force new_state__011_)
+                                         0) in
+                                  (Lazy.force r_new__014_).value)))
+                        with | e -> Ortac_runtime.Out_of_domain) "get"
                        [("plus1 i = i + 1",
                           {
                             Ortac_runtime.start =
@@ -443,35 +366,17 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                 else
                   Some
                     (Ortac_runtime.report "Record" "make 42"
-                       (Ortac_runtime.Value
-                          (Res
-                             (integer,
-                               (let r_old__013_ = Model.get state__009_ 0
-                                and r_new__014_ =
-                                  lazy
-                                    (Model.get (Lazy.force new_state__011_) 0) in
-                                try (Lazy.force r_new__014_).value
-                                with
-                                | e ->
-                                    raise
-                                      (Ortac_runtime.Partial_function
-                                         (e,
-                                           {
-                                             Ortac_runtime.start =
-                                               {
-                                                 pos_fname = "record.mli";
-                                                 pos_lnum = 23;
-                                                 pos_bol = 868;
-                                                 pos_cnum = 884
-                                               };
-                                             Ortac_runtime.stop =
-                                               {
-                                                 pos_fname = "record.mli";
-                                                 pos_lnum = 23;
-                                                 pos_bol = 868;
-                                                 pos_cnum = 891
-                                               }
-                                           })))))) "get"
+                       (try
+                          Ortac_runtime.Value
+                            (Res
+                               (integer,
+                                 (let r_old__013_ = Model.get state__009_ 0
+                                  and r_new__014_ =
+                                    lazy
+                                      (Model.get (Lazy.force new_state__011_)
+                                         0) in
+                                  (Lazy.force r_new__014_).value)))
+                        with | e -> Ortac_runtime.Out_of_domain) "get"
                        [("plus2 i = i + 2",
                           {
                             Ortac_runtime.start =

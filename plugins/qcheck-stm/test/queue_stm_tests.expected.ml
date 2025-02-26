@@ -678,38 +678,18 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                   else
                     Some
                       (Ortac_runtime.report "Queue" "create ()"
-                         (Ortac_runtime.Protected_value
-                            (Res
-                               (int,
-                                 (let t_old__044_ = Model.get state__039_ 0
-                                  and t_new__045_ =
-                                    lazy
-                                      (Model.get (Lazy.force new_state__041_)
-                                         0) in
-                                  try
+                         (try
+                            Ortac_runtime.Protected_value
+                              (Res
+                                 (int,
+                                   (let t_old__044_ = Model.get state__039_ 0
+                                    and t_new__045_ =
+                                      lazy
+                                        (Model.get
+                                           (Lazy.force new_state__041_) 0) in
                                     Ortac_runtime.Gospelstdlib.Sequence.hd
-                                      t_old__044_.contents
-                                  with
-                                  | e ->
-                                      raise
-                                        (Ortac_runtime.Partial_function
-                                           (e,
-                                             {
-                                               Ortac_runtime.start =
-                                                 {
-                                                   pos_fname = "queue.mli";
-                                                   pos_lnum = 27;
-                                                   pos_bol = 1109;
-                                                   pos_cnum = 1125
-                                                 };
-                                               Ortac_runtime.stop =
-                                                 {
-                                                   pos_fname = "queue.mli";
-                                                   pos_lnum = 27;
-                                                   pos_bol = 1109;
-                                                   pos_cnum = 1153
-                                                 }
-                                             })))))) "take"
+                                      t_old__044_.contents)))
+                          with | e -> Ortac_runtime.Out_of_domain) "take"
                          [("v = Sequence.hd (old t.contents)",
                             {
                               Ortac_runtime.start =
@@ -740,38 +720,18 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                   else
                     Some
                       (Ortac_runtime.report "Queue" "create ()"
-                         (Ortac_runtime.Protected_value
-                            (Res
-                               (int,
-                                 (let t_old__044_ = Model.get state__039_ 0
-                                  and t_new__045_ =
-                                    lazy
-                                      (Model.get (Lazy.force new_state__041_)
-                                         0) in
-                                  try
+                         (try
+                            Ortac_runtime.Protected_value
+                              (Res
+                                 (int,
+                                   (let t_old__044_ = Model.get state__039_ 0
+                                    and t_new__045_ =
+                                      lazy
+                                        (Model.get
+                                           (Lazy.force new_state__041_) 0) in
                                     Ortac_runtime.Gospelstdlib.Sequence.hd
-                                      t_old__044_.contents
-                                  with
-                                  | e ->
-                                      raise
-                                        (Ortac_runtime.Partial_function
-                                           (e,
-                                             {
-                                               Ortac_runtime.start =
-                                                 {
-                                                   pos_fname = "queue.mli";
-                                                   pos_lnum = 27;
-                                                   pos_bol = 1109;
-                                                   pos_cnum = 1125
-                                                 };
-                                               Ortac_runtime.stop =
-                                                 {
-                                                   pos_fname = "queue.mli";
-                                                   pos_lnum = 27;
-                                                   pos_bol = 1109;
-                                                   pos_cnum = 1153
-                                                 }
-                                             })))))) "take"
+                                      t_old__044_.contents)))
+                          with | e -> Ortac_runtime.Out_of_domain) "take"
                          [("old t.contents <> Sequence.empty",
                             {
                               Ortac_runtime.start =
@@ -807,7 +767,8 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                else
                  Some
                    (Ortac_runtime.report "Queue" "create ()"
-                      (Ortac_runtime.Exception "Empty") "take"
+                      (try Ortac_runtime.Exception "Empty"
+                       with | e -> Ortac_runtime.Out_of_domain) "take"
                       [("t.contents = old t.contents = Sequence.empty",
                          {
                            Ortac_runtime.start =
@@ -845,13 +806,13 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
           else
             Some
               (Ortac_runtime.report "Queue" "create ()"
-                 (Ortac_runtime.Value
-                    (Res
-                       ((option int),
-                         (let t_old__055_ = Model.get state__039_ 0
-                          and t_new__056_ =
-                            lazy (Model.get (Lazy.force new_state__041_) 0) in
-                          try
+                 (try
+                    Ortac_runtime.Value
+                      (Res
+                         ((option int),
+                           (let t_old__055_ = Model.get state__039_ 0
+                            and t_new__056_ =
+                              lazy (Model.get (Lazy.force new_state__041_) 0) in
                             if
                               t_old__055_.contents =
                                 Ortac_runtime.Gospelstdlib.Sequence.empty
@@ -859,28 +820,8 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                             else
                               Some
                                 (Ortac_runtime.Gospelstdlib.Sequence.hd
-                                   t_old__055_.contents)
-                          with
-                          | e ->
-                              raise
-                                (Ortac_runtime.Partial_function
-                                   (e,
-                                     {
-                                       Ortac_runtime.start =
-                                         {
-                                           pos_fname = "queue.mli";
-                                           pos_lnum = 35;
-                                           pos_bol = 1498;
-                                           pos_cnum = 1514
-                                         };
-                                       Ortac_runtime.stop =
-                                         {
-                                           pos_fname = "queue.mli";
-                                           pos_lnum = 36;
-                                           pos_bol = 1556;
-                                           pos_cnum = 1609
-                                         }
-                                     })))))) "take_opt"
+                                   t_old__055_.contents))))
+                  with | e -> Ortac_runtime.Out_of_domain) "take_opt"
                  [("r = if (old t.contents) = Sequence.empty then\n        None else Some (Sequence.hd (old t.contents))",
                     {
                       Ortac_runtime.start =
@@ -915,38 +856,18 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                   else
                     Some
                       (Ortac_runtime.report "Queue" "create ()"
-                         (Ortac_runtime.Protected_value
-                            (Res
-                               (int,
-                                 (let t_old__060_ = Model.get state__039_ 0
-                                  and t_new__061_ =
-                                    lazy
-                                      (Model.get (Lazy.force new_state__041_)
-                                         0) in
-                                  try
+                         (try
+                            Ortac_runtime.Protected_value
+                              (Res
+                                 (int,
+                                   (let t_old__060_ = Model.get state__039_ 0
+                                    and t_new__061_ =
+                                      lazy
+                                        (Model.get
+                                           (Lazy.force new_state__041_) 0) in
                                     Ortac_runtime.Gospelstdlib.Sequence.hd
-                                      t_old__060_.contents
-                                  with
-                                  | e ->
-                                      raise
-                                        (Ortac_runtime.Partial_function
-                                           (e,
-                                             {
-                                               Ortac_runtime.start =
-                                                 {
-                                                   pos_fname = "queue.mli";
-                                                   pos_lnum = 45;
-                                                   pos_bol = 1982;
-                                                   pos_cnum = 1998
-                                                 };
-                                               Ortac_runtime.stop =
-                                                 {
-                                                   pos_fname = "queue.mli";
-                                                   pos_lnum = 45;
-                                                   pos_bol = 1982;
-                                                   pos_cnum = 2026
-                                                 }
-                                             })))))) "pop"
+                                      t_old__060_.contents)))
+                          with | e -> Ortac_runtime.Out_of_domain) "pop"
                          [("v = Sequence.hd (old t.contents)",
                             {
                               Ortac_runtime.start =
@@ -977,38 +898,18 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                   else
                     Some
                       (Ortac_runtime.report "Queue" "create ()"
-                         (Ortac_runtime.Protected_value
-                            (Res
-                               (int,
-                                 (let t_old__060_ = Model.get state__039_ 0
-                                  and t_new__061_ =
-                                    lazy
-                                      (Model.get (Lazy.force new_state__041_)
-                                         0) in
-                                  try
+                         (try
+                            Ortac_runtime.Protected_value
+                              (Res
+                                 (int,
+                                   (let t_old__060_ = Model.get state__039_ 0
+                                    and t_new__061_ =
+                                      lazy
+                                        (Model.get
+                                           (Lazy.force new_state__041_) 0) in
                                     Ortac_runtime.Gospelstdlib.Sequence.hd
-                                      t_old__060_.contents
-                                  with
-                                  | e ->
-                                      raise
-                                        (Ortac_runtime.Partial_function
-                                           (e,
-                                             {
-                                               Ortac_runtime.start =
-                                                 {
-                                                   pos_fname = "queue.mli";
-                                                   pos_lnum = 45;
-                                                   pos_bol = 1982;
-                                                   pos_cnum = 1998
-                                                 };
-                                               Ortac_runtime.stop =
-                                                 {
-                                                   pos_fname = "queue.mli";
-                                                   pos_lnum = 45;
-                                                   pos_bol = 1982;
-                                                   pos_cnum = 2026
-                                                 }
-                                             })))))) "pop"
+                                      t_old__060_.contents)))
+                          with | e -> Ortac_runtime.Out_of_domain) "pop"
                          [("old t.contents <> Sequence.empty",
                             {
                               Ortac_runtime.start =
@@ -1044,7 +945,8 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                else
                  Some
                    (Ortac_runtime.report "Queue" "create ()"
-                      (Ortac_runtime.Exception "Empty") "pop"
+                      (try Ortac_runtime.Exception "Empty"
+                       with | e -> Ortac_runtime.Out_of_domain) "pop"
                       [("t.contents = old t.contents = Sequence.empty",
                          {
                            Ortac_runtime.start =
@@ -1079,37 +981,18 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                else
                  Some
                    (Ortac_runtime.report "Queue" "create ()"
-                      (Ortac_runtime.Protected_value
-                         (Res
-                            (int,
-                              (let t_old__071_ = Model.get state__039_ 0
-                               and t_new__072_ =
-                                 lazy
-                                   (Model.get (Lazy.force new_state__041_) 0) in
-                               try
+                      (try
+                         Ortac_runtime.Protected_value
+                           (Res
+                              (int,
+                                (let t_old__071_ = Model.get state__039_ 0
+                                 and t_new__072_ =
+                                   lazy
+                                     (Model.get (Lazy.force new_state__041_)
+                                        0) in
                                  Ortac_runtime.Gospelstdlib.Sequence.hd
-                                   (Lazy.force t_new__072_).contents
-                               with
-                               | e ->
-                                   raise
-                                     (Ortac_runtime.Partial_function
-                                        (e,
-                                          {
-                                            Ortac_runtime.start =
-                                              {
-                                                pos_fname = "queue.mli";
-                                                pos_lnum = 51;
-                                                pos_bol = 2270;
-                                                pos_cnum = 2286
-                                              };
-                                            Ortac_runtime.stop =
-                                              {
-                                                pos_fname = "queue.mli";
-                                                pos_lnum = 51;
-                                                pos_bol = 2270;
-                                                pos_cnum = 2308
-                                              }
-                                          })))))) "peek"
+                                   (Lazy.force t_new__072_).contents)))
+                       with | e -> Ortac_runtime.Out_of_domain) "peek"
                       [("v = Sequence.hd t.contents",
                          {
                            Ortac_runtime.start =
@@ -1145,7 +1028,8 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                else
                  Some
                    (Ortac_runtime.report "Queue" "create ()"
-                      (Ortac_runtime.Exception "Empty") "peek"
+                      (try Ortac_runtime.Exception "Empty"
+                       with | e -> Ortac_runtime.Out_of_domain) "peek"
                       [("t.contents = old t.contents = Sequence.empty",
                          {
                            Ortac_runtime.start =
@@ -1180,37 +1064,18 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                else
                  Some
                    (Ortac_runtime.report "Queue" "create ()"
-                      (Ortac_runtime.Protected_value
-                         (Res
-                            (int,
-                              (let t_old__080_ = Model.get state__039_ 0
-                               and t_new__081_ =
-                                 lazy
-                                   (Model.get (Lazy.force new_state__041_) 0) in
-                               try
+                      (try
+                         Ortac_runtime.Protected_value
+                           (Res
+                              (int,
+                                (let t_old__080_ = Model.get state__039_ 0
+                                 and t_new__081_ =
+                                   lazy
+                                     (Model.get (Lazy.force new_state__041_)
+                                        0) in
                                  Ortac_runtime.Gospelstdlib.Sequence.hd
-                                   (Lazy.force t_new__081_).contents
-                               with
-                               | e ->
-                                   raise
-                                     (Ortac_runtime.Partial_function
-                                        (e,
-                                          {
-                                            Ortac_runtime.start =
-                                              {
-                                                pos_fname = "queue.mli";
-                                                pos_lnum = 56;
-                                                pos_bol = 2499;
-                                                pos_cnum = 2515
-                                              };
-                                            Ortac_runtime.stop =
-                                              {
-                                                pos_fname = "queue.mli";
-                                                pos_lnum = 56;
-                                                pos_bol = 2499;
-                                                pos_cnum = 2537
-                                              }
-                                          })))))) "top"
+                                   (Lazy.force t_new__081_).contents)))
+                       with | e -> Ortac_runtime.Out_of_domain) "top"
                       [("v = Sequence.hd t.contents",
                          {
                            Ortac_runtime.start =
@@ -1246,7 +1111,8 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                else
                  Some
                    (Ortac_runtime.report "Queue" "create ()"
-                      (Ortac_runtime.Exception "Empty") "top"
+                      (try Ortac_runtime.Exception "Empty"
+                       with | e -> Ortac_runtime.Out_of_domain) "top"
                       [("t.contents = old t.contents = Sequence.empty",
                          {
                            Ortac_runtime.start =
@@ -1290,8 +1156,8 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
           else
             Some
               (Ortac_runtime.report "Queue" "create ()"
-                 (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
-                 "peek_opt"
+                 (try Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
+                  with | e -> Ortac_runtime.Out_of_domain) "peek_opt"
                  [("match v with\n        | None -> t.contents = Sequence.empty\n        | Some a -> a = Sequence.hd t.contents",
                     {
                       Ortac_runtime.start =
@@ -1330,13 +1196,13 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
           else
             Some
               (Ortac_runtime.report "Queue" "create ()"
-                 (Ortac_runtime.Value
-                    (Res
-                       (bool,
-                         (let t_old__094_ = Model.get state__039_ 0
-                          and t_new__095_ =
-                            lazy (Model.get (Lazy.force new_state__041_) 0) in
-                          try
+                 (try
+                    Ortac_runtime.Value
+                      (Res
+                         (bool,
+                           (let t_old__094_ = Model.get state__039_ 0
+                            and t_new__095_ =
+                              lazy (Model.get (Lazy.force new_state__041_) 0) in
                             match Ortac_runtime.Gospelstdlib.Sequence.length
                                     (Lazy.force t_new__095_).contents
                             with
@@ -1345,28 +1211,8 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                                   (Ortac_runtime.Gospelstdlib.integer_of_int
                                      0)
                                 -> true
-                            | _ -> false
-                          with
-                          | e ->
-                              raise
-                                (Ortac_runtime.Partial_function
-                                   (e,
-                                     {
-                                       Ortac_runtime.start =
-                                         {
-                                           pos_fname = "queue.mli";
-                                           pos_lnum = 75;
-                                           pos_bol = 3297;
-                                           pos_cnum = 3313
-                                         };
-                                       Ortac_runtime.stop =
-                                         {
-                                           pos_fname = "queue.mli";
-                                           pos_lnum = 77;
-                                           pos_bol = 3371;
-                                           pos_cnum = 3391
-                                         }
-                                     })))))) "is_empty"
+                            | _ -> false)))
+                  with | e -> Ortac_runtime.Out_of_domain) "is_empty"
                  [("b = match Sequence.length t.contents with\n        | 0 -> true\n        | _ -> false",
                     {
                       Ortac_runtime.start =
@@ -1397,36 +1243,16 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
           else
             Some
               (Ortac_runtime.report "Queue" "create ()"
-                 (Ortac_runtime.Value
-                    (Res
-                       (integer,
-                         (let t_old__101_ = Model.get state__039_ 0
-                          and t_new__102_ =
-                            lazy (Model.get (Lazy.force new_state__041_) 0) in
-                          try
+                 (try
+                    Ortac_runtime.Value
+                      (Res
+                         (integer,
+                           (let t_old__101_ = Model.get state__039_ 0
+                            and t_new__102_ =
+                              lazy (Model.get (Lazy.force new_state__041_) 0) in
                             Ortac_runtime.Gospelstdlib.Sequence.length
-                              (Lazy.force t_new__102_).contents
-                          with
-                          | e ->
-                              raise
-                                (Ortac_runtime.Partial_function
-                                   (e,
-                                     {
-                                       Ortac_runtime.start =
-                                         {
-                                           pos_fname = "queue.mli";
-                                           pos_lnum = 81;
-                                           pos_bol = 3506;
-                                           pos_cnum = 3522
-                                         };
-                                       Ortac_runtime.stop =
-                                         {
-                                           pos_fname = "queue.mli";
-                                           pos_lnum = 81;
-                                           pos_bol = 3506;
-                                           pos_cnum = 3548
-                                         }
-                                     })))))) "length"
+                              (Lazy.force t_new__102_).contents)))
+                  with | e -> Ortac_runtime.Out_of_domain) "length"
                  [("l = Sequence.length t.contents",
                     {
                       Ortac_runtime.start =

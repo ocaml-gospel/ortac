@@ -18,7 +18,10 @@ let list_append = list_fold_expr (qualify [ "Ortac_runtime" ] "append") "None"
 let res = lident "Res"
 
 let eexpected_value case e =
-  pexp_construct (noloc (Ldot (Lident "Ortac_runtime", case))) (Some e)
+  let x =
+    pexp_construct (noloc (Ldot (Lident "Ortac_runtime", case))) (Some e)
+  in
+  [%expr try [%e x] with e -> Ortac_runtime.Out_of_domain]
 
 let evalue = eexpected_value "Value"
 let eprotected = eexpected_value "Protected_value"
@@ -91,6 +94,11 @@ let ocaml_of_condition cfg t =
   let open Reserr in
   try term_with_catch_bool ~context:cfg.Cfg.context t |> ok
   with W.Error e -> error e
+
+let ocaml_of_returned cfg t =
+  let open Ortac_core.Ocaml_of_gospel in
+  let open Reserr in
+  try term ~context:cfg.Cfg.context t |> ok with W.Error e -> error e
 
 (** [subst_term state ~gos_t ?old_lz ~old_t ?new_lz ~new_t ~fun_vars trm] will
     substitute occurrences in [gos_t] with the associated values from [new_t] or
@@ -797,7 +805,9 @@ let postcond_case config state invariants idx state_ident new_state_ident value
   let* ret_val =
     (* simply warn the user if we can't compute the expected returned value,
        don't skip the function *)
-    match expected_returned_value (translate_postcond ocaml_of_term) value with
+    match
+      expected_returned_value (translate_postcond ocaml_of_returned) value
+    with
     | None ->
         (* If the returned value is a SUT, we don't need to ever show it *)
         if Cfg.does_return_sut config value.ty then ok dummy

@@ -415,8 +415,8 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
              else
                Some
                  (Ortac_runtime.report "Tuples" "create ()"
-                    (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
-                    "size_tup"
+                    (try Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
+                     with | e -> Ortac_runtime.Out_of_domain) "size_tup"
                     [("x = Sequence.length t.contents",
                        {
                          Ortac_runtime.start =
@@ -447,8 +447,8 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
              else
                Some
                  (Ortac_runtime.report "Tuples" "create ()"
-                    (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
-                    "size_tup"
+                    (try Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
+                     with | e -> Ortac_runtime.Out_of_domain) "size_tup"
                     [("y = Sequence.length t.contents",
                        {
                          Ortac_runtime.start =
@@ -481,8 +481,8 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
              else
                Some
                  (Ortac_runtime.report "Tuples" "create ()"
-                    (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
-                    "size_tup'"
+                    (try Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
+                     with | e -> Ortac_runtime.Out_of_domain) "size_tup'"
                     [("x = Sequence.length t.contents",
                        {
                          Ortac_runtime.start =
@@ -514,8 +514,9 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                 else
                   Some
                     (Ortac_runtime.report "Tuples" "create ()"
-                       (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
-                       "size_tup'"
+                       (try
+                          Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
+                        with | e -> Ortac_runtime.Out_of_domain) "size_tup'"
                        [("y = Sequence.length t.contents",
                           {
                             Ortac_runtime.start =
@@ -546,8 +547,9 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                 else
                   Some
                     (Ortac_runtime.report "Tuples" "create ()"
-                       (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
-                       "size_tup'"
+                       (try
+                          Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
+                        with | e -> Ortac_runtime.Out_of_domain) "size_tup'"
                        [("z = Sequence.length t.contents",
                           {
                             Ortac_runtime.start =

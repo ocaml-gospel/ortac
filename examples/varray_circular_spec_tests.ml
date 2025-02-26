@@ -1333,8 +1333,10 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                else
                  Some
                    (Ortac_runtime.report "Varray_circular_spec" "make 42 'a'"
-                      (Ortac_runtime.Protected_value
-                         (Res (Ortac_runtime.dummy, ()))) "pop_back"
+                      (try
+                         Ortac_runtime.Protected_value
+                           (Res (Ortac_runtime.dummy, ()))
+                       with | e -> Ortac_runtime.Out_of_domain) "pop_back"
                       [("if old t.contents = Sequence.empty\n              then false\n              else proj x = (old t.contents)[Sequence.length (old t.contents) - 1]",
                          {
                            Ortac_runtime.start =
@@ -1370,7 +1372,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                else
                  Some
                    (Ortac_runtime.report "Varray_circular_spec" "make 42 'a'"
-                      (Ortac_runtime.Exception "Not_found") "pop_back"
+                      (try Ortac_runtime.Exception "Not_found"
+                       with | e -> Ortac_runtime.Out_of_domain) "pop_back"
                       [("t.contents = old t.contents = Sequence.empty",
                          {
                            Ortac_runtime.start =
@@ -1411,8 +1414,10 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                else
                  Some
                    (Ortac_runtime.report "Varray_circular_spec" "make 42 'a'"
-                      (Ortac_runtime.Protected_value
-                         (Res (Ortac_runtime.dummy, ()))) "pop_front"
+                      (try
+                         Ortac_runtime.Protected_value
+                           (Res (Ortac_runtime.dummy, ()))
+                       with | e -> Ortac_runtime.Out_of_domain) "pop_front"
                       [("if old t.contents = Sequence.empty\n              then false\n              else proj x = Sequence.hd (old t.contents)",
                          {
                            Ortac_runtime.start =
@@ -1448,7 +1453,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                else
                  Some
                    (Ortac_runtime.report "Varray_circular_spec" "make 42 'a'"
-                      (Ortac_runtime.Exception "Not_found") "pop_front"
+                      (try Ortac_runtime.Exception "Not_found"
+                       with | e -> Ortac_runtime.Out_of_domain) "pop_front"
                       [("t.contents = old t.contents = Sequence.empty",
                          {
                            Ortac_runtime.start =
@@ -1487,8 +1493,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                    Some
                      (Ortac_runtime.report "Varray_circular_spec"
                         "make 42 'a'"
-                        (Ortac_runtime.Exception "Invalid_argument")
-                        "insert_at"
+                        (try Ortac_runtime.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Out_of_domain) "insert_at"
                         [("0 <= i <= Sequence.length t.contents",
                            {
                              Ortac_runtime.start =
@@ -1531,7 +1537,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument")
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain)
                            "insert_at"
                            [("0 <= i <= Sequence.length t.contents",
                               {
@@ -1563,7 +1570,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                    Some
                      (Ortac_runtime.report "Varray_circular_spec"
                         "make 42 'a'"
-                        (Ortac_runtime.Exception "Invalid_argument") "pop_at"
+                        (try Ortac_runtime.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Out_of_domain) "pop_at"
                         [("inside i t.contents",
                            {
                              Ortac_runtime.start =
@@ -1600,8 +1608,10 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Protected_value
-                              (Res (Ortac_runtime.dummy, ()))) "pop_at"
+                           (try
+                              Ortac_runtime.Protected_value
+                                (Res (Ortac_runtime.dummy, ()))
+                            with | e -> Ortac_runtime.Out_of_domain) "pop_at"
                            [("(proj x) = old t.contents[i]",
                               {
                                 Ortac_runtime.start =
@@ -1637,8 +1647,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument")
-                           "pop_at"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "pop_at"
                            [("inside i t.contents",
                               {
                                 Ortac_runtime.start =
@@ -1669,8 +1679,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                    Some
                      (Ortac_runtime.report "Varray_circular_spec"
                         "make 42 'a'"
-                        (Ortac_runtime.Exception "Invalid_argument")
-                        "delete_at"
+                        (try Ortac_runtime.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Out_of_domain) "delete_at"
                         [("inside i t.contents",
                            {
                              Ortac_runtime.start =
@@ -1710,7 +1720,9 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Protected_value (Res (unit, ())))
+                           (try
+                              Ortac_runtime.Protected_value (Res (unit, ()))
+                            with | e -> Ortac_runtime.Out_of_domain)
                            "delete_at"
                            [("Sequence.length t.contents = Sequence.length (old t.contents) - 1",
                               {
@@ -1747,7 +1759,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument")
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain)
                            "delete_at"
                            [("inside i t.contents",
                               {
@@ -1779,7 +1792,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                    Some
                      (Ortac_runtime.report "Varray_circular_spec"
                         "make 42 'a'"
-                        (Ortac_runtime.Exception "Invalid_argument") "get"
+                        (try Ortac_runtime.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Out_of_domain) "get"
                         [("inside i t.contents",
                            {
                              Ortac_runtime.start =
@@ -1816,8 +1830,10 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Protected_value
-                              (Res (Ortac_runtime.dummy, ()))) "get"
+                           (try
+                              Ortac_runtime.Protected_value
+                                (Res (Ortac_runtime.dummy, ()))
+                            with | e -> Ortac_runtime.Out_of_domain) "get"
                            [("(proj x) = t.contents[i]",
                               {
                                 Ortac_runtime.start =
@@ -1853,7 +1869,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument") "get"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "get"
                            [("inside i t.contents",
                               {
                                 Ortac_runtime.start =
@@ -1884,7 +1901,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                    Some
                      (Ortac_runtime.report "Varray_circular_spec"
                         "make 42 'a'"
-                        (Ortac_runtime.Exception "Invalid_argument") "set"
+                        (try Ortac_runtime.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Out_of_domain) "set"
                         [("inside i t.contents",
                            {
                              Ortac_runtime.start =
@@ -1921,7 +1939,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument") "set"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "set"
                            [("inside i t.contents",
                               {
                                 Ortac_runtime.start =
@@ -1952,38 +1971,16 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
           else
             Some
               (Ortac_runtime.report "Varray_circular_spec" "make 42 'a'"
-                 (Ortac_runtime.Value
-                    (Res
-                       (integer,
-                         (let t_old__107_ = Model.get state__075_ 0
-                          and t_new__108_ =
-                            lazy (Model.get (Lazy.force new_state__077_) 0) in
-                          try
+                 (try
+                    Ortac_runtime.Value
+                      (Res
+                         (integer,
+                           (let t_old__107_ = Model.get state__075_ 0
+                            and t_new__108_ =
+                              lazy (Model.get (Lazy.force new_state__077_) 0) in
                             Ortac_runtime.Gospelstdlib.Sequence.length
-                              (Lazy.force t_new__108_).contents
-                          with
-                          | e ->
-                              raise
-                                (Ortac_runtime.Partial_function
-                                   (e,
-                                     {
-                                       Ortac_runtime.start =
-                                         {
-                                           pos_fname =
-                                             "varray_circular_spec.mli";
-                                           pos_lnum = 144;
-                                           pos_bol = 8634;
-                                           pos_cnum = 8652
-                                         };
-                                       Ortac_runtime.stop =
-                                         {
-                                           pos_fname =
-                                             "varray_circular_spec.mli";
-                                           pos_lnum = 144;
-                                           pos_bol = 8634;
-                                           pos_cnum = 8678
-                                         }
-                                     })))))) "length"
+                              (Lazy.force t_new__108_).contents)))
+                  with | e -> Ortac_runtime.Out_of_domain) "length"
                  [("l = Sequence.length t.contents",
                     {
                       Ortac_runtime.start =
@@ -2013,7 +2010,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                    Some
                      (Ortac_runtime.report "Varray_circular_spec"
                         "make 42 'a'"
-                        (Ortac_runtime.Exception "Invalid_argument") "make"
+                        (try Ortac_runtime.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Out_of_domain) "make"
                         [("n >= 0",
                            {
                              Ortac_runtime.start =
@@ -2048,8 +2046,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument")
-                           "make"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "make"
                            [("n >= 0",
                               {
                                 Ortac_runtime.start =
@@ -2081,8 +2079,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
           else
             Some
               (Ortac_runtime.report "Varray_circular_spec" "make 42 'a'"
-                 (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
-                 "is_empty"
+                 (try Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
+                  with | e -> Ortac_runtime.Out_of_domain) "is_empty"
                  [("b <-> t.contents = Sequence.empty",
                     {
                       Ortac_runtime.start =
@@ -2122,7 +2120,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument") "sub"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "sub"
                            [("0 <= i <= Sequence.length t.contents",
                               {
                                 Ortac_runtime.start =
@@ -2163,7 +2162,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument") "sub"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "sub"
                            [("i <= i + n <= Sequence.length t.contents",
                               {
                                 Ortac_runtime.start =
@@ -2207,8 +2207,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                          Some
                            (Ortac_runtime.report "Varray_circular_spec"
                               "make 42 'a'"
-                              (Ortac_runtime.Exception "Invalid_argument")
-                              "sub"
+                              (try Ortac_runtime.Exception "Invalid_argument"
+                               with | e -> Ortac_runtime.Out_of_domain) "sub"
                               [("0 <= i <= Sequence.length t.contents",
                                  {
                                    Ortac_runtime.start =
@@ -2253,8 +2253,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                          Some
                            (Ortac_runtime.report "Varray_circular_spec"
                               "make 42 'a'"
-                              (Ortac_runtime.Exception "Invalid_argument")
-                              "sub"
+                              (try Ortac_runtime.Exception "Invalid_argument"
+                               with | e -> Ortac_runtime.Out_of_domain) "sub"
                               [("i <= i + n <= Sequence.length t.contents",
                                  {
                                    Ortac_runtime.start =
@@ -2301,7 +2301,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                    Some
                      (Ortac_runtime.report "Varray_circular_spec"
                         "make 42 'a'"
-                        (Ortac_runtime.Exception "Invalid_argument") "fill"
+                        (try Ortac_runtime.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Out_of_domain) "fill"
                         [("0 <= pos /\\ 0 <= len /\\ pos + len < Sequence.length t.contents",
                            {
                              Ortac_runtime.start =
@@ -2354,8 +2355,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument")
-                           "fill"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "fill"
                            [("0 <= pos /\\ 0 <= len /\\ pos + len < Sequence.length t.contents",
                               {
                                 Ortac_runtime.start =
@@ -2412,8 +2413,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument")
-                           "blit"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "blit"
                            [("0 <= src_pos <= src_pos + len <= Sequence.length src.contents",
                               {
                                 Ortac_runtime.start =
@@ -2467,8 +2468,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument")
-                           "blit"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "blit"
                            [("0 <= dst_pos <= dst_pos + len <= Sequence.length dst.contents",
                               {
                                 Ortac_runtime.start =
@@ -2529,7 +2530,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                          Some
                            (Ortac_runtime.report "Varray_circular_spec"
                               "make 42 'a'"
-                              (Ortac_runtime.Exception "Invalid_argument")
+                              (try Ortac_runtime.Exception "Invalid_argument"
+                               with | e -> Ortac_runtime.Out_of_domain)
                               "blit"
                               [("0 <= src_pos <= src_pos + len <= Sequence.length src.contents",
                                  {
@@ -2584,7 +2586,8 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                          Some
                            (Ortac_runtime.report "Varray_circular_spec"
                               "make 42 'a'"
-                              (Ortac_runtime.Exception "Invalid_argument")
+                              (try Ortac_runtime.Exception "Invalid_argument"
+                               with | e -> Ortac_runtime.Out_of_domain)
                               "blit"
                               [("0 <= dst_pos <= dst_pos + len <= Sequence.length dst.contents",
                                  {

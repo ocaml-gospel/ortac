@@ -293,7 +293,8 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                  else
                    Some
                      (Ortac_runtime.report "Function_args" "make 16 'a'"
-                        (Ortac_runtime.Exception "Invalid_argument") "make"
+                        (try Ortac_runtime.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Out_of_domain) "make"
                         [("len >= 0",
                            {
                              Ortac_runtime.start =
@@ -327,8 +328,8 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                     else
                       Some
                         (Ortac_runtime.report "Function_args" "make 16 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument")
-                           "make"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "make"
                            [("len >= 0",
                               {
                                 Ortac_runtime.start =
