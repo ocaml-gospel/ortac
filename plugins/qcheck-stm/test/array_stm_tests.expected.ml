@@ -1604,8 +1604,7 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                  (Ortac_runtime.Gospelstdlib.Sequence.fold_left
                     (fun acc ->
                        fun a_6 ->
-                         if
-                           ((QCheck.Fn.apply_1 p a_6) = true) && (acc = true)
+                         if ((QCheck.Fn.apply p a_6) = true) && (acc = true)
                          then true
                          else false) true (Lazy.force t_new__085_).contents)
              with | e -> false)

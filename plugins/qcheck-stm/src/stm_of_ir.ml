@@ -16,6 +16,7 @@ let exp_default = evar exp_default_name
 let res_default = Ident.create ~loc:Location.none "res"
 let list_append = list_fold_expr (qualify [ "Ortac_runtime" ] "append") "None"
 let res = lident "Res"
+let fn_apply_name = Ident.create ~loc:Location.none "QCheck.Fn.apply"
 
 let eexpected_value case e =
   let x =
@@ -140,7 +141,6 @@ let subst_term state ?(out_of_scope = []) ~gos_t ?(old_lz = false) ~fun_vars
           raise (ImpossibleSubst (term, `NotModel))
     | Tvar { vs_name; _ } when List.mem vs_name fun_vars ->
         let open Gospel in
-        let fn_apply_name = Ident.create ~loc:Location.none "QCheck.Fn.apply" in
         let fn_apply_ty = Ttypes.fresh_ty_var "a" in
         let fn_apply_term =
           Tterm_helper.mk_term
