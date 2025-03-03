@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set-up OCaml 5.0
-        uses: ocaml/setup-ocaml@v2
+        uses: ocaml/setup-ocaml@v3
         with:
           ocaml-compiler: "5.0"
           dune-cache: true
@@ -28,7 +28,7 @@ jobs:
         uses: actions/configure-pages@v4
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v4
         with:
           path: _build/default/_doc/_html
 
