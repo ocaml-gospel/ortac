@@ -1,3 +1,8 @@
+# Unreleased
+
+- Improve failure message in case of out of domain failure
+  [\#287](https://github.com/ocaml-gospel/ortac/pull/287)
+
 # 0.5.0
 
 - Add `submodule` optional argument to Ortac/QCheck-STM and Ortac/Dune
