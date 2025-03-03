@@ -114,27 +114,7 @@ module Spec =
                Ortac_runtime.Gospelstdlib.(>=)
                  (Ortac_runtime.Gospelstdlib.integer_of_int len)
                  (Ortac_runtime.Gospelstdlib.integer_of_int 0)
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "function_args.mli";
-                              pos_lnum = 7;
-                              pos_bol = 288;
-                              pos_cnum = 299
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "function_args.mli";
-                              pos_lnum = 7;
-                              pos_bol = 288;
-                              pos_cnum = 307
-                            }
-                        })))
+             with | e -> false)
           then
             let t_1__005_ =
               let open ModelElt in
@@ -308,32 +288,13 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                      Ortac_runtime.Gospelstdlib.(>=)
                        (Ortac_runtime.Gospelstdlib.integer_of_int len)
                        (Ortac_runtime.Gospelstdlib.integer_of_int 0)
-                   with
-                   | e ->
-                       raise
-                         (Ortac_runtime.Partial_function
-                            (e,
-                              {
-                                Ortac_runtime.start =
-                                  {
-                                    pos_fname = "function_args.mli";
-                                    pos_lnum = 7;
-                                    pos_bol = 288;
-                                    pos_cnum = 299
-                                  };
-                                Ortac_runtime.stop =
-                                  {
-                                    pos_fname = "function_args.mli";
-                                    pos_lnum = 7;
-                                    pos_bol = 288;
-                                    pos_cnum = 307
-                                  }
-                              }))
+                   with | e -> false
                  then None
                  else
                    Some
                      (Ortac_runtime.report "Function_args" "make 16 'a'"
-                        (Ortac_runtime.Exception "Invalid_argument") "make"
+                        (try Ortac_runtime.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Out_of_domain) "make"
                         [("len >= 0",
                            {
                              Ortac_runtime.start =
@@ -362,33 +323,13 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                          Ortac_runtime.Gospelstdlib.(>=)
                            (Ortac_runtime.Gospelstdlib.integer_of_int len)
                            (Ortac_runtime.Gospelstdlib.integer_of_int 0)
-                       with
-                       | e ->
-                           raise
-                             (Ortac_runtime.Partial_function
-                                (e,
-                                  {
-                                    Ortac_runtime.start =
-                                      {
-                                        pos_fname = "function_args.mli";
-                                        pos_lnum = 7;
-                                        pos_bol = 288;
-                                        pos_cnum = 299
-                                      };
-                                    Ortac_runtime.stop =
-                                      {
-                                        pos_fname = "function_args.mli";
-                                        pos_lnum = 7;
-                                        pos_bol = 288;
-                                        pos_cnum = 307
-                                      }
-                                  })))
+                       with | e -> false)
                     then None
                     else
                       Some
                         (Ortac_runtime.report "Function_args" "make 16 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument")
-                           "make"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "make"
                            [("len >= 0",
                               {
                                 Ortac_runtime.start =

@@ -392,27 +392,7 @@ module Spec =
                    (Ortac_runtime.Gospelstdlib.Sequence.length
                       t_5__014_.contents) in
                __t1__018_ && __t2__019_
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 72;
-                              pos_bol = 4784;
-                              pos_cnum = 4797
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 72;
-                              pos_bol = 4784;
-                              pos_cnum = 4833
-                            }
-                        })))
+             with | e -> false)
           then
             let t_5__017_ =
               let open ModelElt in
@@ -476,27 +456,7 @@ module Spec =
                (inside (Ortac_runtime.Gospelstdlib.integer_of_int i_2)
                   t_6__020_.contents)
                  = true
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 89;
-                              pos_bol = 5727;
-                              pos_cnum = 5740
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 89;
-                              pos_bol = 5727;
-                              pos_cnum = 5759
-                            }
-                        })))
+             with | e -> false)
           then
             let t_6__021_ =
               let open ModelElt in
@@ -545,27 +505,7 @@ module Spec =
                (inside (Ortac_runtime.Gospelstdlib.integer_of_int i_3)
                   t_7__022_.contents)
                  = true
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 102;
-                              pos_bol = 6426;
-                              pos_cnum = 6439
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 102;
-                              pos_bol = 6426;
-                              pos_cnum = 6458
-                            }
-                        })))
+             with | e -> false)
           then
             let t_7__023_ =
               let open ModelElt in
@@ -614,27 +554,7 @@ module Spec =
                (inside (Ortac_runtime.Gospelstdlib.integer_of_int i_4)
                   t_8__024_.contents)
                  = true
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 128;
-                              pos_bol = 7616;
-                              pos_cnum = 7629
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 128;
-                              pos_bol = 7616;
-                              pos_cnum = 7648
-                            }
-                        })))
+             with | e -> false)
           then
             let t_8__025_ = t_8__024_ in
             Model.push (Model.drop_n state__005_ 1) t_8__025_
@@ -646,27 +566,7 @@ module Spec =
                (inside (Ortac_runtime.Gospelstdlib.integer_of_int i_5)
                   t_9__026_.contents)
                  = true
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 137;
-                              pos_bol = 8077;
-                              pos_cnum = 8090
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 137;
-                              pos_bol = 8077;
-                              pos_cnum = 8109
-                            }
-                        })))
+             with | e -> false)
           then
             let t_9__027_ =
               let open ModelElt in
@@ -711,27 +611,7 @@ module Spec =
                Ortac_runtime.Gospelstdlib.(>=)
                  (Ortac_runtime.Gospelstdlib.integer_of_int n)
                  (Ortac_runtime.Gospelstdlib.integer_of_int 0)
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 153;
-                              pos_bol = 9121;
-                              pos_cnum = 9134
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 153;
-                              pos_bol = 9121;
-                              pos_cnum = 9140
-                            }
-                        })))
+             with | e -> false)
           then
             let t_11__031_ =
               let open ModelElt in
@@ -849,28 +729,7 @@ module Spec =
                    (Ortac_runtime.Gospelstdlib.Sequence.length
                       t_15__042_.contents) in
                __t1__046_ && __t2__047_
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 194;
-                              pos_bol = 11847;
-                              pos_cnum = 11860
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 194;
-                              pos_bol = 11847;
-                              pos_cnum = 11896
-                            }
-                        })))
-              &&
+             with | e -> false) &&
               ((try
                   let __t1__048_ =
                     Ortac_runtime.Gospelstdlib.(<=)
@@ -886,27 +745,7 @@ module Spec =
                       (Ortac_runtime.Gospelstdlib.Sequence.length
                          t_15__042_.contents) in
                   __t1__048_ && __t2__049_
-                with
-                | e ->
-                    raise
-                      (Ortac_runtime.Partial_function
-                         (e,
-                           {
-                             Ortac_runtime.start =
-                               {
-                                 pos_fname = "varray_circular_spec.mli";
-                                 pos_lnum = 195;
-                                 pos_bol = 11897;
-                                 pos_cnum = 11910
-                               };
-                             Ortac_runtime.stop =
-                               {
-                                 pos_fname = "varray_circular_spec.mli";
-                                 pos_lnum = 195;
-                                 pos_bol = 11897;
-                                 pos_cnum = 11950
-                               }
-                           }))))
+                with | e -> false))
           then
             let r__045_ =
               let open ModelElt in
@@ -1008,27 +847,7 @@ module Spec =
                         t_17__054_.contents) in
                  __t1__060_ && __t2__061_ in
                __t1__058_ && __t2__059_
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 211;
-                              pos_bol = 12970;
-                              pos_cnum = 12983
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 211;
-                              pos_bol = 12970;
-                              pos_cnum = 13045
-                            }
-                        })))
+             with | e -> false)
           then
             let t_17__057_ =
               let open ModelElt in
@@ -1105,28 +924,7 @@ module Spec =
                         src__062_.contents) in
                  __t1__068_ && __t2__069_ in
                __t1__066_ && __t2__067_
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 223;
-                              pos_bol = 13939;
-                              pos_cnum = 13952
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 223;
-                              pos_bol = 13939;
-                              pos_cnum = 14013
-                            }
-                        })))
-              &&
+             with | e -> false) &&
               ((try
                   let __t1__070_ =
                     Ortac_runtime.Gospelstdlib.(<=)
@@ -1148,27 +946,7 @@ module Spec =
                            dst__063_.contents) in
                     __t1__072_ && __t2__073_ in
                   __t1__070_ && __t2__071_
-                with
-                | e ->
-                    raise
-                      (Ortac_runtime.Partial_function
-                         (e,
-                           {
-                             Ortac_runtime.start =
-                               {
-                                 pos_fname = "varray_circular_spec.mli";
-                                 pos_lnum = 224;
-                                 pos_bol = 14014;
-                                 pos_cnum = 14027
-                               };
-                             Ortac_runtime.stop =
-                               {
-                                 pos_fname = "varray_circular_spec.mli";
-                                 pos_lnum = 224;
-                                 pos_bol = 14014;
-                                 pos_cnum = 14088
-                               }
-                           }))))
+                with | e -> false))
           then
             let src__065_ = src__062_
             and dst__064_ =
@@ -1550,33 +1328,15 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                               (Ortac_runtime.Gospelstdlib.Sequence.length
                                  t_old__079_.contents)
                               (Ortac_runtime.Gospelstdlib.integer_of_int 1)))
-                  with
-                  | e ->
-                      raise
-                        (Ortac_runtime.Partial_function
-                           (e,
-                             {
-                               Ortac_runtime.start =
-                                 {
-                                   pos_fname = "varray_circular_spec.mli";
-                                   pos_lnum = 33;
-                                   pos_bol = 2340;
-                                   pos_cnum = 2354
-                                 };
-                               Ortac_runtime.stop =
-                                 {
-                                   pos_fname = "varray_circular_spec.mli";
-                                   pos_lnum = 35;
-                                   pos_bol = 2414;
-                                   pos_cnum = 2496
-                                 }
-                             })))
+                  with | e -> false)
                then None
                else
                  Some
                    (Ortac_runtime.report "Varray_circular_spec" "make 42 'a'"
-                      (Ortac_runtime.Protected_value
-                         (Res (Ortac_runtime.dummy, ()))) "pop_back"
+                      (try
+                         Ortac_runtime.Protected_value
+                           (Res (Ortac_runtime.dummy, ()))
+                       with | e -> Ortac_runtime.Out_of_domain) "pop_back"
                       [("if old t.contents = Sequence.empty\n              then false\n              else proj x = (old t.contents)[Sequence.length (old t.contents) - 1]",
                          {
                            Ortac_runtime.start =
@@ -1607,32 +1367,13 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                       t_old__081_.contents =
                         Ortac_runtime.Gospelstdlib.Sequence.empty in
                     __t1__083_ && __t2__084_
-                  with
-                  | e ->
-                      raise
-                        (Ortac_runtime.Partial_function
-                           (e,
-                             {
-                               Ortac_runtime.start =
-                                 {
-                                   pos_fname = "varray_circular_spec.mli";
-                                   pos_lnum = 36;
-                                   pos_bol = 2497;
-                                   pos_cnum = 2523
-                                 };
-                               Ortac_runtime.stop =
-                                 {
-                                   pos_fname = "varray_circular_spec.mli";
-                                   pos_lnum = 36;
-                                   pos_bol = 2497;
-                                   pos_cnum = 2567
-                                 }
-                             })))
+                  with | e -> false)
                then None
                else
                  Some
                    (Ortac_runtime.report "Varray_circular_spec" "make 42 'a'"
-                      (Ortac_runtime.Exception "Not_found") "pop_back"
+                      (try Ortac_runtime.Exception "Not_found"
+                       with | e -> Ortac_runtime.Out_of_domain) "pop_back"
                       [("t.contents = old t.contents = Sequence.empty",
                          {
                            Ortac_runtime.start =
@@ -1668,33 +1409,15 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                       (proj x_6) =
                         (Ortac_runtime.Gospelstdlib.Sequence.hd
                            t_old__087_.contents)
-                  with
-                  | e ->
-                      raise
-                        (Ortac_runtime.Partial_function
-                           (e,
-                             {
-                               Ortac_runtime.start =
-                                 {
-                                   pos_fname = "varray_circular_spec.mli";
-                                   pos_lnum = 56;
-                                   pos_bol = 3884;
-                                   pos_cnum = 3898
-                                 };
-                               Ortac_runtime.stop =
-                                 {
-                                   pos_fname = "varray_circular_spec.mli";
-                                   pos_lnum = 58;
-                                   pos_bol = 3958;
-                                   pos_cnum = 4014
-                                 }
-                             })))
+                  with | e -> false)
                then None
                else
                  Some
                    (Ortac_runtime.report "Varray_circular_spec" "make 42 'a'"
-                      (Ortac_runtime.Protected_value
-                         (Res (Ortac_runtime.dummy, ()))) "pop_front"
+                      (try
+                         Ortac_runtime.Protected_value
+                           (Res (Ortac_runtime.dummy, ()))
+                       with | e -> Ortac_runtime.Out_of_domain) "pop_front"
                       [("if old t.contents = Sequence.empty\n              then false\n              else proj x = Sequence.hd (old t.contents)",
                          {
                            Ortac_runtime.start =
@@ -1725,32 +1448,13 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                       t_old__089_.contents =
                         Ortac_runtime.Gospelstdlib.Sequence.empty in
                     __t1__091_ && __t2__092_
-                  with
-                  | e ->
-                      raise
-                        (Ortac_runtime.Partial_function
-                           (e,
-                             {
-                               Ortac_runtime.start =
-                                 {
-                                   pos_fname = "varray_circular_spec.mli";
-                                   pos_lnum = 59;
-                                   pos_bol = 4015;
-                                   pos_cnum = 4041
-                                 };
-                               Ortac_runtime.stop =
-                                 {
-                                   pos_fname = "varray_circular_spec.mli";
-                                   pos_lnum = 59;
-                                   pos_bol = 4015;
-                                   pos_cnum = 4085
-                                 }
-                             })))
+                  with | e -> false)
                then None
                else
                  Some
                    (Ortac_runtime.report "Varray_circular_spec" "make 42 'a'"
-                      (Ortac_runtime.Exception "Not_found") "pop_front"
+                      (try Ortac_runtime.Exception "Not_found"
+                       with | e -> Ortac_runtime.Out_of_domain) "pop_front"
                       [("t.contents = old t.contents = Sequence.empty",
                          {
                            Ortac_runtime.start =
@@ -1783,34 +1487,14 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                          (Ortac_runtime.Gospelstdlib.Sequence.length
                             tmp__094_.contents) in
                      __t1__095_ && __t2__096_
-                   with
-                   | e ->
-                       raise
-                         (Ortac_runtime.Partial_function
-                            (e,
-                              {
-                                Ortac_runtime.start =
-                                  {
-                                    pos_fname = "varray_circular_spec.mli";
-                                    pos_lnum = 72;
-                                    pos_bol = 4784;
-                                    pos_cnum = 4797
-                                  };
-                                Ortac_runtime.stop =
-                                  {
-                                    pos_fname = "varray_circular_spec.mli";
-                                    pos_lnum = 72;
-                                    pos_bol = 4784;
-                                    pos_cnum = 4833
-                                  }
-                              }))
+                   with | e -> false
                  then None
                  else
                    Some
                      (Ortac_runtime.report "Varray_circular_spec"
                         "make 42 'a'"
-                        (Ortac_runtime.Exception "Invalid_argument")
-                        "insert_at"
+                        (try Ortac_runtime.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Out_of_domain) "insert_at"
                         [("0 <= i <= Sequence.length t.contents",
                            {
                              Ortac_runtime.start =
@@ -1847,35 +1531,14 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                              (Ortac_runtime.Gospelstdlib.Sequence.length
                                 tmp__094_.contents) in
                          __t1__095_ && __t2__096_
-                       with
-                       | e ->
-                           raise
-                             (Ortac_runtime.Partial_function
-                                (e,
-                                  {
-                                    Ortac_runtime.start =
-                                      {
-                                        pos_fname =
-                                          "varray_circular_spec.mli";
-                                        pos_lnum = 72;
-                                        pos_bol = 4784;
-                                        pos_cnum = 4797
-                                      };
-                                    Ortac_runtime.stop =
-                                      {
-                                        pos_fname =
-                                          "varray_circular_spec.mli";
-                                        pos_lnum = 72;
-                                        pos_bol = 4784;
-                                        pos_cnum = 4833
-                                      }
-                                  })))
+                       with | e -> false)
                     then None
                     else
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument")
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain)
                            "insert_at"
                            [("0 <= i <= Sequence.length t.contents",
                               {
@@ -1901,33 +1564,14 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                      (inside (Ortac_runtime.Gospelstdlib.integer_of_int i_2)
                         tmp__099_.contents)
                        = true
-                   with
-                   | e ->
-                       raise
-                         (Ortac_runtime.Partial_function
-                            (e,
-                              {
-                                Ortac_runtime.start =
-                                  {
-                                    pos_fname = "varray_circular_spec.mli";
-                                    pos_lnum = 89;
-                                    pos_bol = 5727;
-                                    pos_cnum = 5740
-                                  };
-                                Ortac_runtime.stop =
-                                  {
-                                    pos_fname = "varray_circular_spec.mli";
-                                    pos_lnum = 89;
-                                    pos_bol = 5727;
-                                    pos_cnum = 5759
-                                  }
-                              }))
+                   with | e -> false
                  then None
                  else
                    Some
                      (Ortac_runtime.report "Varray_circular_spec"
                         "make 42 'a'"
-                        (Ortac_runtime.Exception "Invalid_argument") "pop_at"
+                        (try Ortac_runtime.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Out_of_domain) "pop_at"
                         [("inside i t.contents",
                            {
                              Ortac_runtime.start =
@@ -1958,36 +1602,16 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                            (Ortac_runtime.Gospelstdlib.__mix_Bub
                               t_old__097_.contents
                               (Ortac_runtime.Gospelstdlib.integer_of_int i_2))
-                       with
-                       | e ->
-                           raise
-                             (Ortac_runtime.Partial_function
-                                (e,
-                                  {
-                                    Ortac_runtime.start =
-                                      {
-                                        pos_fname =
-                                          "varray_circular_spec.mli";
-                                        pos_lnum = 92;
-                                        pos_bol = 5864;
-                                        pos_cnum = 5878
-                                      };
-                                    Ortac_runtime.stop =
-                                      {
-                                        pos_fname =
-                                          "varray_circular_spec.mli";
-                                        pos_lnum = 92;
-                                        pos_bol = 5864;
-                                        pos_cnum = 5906
-                                      }
-                                  })))
+                       with | e -> false)
                     then None
                     else
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Protected_value
-                              (Res (Ortac_runtime.dummy, ()))) "pop_at"
+                           (try
+                              Ortac_runtime.Protected_value
+                                (Res (Ortac_runtime.dummy, ()))
+                            with | e -> Ortac_runtime.Out_of_domain) "pop_at"
                            [("(proj x) = old t.contents[i]",
                               {
                                 Ortac_runtime.start =
@@ -2017,36 +1641,14 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                             (Ortac_runtime.Gospelstdlib.integer_of_int i_2)
                             tmp__099_.contents)
                            = true
-                       with
-                       | e ->
-                           raise
-                             (Ortac_runtime.Partial_function
-                                (e,
-                                  {
-                                    Ortac_runtime.start =
-                                      {
-                                        pos_fname =
-                                          "varray_circular_spec.mli";
-                                        pos_lnum = 89;
-                                        pos_bol = 5727;
-                                        pos_cnum = 5740
-                                      };
-                                    Ortac_runtime.stop =
-                                      {
-                                        pos_fname =
-                                          "varray_circular_spec.mli";
-                                        pos_lnum = 89;
-                                        pos_bol = 5727;
-                                        pos_cnum = 5759
-                                      }
-                                  })))
+                       with | e -> false)
                     then None
                     else
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument")
-                           "pop_at"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "pop_at"
                            [("inside i t.contents",
                               {
                                 Ortac_runtime.start =
@@ -2071,34 +1673,14 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                      (inside (Ortac_runtime.Gospelstdlib.integer_of_int i_3)
                         tmp__102_.contents)
                        = true
-                   with
-                   | e ->
-                       raise
-                         (Ortac_runtime.Partial_function
-                            (e,
-                              {
-                                Ortac_runtime.start =
-                                  {
-                                    pos_fname = "varray_circular_spec.mli";
-                                    pos_lnum = 102;
-                                    pos_bol = 6426;
-                                    pos_cnum = 6439
-                                  };
-                                Ortac_runtime.stop =
-                                  {
-                                    pos_fname = "varray_circular_spec.mli";
-                                    pos_lnum = 102;
-                                    pos_bol = 6426;
-                                    pos_cnum = 6458
-                                  }
-                              }))
+                   with | e -> false
                  then None
                  else
                    Some
                      (Ortac_runtime.report "Varray_circular_spec"
                         "make 42 'a'"
-                        (Ortac_runtime.Exception "Invalid_argument")
-                        "delete_at"
+                        (try Ortac_runtime.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Out_of_domain) "delete_at"
                         [("inside i t.contents",
                            {
                              Ortac_runtime.start =
@@ -2132,35 +1714,15 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                               (Ortac_runtime.Gospelstdlib.Sequence.length
                                  t_old__100_.contents)
                               (Ortac_runtime.Gospelstdlib.integer_of_int 1))
-                       with
-                       | e ->
-                           raise
-                             (Ortac_runtime.Partial_function
-                                (e,
-                                  {
-                                    Ortac_runtime.start =
-                                      {
-                                        pos_fname =
-                                          "varray_circular_spec.mli";
-                                        pos_lnum = 105;
-                                        pos_bol = 6563;
-                                        pos_cnum = 6577
-                                      };
-                                    Ortac_runtime.stop =
-                                      {
-                                        pos_fname =
-                                          "varray_circular_spec.mli";
-                                        pos_lnum = 105;
-                                        pos_bol = 6563;
-                                        pos_cnum = 6642
-                                      }
-                                  })))
+                       with | e -> false)
                     then None
                     else
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Protected_value (Res (unit, ())))
+                           (try
+                              Ortac_runtime.Protected_value (Res (unit, ()))
+                            with | e -> Ortac_runtime.Out_of_domain)
                            "delete_at"
                            [("Sequence.length t.contents = Sequence.length (old t.contents) - 1",
                               {
@@ -2191,35 +1753,14 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                             (Ortac_runtime.Gospelstdlib.integer_of_int i_3)
                             tmp__102_.contents)
                            = true
-                       with
-                       | e ->
-                           raise
-                             (Ortac_runtime.Partial_function
-                                (e,
-                                  {
-                                    Ortac_runtime.start =
-                                      {
-                                        pos_fname =
-                                          "varray_circular_spec.mli";
-                                        pos_lnum = 102;
-                                        pos_bol = 6426;
-                                        pos_cnum = 6439
-                                      };
-                                    Ortac_runtime.stop =
-                                      {
-                                        pos_fname =
-                                          "varray_circular_spec.mli";
-                                        pos_lnum = 102;
-                                        pos_bol = 6426;
-                                        pos_cnum = 6458
-                                      }
-                                  })))
+                       with | e -> false)
                     then None
                     else
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument")
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain)
                            "delete_at"
                            [("inside i t.contents",
                               {
@@ -2245,33 +1786,14 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                      (inside (Ortac_runtime.Gospelstdlib.integer_of_int i_4)
                         tmp__105_.contents)
                        = true
-                   with
-                   | e ->
-                       raise
-                         (Ortac_runtime.Partial_function
-                            (e,
-                              {
-                                Ortac_runtime.start =
-                                  {
-                                    pos_fname = "varray_circular_spec.mli";
-                                    pos_lnum = 128;
-                                    pos_bol = 7616;
-                                    pos_cnum = 7629
-                                  };
-                                Ortac_runtime.stop =
-                                  {
-                                    pos_fname = "varray_circular_spec.mli";
-                                    pos_lnum = 128;
-                                    pos_bol = 7616;
-                                    pos_cnum = 7648
-                                  }
-                              }))
+                   with | e -> false
                  then None
                  else
                    Some
                      (Ortac_runtime.report "Varray_circular_spec"
                         "make 42 'a'"
-                        (Ortac_runtime.Exception "Invalid_argument") "get"
+                        (try Ortac_runtime.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Out_of_domain) "get"
                         [("inside i t.contents",
                            {
                              Ortac_runtime.start =
@@ -2302,36 +1824,16 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                            (Ortac_runtime.Gospelstdlib.__mix_Bub
                               (Lazy.force t_new__104_).contents
                               (Ortac_runtime.Gospelstdlib.integer_of_int i_4))
-                       with
-                       | e ->
-                           raise
-                             (Ortac_runtime.Partial_function
-                                (e,
-                                  {
-                                    Ortac_runtime.start =
-                                      {
-                                        pos_fname =
-                                          "varray_circular_spec.mli";
-                                        pos_lnum = 127;
-                                        pos_bol = 7577;
-                                        pos_cnum = 7591
-                                      };
-                                    Ortac_runtime.stop =
-                                      {
-                                        pos_fname =
-                                          "varray_circular_spec.mli";
-                                        pos_lnum = 127;
-                                        pos_bol = 7577;
-                                        pos_cnum = 7615
-                                      }
-                                  })))
+                       with | e -> false)
                     then None
                     else
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Protected_value
-                              (Res (Ortac_runtime.dummy, ()))) "get"
+                           (try
+                              Ortac_runtime.Protected_value
+                                (Res (Ortac_runtime.dummy, ()))
+                            with | e -> Ortac_runtime.Out_of_domain) "get"
                            [("(proj x) = t.contents[i]",
                               {
                                 Ortac_runtime.start =
@@ -2361,35 +1863,14 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                             (Ortac_runtime.Gospelstdlib.integer_of_int i_4)
                             tmp__105_.contents)
                            = true
-                       with
-                       | e ->
-                           raise
-                             (Ortac_runtime.Partial_function
-                                (e,
-                                  {
-                                    Ortac_runtime.start =
-                                      {
-                                        pos_fname =
-                                          "varray_circular_spec.mli";
-                                        pos_lnum = 128;
-                                        pos_bol = 7616;
-                                        pos_cnum = 7629
-                                      };
-                                    Ortac_runtime.stop =
-                                      {
-                                        pos_fname =
-                                          "varray_circular_spec.mli";
-                                        pos_lnum = 128;
-                                        pos_bol = 7616;
-                                        pos_cnum = 7648
-                                      }
-                                  })))
+                       with | e -> false)
                     then None
                     else
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument") "get"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "get"
                            [("inside i t.contents",
                               {
                                 Ortac_runtime.start =
@@ -2414,33 +1895,14 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                      (inside (Ortac_runtime.Gospelstdlib.integer_of_int i_5)
                         tmp__106_.contents)
                        = true
-                   with
-                   | e ->
-                       raise
-                         (Ortac_runtime.Partial_function
-                            (e,
-                              {
-                                Ortac_runtime.start =
-                                  {
-                                    pos_fname = "varray_circular_spec.mli";
-                                    pos_lnum = 137;
-                                    pos_bol = 8077;
-                                    pos_cnum = 8090
-                                  };
-                                Ortac_runtime.stop =
-                                  {
-                                    pos_fname = "varray_circular_spec.mli";
-                                    pos_lnum = 137;
-                                    pos_bol = 8077;
-                                    pos_cnum = 8109
-                                  }
-                              }))
+                   with | e -> false
                  then None
                  else
                    Some
                      (Ortac_runtime.report "Varray_circular_spec"
                         "make 42 'a'"
-                        (Ortac_runtime.Exception "Invalid_argument") "set"
+                        (try Ortac_runtime.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Out_of_domain) "set"
                         [("inside i t.contents",
                            {
                              Ortac_runtime.start =
@@ -2471,35 +1933,14 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                             (Ortac_runtime.Gospelstdlib.integer_of_int i_5)
                             tmp__106_.contents)
                            = true
-                       with
-                       | e ->
-                           raise
-                             (Ortac_runtime.Partial_function
-                                (e,
-                                  {
-                                    Ortac_runtime.start =
-                                      {
-                                        pos_fname =
-                                          "varray_circular_spec.mli";
-                                        pos_lnum = 137;
-                                        pos_bol = 8077;
-                                        pos_cnum = 8090
-                                      };
-                                    Ortac_runtime.stop =
-                                      {
-                                        pos_fname =
-                                          "varray_circular_spec.mli";
-                                        pos_lnum = 137;
-                                        pos_bol = 8077;
-                                        pos_cnum = 8109
-                                      }
-                                  })))
+                       with | e -> false)
                     then None
                     else
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument") "set"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "set"
                            [("inside i t.contents",
                               {
                                 Ortac_runtime.start =
@@ -2525,63 +1966,21 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                (Ortac_runtime.Gospelstdlib.integer_of_int l) =
                  (Ortac_runtime.Gospelstdlib.Sequence.length
                     (Lazy.force t_new__110_).contents)
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 144;
-                              pos_bol = 8634;
-                              pos_cnum = 8648
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 144;
-                              pos_bol = 8634;
-                              pos_cnum = 8678
-                            }
-                        })))
+             with | e -> false)
           then None
           else
             Some
               (Ortac_runtime.report "Varray_circular_spec" "make 42 'a'"
-                 (Ortac_runtime.Value
-                    (Res
-                       (integer,
-                         (let t_old__107_ = Model.get state__075_ 0
-                          and t_new__108_ =
-                            lazy (Model.get (Lazy.force new_state__077_) 0) in
-                          try
+                 (try
+                    Ortac_runtime.Value
+                      (Res
+                         (integer,
+                           (let t_old__107_ = Model.get state__075_ 0
+                            and t_new__108_ =
+                              lazy (Model.get (Lazy.force new_state__077_) 0) in
                             Ortac_runtime.Gospelstdlib.Sequence.length
-                              (Lazy.force t_new__108_).contents
-                          with
-                          | e ->
-                              raise
-                                (Ortac_runtime.Partial_function
-                                   (e,
-                                     {
-                                       Ortac_runtime.start =
-                                         {
-                                           pos_fname =
-                                             "varray_circular_spec.mli";
-                                           pos_lnum = 144;
-                                           pos_bol = 8634;
-                                           pos_cnum = 8652
-                                         };
-                                       Ortac_runtime.stop =
-                                         {
-                                           pos_fname =
-                                             "varray_circular_spec.mli";
-                                           pos_lnum = 144;
-                                           pos_bol = 8634;
-                                           pos_cnum = 8678
-                                         }
-                                     })))))) "length"
+                              (Lazy.force t_new__108_).contents)))
+                  with | e -> Ortac_runtime.Out_of_domain) "length"
                  [("l = Sequence.length t.contents",
                     {
                       Ortac_runtime.start =
@@ -2605,33 +2004,14 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                      Ortac_runtime.Gospelstdlib.(>=)
                        (Ortac_runtime.Gospelstdlib.integer_of_int n)
                        (Ortac_runtime.Gospelstdlib.integer_of_int 0)
-                   with
-                   | e ->
-                       raise
-                         (Ortac_runtime.Partial_function
-                            (e,
-                              {
-                                Ortac_runtime.start =
-                                  {
-                                    pos_fname = "varray_circular_spec.mli";
-                                    pos_lnum = 153;
-                                    pos_bol = 9121;
-                                    pos_cnum = 9134
-                                  };
-                                Ortac_runtime.stop =
-                                  {
-                                    pos_fname = "varray_circular_spec.mli";
-                                    pos_lnum = 153;
-                                    pos_bol = 9121;
-                                    pos_cnum = 9140
-                                  }
-                              }))
+                   with | e -> false
                  then None
                  else
                    Some
                      (Ortac_runtime.report "Varray_circular_spec"
                         "make 42 'a'"
-                        (Ortac_runtime.Exception "Invalid_argument") "make"
+                        (try Ortac_runtime.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Out_of_domain) "make"
                         [("n >= 0",
                            {
                              Ortac_runtime.start =
@@ -2660,36 +2040,14 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                          Ortac_runtime.Gospelstdlib.(>=)
                            (Ortac_runtime.Gospelstdlib.integer_of_int n)
                            (Ortac_runtime.Gospelstdlib.integer_of_int 0)
-                       with
-                       | e ->
-                           raise
-                             (Ortac_runtime.Partial_function
-                                (e,
-                                  {
-                                    Ortac_runtime.start =
-                                      {
-                                        pos_fname =
-                                          "varray_circular_spec.mli";
-                                        pos_lnum = 153;
-                                        pos_bol = 9121;
-                                        pos_cnum = 9134
-                                      };
-                                    Ortac_runtime.stop =
-                                      {
-                                        pos_fname =
-                                          "varray_circular_spec.mli";
-                                        pos_lnum = 153;
-                                        pos_bol = 9121;
-                                        pos_cnum = 9140
-                                      }
-                                  })))
+                       with | e -> false)
                     then None
                     else
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument")
-                           "make"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "make"
                            [("n >= 0",
                               {
                                 Ortac_runtime.start =
@@ -2716,33 +2074,13 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                (b_1 = true) =
                  ((Lazy.force t_new__113_).contents =
                     Ortac_runtime.Gospelstdlib.Sequence.empty)
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 171;
-                              pos_bol = 10238;
-                              pos_cnum = 10252
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "varray_circular_spec.mli";
-                              pos_lnum = 171;
-                              pos_bol = 10238;
-                              pos_cnum = 10285
-                            }
-                        })))
+             with | e -> false)
           then None
           else
             Some
               (Ortac_runtime.report "Varray_circular_spec" "make 42 'a'"
-                 (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
-                 "is_empty"
+                 (try Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
+                  with | e -> Ortac_runtime.Out_of_domain) "is_empty"
                  [("b <-> t.contents = Sequence.empty",
                     {
                       Ortac_runtime.start =
@@ -2776,33 +2114,14 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                             (Ortac_runtime.Gospelstdlib.Sequence.length
                                tmp__117_.contents) in
                         __t1__118_ && __t2__119_
-                      with
-                      | e ->
-                          raise
-                            (Ortac_runtime.Partial_function
-                               (e,
-                                 {
-                                   Ortac_runtime.start =
-                                     {
-                                       pos_fname = "varray_circular_spec.mli";
-                                       pos_lnum = 194;
-                                       pos_bol = 11847;
-                                       pos_cnum = 11860
-                                     };
-                                   Ortac_runtime.stop =
-                                     {
-                                       pos_fname = "varray_circular_spec.mli";
-                                       pos_lnum = 194;
-                                       pos_bol = 11847;
-                                       pos_cnum = 11896
-                                     }
-                                 }))
+                      with | e -> false
                     then None
                     else
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument") "sub"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "sub"
                            [("0 <= i <= Sequence.length t.contents",
                               {
                                 Ortac_runtime.start =
@@ -2837,33 +2156,14 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                             (Ortac_runtime.Gospelstdlib.Sequence.length
                                tmp__117_.contents) in
                         __t1__120_ && __t2__121_
-                      with
-                      | e ->
-                          raise
-                            (Ortac_runtime.Partial_function
-                               (e,
-                                 {
-                                   Ortac_runtime.start =
-                                     {
-                                       pos_fname = "varray_circular_spec.mli";
-                                       pos_lnum = 195;
-                                       pos_bol = 11897;
-                                       pos_cnum = 11910
-                                     };
-                                   Ortac_runtime.stop =
-                                     {
-                                       pos_fname = "varray_circular_spec.mli";
-                                       pos_lnum = 195;
-                                       pos_bol = 11897;
-                                       pos_cnum = 11950
-                                     }
-                                 }))
+                      with | e -> false
                     then None
                     else
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument") "sub"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "sub"
                            [("i <= i + n <= Sequence.length t.contents",
                               {
                                 Ortac_runtime.start =
@@ -2901,36 +2201,14 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                                (Ortac_runtime.Gospelstdlib.Sequence.length
                                   tmp__117_.contents) in
                            __t1__118_ && __t2__119_
-                         with
-                         | e ->
-                             raise
-                               (Ortac_runtime.Partial_function
-                                  (e,
-                                    {
-                                      Ortac_runtime.start =
-                                        {
-                                          pos_fname =
-                                            "varray_circular_spec.mli";
-                                          pos_lnum = 194;
-                                          pos_bol = 11847;
-                                          pos_cnum = 11860
-                                        };
-                                      Ortac_runtime.stop =
-                                        {
-                                          pos_fname =
-                                            "varray_circular_spec.mli";
-                                          pos_lnum = 194;
-                                          pos_bol = 11847;
-                                          pos_cnum = 11896
-                                        }
-                                    }))
+                         with | e -> false
                        then None
                        else
                          Some
                            (Ortac_runtime.report "Varray_circular_spec"
                               "make 42 'a'"
-                              (Ortac_runtime.Exception "Invalid_argument")
-                              "sub"
+                              (try Ortac_runtime.Exception "Invalid_argument"
+                               with | e -> Ortac_runtime.Out_of_domain) "sub"
                               [("0 <= i <= Sequence.length t.contents",
                                  {
                                    Ortac_runtime.start =
@@ -2969,36 +2247,14 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                                (Ortac_runtime.Gospelstdlib.Sequence.length
                                   tmp__117_.contents) in
                            __t1__120_ && __t2__121_
-                         with
-                         | e ->
-                             raise
-                               (Ortac_runtime.Partial_function
-                                  (e,
-                                    {
-                                      Ortac_runtime.start =
-                                        {
-                                          pos_fname =
-                                            "varray_circular_spec.mli";
-                                          pos_lnum = 195;
-                                          pos_bol = 11897;
-                                          pos_cnum = 11910
-                                        };
-                                      Ortac_runtime.stop =
-                                        {
-                                          pos_fname =
-                                            "varray_circular_spec.mli";
-                                          pos_lnum = 195;
-                                          pos_bol = 11897;
-                                          pos_cnum = 11950
-                                        }
-                                    }))
+                         with | e -> false
                        then None
                        else
                          Some
                            (Ortac_runtime.report "Varray_circular_spec"
                               "make 42 'a'"
-                              (Ortac_runtime.Exception "Invalid_argument")
-                              "sub"
+                              (try Ortac_runtime.Exception "Invalid_argument"
+                               with | e -> Ortac_runtime.Out_of_domain) "sub"
                               [("i <= i + n <= Sequence.length t.contents",
                                  {
                                    Ortac_runtime.start =
@@ -3039,33 +2295,14 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                               tmp__123_.contents) in
                        __t1__126_ && __t2__127_ in
                      __t1__124_ && __t2__125_
-                   with
-                   | e ->
-                       raise
-                         (Ortac_runtime.Partial_function
-                            (e,
-                              {
-                                Ortac_runtime.start =
-                                  {
-                                    pos_fname = "varray_circular_spec.mli";
-                                    pos_lnum = 211;
-                                    pos_bol = 12970;
-                                    pos_cnum = 12983
-                                  };
-                                Ortac_runtime.stop =
-                                  {
-                                    pos_fname = "varray_circular_spec.mli";
-                                    pos_lnum = 211;
-                                    pos_bol = 12970;
-                                    pos_cnum = 13045
-                                  }
-                              }))
+                   with | e -> false
                  then None
                  else
                    Some
                      (Ortac_runtime.report "Varray_circular_spec"
                         "make 42 'a'"
-                        (Ortac_runtime.Exception "Invalid_argument") "fill"
+                        (try Ortac_runtime.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Out_of_domain) "fill"
                         [("0 <= pos /\\ 0 <= len /\\ pos + len < Sequence.length t.contents",
                            {
                              Ortac_runtime.start =
@@ -3112,36 +2349,14 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                                   tmp__123_.contents) in
                            __t1__126_ && __t2__127_ in
                          __t1__124_ && __t2__125_
-                       with
-                       | e ->
-                           raise
-                             (Ortac_runtime.Partial_function
-                                (e,
-                                  {
-                                    Ortac_runtime.start =
-                                      {
-                                        pos_fname =
-                                          "varray_circular_spec.mli";
-                                        pos_lnum = 211;
-                                        pos_bol = 12970;
-                                        pos_cnum = 12983
-                                      };
-                                    Ortac_runtime.stop =
-                                      {
-                                        pos_fname =
-                                          "varray_circular_spec.mli";
-                                        pos_lnum = 211;
-                                        pos_bol = 12970;
-                                        pos_cnum = 13045
-                                      }
-                                  })))
+                       with | e -> false)
                     then None
                     else
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument")
-                           "fill"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "fill"
                            [("0 <= pos /\\ 0 <= len /\\ pos + len < Sequence.length t.contents",
                               {
                                 Ortac_runtime.start =
@@ -3192,34 +2407,14 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                                  tmp__128_.contents) in
                           __t1__132_ && __t2__133_ in
                         __t1__130_ && __t2__131_
-                      with
-                      | e ->
-                          raise
-                            (Ortac_runtime.Partial_function
-                               (e,
-                                 {
-                                   Ortac_runtime.start =
-                                     {
-                                       pos_fname = "varray_circular_spec.mli";
-                                       pos_lnum = 223;
-                                       pos_bol = 13939;
-                                       pos_cnum = 13952
-                                     };
-                                   Ortac_runtime.stop =
-                                     {
-                                       pos_fname = "varray_circular_spec.mli";
-                                       pos_lnum = 223;
-                                       pos_bol = 13939;
-                                       pos_cnum = 14013
-                                     }
-                                 }))
+                      with | e -> false
                     then None
                     else
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument")
-                           "blit"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "blit"
                            [("0 <= src_pos <= src_pos + len <= Sequence.length src.contents",
                               {
                                 Ortac_runtime.start =
@@ -3267,34 +2462,14 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                                  tmp__129_.contents) in
                           __t1__136_ && __t2__137_ in
                         __t1__134_ && __t2__135_
-                      with
-                      | e ->
-                          raise
-                            (Ortac_runtime.Partial_function
-                               (e,
-                                 {
-                                   Ortac_runtime.start =
-                                     {
-                                       pos_fname = "varray_circular_spec.mli";
-                                       pos_lnum = 224;
-                                       pos_bol = 14014;
-                                       pos_cnum = 14027
-                                     };
-                                   Ortac_runtime.stop =
-                                     {
-                                       pos_fname = "varray_circular_spec.mli";
-                                       pos_lnum = 224;
-                                       pos_bol = 14014;
-                                       pos_cnum = 14088
-                                     }
-                                 }))
+                      with | e -> false
                     then None
                     else
                       Some
                         (Ortac_runtime.report "Varray_circular_spec"
                            "make 42 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument")
-                           "blit"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "blit"
                            [("0 <= dst_pos <= dst_pos + len <= Sequence.length dst.contents",
                               {
                                 Ortac_runtime.start =
@@ -3349,35 +2524,14 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                                     tmp__128_.contents) in
                              __t1__132_ && __t2__133_ in
                            __t1__130_ && __t2__131_
-                         with
-                         | e ->
-                             raise
-                               (Ortac_runtime.Partial_function
-                                  (e,
-                                    {
-                                      Ortac_runtime.start =
-                                        {
-                                          pos_fname =
-                                            "varray_circular_spec.mli";
-                                          pos_lnum = 223;
-                                          pos_bol = 13939;
-                                          pos_cnum = 13952
-                                        };
-                                      Ortac_runtime.stop =
-                                        {
-                                          pos_fname =
-                                            "varray_circular_spec.mli";
-                                          pos_lnum = 223;
-                                          pos_bol = 13939;
-                                          pos_cnum = 14013
-                                        }
-                                    }))
+                         with | e -> false
                        then None
                        else
                          Some
                            (Ortac_runtime.report "Varray_circular_spec"
                               "make 42 'a'"
-                              (Ortac_runtime.Exception "Invalid_argument")
+                              (try Ortac_runtime.Exception "Invalid_argument"
+                               with | e -> Ortac_runtime.Out_of_domain)
                               "blit"
                               [("0 <= src_pos <= src_pos + len <= Sequence.length src.contents",
                                  {
@@ -3426,35 +2580,14 @@ let ortac_postcond cmd__074_ state__075_ res__076_ =
                                     tmp__129_.contents) in
                              __t1__136_ && __t2__137_ in
                            __t1__134_ && __t2__135_
-                         with
-                         | e ->
-                             raise
-                               (Ortac_runtime.Partial_function
-                                  (e,
-                                    {
-                                      Ortac_runtime.start =
-                                        {
-                                          pos_fname =
-                                            "varray_circular_spec.mli";
-                                          pos_lnum = 224;
-                                          pos_bol = 14014;
-                                          pos_cnum = 14027
-                                        };
-                                      Ortac_runtime.stop =
-                                        {
-                                          pos_fname =
-                                            "varray_circular_spec.mli";
-                                          pos_lnum = 224;
-                                          pos_bol = 14014;
-                                          pos_cnum = 14088
-                                        }
-                                    }))
+                         with | e -> false
                        then None
                        else
                          Some
                            (Ortac_runtime.report "Varray_circular_spec"
                               "make 42 'a'"
-                              (Ortac_runtime.Exception "Invalid_argument")
+                              (try Ortac_runtime.Exception "Invalid_argument"
+                               with | e -> Ortac_runtime.Out_of_domain)
                               "blit"
                               [("0 <= dst_pos <= dst_pos + len <= Sequence.length dst.contents",
                                  {

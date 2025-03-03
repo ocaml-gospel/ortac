@@ -5,6 +5,7 @@ type expected_result =
   | Value of res
   | Protected_value of res
   | Exception of string
+  | Out_of_domain
 
 type report = {
   mod_name : string;
@@ -141,6 +142,10 @@ module Make (Spec : Spec) = struct
             \  @[| Error (%s _) -> true@\n\
              | _ -> false@]@])@\n"
             exn
+      | Out_of_domain ->
+          pf ppf
+            "(* @[Partial function called out of domain@\n\
+             in the computation of the expected value.@] *)@\n"
       | _ -> ()
     in
     let rec aux ppf = function

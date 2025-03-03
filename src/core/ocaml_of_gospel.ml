@@ -214,6 +214,15 @@ let term_with_catch ~context t =
     with e ->
       raise (Ortac_runtime.Partial_function (e, [%e elocation t.t_loc]))]
 
+let term_with_catch_bool ~context t =
+  let open Tterm in
+  let open Ttypes in
+  match t.t_ty with
+  | Some ty when not (ty_equal ty ty_bool) -> term_with_catch ~context t
+  | _ ->
+      let exp = term ~context t in
+      [%expr try [%e exp] with e -> false]
+
 let core_type_of_ty_aux ~context f =
   let open Ttypes in
   let lident_of_tysymbol ts =

@@ -254,28 +254,7 @@ module Spec =
                    (Ortac_runtime.Gospelstdlib.Sequence.length
                       t_4__016_.contents) in
                __t1__020_ && __t2__021_
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "invariants.mli";
-                              pos_lnum = 28;
-                              pos_bol = 1297;
-                              pos_cnum = 1308
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "invariants.mli";
-                              pos_lnum = 28;
-                              pos_bol = 1297;
-                              pos_cnum = 1344
-                            }
-                        })))
-              &&
+             with | e -> false) &&
               ((try
                   let __t1__022_ =
                     Ortac_runtime.Gospelstdlib.(<=)
@@ -291,53 +270,12 @@ module Spec =
                       (Ortac_runtime.Gospelstdlib.Sequence.length
                          t_4__016_.contents) in
                   __t1__022_ && __t2__023_
-                with
-                | e ->
-                    raise
-                      (Ortac_runtime.Partial_function
-                         (e,
-                           {
-                             Ortac_runtime.start =
-                               {
-                                 pos_fname = "invariants.mli";
-                                 pos_lnum = 29;
-                                 pos_bol = 1345;
-                                 pos_cnum = 1356
-                               };
-                             Ortac_runtime.stop =
-                               {
-                                 pos_fname = "invariants.mli";
-                                 pos_lnum = 29;
-                                 pos_bol = 1345;
-                                 pos_cnum = 1396
-                               }
-                           })))
-                 &&
+                with | e -> false) &&
                  ((try
                      Ortac_runtime.Gospelstdlib.(>=)
                        (Ortac_runtime.Gospelstdlib.integer_of_int n)
                        (Ortac_runtime.Gospelstdlib.integer_of_int 1)
-                   with
-                   | e ->
-                       raise
-                         (Ortac_runtime.Partial_function
-                            (e,
-                              {
-                                Ortac_runtime.start =
-                                  {
-                                    pos_fname = "invariants.mli";
-                                    pos_lnum = 30;
-                                    pos_bol = 1397;
-                                    pos_cnum = 1408
-                                  };
-                                Ortac_runtime.stop =
-                                  {
-                                    pos_fname = "invariants.mli";
-                                    pos_lnum = 30;
-                                    pos_bol = 1397;
-                                    pos_cnum = 1414
-                                  }
-                              })))))
+                   with | e -> false)))
           then
             let r_1__019_ =
               let open ModelElt in
@@ -539,8 +477,8 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
           else
             Some
               (Ortac_runtime.report "Invariants" "create 42"
-                 (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
-                 "create"
+                 (try Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
+                  with | e -> Ortac_runtime.Out_of_domain) "create"
                  [("Sequence.length x.contents > 0",
                     {
                       Ortac_runtime.start =
@@ -591,7 +529,8 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
           else
             Some
               (Ortac_runtime.report "Invariants" "create 42"
-                 (Ortac_runtime.Value (Res (unit, ()))) "push"
+                 (try Ortac_runtime.Value (Res (unit, ()))
+                  with | e -> Ortac_runtime.Out_of_domain) "push"
                  [("Sequence.length x.contents > 0",
                     {
                       Ortac_runtime.start =
@@ -643,7 +582,8 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
              else
                Some
                  (Ortac_runtime.report "Invariants" "create 42"
-                    (Ortac_runtime.Value (Res (unit, ()))) "transfer"
+                    (try Ortac_runtime.Value (Res (unit, ()))
+                     with | e -> Ortac_runtime.Out_of_domain) "transfer"
                     [("Sequence.length x.contents > 0",
                        {
                          Ortac_runtime.start =
@@ -693,7 +633,8 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
              else
                Some
                  (Ortac_runtime.report "Invariants" "create 42"
-                    (Ortac_runtime.Value (Res (unit, ()))) "transfer"
+                    (try Ortac_runtime.Value (Res (unit, ()))
+                     with | e -> Ortac_runtime.Out_of_domain) "transfer"
                     [("Sequence.length x.contents > 0",
                        {
                          Ortac_runtime.start =
@@ -745,8 +686,8 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
              else
                Some
                  (Ortac_runtime.report "Invariants" "create 42"
-                    (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
-                    "copy"
+                    (try Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
+                     with | e -> Ortac_runtime.Out_of_domain) "copy"
                     [("Sequence.length x.contents > 0",
                        {
                          Ortac_runtime.start =
@@ -796,8 +737,8 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
              else
                Some
                  (Ortac_runtime.report "Invariants" "create 42"
-                    (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
-                    "copy"
+                    (try Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
+                     with | e -> Ortac_runtime.Out_of_domain) "copy"
                     [("Sequence.length x.contents > 0",
                        {
                          Ortac_runtime.start =
@@ -830,32 +771,13 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                             (Ortac_runtime.Gospelstdlib.Sequence.length
                                tmp__040_.contents) in
                         __t1__041_ && __t2__042_
-                      with
-                      | e ->
-                          raise
-                            (Ortac_runtime.Partial_function
-                               (e,
-                                 {
-                                   Ortac_runtime.start =
-                                     {
-                                       pos_fname = "invariants.mli";
-                                       pos_lnum = 28;
-                                       pos_bol = 1297;
-                                       pos_cnum = 1308
-                                     };
-                                   Ortac_runtime.stop =
-                                     {
-                                       pos_fname = "invariants.mli";
-                                       pos_lnum = 28;
-                                       pos_bol = 1297;
-                                       pos_cnum = 1344
-                                     }
-                                 }))
+                      with | e -> false
                     then None
                     else
                       Some
                         (Ortac_runtime.report "Invariants" "create 42"
-                           (Ortac_runtime.Exception "Invalid_argument") "sub"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "sub"
                            [("0 <= i <= Sequence.length t.contents",
                               {
                                 Ortac_runtime.start =
@@ -895,33 +817,13 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                                (Ortac_runtime.Gospelstdlib.Sequence.length
                                   tmp__040_.contents) in
                            __t1__043_ && __t2__044_
-                         with
-                         | e ->
-                             raise
-                               (Ortac_runtime.Partial_function
-                                  (e,
-                                    {
-                                      Ortac_runtime.start =
-                                        {
-                                          pos_fname = "invariants.mli";
-                                          pos_lnum = 29;
-                                          pos_bol = 1345;
-                                          pos_cnum = 1356
-                                        };
-                                      Ortac_runtime.stop =
-                                        {
-                                          pos_fname = "invariants.mli";
-                                          pos_lnum = 29;
-                                          pos_bol = 1345;
-                                          pos_cnum = 1396
-                                        }
-                                    }))
+                         with | e -> false
                        then None
                        else
                          Some
                            (Ortac_runtime.report "Invariants" "create 42"
-                              (Ortac_runtime.Exception "Invalid_argument")
-                              "sub"
+                              (try Ortac_runtime.Exception "Invalid_argument"
+                               with | e -> Ortac_runtime.Out_of_domain) "sub"
                               [("i <= i + n <= Sequence.length t.contents",
                                  {
                                    Ortac_runtime.start =
@@ -945,33 +847,13 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                            Ortac_runtime.Gospelstdlib.(>=)
                              (Ortac_runtime.Gospelstdlib.integer_of_int n)
                              (Ortac_runtime.Gospelstdlib.integer_of_int 1)
-                         with
-                         | e ->
-                             raise
-                               (Ortac_runtime.Partial_function
-                                  (e,
-                                    {
-                                      Ortac_runtime.start =
-                                        {
-                                          pos_fname = "invariants.mli";
-                                          pos_lnum = 30;
-                                          pos_bol = 1397;
-                                          pos_cnum = 1408
-                                        };
-                                      Ortac_runtime.stop =
-                                        {
-                                          pos_fname = "invariants.mli";
-                                          pos_lnum = 30;
-                                          pos_bol = 1397;
-                                          pos_cnum = 1414
-                                        }
-                                    }))
+                         with | e -> false
                        then None
                        else
                          Some
                            (Ortac_runtime.report "Invariants" "create 42"
-                              (Ortac_runtime.Exception "Invalid_argument")
-                              "sub"
+                              (try Ortac_runtime.Exception "Invalid_argument"
+                               with | e -> Ortac_runtime.Out_of_domain) "sub"
                               [("n >= 1",
                                  {
                                    Ortac_runtime.start =
@@ -1027,8 +909,10 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                        else
                          Some
                            (Ortac_runtime.report "Invariants" "create 42"
-                              (Ortac_runtime.Protected_value
-                                 (Res (Ortac_runtime.dummy, ()))) "sub"
+                              (try
+                                 Ortac_runtime.Protected_value
+                                   (Res (Ortac_runtime.dummy, ()))
+                               with | e -> Ortac_runtime.Out_of_domain) "sub"
                               [("Sequence.length x.contents > 0",
                                  {
                                    Ortac_runtime.start =
@@ -1079,8 +963,10 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                        else
                          Some
                            (Ortac_runtime.report "Invariants" "create 42"
-                              (Ortac_runtime.Protected_value
-                                 (Res (Ortac_runtime.dummy, ()))) "sub"
+                              (try
+                                 Ortac_runtime.Protected_value
+                                   (Res (Ortac_runtime.dummy, ()))
+                               with | e -> Ortac_runtime.Out_of_domain) "sub"
                               [("Sequence.length x.contents > 0",
                                  {
                                    Ortac_runtime.start =
@@ -1117,33 +1003,13 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                                (Ortac_runtime.Gospelstdlib.Sequence.length
                                   tmp__040_.contents) in
                            __t1__041_ && __t2__042_
-                         with
-                         | e ->
-                             raise
-                               (Ortac_runtime.Partial_function
-                                  (e,
-                                    {
-                                      Ortac_runtime.start =
-                                        {
-                                          pos_fname = "invariants.mli";
-                                          pos_lnum = 28;
-                                          pos_bol = 1297;
-                                          pos_cnum = 1308
-                                        };
-                                      Ortac_runtime.stop =
-                                        {
-                                          pos_fname = "invariants.mli";
-                                          pos_lnum = 28;
-                                          pos_bol = 1297;
-                                          pos_cnum = 1344
-                                        }
-                                    }))
+                         with | e -> false
                        then None
                        else
                          Some
                            (Ortac_runtime.report "Invariants" "create 42"
-                              (Ortac_runtime.Exception "Invalid_argument")
-                              "sub"
+                              (try Ortac_runtime.Exception "Invalid_argument"
+                               with | e -> Ortac_runtime.Out_of_domain) "sub"
                               [("0 <= i <= Sequence.length t.contents",
                                  {
                                    Ortac_runtime.start =
@@ -1184,32 +1050,15 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                                   (Ortac_runtime.Gospelstdlib.Sequence.length
                                      tmp__040_.contents) in
                               __t1__043_ && __t2__044_
-                            with
-                            | e ->
-                                raise
-                                  (Ortac_runtime.Partial_function
-                                     (e,
-                                       {
-                                         Ortac_runtime.start =
-                                           {
-                                             pos_fname = "invariants.mli";
-                                             pos_lnum = 29;
-                                             pos_bol = 1345;
-                                             pos_cnum = 1356
-                                           };
-                                         Ortac_runtime.stop =
-                                           {
-                                             pos_fname = "invariants.mli";
-                                             pos_lnum = 29;
-                                             pos_bol = 1345;
-                                             pos_cnum = 1396
-                                           }
-                                       }))
+                            with | e -> false
                           then None
                           else
                             Some
                               (Ortac_runtime.report "Invariants" "create 42"
-                                 (Ortac_runtime.Exception "Invalid_argument")
+                                 (try
+                                    Ortac_runtime.Exception
+                                      "Invalid_argument"
+                                  with | e -> Ortac_runtime.Out_of_domain)
                                  "sub"
                                  [("i <= i + n <= Sequence.length t.contents",
                                     {
@@ -1234,32 +1083,15 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                               Ortac_runtime.Gospelstdlib.(>=)
                                 (Ortac_runtime.Gospelstdlib.integer_of_int n)
                                 (Ortac_runtime.Gospelstdlib.integer_of_int 1)
-                            with
-                            | e ->
-                                raise
-                                  (Ortac_runtime.Partial_function
-                                     (e,
-                                       {
-                                         Ortac_runtime.start =
-                                           {
-                                             pos_fname = "invariants.mli";
-                                             pos_lnum = 30;
-                                             pos_bol = 1397;
-                                             pos_cnum = 1408
-                                           };
-                                         Ortac_runtime.stop =
-                                           {
-                                             pos_fname = "invariants.mli";
-                                             pos_lnum = 30;
-                                             pos_bol = 1397;
-                                             pos_cnum = 1414
-                                           }
-                                       }))
+                            with | e -> false
                           then None
                           else
                             Some
                               (Ortac_runtime.report "Invariants" "create 42"
-                                 (Ortac_runtime.Exception "Invalid_argument")
+                                 (try
+                                    Ortac_runtime.Exception
+                                      "Invalid_argument"
+                                  with | e -> Ortac_runtime.Out_of_domain)
                                  "sub"
                                  [("n >= 1",
                                     {

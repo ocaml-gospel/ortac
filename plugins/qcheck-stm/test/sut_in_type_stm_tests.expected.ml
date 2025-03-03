@@ -85,27 +85,7 @@ module Spec =
                Ortac_runtime.Gospelstdlib.(>=)
                  (Ortac_runtime.Gospelstdlib.integer_of_int i)
                  (Ortac_runtime.Gospelstdlib.integer_of_int 0)
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "sut_in_type.mli";
-                              pos_lnum = 6;
-                              pos_bol = 253;
-                              pos_cnum = 264
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "sut_in_type.mli";
-                              pos_lnum = 6;
-                              pos_bol = 253;
-                              pos_cnum = 270
-                            }
-                        })))
+             with | e -> false)
           then
             let t_1__005_ =
               let open ModelElt in
@@ -182,32 +162,13 @@ let ortac_postcond cmd__006_ state__007_ res__008_ =
                      Ortac_runtime.Gospelstdlib.(>=)
                        (Ortac_runtime.Gospelstdlib.integer_of_int i)
                        (Ortac_runtime.Gospelstdlib.integer_of_int 0)
-                   with
-                   | e ->
-                       raise
-                         (Ortac_runtime.Partial_function
-                            (e,
-                              {
-                                Ortac_runtime.start =
-                                  {
-                                    pos_fname = "sut_in_type.mli";
-                                    pos_lnum = 6;
-                                    pos_bol = 253;
-                                    pos_cnum = 264
-                                  };
-                                Ortac_runtime.stop =
-                                  {
-                                    pos_fname = "sut_in_type.mli";
-                                    pos_lnum = 6;
-                                    pos_bol = 253;
-                                    pos_cnum = 270
-                                  }
-                              }))
+                   with | e -> false
                  then None
                  else
                    Some
                      (Ortac_runtime.report "Sut_in_type" "make 16 0"
-                        (Ortac_runtime.Exception "Invalid_argument") "make"
+                        (try Ortac_runtime.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Out_of_domain) "make"
                         [("i >= 0",
                            {
                              Ortac_runtime.start =
@@ -236,33 +197,13 @@ let ortac_postcond cmd__006_ state__007_ res__008_ =
                          Ortac_runtime.Gospelstdlib.(>=)
                            (Ortac_runtime.Gospelstdlib.integer_of_int i)
                            (Ortac_runtime.Gospelstdlib.integer_of_int 0)
-                       with
-                       | e ->
-                           raise
-                             (Ortac_runtime.Partial_function
-                                (e,
-                                  {
-                                    Ortac_runtime.start =
-                                      {
-                                        pos_fname = "sut_in_type.mli";
-                                        pos_lnum = 6;
-                                        pos_bol = 253;
-                                        pos_cnum = 264
-                                      };
-                                    Ortac_runtime.stop =
-                                      {
-                                        pos_fname = "sut_in_type.mli";
-                                        pos_lnum = 6;
-                                        pos_bol = 253;
-                                        pos_cnum = 270
-                                      }
-                                  })))
+                       with | e -> false)
                     then None
                     else
                       Some
                         (Ortac_runtime.report "Sut_in_type" "make 16 0"
-                           (Ortac_runtime.Exception "Invalid_argument")
-                           "make"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "make"
                            [("i >= 0",
                               {
                                 Ortac_runtime.start =

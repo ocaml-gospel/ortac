@@ -87,27 +87,7 @@ module Spec =
                Ortac_runtime.Gospelstdlib.(>=)
                  (Ortac_runtime.Gospelstdlib.integer_of_int i)
                  (Ortac_runtime.Gospelstdlib.integer_of_int 0)
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "conjunctive_clauses.mli";
-                              pos_lnum = 6;
-                              pos_bol = 285;
-                              pos_cnum = 296
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "conjunctive_clauses.mli";
-                              pos_lnum = 6;
-                              pos_bol = 285;
-                              pos_cnum = 302
-                            }
-                        })))
+             with | e -> false)
           then
             let t_1__005_ =
               let open ModelElt in
@@ -155,27 +135,7 @@ module Spec =
                    (Ortac_runtime.Gospelstdlib.Sequence.length
                       t_2__006_.contents) in
                __t1__008_ && __t2__009_
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "conjunctive_clauses.mli";
-                              pos_lnum = 11;
-                              pos_bol = 571;
-                              pos_cnum = 582
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "conjunctive_clauses.mli";
-                              pos_lnum = 11;
-                              pos_bol = 571;
-                              pos_cnum = 617
-                            }
-                        })))
+             with | e -> false)
           then
             let t_2__007_ =
               let open ModelElt in
@@ -264,33 +224,14 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                      Ortac_runtime.Gospelstdlib.(>=)
                        (Ortac_runtime.Gospelstdlib.integer_of_int i)
                        (Ortac_runtime.Gospelstdlib.integer_of_int 0)
-                   with
-                   | e ->
-                       raise
-                         (Ortac_runtime.Partial_function
-                            (e,
-                              {
-                                Ortac_runtime.start =
-                                  {
-                                    pos_fname = "conjunctive_clauses.mli";
-                                    pos_lnum = 6;
-                                    pos_bol = 285;
-                                    pos_cnum = 296
-                                  };
-                                Ortac_runtime.stop =
-                                  {
-                                    pos_fname = "conjunctive_clauses.mli";
-                                    pos_lnum = 6;
-                                    pos_bol = 285;
-                                    pos_cnum = 302
-                                  }
-                              }))
+                   with | e -> false
                  then None
                  else
                    Some
                      (Ortac_runtime.report "Conjunctive_clauses"
                         "make 42 'a'"
-                        (Ortac_runtime.Exception "Invalid_argument") "make"
+                        (try Ortac_runtime.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Out_of_domain) "make"
                         [("i >= 0",
                            {
                              Ortac_runtime.start =
@@ -319,34 +260,14 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                          Ortac_runtime.Gospelstdlib.(>=)
                            (Ortac_runtime.Gospelstdlib.integer_of_int i)
                            (Ortac_runtime.Gospelstdlib.integer_of_int 0)
-                       with
-                       | e ->
-                           raise
-                             (Ortac_runtime.Partial_function
-                                (e,
-                                  {
-                                    Ortac_runtime.start =
-                                      {
-                                        pos_fname = "conjunctive_clauses.mli";
-                                        pos_lnum = 6;
-                                        pos_bol = 285;
-                                        pos_cnum = 296
-                                      };
-                                    Ortac_runtime.stop =
-                                      {
-                                        pos_fname = "conjunctive_clauses.mli";
-                                        pos_lnum = 6;
-                                        pos_bol = 285;
-                                        pos_cnum = 302
-                                      }
-                                  })))
+                       with | e -> false)
                     then None
                     else
                       Some
                         (Ortac_runtime.report "Conjunctive_clauses"
                            "make 42 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument")
-                           "make"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "make"
                            [("i >= 0",
                               {
                                 Ortac_runtime.start =
@@ -378,33 +299,14 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                          (Ortac_runtime.Gospelstdlib.Sequence.length
                             tmp__014_.contents) in
                      __t1__015_ && __t2__016_
-                   with
-                   | e ->
-                       raise
-                         (Ortac_runtime.Partial_function
-                            (e,
-                              {
-                                Ortac_runtime.start =
-                                  {
-                                    pos_fname = "conjunctive_clauses.mli";
-                                    pos_lnum = 11;
-                                    pos_bol = 571;
-                                    pos_cnum = 582
-                                  };
-                                Ortac_runtime.stop =
-                                  {
-                                    pos_fname = "conjunctive_clauses.mli";
-                                    pos_lnum = 11;
-                                    pos_bol = 571;
-                                    pos_cnum = 617
-                                  }
-                              }))
+                   with | e -> false
                  then None
                  else
                    Some
                      (Ortac_runtime.report "Conjunctive_clauses"
                         "make 42 'a'"
-                        (Ortac_runtime.Exception "Invalid_argument") "set"
+                        (try Ortac_runtime.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Out_of_domain) "set"
                         [("0 <= i < Sequence.length t.contents",
                            {
                              Ortac_runtime.start =
@@ -441,33 +343,14 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                              (Ortac_runtime.Gospelstdlib.Sequence.length
                                 tmp__014_.contents) in
                          __t1__015_ && __t2__016_
-                       with
-                       | e ->
-                           raise
-                             (Ortac_runtime.Partial_function
-                                (e,
-                                  {
-                                    Ortac_runtime.start =
-                                      {
-                                        pos_fname = "conjunctive_clauses.mli";
-                                        pos_lnum = 11;
-                                        pos_bol = 571;
-                                        pos_cnum = 582
-                                      };
-                                    Ortac_runtime.stop =
-                                      {
-                                        pos_fname = "conjunctive_clauses.mli";
-                                        pos_lnum = 11;
-                                        pos_bol = 571;
-                                        pos_cnum = 617
-                                      }
-                                  })))
+                       with | e -> false)
                     then None
                     else
                       Some
                         (Ortac_runtime.report "Conjunctive_clauses"
                            "make 42 'a'"
-                           (Ortac_runtime.Exception "Invalid_argument") "set"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "set"
                            [("0 <= i < Sequence.length t.contents",
                               {
                                 Ortac_runtime.start =

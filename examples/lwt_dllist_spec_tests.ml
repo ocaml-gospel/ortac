@@ -491,33 +491,13 @@ let ortac_postcond cmd__023_ state__024_ res__025_ =
                (b = true) =
                  ((Lazy.force s_new__028_).contents =
                     Ortac_runtime.Gospelstdlib.Sequence.empty)
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "lwt_dllist_spec.mli";
-                              pos_lnum = 51;
-                              pos_bol = 2194;
-                              pos_cnum = 2208
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "lwt_dllist_spec.mli";
-                              pos_lnum = 51;
-                              pos_bol = 2194;
-                              pos_cnum = 2241
-                            }
-                        })))
+             with | e -> false)
           then None
           else
             Some
               (Ortac_runtime.report "Lwt_dllist_spec" "create ()"
-                 (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
-                 "is_empty"
+                 (try Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
+                  with | e -> Ortac_runtime.Out_of_domain) "is_empty"
                  [("b <-> s.contents = Sequence.empty",
                     {
                       Ortac_runtime.start =
@@ -543,61 +523,21 @@ let ortac_postcond cmd__023_ state__024_ res__025_ =
                (Ortac_runtime.Gospelstdlib.integer_of_int l_1) =
                  (Ortac_runtime.Gospelstdlib.Sequence.length
                     (Lazy.force s_new__033_).contents)
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "lwt_dllist_spec.mli";
-                              pos_lnum = 58;
-                              pos_bol = 2649;
-                              pos_cnum = 2663
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "lwt_dllist_spec.mli";
-                              pos_lnum = 58;
-                              pos_bol = 2649;
-                              pos_cnum = 2693
-                            }
-                        })))
+             with | e -> false)
           then None
           else
             Some
               (Ortac_runtime.report "Lwt_dllist_spec" "create ()"
-                 (Ortac_runtime.Value
-                    (Res
-                       (integer,
-                         (let s_old__030_ = Model.get state__024_ 0
-                          and s_new__031_ =
-                            lazy (Model.get (Lazy.force new_state__026_) 0) in
-                          try
+                 (try
+                    Ortac_runtime.Value
+                      (Res
+                         (integer,
+                           (let s_old__030_ = Model.get state__024_ 0
+                            and s_new__031_ =
+                              lazy (Model.get (Lazy.force new_state__026_) 0) in
                             Ortac_runtime.Gospelstdlib.Sequence.length
-                              (Lazy.force s_new__031_).contents
-                          with
-                          | e ->
-                              raise
-                                (Ortac_runtime.Partial_function
-                                   (e,
-                                     {
-                                       Ortac_runtime.start =
-                                         {
-                                           pos_fname = "lwt_dllist_spec.mli";
-                                           pos_lnum = 58;
-                                           pos_bol = 2649;
-                                           pos_cnum = 2667
-                                         };
-                                       Ortac_runtime.stop =
-                                         {
-                                           pos_fname = "lwt_dllist_spec.mli";
-                                           pos_lnum = 58;
-                                           pos_bol = 2649;
-                                           pos_cnum = 2693
-                                         }
-                                     })))))) "length"
+                              (Lazy.force s_new__031_).contents)))
+                  with | e -> Ortac_runtime.Out_of_domain) "length"
                  [("l = Sequence.length s.contents",
                     {
                       Ortac_runtime.start =
@@ -633,33 +573,15 @@ let ortac_postcond cmd__023_ state__024_ res__025_ =
                       a_3 =
                         (Ortac_runtime.Gospelstdlib.Sequence.hd
                            s_old__037_.contents)
-                  with
-                  | e ->
-                      raise
-                        (Ortac_runtime.Partial_function
-                           (e,
-                             {
-                               Ortac_runtime.start =
-                                 {
-                                   pos_fname = "lwt_dllist_spec.mli";
-                                   pos_lnum = 85;
-                                   pos_bol = 4320;
-                                   pos_cnum = 4334
-                                 };
-                               Ortac_runtime.stop =
-                                 {
-                                   pos_fname = "lwt_dllist_spec.mli";
-                                   pos_lnum = 87;
-                                   pos_bol = 4394;
-                                   pos_cnum = 4445
-                                 }
-                             })))
+                  with | e -> false)
                then None
                else
                  Some
                    (Ortac_runtime.report "Lwt_dllist_spec" "create ()"
-                      (Ortac_runtime.Protected_value
-                         (Res (Ortac_runtime.dummy, ()))) "take_l"
+                      (try
+                         Ortac_runtime.Protected_value
+                           (Res (Ortac_runtime.dummy, ()))
+                       with | e -> Ortac_runtime.Out_of_domain) "take_l"
                       [("if old s.contents = Sequence.empty\n              then false\n              else a = Sequence.hd (old s.contents)",
                          {
                            Ortac_runtime.start =
@@ -690,32 +612,13 @@ let ortac_postcond cmd__023_ state__024_ res__025_ =
                       Ortac_runtime.Gospelstdlib.Sequence.empty =
                         (Lazy.force s_new__040_).contents in
                     __t1__041_ && __t2__042_
-                  with
-                  | e ->
-                      raise
-                        (Ortac_runtime.Partial_function
-                           (e,
-                             {
-                               Ortac_runtime.start =
-                                 {
-                                   pos_fname = "lwt_dllist_spec.mli";
-                                   pos_lnum = 88;
-                                   pos_bol = 4446;
-                                   pos_cnum = 4468
-                                 };
-                               Ortac_runtime.stop =
-                                 {
-                                   pos_fname = "lwt_dllist_spec.mli";
-                                   pos_lnum = 88;
-                                   pos_bol = 4446;
-                                   pos_cnum = 4512
-                                 }
-                             })))
+                  with | e -> false)
                then None
                else
                  Some
                    (Ortac_runtime.report "Lwt_dllist_spec" "create ()"
-                      (Ortac_runtime.Exception "Empty") "take_l"
+                      (try Ortac_runtime.Exception "Empty"
+                       with | e -> Ortac_runtime.Out_of_domain) "take_l"
                       [("old s.contents = Sequence.empty = s.contents",
                          {
                            Ortac_runtime.start =
@@ -754,33 +657,15 @@ let ortac_postcond cmd__023_ state__024_ res__025_ =
                               (Ortac_runtime.Gospelstdlib.Sequence.length
                                  s_old__044_.contents)
                               (Ortac_runtime.Gospelstdlib.integer_of_int 1)))
-                  with
-                  | e ->
-                      raise
-                        (Ortac_runtime.Partial_function
-                           (e,
-                             {
-                               Ortac_runtime.start =
-                                 {
-                                   pos_fname = "lwt_dllist_spec.mli";
-                                   pos_lnum = 99;
-                                   pos_bol = 5153;
-                                   pos_cnum = 5167
-                                 };
-                               Ortac_runtime.stop =
-                                 {
-                                   pos_fname = "lwt_dllist_spec.mli";
-                                   pos_lnum = 101;
-                                   pos_bol = 5227;
-                                   pos_cnum = 5304
-                                 }
-                             })))
+                  with | e -> false)
                then None
                else
                  Some
                    (Ortac_runtime.report "Lwt_dllist_spec" "create ()"
-                      (Ortac_runtime.Protected_value
-                         (Res (Ortac_runtime.dummy, ()))) "take_r"
+                      (try
+                         Ortac_runtime.Protected_value
+                           (Res (Ortac_runtime.dummy, ()))
+                       with | e -> Ortac_runtime.Out_of_domain) "take_r"
                       [("if old s.contents = Sequence.empty\n              then false\n              else a = (old s.contents)[Sequence.length (old s.contents) - 1]",
                          {
                            Ortac_runtime.start =
@@ -811,32 +696,13 @@ let ortac_postcond cmd__023_ state__024_ res__025_ =
                       Ortac_runtime.Gospelstdlib.Sequence.empty =
                         (Lazy.force s_new__047_).contents in
                     __t1__048_ && __t2__049_
-                  with
-                  | e ->
-                      raise
-                        (Ortac_runtime.Partial_function
-                           (e,
-                             {
-                               Ortac_runtime.start =
-                                 {
-                                   pos_fname = "lwt_dllist_spec.mli";
-                                   pos_lnum = 102;
-                                   pos_bol = 5305;
-                                   pos_cnum = 5327
-                                 };
-                               Ortac_runtime.stop =
-                                 {
-                                   pos_fname = "lwt_dllist_spec.mli";
-                                   pos_lnum = 102;
-                                   pos_bol = 5305;
-                                   pos_cnum = 5371
-                                 }
-                             })))
+                  with | e -> false)
                then None
                else
                  Some
                    (Ortac_runtime.report "Lwt_dllist_spec" "create ()"
-                      (Ortac_runtime.Exception "Empty") "take_r"
+                      (try Ortac_runtime.Exception "Empty"
+                       with | e -> Ortac_runtime.Out_of_domain) "take_r"
                       [("old s.contents = Sequence.empty = s.contents",
                          {
                            Ortac_runtime.start =
@@ -866,33 +732,13 @@ let ortac_postcond cmd__023_ state__024_ res__025_ =
                   | Some a_5 ->
                       Ortac_runtime.Gospelstdlib.Sequence.cons a_5
                         (Lazy.force s_new__052_).contents)
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "lwt_dllist_spec.mli";
-                              pos_lnum = 112;
-                              pos_bol = 6030;
-                              pos_cnum = 6044
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "lwt_dllist_spec.mli";
-                              pos_lnum = 114;
-                              pos_bol = 6131;
-                              pos_cnum = 6201
-                            }
-                        })))
+             with | e -> false)
           then None
           else
             Some
               (Ortac_runtime.report "Lwt_dllist_spec" "create ()"
-                 (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
-                 "take_opt_l"
+                 (try Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
+                  with | e -> Ortac_runtime.Out_of_domain) "take_opt_l"
                  [("old s.contents = match o with\n                                | None -> Sequence.empty\n                                | Some a -> Sequence.cons a s.contents",
                     {
                       Ortac_runtime.start =
@@ -921,33 +767,13 @@ let ortac_postcond cmd__023_ state__024_ res__025_ =
                   | Some a_6 ->
                       Ortac_runtime.Gospelstdlib.Sequence.snoc
                         (Lazy.force s_new__055_).contents a_6)
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "lwt_dllist_spec.mli";
-                              pos_lnum = 124;
-                              pos_bol = 6869;
-                              pos_cnum = 6883
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "lwt_dllist_spec.mli";
-                              pos_lnum = 126;
-                              pos_bol = 6970;
-                              pos_cnum = 7040
-                            }
-                        })))
+             with | e -> false)
           then None
           else
             Some
               (Ortac_runtime.report "Lwt_dllist_spec" "create ()"
-                 (Ortac_runtime.Value (Res (Ortac_runtime.dummy, ())))
-                 "take_opt_r"
+                 (try Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
+                  with | e -> Ortac_runtime.Out_of_domain) "take_opt_r"
                  [("old s.contents = match o with\n                                | None -> Sequence.empty\n                                | Some a -> Sequence.snoc s.contents a",
                     {
                       Ortac_runtime.start =

@@ -90,27 +90,7 @@ module Spec =
                Ortac_runtime.Gospelstdlib.(>=)
                  (Ortac_runtime.Gospelstdlib.integer_of_int i)
                  (Ortac_runtime.Gospelstdlib.integer_of_int 0)
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "test_without_sut.mli";
-                              pos_lnum = 6;
-                              pos_bol = 273;
-                              pos_cnum = 284
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "test_without_sut.mli";
-                              pos_lnum = 6;
-                              pos_bol = 273;
-                              pos_cnum = 290
-                            }
-                        })))
+             with | e -> false)
           then
             let t_1__005_ =
               let open ModelElt in
@@ -194,32 +174,13 @@ let ortac_postcond cmd__006_ state__007_ res__008_ =
                      Ortac_runtime.Gospelstdlib.(>=)
                        (Ortac_runtime.Gospelstdlib.integer_of_int i)
                        (Ortac_runtime.Gospelstdlib.integer_of_int 0)
-                   with
-                   | e ->
-                       raise
-                         (Ortac_runtime.Partial_function
-                            (e,
-                              {
-                                Ortac_runtime.start =
-                                  {
-                                    pos_fname = "test_without_sut.mli";
-                                    pos_lnum = 6;
-                                    pos_bol = 273;
-                                    pos_cnum = 284
-                                  };
-                                Ortac_runtime.stop =
-                                  {
-                                    pos_fname = "test_without_sut.mli";
-                                    pos_lnum = 6;
-                                    pos_bol = 273;
-                                    pos_cnum = 290
-                                  }
-                              }))
+                   with | e -> false
                  then None
                  else
                    Some
                      (Ortac_runtime.report "Test_without_sut" "make 16 0"
-                        (Ortac_runtime.Exception "Invalid_argument") "make"
+                        (try Ortac_runtime.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Out_of_domain) "make"
                         [("i >= 0",
                            {
                              Ortac_runtime.start =
@@ -248,33 +209,13 @@ let ortac_postcond cmd__006_ state__007_ res__008_ =
                          Ortac_runtime.Gospelstdlib.(>=)
                            (Ortac_runtime.Gospelstdlib.integer_of_int i)
                            (Ortac_runtime.Gospelstdlib.integer_of_int 0)
-                       with
-                       | e ->
-                           raise
-                             (Ortac_runtime.Partial_function
-                                (e,
-                                  {
-                                    Ortac_runtime.start =
-                                      {
-                                        pos_fname = "test_without_sut.mli";
-                                        pos_lnum = 6;
-                                        pos_bol = 273;
-                                        pos_cnum = 284
-                                      };
-                                    Ortac_runtime.stop =
-                                      {
-                                        pos_fname = "test_without_sut.mli";
-                                        pos_lnum = 6;
-                                        pos_bol = 273;
-                                        pos_cnum = 290
-                                      }
-                                  })))
+                       with | e -> false)
                     then None
                     else
                       Some
                         (Ortac_runtime.report "Test_without_sut" "make 16 0"
-                           (Ortac_runtime.Exception "Invalid_argument")
-                           "make"
+                           (try Ortac_runtime.Exception "Invalid_argument"
+                            with | e -> Ortac_runtime.Out_of_domain) "make"
                            [("i >= 0",
                               {
                                 Ortac_runtime.start =
@@ -299,59 +240,19 @@ let ortac_postcond cmd__006_ state__007_ res__008_ =
                  (Ortac_runtime.Gospelstdlib.(+)
                     (Ortac_runtime.Gospelstdlib.integer_of_int a_2)
                     (Ortac_runtime.Gospelstdlib.integer_of_int b))
-             with
-             | e ->
-                 raise
-                   (Ortac_runtime.Partial_function
-                      (e,
-                        {
-                          Ortac_runtime.start =
-                            {
-                              pos_fname = "test_without_sut.mli";
-                              pos_lnum = 11;
-                              pos_bol = 515;
-                              pos_cnum = 527
-                            };
-                          Ortac_runtime.stop =
-                            {
-                              pos_fname = "test_without_sut.mli";
-                              pos_lnum = 11;
-                              pos_bol = 515;
-                              pos_cnum = 536
-                            }
-                        })))
+             with | e -> false)
           then None
           else
             Some
               (Ortac_runtime.report "Test_without_sut" "make 16 0"
-                 (Ortac_runtime.Value
-                    (Res
-                       (integer,
-                         (try
-                            Ortac_runtime.Gospelstdlib.(+)
+                 (try
+                    Ortac_runtime.Value
+                      (Res
+                         (integer,
+                           (Ortac_runtime.Gospelstdlib.(+)
                               (Ortac_runtime.Gospelstdlib.integer_of_int a_2)
-                              (Ortac_runtime.Gospelstdlib.integer_of_int b)
-                          with
-                          | e ->
-                              raise
-                                (Ortac_runtime.Partial_function
-                                   (e,
-                                     {
-                                       Ortac_runtime.start =
-                                         {
-                                           pos_fname = "test_without_sut.mli";
-                                           pos_lnum = 11;
-                                           pos_bol = 515;
-                                           pos_cnum = 533
-                                         };
-                                       Ortac_runtime.stop =
-                                         {
-                                           pos_fname = "test_without_sut.mli";
-                                           pos_lnum = 11;
-                                           pos_bol = 515;
-                                           pos_cnum = 534
-                                         }
-                                     })))))) "add"
+                              (Ortac_runtime.Gospelstdlib.integer_of_int b))))
+                  with | e -> Ortac_runtime.Out_of_domain) "add"
                  [("c = a + b",
                     {
                       Ortac_runtime.start =
