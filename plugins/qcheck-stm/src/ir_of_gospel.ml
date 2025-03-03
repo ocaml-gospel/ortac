@@ -277,6 +277,23 @@ let returned_value_description spec ret =
            && Symbols.(ls_equal ps_equ ls)
            && is_ret vs ->
         [ Ir.term_val spec right ]
+    (* Gospel turns equality between prop (bool being coerced to prop) into
+       double implication of a specific form. This case is obviously fragile
+       and depends a lot on the implementation of Gospel type-checker *)
+    | Tbinop
+        ( Tiff,
+          {
+            t_node =
+              Tapp
+                ( ls1,
+                  [ { t_node = Tvar vs; _ }; { t_node = Tapp (ls2, []); _ } ] );
+            _;
+          },
+          right )
+      when is_ret vs
+           && Symbols.(ls_equal ps_equ ls1)
+           && Symbols.(ls_equal fs_bool_true ls2) ->
+        [ Ir.term_val spec right ]
     | Tbinop ((Tand | Tand_asym), l, r) -> pred l @ pred r
     | _ -> []
   in

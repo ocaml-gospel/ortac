@@ -643,8 +643,8 @@ module Spec =
           let t_12__044_ = Model.get state__003_ 0 in
           let t_12__045_ = t_12__044_ in
           Model.push (Model.drop_n state__003_ 1) t_12__045_
-    let precond cmd__087_ state__088_ =
-      match cmd__087_ with
+    let precond cmd__089_ state__090_ =
+      match cmd__089_ with
       | Length -> true
       | Get i -> true
       | Set (i_1, a_1) -> true
@@ -658,176 +658,176 @@ module Spec =
       | Mem a_3 -> true
       | For_all p -> true
     let postcond _ _ _ = true
-    let run cmd__089_ sut__090_ =
-      match cmd__089_ with
+    let run cmd__091_ sut__092_ =
+      match cmd__091_ with
       | Length ->
           Res
             (int,
-              (let t_1__091_ = SUT.pop sut__090_ in
-               let res__092_ = length t_1__091_ in
-               (SUT.push sut__090_ t_1__091_; res__092_)))
+              (let t_1__093_ = SUT.pop sut__092_ in
+               let res__094_ = length t_1__093_ in
+               (SUT.push sut__092_ t_1__093_; res__094_)))
       | Get i ->
           Res
             ((result char exn),
-              (let t_2__093_ = SUT.pop sut__090_ in
-               let res__094_ = protect (fun () -> get t_2__093_ i) () in
-               (SUT.push sut__090_ t_2__093_; res__094_)))
+              (let t_2__095_ = SUT.pop sut__092_ in
+               let res__096_ = protect (fun () -> get t_2__095_ i) () in
+               (SUT.push sut__092_ t_2__095_; res__096_)))
       | Set (i_1, a_1) ->
           Res
             ((result unit exn),
-              (let t_3__095_ = SUT.pop sut__090_ in
-               let res__096_ = protect (fun () -> set t_3__095_ i_1 a_1) () in
-               (SUT.push sut__090_ t_3__095_; res__096_)))
+              (let t_3__097_ = SUT.pop sut__092_ in
+               let res__098_ = protect (fun () -> set t_3__097_ i_1 a_1) () in
+               (SUT.push sut__092_ t_3__097_; res__098_)))
       | Make (i_2, a_2) ->
           Res
             ((result sut exn),
-              (let res__097_ = protect (fun () -> make i_2 a_2) () in
-               ((match res__097_ with
-                 | Ok res -> SUT.push sut__090_ res
+              (let res__099_ = protect (fun () -> make i_2 a_2) () in
+               ((match res__099_ with
+                 | Ok res -> SUT.push sut__092_ res
                  | Error _ -> ());
-                res__097_)))
+                res__099_)))
       | Append ->
           Res
             (sut,
-              (let a_4__098_ = SUT.pop sut__090_ in
-               let b__099_ = SUT.pop sut__090_ in
-               let res__100_ = append a_4__098_ b__099_ in
-               (SUT.push sut__090_ b__099_;
-                SUT.push sut__090_ a_4__098_;
-                SUT.push sut__090_ res__100_;
-                res__100_)))
+              (let a_4__100_ = SUT.pop sut__092_ in
+               let b__101_ = SUT.pop sut__092_ in
+               let res__102_ = append a_4__100_ b__101_ in
+               (SUT.push sut__092_ b__101_;
+                SUT.push sut__092_ a_4__100_;
+                SUT.push sut__092_ res__102_;
+                res__102_)))
       | Sub (i_3, n) ->
           Res
             ((result sut exn),
-              (let t_6__101_ = SUT.pop sut__090_ in
-               let res__102_ = protect (fun () -> sub t_6__101_ i_3 n) () in
-               (SUT.push sut__090_ t_6__101_;
-                (match res__102_ with
-                 | Ok res -> SUT.push sut__090_ res
+              (let t_6__103_ = SUT.pop sut__092_ in
+               let res__104_ = protect (fun () -> sub t_6__103_ i_3 n) () in
+               (SUT.push sut__092_ t_6__103_;
+                (match res__104_ with
+                 | Ok res -> SUT.push sut__092_ res
                  | Error _ -> ());
-                res__102_)))
+                res__104_)))
       | Copy ->
           Res
             (sut,
-              (let t_7__103_ = SUT.pop sut__090_ in
-               let res__104_ = copy t_7__103_ in
-               (SUT.push sut__090_ t_7__103_;
-                SUT.push sut__090_ res__104_;
-                res__104_)))
+              (let t_7__105_ = SUT.pop sut__092_ in
+               let res__106_ = copy t_7__105_ in
+               (SUT.push sut__092_ t_7__105_;
+                SUT.push sut__092_ res__106_;
+                res__106_)))
       | Fill (pos, len, x) ->
           Res
             ((result unit exn),
-              (let t_8__105_ = SUT.pop sut__090_ in
-               let res__106_ =
-                 protect (fun () -> fill t_8__105_ pos len x) () in
-               (SUT.push sut__090_ t_8__105_; res__106_)))
+              (let t_8__107_ = SUT.pop sut__092_ in
+               let res__108_ =
+                 protect (fun () -> fill t_8__107_ pos len x) () in
+               (SUT.push sut__092_ t_8__107_; res__108_)))
       | To_list ->
           Res
             ((list char),
-              (let t_9__107_ = SUT.pop sut__090_ in
-               let res__108_ = to_list t_9__107_ in
-               (SUT.push sut__090_ t_9__107_; res__108_)))
+              (let t_9__109_ = SUT.pop sut__092_ in
+               let res__110_ = to_list t_9__109_ in
+               (SUT.push sut__092_ t_9__109_; res__110_)))
       | Of_list l ->
           Res
             (sut,
-              (let res__109_ = of_list l in
-               (SUT.push sut__090_ res__109_; res__109_)))
+              (let res__111_ = of_list l in
+               (SUT.push sut__092_ res__111_; res__111_)))
       | Mem a_3 ->
           Res
             (bool,
-              (let t_11__110_ = SUT.pop sut__090_ in
-               let res__111_ = mem a_3 t_11__110_ in
-               (SUT.push sut__090_ t_11__110_; res__111_)))
+              (let t_11__112_ = SUT.pop sut__092_ in
+               let res__113_ = mem a_3 t_11__112_ in
+               (SUT.push sut__092_ t_11__112_; res__113_)))
       | For_all p ->
           Res
             (bool,
-              (let t_12__112_ = SUT.pop sut__090_ in
-               let res__113_ = for_all (QCheck.Fn.apply p) t_12__112_ in
-               (SUT.push sut__090_ t_12__112_; res__113_)))
+              (let t_12__114_ = SUT.pop sut__092_ in
+               let res__115_ = for_all (QCheck.Fn.apply p) t_12__114_ in
+               (SUT.push sut__092_ t_12__114_; res__115_)))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__115_ state__116_ last__118_ res__117_ =
+let ortac_show_cmd cmd__117_ state__118_ last__120_ res__119_ =
   let open Spec in
     let open STM in
-      match (cmd__115_, res__117_) with
+      match (cmd__117_, res__119_) with
       | (Length, Res ((Int, _), _)) ->
-          let lhs = if last__118_ then "r" else "_"
+          let lhs = if last__120_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "length"
-            (SUT.get_name state__116_ (0 + shift))
+            (SUT.get_name state__118_ (0 + shift))
       | (Get i, Res ((Result (Char, Exn), _), _)) ->
-          let lhs = if last__118_ then "r" else "_"
+          let lhs = if last__120_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s %a)" lhs "get"
-            (SUT.get_name state__116_ (0 + shift)) (Util.Pp.pp_int true) i
+            (SUT.get_name state__118_ (0 + shift)) (Util.Pp.pp_int true) i
       | (Set (i_1, a_1), Res ((Result (Unit, Exn), _), _)) ->
-          let lhs = if last__118_ then "r" else "_"
+          let lhs = if last__120_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s %a %a)" lhs
-            "set" (SUT.get_name state__116_ (0 + shift))
+            "set" (SUT.get_name state__118_ (0 + shift))
             (Util.Pp.pp_int true) i_1 (Util.Pp.pp_char true) a_1
       | (Make (i_2, a_2), Res ((Result (SUT, Exn), _), t_4)) ->
           let lhs =
-            if last__118_
+            if last__120_
             then "r"
             else
               (match t_4 with
-               | Ok _ -> "Ok " ^ (SUT.get_name state__116_ 0)
+               | Ok _ -> "Ok " ^ (SUT.get_name state__118_ 0)
                | Error _ -> "_")
           and shift = match t_4 with | Ok _ -> 1 | Error _ -> 0 in
           Format.asprintf "let %s = protect (fun () -> %s %a %a)" lhs "make"
             (Util.Pp.pp_int true) i_2 (Util.Pp.pp_char true) a_2
       | (Append, Res ((SUT, _), t_5)) ->
-          let lhs = if last__118_ then "r" else SUT.get_name state__116_ 0
+          let lhs = if last__120_ then "r" else SUT.get_name state__118_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %s %s" lhs "append"
-            (SUT.get_name state__116_ (0 + shift))
-            (SUT.get_name state__116_ (1 + shift))
+            (SUT.get_name state__118_ (0 + shift))
+            (SUT.get_name state__118_ (1 + shift))
       | (Sub (i_3, n), Res ((Result (SUT, Exn), _), r)) ->
           let lhs =
-            if last__118_
+            if last__120_
             then "r"
             else
               (match r with
-               | Ok _ -> "Ok " ^ (SUT.get_name state__116_ 0)
+               | Ok _ -> "Ok " ^ (SUT.get_name state__118_ 0)
                | Error _ -> "_")
           and shift = match r with | Ok _ -> 1 | Error _ -> 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s %a %a)" lhs
-            "sub" (SUT.get_name state__116_ (0 + shift))
+            "sub" (SUT.get_name state__118_ (0 + shift))
             (Util.Pp.pp_int true) i_3 (Util.Pp.pp_int true) n
       | (Copy, Res ((SUT, _), r_1)) ->
-          let lhs = if last__118_ then "r" else SUT.get_name state__116_ 0
+          let lhs = if last__120_ then "r" else SUT.get_name state__118_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %s" lhs "copy"
-            (SUT.get_name state__116_ (0 + shift))
+            (SUT.get_name state__118_ (0 + shift))
       | (Fill (pos, len, x), Res ((Result (Unit, Exn), _), _)) ->
-          let lhs = if last__118_ then "r" else "_"
+          let lhs = if last__120_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s %a %a %a)" lhs
-            "fill" (SUT.get_name state__116_ (0 + shift))
+            "fill" (SUT.get_name state__118_ (0 + shift))
             (Util.Pp.pp_int true) pos (Util.Pp.pp_int true) len
             (Util.Pp.pp_char true) x
       | (To_list, Res ((List (Char), _), _)) ->
-          let lhs = if last__118_ then "r" else "_"
+          let lhs = if last__120_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "to_list"
-            (SUT.get_name state__116_ (0 + shift))
+            (SUT.get_name state__118_ (0 + shift))
       | (Of_list l, Res ((SUT, _), t_10)) ->
-          let lhs = if last__118_ then "r" else SUT.get_name state__116_ 0
+          let lhs = if last__120_ then "r" else SUT.get_name state__118_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a" lhs "of_list"
             (Util.Pp.pp_list Util.Pp.pp_char true) l
       | (Mem a_3, Res ((Bool, _), _)) ->
-          let lhs = if last__118_ then "r" else "_"
+          let lhs = if last__120_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a %s" lhs "mem"
-            (Util.Pp.pp_char true) a_3 (SUT.get_name state__116_ (0 + shift))
+            (Util.Pp.pp_char true) a_3 (SUT.get_name state__118_ (0 + shift))
       | (For_all p, Res ((Bool, _), _)) ->
-          let lhs = if last__118_ then "r" else "_"
+          let lhs = if last__120_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a %s" lhs "for_all"
-            (Util.Pp.pp_fun_ true) p (SUT.get_name state__116_ (0 + shift))
+            (Util.Pp.pp_fun_ true) p (SUT.get_name state__118_ (0 + shift))
       | _ -> assert false
 let ortac_postcond cmd__046_ state__047_ res__048_ =
   let open Spec in
@@ -1565,18 +1565,26 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
       | (Of_list l, Res ((SUT, _), t_10)) -> None
       | (Mem a_3, Res ((Bool, _), b_1)) ->
           if
-            let t_old__079_ = Model.get state__047_ 0
-            and t_new__080_ = lazy (Model.get (Lazy.force new_state__049_) 0) in
+            let t_old__081_ = Model.get state__047_ 0
+            and t_new__082_ = lazy (Model.get (Lazy.force new_state__049_) 0) in
             (try
                (b_1 = true) =
                  (Ortac_runtime.Gospelstdlib.Sequence.mem
-                    (Lazy.force t_new__080_).contents a_3)
+                    (Lazy.force t_new__082_).contents a_3)
              with | e -> false)
           then None
           else
             Some
               (Ortac_runtime.report "Array" "make 16 'a'"
-                 (try Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
+                 (try
+                    Ortac_runtime.Value
+                      (Res
+                         (bool,
+                           (let t_old__079_ = Model.get state__047_ 0
+                            and t_new__080_ =
+                              lazy (Model.get (Lazy.force new_state__049_) 0) in
+                            Ortac_runtime.Gospelstdlib.Sequence.mem
+                              (Lazy.force t_new__080_).contents a_3)))
                   with | e -> Ortac_runtime.Out_of_domain) "mem"
                  [("b = Sequence.mem t.contents a",
                     {
@@ -1597,8 +1605,8 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                     })])
       | (For_all p, Res ((Bool, _), b_2)) ->
           if
-            let t_old__084_ = Model.get state__047_ 0
-            and t_new__085_ = lazy (Model.get (Lazy.force new_state__049_) 0) in
+            let t_old__086_ = Model.get state__047_ 0
+            and t_new__087_ = lazy (Model.get (Lazy.force new_state__049_) 0) in
             (try
                b_2 =
                  (Ortac_runtime.Gospelstdlib.Sequence.fold_left
@@ -1606,7 +1614,7 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                        fun a_6 ->
                          if ((QCheck.Fn.apply p a_6) = true) && (acc = true)
                          then true
-                         else false) true (Lazy.force t_new__085_).contents)
+                         else false) true (Lazy.force t_new__087_).contents)
              with | e -> false)
           then None
           else
@@ -1616,8 +1624,8 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                     Ortac_runtime.Value
                       (Res
                          (bool,
-                           (let t_old__082_ = Model.get state__047_ 0
-                            and t_new__083_ =
+                           (let t_old__084_ = Model.get state__047_ 0
+                            and t_new__085_ =
                               lazy (Model.get (Lazy.force new_state__049_) 0) in
                             Ortac_runtime.Gospelstdlib.Sequence.fold_left
                               (fun acc ->
@@ -1627,7 +1635,7 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                                        (acc = true)
                                    then true
                                    else false) true
-                              (Lazy.force t_new__083_).contents)))
+                              (Lazy.force t_new__085_).contents)))
                   with | e -> Ortac_runtime.Out_of_domain) "for_all"
                  [("b = Sequence.fold_left (fun acc a -> p a && acc) true t.contents",
                     {

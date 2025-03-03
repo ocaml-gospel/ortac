@@ -93,8 +93,3 @@ File "hashtbl.mli", line 40, characters 0-162:
 41 | (*@ bs = find_all h a
 42 |     ensures bs = Sequence.filter_map (fun (x, y) -> if x = a then Some y else None) h.contents *)
 Warning: Incomplete computation of the returned value in the specification of find_all. Failure message won't be able to display the expected returned value.
-File "hashtbl.mli", line 44, characters 0-114:
-44 | val mem : ('a, 'b) t -> 'a -> bool
-45 | (*@ b = mem h a
-46 |     ensures b = Sequence.mem (Sequence.map fst h.contents) a *)
-Warning: Incomplete computation of the returned value in the specification of mem. Failure message won't be able to display the expected returned value.
