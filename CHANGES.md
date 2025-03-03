@@ -1,5 +1,7 @@
 # Unreleased
 
+- Fix generation of the `QCheck.Fn.apply` identifier
+  [\#288](https://github.com/ocaml-gospel/ortac/pull/288)
 - Improve failure message in case of out of domain failure
   [\#287](https://github.com/ocaml-gospel/ortac/pull/287)
 
