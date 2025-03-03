@@ -60,3 +60,7 @@ val of_list : 'a list -> 'a t
 val mem : 'a -> 'a t -> bool
 (*@ b = mem a t
     ensures b = Sequence.mem t.contents a *)
+
+val for_all : ('a -> bool) -> 'a t -> bool
+(*@ b = for_all p t
+    ensures b = Sequence.fold_left (fun acc a -> p a && acc) true t.contents *)
