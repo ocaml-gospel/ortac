@@ -270,6 +270,9 @@ let returned_value_description spec ret =
     | Tapp (ls, [ { t_node = Tvar vs; _ }; right ])
       when Symbols.(ls_equal ps_equ ls) && is_ret vs ->
         [ Ir.term_val spec right ]
+    | Tapp (ls, [ left; { t_node = Tvar vs; _ } ])
+      when Symbols.(ls_equal ps_equ ls) && is_ret vs ->
+        [ Ir.term_val spec left ]
     (* Gospel automatically inserts a cast from int to integer when needed *)
     | Tapp
         (ls, [ { t_node = Tapp (func, [ { t_node = Tvar vs; _ } ]); _ }; right ])
@@ -277,6 +280,12 @@ let returned_value_description spec ret =
            && Symbols.(ls_equal ps_equ ls)
            && is_ret vs ->
         [ Ir.term_val spec right ]
+    | Tapp
+        (ls, [ left; { t_node = Tapp (func, [ { t_node = Tvar vs; _ } ]); _ } ])
+      when String.equal func.ls_name.id_str "integer_of_int"
+           && Symbols.(ls_equal ps_equ ls)
+           && is_ret vs ->
+        [ Ir.term_val spec left ]
     (* Gospel turns equality between prop (bool being coerced to prop) into
        double implication of a specific form. This case is obviously fragile
        and depends a lot on the implementation of Gospel type-checker *)
@@ -294,6 +303,20 @@ let returned_value_description spec ret =
            && Symbols.(ls_equal ps_equ ls1)
            && Symbols.(ls_equal fs_bool_true ls2) ->
         [ Ir.term_val spec right ]
+    | Tbinop
+        ( Tiff,
+          left,
+          {
+            t_node =
+              Tapp
+                ( ls1,
+                  [ { t_node = Tvar vs; _ }; { t_node = Tapp (ls2, []); _ } ] );
+            _;
+          } )
+      when is_ret vs
+           && Symbols.(ls_equal ps_equ ls1)
+           && Symbols.(ls_equal fs_bool_true ls2) ->
+        [ Ir.term_val spec left ]
     | Tbinop ((Tand | Tand_asym), l, r) -> pred l @ pred r
     | _ -> []
   in
