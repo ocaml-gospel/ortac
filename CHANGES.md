@@ -1,4 +1,4 @@
-# Unreleased
+# 0.6.0
 
 - Make search for returned value description more flexible
   [\#291](https://github.com/ocaml-gospel/ortac/pull/291)
