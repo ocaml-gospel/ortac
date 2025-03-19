@@ -1,4 +1,4 @@
-include Ortac_runtime__Ortac_runtime_intf.S
+include module type of Ortac_runtime
 
 val print_record : string -> (string * PPrint.document) list -> PPrint.document
 
