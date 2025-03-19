@@ -90,9 +90,6 @@ module SUT = struct
     val create : int -> unit -> t
     (** [create n ()] creates an initial stack with [n] SUTs *)
 
-    val clear : t -> unit
-    (** [clear t] removes all elements from the stack [t] of SUTs *)
-
     val size : t -> int
     (** [size t] returns the number of SUTs currently on the stack [t] *)
 
@@ -117,7 +114,6 @@ module SUT = struct
       done;
       t
 
-    let clear (t : t) = Stack.clear t
     let size (t : t) = Stack.length t
     let pop (t : t) = Stack.pop t
     let push (t : t) (e : elt) = Stack.push e t
