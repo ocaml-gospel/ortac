@@ -108,8 +108,8 @@ module R =
                   |> (Ortac_runtime.Errors.register __error__012_);
                 true))
       then
-        (Ortac_runtime.Violated_invariant
-           { term = "0 <= n <= 32"; position = Pre })
+        (Ortac_runtime.Violated_condition
+           { term = "0 <= n <= 32"; term_kind = Pre })
           |> (Ortac_runtime.Errors.register __error__012_);
       Ortac_runtime.Errors.report __error__012_;
       (let bv_1 =
@@ -142,10 +142,10 @@ module R =
                    |> (Ortac_runtime.Errors.register __error__012_);
                  true))
        then
-         (Ortac_runtime.Violated_invariant
+         (Ortac_runtime.Violated_condition
             {
               term = "forall i. 0 <= i < n -> not (mem i bv)";
-              position = Post
+              term_kind = Post
             })
            |> (Ortac_runtime.Errors.register __error__012_);
        if
@@ -158,8 +158,8 @@ module R =
                    |> (Ortac_runtime.Errors.register __error__012_);
                  true))
        then
-         (Ortac_runtime.Violated_invariant
-            { term = "bv.size = n"; position = Post })
+         (Ortac_runtime.Violated_condition
+            { term = "bv.size = n"; term_kind = Post })
            |> (Ortac_runtime.Errors.register __error__012_);
        __invariant___006_ __error__012_ Post bv_1;
        __invariant___001_ __error__012_ Post bv_1;
@@ -203,8 +203,8 @@ module R =
                   |> (Ortac_runtime.Errors.register __error__015_);
                 true))
       then
-        (Ortac_runtime.Violated_invariant
-           { term = "0 <= i < bv.size"; position = Pre })
+        (Ortac_runtime.Violated_condition
+           { term = "0 <= i < bv.size"; term_kind = Pre })
           |> (Ortac_runtime.Errors.register __error__015_);
       __invariant___006_ __error__015_ Pre bv_2;
       __invariant___001_ __error__015_ Pre bv_2;
@@ -267,8 +267,8 @@ module R =
                   |> (Ortac_runtime.Errors.register __error__020_);
                 true))
       then
-        (Ortac_runtime.Violated_invariant
-           { term = "0 <= i < bv.size"; position = Pre })
+        (Ortac_runtime.Violated_condition
+           { term = "0 <= i < bv.size"; term_kind = Pre })
           |> (Ortac_runtime.Errors.register __error__020_);
       __invariant___006_ __error__020_ Pre bv_3;
       __invariant___001_ __error__020_ Pre bv_3;
@@ -302,8 +302,8 @@ module R =
                    |> (Ortac_runtime.Errors.register __error__020_);
                  true))
        then
-         (Ortac_runtime.Violated_invariant
-            { term = "b <-> mem i bv"; position = Post })
+         (Ortac_runtime.Violated_condition
+            { term = "b <-> mem i bv"; term_kind = Post })
            |> (Ortac_runtime.Errors.register __error__020_);
        __invariant___006_ __error__020_ Post bv_3;
        __invariant___001_ __error__020_ Post bv_3;

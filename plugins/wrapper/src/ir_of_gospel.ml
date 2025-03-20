@@ -176,7 +176,7 @@ let with_modified modifies (value : value) =
 
 let with_pres ~context ~term_printer pres (value : value) =
   let register_name = evar value.register_name in
-  let violated term = F.violated `Pre ~term ~register_name in
+  let violated term = F.violated_condition `Pre ~term ~register_name in
   let nonexec term exn = F.spec_failure `Pre ~term ~exn ~register_name in
   let preconditions = conditions ~context ~term_printer violated nonexec pres in
   { value with preconditions }
@@ -207,7 +207,7 @@ let with_checks ~context ~term_printer checks (value : value) =
 
 let with_posts ~context ~term_printer posts (value : value) =
   let register_name = evar value.register_name in
-  let violated term = F.violated `Post ~term ~register_name in
+  let violated term = F.violated_condition `Post ~term ~register_name in
   let nonexec term exn = F.spec_failure `Post ~term ~exn ~register_name in
   let postconditions =
     conditions ~context ~term_printer violated nonexec posts
@@ -217,7 +217,7 @@ let with_posts ~context ~term_printer posts (value : value) =
 let with_constant_checks ~context ~term_printer checks (constant : Ir.constant)
     =
   let register_name = evar constant.register_name in
-  let violated term = F.violated `Pre ~term ~register_name in
+  let violated term = F.violated_condition `Pre ~term ~register_name in
   let nonexec term exn = F.spec_failure `Pre ~term ~exn ~register_name in
   let checks = conditions ~context ~term_printer violated nonexec checks in
   { constant with checks }
@@ -254,7 +254,7 @@ let with_xposts ~context ~term_printer xposts (value : value) =
                    ~rhs:
                      [%expr
                        if not [%e t] then
-                         [%e F.violated `XPost ~term:s ~register_name]]))
+                         [%e F.violated_condition `XPost ~term:s ~register_name]]))
         (* XXX ptlist must be rev because the cases are given in the
            reverse order by gospel *)
         (List.rev ptlist)
