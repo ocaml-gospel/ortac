@@ -1,3 +1,8 @@
+# Unreleased
+
+- Fix incorrect error type for violated preconditions and postconditions
+  [\#295](https://github.com/ocaml-gospel/ortac/pull/295)
+
 # 0.6.0
 
 - Make search for returned value description more flexible
