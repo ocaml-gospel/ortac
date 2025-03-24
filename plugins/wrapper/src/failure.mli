@@ -3,7 +3,7 @@ open Ppxlib
 val violated_invariant :
   expression -> term:string -> register_name:expression -> expression
 
-val violated :
+val violated_condition :
   [ `Check | `Post | `Pre | `XPost | `Invariant ] ->
   term:string ->
   register_name:expression ->
