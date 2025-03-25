@@ -85,6 +85,9 @@ module SUT : sig
     val pop : t -> elt
     (** [pop t] pops and returns the topmost element of the stack [t] of SUTs *)
 
+    val get : t -> int -> elt
+    (** [get t i] gets the i-th SUT in the store *)
+
     val push : t -> elt -> unit
     (** [push t e] pushes the SUT e onto the stack [t] of SUTs *)
 
