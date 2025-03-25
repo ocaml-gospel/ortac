@@ -60,19 +60,21 @@ module SUT = struct
   end) =
   struct
     type elt = M.sut
-    type t = elt Stack.t
+    type t = elt list ref
 
-    let create n () : t =
-      let t = Stack.create () in
-      for _ = 0 to n - 1 do
-        Stack.push (M.init ()) t
-      done;
-      t
+    let create n () = ref @@ List.init n (fun _ -> M.init ())
+    let size t = List.length !t
 
-    let size (t : t) = Stack.length t
-    let pop (t : t) = Stack.pop t
-    let push (t : t) (e : elt) = Stack.push e t
-    let get_name (t : t) n = Format.asprintf "sut%d" (Stack.length t - n - 1)
+    let pop t =
+      match !t with
+      | [] -> invalid_arg "pop"
+      | x :: xs ->
+          t := xs;
+          x
+
+    let get t = List.nth !t
+    let push t e = t := e :: !t
+    let get_name t n = Format.asprintf "sut%d" (size t - n - 1)
   end
 end
 
