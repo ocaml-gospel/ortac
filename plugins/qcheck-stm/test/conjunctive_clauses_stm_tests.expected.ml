@@ -185,9 +185,9 @@ module Spec =
       | Set (i_1, a_2) ->
           Res
             ((result unit exn),
-              (let t_2__022_ = SUT.pop sut__020_ in
+              (let t_2__022_ = SUT.get sut__020_ 0 in
                let res__023_ = protect (fun () -> set t_2__022_ i_1 a_2) () in
-               (SUT.push sut__020_ t_2__022_; res__023_)))
+               res__023_))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()

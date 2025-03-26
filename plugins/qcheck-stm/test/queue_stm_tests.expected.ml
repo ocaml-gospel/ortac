@@ -494,86 +494,74 @@ module Spec =
       | Add v ->
           Res
             (unit,
-              (let t_2__113_ = SUT.pop sut__111_ in
-               let res__114_ = add v t_2__113_ in
-               (SUT.push sut__111_ t_2__113_; res__114_)))
+              (let t_2__113_ = SUT.get sut__111_ 0 in
+               let res__114_ = add v t_2__113_ in res__114_))
       | Push v_1 ->
           Res
             (unit,
-              (let t_3__115_ = SUT.pop sut__111_ in
-               let res__116_ = push v_1 t_3__115_ in
-               (SUT.push sut__111_ t_3__115_; res__116_)))
+              (let t_3__115_ = SUT.get sut__111_ 0 in
+               let res__116_ = push v_1 t_3__115_ in res__116_))
       | Take ->
           Res
             ((result int exn),
-              (let t_4__117_ = SUT.pop sut__111_ in
+              (let t_4__117_ = SUT.get sut__111_ 0 in
                let res__118_ = protect (fun () -> take t_4__117_) () in
-               (SUT.push sut__111_ t_4__117_; res__118_)))
+               res__118_))
       | Take_opt ->
           Res
             ((option int),
-              (let t_5__119_ = SUT.pop sut__111_ in
-               let res__120_ = take_opt t_5__119_ in
-               (SUT.push sut__111_ t_5__119_; res__120_)))
+              (let t_5__119_ = SUT.get sut__111_ 0 in
+               let res__120_ = take_opt t_5__119_ in res__120_))
       | Pop ->
           Res
             ((result int exn),
-              (let t_6__121_ = SUT.pop sut__111_ in
+              (let t_6__121_ = SUT.get sut__111_ 0 in
                let res__122_ = protect (fun () -> pop t_6__121_) () in
-               (SUT.push sut__111_ t_6__121_; res__122_)))
+               res__122_))
       | Peek ->
           Res
             ((result int exn),
-              (let t_7__123_ = SUT.pop sut__111_ in
+              (let t_7__123_ = SUT.get sut__111_ 0 in
                let res__124_ = protect (fun () -> peek t_7__123_) () in
-               (SUT.push sut__111_ t_7__123_; res__124_)))
+               res__124_))
       | Top ->
           Res
             ((result int exn),
-              (let t_8__125_ = SUT.pop sut__111_ in
+              (let t_8__125_ = SUT.get sut__111_ 0 in
                let res__126_ = protect (fun () -> top t_8__125_) () in
-               (SUT.push sut__111_ t_8__125_; res__126_)))
+               res__126_))
       | Peek_opt ->
           Res
             ((option int),
-              (let t_9__127_ = SUT.pop sut__111_ in
-               let res__128_ = peek_opt t_9__127_ in
-               (SUT.push sut__111_ t_9__127_; res__128_)))
+              (let t_9__127_ = SUT.get sut__111_ 0 in
+               let res__128_ = peek_opt t_9__127_ in res__128_))
       | Clear ->
           Res
             (unit,
-              (let t_10__129_ = SUT.pop sut__111_ in
-               let res__130_ = clear t_10__129_ in
-               (SUT.push sut__111_ t_10__129_; res__130_)))
+              (let t_10__129_ = SUT.get sut__111_ 0 in
+               let res__130_ = clear t_10__129_ in res__130_))
       | Copy ->
           Res
             (sut,
-              (let t_11__131_ = SUT.pop sut__111_ in
+              (let t_11__131_ = SUT.get sut__111_ 0 in
                let res__132_ = copy t_11__131_ in
-               (SUT.push sut__111_ t_11__131_;
-                SUT.push sut__111_ res__132_;
-                res__132_)))
+               (SUT.push sut__111_ res__132_; res__132_)))
       | Is_empty ->
           Res
             (bool,
-              (let t_12__133_ = SUT.pop sut__111_ in
-               let res__134_ = is_empty t_12__133_ in
-               (SUT.push sut__111_ t_12__133_; res__134_)))
+              (let t_12__133_ = SUT.get sut__111_ 0 in
+               let res__134_ = is_empty t_12__133_ in res__134_))
       | Length ->
           Res
             (int,
-              (let t_13__135_ = SUT.pop sut__111_ in
-               let res__136_ = length t_13__135_ in
-               (SUT.push sut__111_ t_13__135_; res__136_)))
+              (let t_13__135_ = SUT.get sut__111_ 0 in
+               let res__136_ = length t_13__135_ in res__136_))
       | Transfer ->
           Res
             (unit,
-              (let t1__137_ = SUT.pop sut__111_ in
-               let t2__138_ = SUT.pop sut__111_ in
-               let res__139_ = transfer t1__137_ t2__138_ in
-               (SUT.push sut__111_ t2__138_;
-                SUT.push sut__111_ t1__137_;
-                res__139_)))
+              (let t1__137_ = SUT.get sut__111_ 0 in
+               let t2__138_ = SUT.get sut__111_ 1 in
+               let res__139_ = transfer t1__137_ t2__138_ in res__139_))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()

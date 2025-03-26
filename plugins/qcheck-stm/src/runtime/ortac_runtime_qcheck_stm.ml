@@ -37,31 +37,8 @@ module Model = struct
     type elt
 
     val init : elt
-  end) : sig
-    type elt
-    (** The type of a model of a single state *)
-
-    type t
-    (** A value of type [t] represents an immutable model of a stack of states
-    *)
-
-    val create : int -> unit -> t
-    (** [create n ()] creates a model with [n] initial elements *)
-
-    val size : t -> int
-    (** [size t] returns the number of elements in the model [t] *)
-
-    val drop_n : t -> int -> t
-    (** [drop_n t n] returns a new model with the [n] uppermost elements removed
-    *)
-
-    val push : t -> elt -> t
-    (** [push t e] returns a new model with [e] as the topmost element *)
-
-    val get : t -> int -> elt
-    (** [get t n] returns the [n]th element of the model [t] *)
-  end
-  with type elt := M.elt = struct
+  end) =
+  struct
     type elt = M.elt
     type t = elt list
 
@@ -80,48 +57,16 @@ module SUT = struct
     type sut
 
     val init : unit -> sut
-  end) : sig
-    type elt
-    (** Type of a single SUT *)
-
-    type t
-    (** Values of type [t] represent a stack of SUTs *)
-
-    val create : int -> unit -> t
-    (** [create n ()] creates an initial stack with [n] SUTs *)
-
-    val clear : t -> unit
-    (** [clear t] removes all elements from the stack [t] of SUTs *)
-
-    val size : t -> int
-    (** [size t] returns the number of SUTs currently on the stack [t] *)
-
-    val pop : t -> elt
-    (** [pop t] pops and returns the topmost element of the stack [t] of SUTs *)
-
-    val push : t -> elt -> unit
-    (** [push t e] pushes the SUT e onto the stack [t] of SUTs *)
-
-    val get_name : t -> int -> string
-    (** [get_name t n] returns the name for the [n]th element of the stack [t]
-        of SUTs *)
-  end
-  with type elt = M.sut = struct
+  end) =
+  struct
     type elt = M.sut
-    type t = elt Stack.t
+    type t = elt list ref
 
-    let create n () : t =
-      let t = Stack.create () in
-      for _ = 0 to n - 1 do
-        Stack.push (M.init ()) t
-      done;
-      t
-
-    let clear (t : t) = Stack.clear t
-    let size (t : t) = Stack.length t
-    let pop (t : t) = Stack.pop t
-    let push (t : t) (e : elt) = Stack.push e t
-    let get_name (t : t) n = Format.asprintf "sut%d" (Stack.length t - n - 1)
+    let create n () = ref @@ List.init n (fun _ -> M.init ())
+    let size t = List.length !t
+    let get t = List.nth !t
+    let push t e = t := e :: !t
+    let get_name t n = Format.asprintf "sut%d" (size t - n - 1)
   end
 end
 
