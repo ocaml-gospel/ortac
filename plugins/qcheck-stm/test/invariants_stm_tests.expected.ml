@@ -339,33 +339,26 @@ module Spec =
       | Push a_2 ->
           Res
             (unit,
-              (let t_2__050_ = SUT.pop sut__048_ in
-               let res__051_ = push a_2 t_2__050_ in
-               (SUT.push sut__048_ t_2__050_; res__051_)))
+              (let t_2__050_ = SUT.get sut__048_ 0 in
+               let res__051_ = push a_2 t_2__050_ in res__051_))
       | Transfer ->
           Res
             (unit,
-              (let t1__052_ = SUT.pop sut__048_ in
-               let t2__053_ = SUT.pop sut__048_ in
-               let res__054_ = transfer t1__052_ t2__053_ in
-               (SUT.push sut__048_ t2__053_;
-                SUT.push sut__048_ t1__052_;
-                res__054_)))
+              (let t1__052_ = SUT.get sut__048_ 0 in
+               let t2__053_ = SUT.get sut__048_ 1 in
+               let res__054_ = transfer t1__052_ t2__053_ in res__054_))
       | Copy ->
           Res
             (sut,
-              (let t_3__055_ = SUT.pop sut__048_ in
+              (let t_3__055_ = SUT.get sut__048_ 0 in
                let res__056_ = copy t_3__055_ in
-               (SUT.push sut__048_ t_3__055_;
-                SUT.push sut__048_ res__056_;
-                res__056_)))
+               (SUT.push sut__048_ res__056_; res__056_)))
       | Sub (i, n) ->
           Res
             ((result sut exn),
-              (let t_4__057_ = SUT.pop sut__048_ in
+              (let t_4__057_ = SUT.get sut__048_ 0 in
                let res__058_ = protect (fun () -> sub t_4__057_ i n) () in
-               (SUT.push sut__048_ t_4__057_;
-                (match res__058_ with
+               ((match res__058_ with
                  | Ok res -> SUT.push sut__048_ res
                  | Error _ -> ());
                 res__058_)))

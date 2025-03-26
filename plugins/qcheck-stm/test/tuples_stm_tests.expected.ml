@@ -309,39 +309,33 @@ module Spec =
       | Clear ->
           Res
             (unit,
-              (let h_1__043_ = SUT.pop sut__041_ in
-               let res__044_ = clear h_1__043_ in
-               (SUT.push sut__041_ h_1__043_; res__044_)))
+              (let h_1__043_ = SUT.get sut__041_ 0 in
+               let res__044_ = clear h_1__043_ in res__044_))
       | Add tup ->
           Res
             (unit,
-              (let h_2__045_ = SUT.pop sut__041_ in
-               let res__046_ = add h_2__045_ tup in
-               (SUT.push sut__041_ h_2__045_; res__046_)))
+              (let h_2__045_ = SUT.get sut__041_ 0 in
+               let res__046_ = add h_2__045_ tup in res__046_))
       | Add' tup_1 ->
           Res
             (unit,
-              (let h_3__047_ = SUT.pop sut__041_ in
-               let res__048_ = add' h_3__047_ tup_1 in
-               (SUT.push sut__041_ h_3__047_; res__048_)))
+              (let h_3__047_ = SUT.get sut__041_ 0 in
+               let res__048_ = add' h_3__047_ tup_1 in res__048_))
       | Add'' tup_2 ->
           Res
             (unit,
-              (let h_4__049_ = SUT.pop sut__041_ in
-               let res__050_ = add'' h_4__049_ tup_2 in
-               (SUT.push sut__041_ h_4__049_; res__050_)))
+              (let h_4__049_ = SUT.get sut__041_ 0 in
+               let res__050_ = add'' h_4__049_ tup_2 in res__050_))
       | Size_tup ->
           Res
             ((tup2 int int),
-              (let t_1__051_ = SUT.pop sut__041_ in
-               let res__052_ = size_tup t_1__051_ in
-               (SUT.push sut__041_ t_1__051_; res__052_)))
+              (let t_1__051_ = SUT.get sut__041_ 0 in
+               let res__052_ = size_tup t_1__051_ in res__052_))
       | Size_tup' ->
           Res
             ((tup3 int int int),
-              (let t_2__053_ = SUT.pop sut__041_ in
-               let res__054_ = size_tup' t_2__053_ in
-               (SUT.push sut__041_ t_2__053_; res__054_)))
+              (let t_2__053_ = SUT.get sut__041_ 0 in
+               let res__054_ = size_tup' t_2__053_ in res__054_))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()

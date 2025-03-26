@@ -379,51 +379,45 @@ module Spec =
       | Is_empty ->
           Res
             (bool,
-              (let s_1__064_ = SUT.pop sut__062_ in
-               let res__065_ = is_empty s_1__064_ in
-               (SUT.push sut__062_ s_1__064_; res__065_)))
+              (let s_1__064_ = SUT.get sut__062_ 0 in
+               let res__065_ = is_empty s_1__064_ in res__065_))
       | Length ->
           Res
             (int,
-              (let s_2__066_ = SUT.pop sut__062_ in
-               let res__067_ = length s_2__066_ in
-               (SUT.push sut__062_ s_2__066_; res__067_)))
+              (let s_2__066_ = SUT.get sut__062_ 0 in
+               let res__067_ = length s_2__066_ in res__067_))
       | Add_l a_1 ->
           Res
             ((node int),
-              (let s_3__068_ = SUT.pop sut__062_ in
-               let res__069_ = add_l a_1 s_3__068_ in
-               (SUT.push sut__062_ s_3__068_; res__069_)))
+              (let s_3__068_ = SUT.get sut__062_ 0 in
+               let res__069_ = add_l a_1 s_3__068_ in res__069_))
       | Add_r a_2 ->
           Res
             ((node int),
-              (let s_4__070_ = SUT.pop sut__062_ in
-               let res__071_ = add_r a_2 s_4__070_ in
-               (SUT.push sut__062_ s_4__070_; res__071_)))
+              (let s_4__070_ = SUT.get sut__062_ 0 in
+               let res__071_ = add_r a_2 s_4__070_ in res__071_))
       | Take_l ->
           Res
             ((result int exn),
-              (let s_5__072_ = SUT.pop sut__062_ in
+              (let s_5__072_ = SUT.get sut__062_ 0 in
                let res__073_ = protect (fun () -> take_l s_5__072_) () in
-               (SUT.push sut__062_ s_5__072_; res__073_)))
+               res__073_))
       | Take_r ->
           Res
             ((result int exn),
-              (let s_6__074_ = SUT.pop sut__062_ in
+              (let s_6__074_ = SUT.get sut__062_ 0 in
                let res__075_ = protect (fun () -> take_r s_6__074_) () in
-               (SUT.push sut__062_ s_6__074_; res__075_)))
+               res__075_))
       | Take_opt_l ->
           Res
             ((option int),
-              (let s_7__076_ = SUT.pop sut__062_ in
-               let res__077_ = take_opt_l s_7__076_ in
-               (SUT.push sut__062_ s_7__076_; res__077_)))
+              (let s_7__076_ = SUT.get sut__062_ 0 in
+               let res__077_ = take_opt_l s_7__076_ in res__077_))
       | Take_opt_r ->
           Res
             ((option int),
-              (let s_8__078_ = SUT.pop sut__062_ in
-               let res__079_ = take_opt_r s_8__078_ in
-               (SUT.push sut__062_ s_8__078_; res__079_)))
+              (let s_8__078_ = SUT.get sut__062_ 0 in
+               let res__079_ = take_opt_r s_8__078_ in res__079_))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()

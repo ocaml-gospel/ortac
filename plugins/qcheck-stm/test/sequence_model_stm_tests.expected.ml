@@ -257,21 +257,18 @@ module Spec =
       | Add v ->
           Res
             (unit,
-              (let t_2__026_ = SUT.pop sut__024_ in
-               let res__027_ = add v t_2__026_ in
-               (SUT.push sut__024_ t_2__026_; res__027_)))
+              (let t_2__026_ = SUT.get sut__024_ 0 in
+               let res__027_ = add v t_2__026_ in res__027_))
       | Remove ->
           Res
             ((option char),
-              (let t_3__028_ = SUT.pop sut__024_ in
-               let res__029_ = remove t_3__028_ in
-               (SUT.push sut__024_ t_3__028_; res__029_)))
+              (let t_3__028_ = SUT.get sut__024_ 0 in
+               let res__029_ = remove t_3__028_ in res__029_))
       | Remove_ ->
           Res
             ((option char),
-              (let t_4__030_ = SUT.pop sut__024_ in
-               let res__031_ = remove_ t_4__030_ in
-               (SUT.push sut__024_ t_4__030_; res__031_)))
+              (let t_4__030_ = SUT.get sut__024_ 0 in
+               let res__031_ = remove_ t_4__030_ in res__031_))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()

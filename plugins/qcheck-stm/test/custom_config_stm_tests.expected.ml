@@ -195,15 +195,14 @@ module Spec =
       | Push e ->
           Res
             (unit,
-              (let t_2__024_ = SUT.pop sut__021_ in
-               let res__025_ = push t_2__024_ e in
-               (SUT.push sut__021_ t_2__024_; res__025_)))
+              (let t_2__024_ = SUT.get sut__021_ 0 in
+               let res__025_ = push t_2__024_ e in res__025_))
       | Top ->
           Res
             ((result (elt int) exn),
-              (let t_3__026_ = SUT.pop sut__021_ in
+              (let t_3__026_ = SUT.get sut__021_ 0 in
                let res__027_ = protect (fun () -> top t_3__026_) () in
-               (SUT.push sut__021_ t_3__026_; res__027_)))
+               res__027_))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()

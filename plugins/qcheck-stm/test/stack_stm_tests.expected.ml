@@ -327,53 +327,46 @@ module Spec =
       | Push v ->
           Res
             (unit,
-              (let t_2__071_ = SUT.pop sut__069_ in
-               let res__072_ = push v t_2__071_ in
-               (SUT.push sut__069_ t_2__071_; res__072_)))
+              (let t_2__071_ = SUT.get sut__069_ 0 in
+               let res__072_ = push v t_2__071_ in res__072_))
       | Pop ->
           Res
             ((result char exn),
-              (let t_3__073_ = SUT.pop sut__069_ in
+              (let t_3__073_ = SUT.get sut__069_ 0 in
                let res__074_ = protect (fun () -> pop t_3__073_) () in
-               (SUT.push sut__069_ t_3__073_; res__074_)))
+               res__074_))
       | Pop_opt ->
           Res
             ((option char),
-              (let t_4__075_ = SUT.pop sut__069_ in
-               let res__076_ = pop_opt t_4__075_ in
-               (SUT.push sut__069_ t_4__075_; res__076_)))
+              (let t_4__075_ = SUT.get sut__069_ 0 in
+               let res__076_ = pop_opt t_4__075_ in res__076_))
       | Top ->
           Res
             ((result char exn),
-              (let t_5__077_ = SUT.pop sut__069_ in
+              (let t_5__077_ = SUT.get sut__069_ 0 in
                let res__078_ = protect (fun () -> top t_5__077_) () in
-               (SUT.push sut__069_ t_5__077_; res__078_)))
+               res__078_))
       | Top_opt ->
           Res
             ((option char),
-              (let t_6__079_ = SUT.pop sut__069_ in
-               let res__080_ = top_opt t_6__079_ in
-               (SUT.push sut__069_ t_6__079_; res__080_)))
+              (let t_6__079_ = SUT.get sut__069_ 0 in
+               let res__080_ = top_opt t_6__079_ in res__080_))
       | Clear ->
           Res
             (unit,
-              (let t_7__081_ = SUT.pop sut__069_ in
-               let res__082_ = clear t_7__081_ in
-               (SUT.push sut__069_ t_7__081_; res__082_)))
+              (let t_7__081_ = SUT.get sut__069_ 0 in
+               let res__082_ = clear t_7__081_ in res__082_))
       | Copy ->
           Res
             (sut,
-              (let t_8__083_ = SUT.pop sut__069_ in
+              (let t_8__083_ = SUT.get sut__069_ 0 in
                let res__084_ = copy t_8__083_ in
-               (SUT.push sut__069_ t_8__083_;
-                SUT.push sut__069_ res__084_;
-                res__084_)))
+               (SUT.push sut__069_ res__084_; res__084_)))
       | Is_empty ->
           Res
             (bool,
-              (let t_9__085_ = SUT.pop sut__069_ in
-               let res__086_ = is_empty t_9__085_ in
-               (SUT.push sut__069_ t_9__085_; res__086_)))
+              (let t_9__085_ = SUT.get sut__069_ 0 in
+               let res__086_ = is_empty t_9__085_ in res__086_))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()

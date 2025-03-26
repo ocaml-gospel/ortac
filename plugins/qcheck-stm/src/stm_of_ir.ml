@@ -468,20 +468,15 @@ let run_case config sut_name value =
     let call = if may_raise_exception value then eprotect call else call in
     let call_res = gen_symbol ~prefix:"res" () in
     let pops body =
-      List.fold_right
-        (fun sut acc ->
-          let expr = eapply (qualify [ "SUT" ] "pop") [ evar sut_name ] in
-          let vb = value_binding ~pat:(pvar sut) ~expr in
-          pexp_let Nonrecursive [ vb ] acc)
-        suts body
+      let suts = List.mapi (fun i sut -> (i, sut)) suts in
+      let aux (i, sut) acc =
+        let expr = eapply (qualify [ "SUT" ] "get") [ evar sut_name; eint i ] in
+        let vb = value_binding ~pat:(pvar sut) ~expr in
+        pexp_let Nonrecursive [ vb ] acc
+      in
+      List.fold_right aux suts body
     in
     let pushes =
-      List.map
-        (fun sut ->
-          eapply (qualify [ "SUT" ] "push") [ evar sut_name; evar sut ])
-        (List.rev suts)
-      @
-      (* If a sut is returned, push it last *)
       if Cfg.does_return_sut config value.ty then
         (* We can only push a sut if there was no exception *)
         if may_raise_exception value then

@@ -144,9 +144,8 @@ module Spec =
       | Use ->
           Res
             (unit,
-              (let t_2__018_ = SUT.pop sut__016_ in
-               let res__019_ = use t_2__018_ in
-               (SUT.push sut__016_ t_2__018_; res__019_)))
+              (let t_2__018_ = SUT.get sut__016_ 0 in
+               let res__019_ = use t_2__018_ in res__019_))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()

@@ -457,78 +457,67 @@ module Spec =
       | Clear ->
           Res
             (unit,
-              (let h_1__071_ = SUT.pop sut__069_ in
-               let res__072_ = clear h_1__071_ in
-               (SUT.push sut__069_ h_1__071_; res__072_)))
+              (let h_1__071_ = SUT.get sut__069_ 0 in
+               let res__072_ = clear h_1__071_ in res__072_))
       | Reset ->
           Res
             (unit,
-              (let h_2__073_ = SUT.pop sut__069_ in
-               let res__074_ = reset h_2__073_ in
-               (SUT.push sut__069_ h_2__073_; res__074_)))
+              (let h_2__073_ = SUT.get sut__069_ 0 in
+               let res__074_ = reset h_2__073_ in res__074_))
       | Copy ->
           Res
             (sut,
-              (let h1__075_ = SUT.pop sut__069_ in
+              (let h1__075_ = SUT.get sut__069_ 0 in
                let res__076_ = copy h1__075_ in
-               (SUT.push sut__069_ h1__075_;
-                SUT.push sut__069_ res__076_;
-                res__076_)))
+               (SUT.push sut__069_ res__076_; res__076_)))
       | Add (a_1, b_1) ->
           Res
             (unit,
-              (let h_3__077_ = SUT.pop sut__069_ in
-               let res__078_ = add h_3__077_ a_1 b_1 in
-               (SUT.push sut__069_ h_3__077_; res__078_)))
+              (let h_3__077_ = SUT.get sut__069_ 0 in
+               let res__078_ = add h_3__077_ a_1 b_1 in res__078_))
       | Find a_2 ->
           Res
             ((result int exn),
-              (let h_4__079_ = SUT.pop sut__069_ in
+              (let h_4__079_ = SUT.get sut__069_ 0 in
                let res__080_ = protect (fun () -> find h_4__079_ a_2) () in
-               (SUT.push sut__069_ h_4__079_; res__080_)))
+               res__080_))
       | Find_opt a_3 ->
           Res
             ((option int),
-              (let h_5__081_ = SUT.pop sut__069_ in
-               let res__082_ = find_opt h_5__081_ a_3 in
-               (SUT.push sut__069_ h_5__081_; res__082_)))
+              (let h_5__081_ = SUT.get sut__069_ 0 in
+               let res__082_ = find_opt h_5__081_ a_3 in res__082_))
       | Find_all a_4 ->
           Res
             ((list int),
-              (let h_6__083_ = SUT.pop sut__069_ in
-               let res__084_ = find_all h_6__083_ a_4 in
-               (SUT.push sut__069_ h_6__083_; res__084_)))
+              (let h_6__083_ = SUT.get sut__069_ 0 in
+               let res__084_ = find_all h_6__083_ a_4 in res__084_))
       | Mem a_5 ->
           Res
             (bool,
-              (let h_7__085_ = SUT.pop sut__069_ in
-               let res__086_ = mem h_7__085_ a_5 in
-               (SUT.push sut__069_ h_7__085_; res__086_)))
+              (let h_7__085_ = SUT.get sut__069_ 0 in
+               let res__086_ = mem h_7__085_ a_5 in res__086_))
       | Remove a_6 ->
           Res
             (unit,
-              (let h_8__087_ = SUT.pop sut__069_ in
-               let res__088_ = remove h_8__087_ a_6 in
-               (SUT.push sut__069_ h_8__087_; res__088_)))
+              (let h_8__087_ = SUT.get sut__069_ 0 in
+               let res__088_ = remove h_8__087_ a_6 in res__088_))
       | Replace (a_7, b_2) ->
           Res
             (unit,
-              (let h_9__089_ = SUT.pop sut__069_ in
-               let res__090_ = replace h_9__089_ a_7 b_2 in
-               (SUT.push sut__069_ h_9__089_; res__090_)))
+              (let h_9__089_ = SUT.get sut__069_ 0 in
+               let res__090_ = replace h_9__089_ a_7 b_2 in res__090_))
       | Filter_map_inplace f ->
           Res
             (unit,
-              (let h_10__091_ = SUT.pop sut__069_ in
+              (let h_10__091_ = SUT.get sut__069_ 0 in
                let res__092_ =
                  filter_map_inplace (QCheck.Fn.apply f) h_10__091_ in
-               (SUT.push sut__069_ h_10__091_; res__092_)))
+               res__092_))
       | Length ->
           Res
             (int,
-              (let h_11__093_ = SUT.pop sut__069_ in
-               let res__094_ = length h_11__093_ in
-               (SUT.push sut__069_ h_11__093_; res__094_)))
+              (let h_11__093_ = SUT.get sut__069_ 0 in
+               let res__094_ = length h_11__093_ in res__094_))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
