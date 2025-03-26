@@ -3,6 +3,10 @@
 - Extend Wrapper plugin tests
   [\#299](https://github.com/ocaml-gospel/ortac/pull/299)
 - Fix incorrect error type for violated preconditions and postconditions
+- [QCheck-STM] Modifies SUTs in place in the store
+  [\#296](https://github.com/ocaml-gospel/ortac/pull/296)
+- [Wrapper] Fix incorrect error type for violated preconditions and
+  postconditions
   [\#295](https://github.com/ocaml-gospel/ortac/pull/295)
 
 # 0.6.0
