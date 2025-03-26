@@ -64,14 +64,6 @@ module SUT = struct
 
     let create n () = ref @@ List.init n (fun _ -> M.init ())
     let size t = List.length !t
-
-    let pop t =
-      match !t with
-      | [] -> invalid_arg "pop"
-      | x :: xs ->
-          t := xs;
-          x
-
     let get t = List.nth !t
     let push t e = t := e :: !t
     let get_name t n = Format.asprintf "sut%d" (size t - n - 1)
