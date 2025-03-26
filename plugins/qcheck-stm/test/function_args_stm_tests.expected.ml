@@ -248,11 +248,9 @@ module Spec =
       | Map f ->
           Res
             (sut,
-              (let input__020_ = SUT.pop sut__018_ in
+              (let input__020_ = SUT.get sut__018_ 0 in
                let res__021_ = map (QCheck.Fn.apply f) input__020_ in
-               (SUT.push sut__018_ input__020_;
-                SUT.push sut__018_ res__021_;
-                res__021_)))
+               (SUT.push sut__018_ res__021_; res__021_)))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
