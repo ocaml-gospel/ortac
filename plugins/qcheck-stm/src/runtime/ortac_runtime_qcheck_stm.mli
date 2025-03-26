@@ -82,9 +82,6 @@ module SUT : sig
     val size : t -> int
     (** [size t] returns the number of SUTs currently on the stack [t] *)
 
-    val pop : t -> elt
-    (** [pop t] pops and returns the topmost element of the stack [t] of SUTs *)
-
     val get : t -> int -> elt
     (** [get t i] gets the i-th SUT in the store *)
 
