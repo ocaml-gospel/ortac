@@ -1,4 +1,3 @@
-open Types
 open Gospel
 module W = Ortac_core.Warnings
 module F = Failure
@@ -8,6 +7,7 @@ open Ppxlib
 open Ortac_core.Builder
 module Ident = Identifier.Ident
 open Ortac_core.Utils
+module VSet = Set.Make (Symbols.Vs)
 
 let term ~context fail t =
   try
@@ -205,14 +205,230 @@ let with_checks ~context ~term_printer checks (value : value) =
   in
   { value with checks }
 
+let rec get_pattern_vars p =
+  match p.Tterm.p_node with
+  | Tterm.Pvar vs -> VSet.singleton vs
+  | Tterm.Papp (_, args) ->
+      List.fold_left
+        (fun acc p -> VSet.union acc (get_pattern_vars p))
+        VSet.empty args
+  | Tterm.Por (p1, p2) -> VSet.union (get_pattern_vars p1) (get_pattern_vars p2)
+  | Tterm.Pas (p, s) -> VSet.add s (get_pattern_vars p)
+  | Tterm.Pwild | Tterm.Pinterval _ | Tterm.Pconst _ -> VSet.empty
+
+let rec old_vars b t : Tterm.term =
+  match t.Tterm.t_node with
+  | Tvar x when VSet.mem x b -> t
+  | Tvar _ -> { t with t_node = Told t }
+  | Tconst _ | Ttrue | Tfalse -> t
+  | Tapp (ls, tl) ->
+      let tl = List.map (old_vars b) tl in
+      let t_node = Tterm.Tapp (ls, tl) in
+      { t with t_node }
+  | Tfield (t, ls) ->
+      let t = old_vars b t in
+      let t_node = Tterm.Tfield (t, ls) in
+      { t with t_node }
+  | Tif (t1, t2, t3) ->
+      let t1 = old_vars b t1 in
+      let t2 = old_vars b t2 in
+      let t3 = old_vars b t3 in
+      let t_node = Tterm.Tif (t1, t2, t3) in
+      { t with t_node }
+  | Tlet (vs, t1, t2) ->
+      let t1 = old_vars b t1 in
+      let t2 = old_vars (VSet.add vs b) t2 in
+      let t_node = Tterm.Tlet (vs, t1, t2) in
+      { t with t_node }
+  | Tcase (t, ptl) ->
+      let t = old_vars b t in
+      let ptl =
+        List.map
+          (fun (p, g, t) ->
+            ( p,
+              Option.map (old_vars b) g,
+              old_vars (VSet.union (get_pattern_vars p) b) t ))
+          ptl
+      in
+      let t_node = Tterm.Tcase (t, ptl) in
+      { t with t_node }
+  | Tlambda (pl, t) ->
+      let t =
+        let b =
+          List.fold_left (fun set p -> VSet.union set (get_pattern_vars p)) b pl
+        in
+        old_vars b t
+      in
+      let t_node = Tterm.Tlambda (pl, t) in
+      { t with t_node }
+  | Tquant (q, vsl, t) ->
+      let t = old_vars (VSet.union (VSet.of_list vsl) b) t in
+      let t_node = Tterm.Tquant (q, vsl, t) in
+      { t with t_node }
+  | Tbinop (op, t1, t2) ->
+      let t1 = old_vars b t1 in
+      let t2 = old_vars b t2 in
+      let t_node = Tterm.Tbinop (op, t1, t2) in
+      { t with t_node }
+  | Tnot t ->
+      let t = old_vars b t in
+      let t_node = Tterm.Tnot t in
+      { t with t_node }
+  | Told t -> old_vars b t
+
+let rec old_down b t : Tterm.term =
+  match t.Tterm.t_node with
+  | Tvar _ | Tconst _ | Ttrue | Tfalse -> t
+  | Tapp (ls, tl) ->
+      let tl = List.map (old_down b) tl in
+      let t_node = Tterm.Tapp (ls, tl) in
+      { t with t_node }
+  | Tfield (t, ls) ->
+      let t = old_down b t in
+      let t_node = Tterm.Tfield (t, ls) in
+      { t with t_node }
+  | Tif (t1, t2, t3) ->
+      let t1 = old_down b t1 in
+      let t2 = old_down b t2 in
+      let t3 = old_down b t3 in
+      let t_node = Tterm.Tif (t1, t2, t3) in
+      { t with t_node }
+  | Tterm.Tlet (vs, t1, t2) ->
+      let t1 = old_down b t1 in
+      let t2 = old_down (VSet.add vs b) t2 in
+      let t_node = Tterm.Tlet (vs, t1, t2) in
+      { t with t_node }
+  | Tterm.Tcase (t, ptl) ->
+      let t = old_down b t in
+      let ptl =
+        List.map
+          (fun (p, g, t) ->
+            ( p,
+              Option.map (old_down b) g,
+              old_down (VSet.union (get_pattern_vars p) b) t ))
+          ptl
+      in
+      let t_node = Tterm.Tcase (t, ptl) in
+      { t with t_node }
+  | Tlambda (pl, t) ->
+      let t =
+        let b =
+          List.fold_left (fun set p -> VSet.union set (get_pattern_vars p)) b pl
+        in
+        old_vars b t
+      in
+      let t_node = Tterm.Tlambda (pl, t) in
+      { t with t_node }
+  | Tquant (q, vsl, t) ->
+      let t = old_down (VSet.union (VSet.of_list vsl) b) t in
+      let t_node = Tterm.Tquant (q, vsl, t) in
+      { t with t_node }
+  | Tterm.Tbinop (op, t1, t2) ->
+      let t1 = old_down b t1 in
+      let t2 = old_down b t2 in
+      let t_node = Tterm.Tbinop (op, t1, t2) in
+      { t with t_node }
+  | Tterm.Tnot t ->
+      let t = old_down b t in
+      let t_node = Tterm.Tnot t in
+      { t with t_node }
+  | Tterm.Told t -> old_vars b t
+
+let fresh_var =
+  let id = ref 0 in
+  fun ty ->
+    incr id;
+    let str = Fmt.str "___ortac_copy_%d" !id in
+    let preid = Identifier.Preid.create ~loc:Location.none str in
+    Symbols.create_vsymbol preid (Option.value ~default:Ttypes.ty_bool ty)
+
+let collect_old t =
+  let rec aux acc t =
+    match t.Tterm.t_node with
+    | Tvar _ | Tconst _ | Ttrue | Tfalse -> (acc, t)
+    | Tapp (ls, tl) ->
+        let acc, tl = List.fold_left_map aux acc tl in
+        let t_node = Tterm.Tapp (ls, tl) in
+        (acc, { t with t_node })
+    | Tfield (t, ls) ->
+        let acc, t = aux acc t in
+        let t_node = Tterm.Tfield (t, ls) in
+        (acc, { t with t_node })
+    | Tif (t1, t2, t3) ->
+        let acc, t1 = aux acc t1 in
+        let acc, t2 = aux acc t2 in
+        let acc, t3 = aux acc t3 in
+        let t_node = Tterm.Tif (t1, t2, t3) in
+        (acc, { t with t_node })
+    | Tterm.Tlet (vs, t1, t2) ->
+        let acc, t1 = aux acc t1 in
+        let acc, t2 = aux acc t2 in
+        let t_node = Tterm.Tlet (vs, t1, t2) in
+        (acc, { t with t_node })
+    | Tterm.Tcase (t, ptl) ->
+        let acc, t = aux acc t in
+        let acc, ptl =
+          List.fold_left_map
+            (fun acc (p, (g : Tterm.term option), t) ->
+              let acc, g =
+                Option.fold ~none:(acc, None)
+                  ~some:(fun g ->
+                    let acc, g = aux acc g in
+                    (acc, Some g))
+                  g
+              in
+              let acc, t = aux acc t in
+              (acc, (p, g, t)))
+            acc ptl
+        in
+        let t_node = Tterm.Tcase (t, ptl) in
+        (acc, { t with t_node })
+    | Tlambda (pl, t) ->
+        let acc, t = aux acc t in
+        let t_node = Tterm.Tlambda (pl, t) in
+        (acc, { t with t_node })
+    | Tquant (q, vsl, t) ->
+        let acc, t = aux acc t in
+        let t_node = Tterm.Tquant (q, vsl, t) in
+        (acc, { t with t_node })
+    | Tterm.Tbinop (op, t1, t2) ->
+        let acc, t1 = aux acc t1 in
+        let acc, t2 = aux acc t2 in
+        let t_node = Tterm.Tbinop (op, t1, t2) in
+        (acc, { t with t_node })
+    | Tterm.Tnot t ->
+        let acc, t = aux acc t in
+        let t_node = Tterm.Tnot t in
+        (acc, { t with t_node })
+    | Tterm.Told t ->
+        let vs = fresh_var t.t_ty in
+        let t_node = Tterm.Tvar vs in
+        ((vs, t) :: acc, { t with t_node })
+  in
+  aux [] t
+
 let with_posts ~context ~term_printer posts (value : value) =
   let register_name = evar value.register_name in
   let violated term = F.violated_condition `Post ~term ~register_name in
   let nonexec term exn = F.spec_failure `Post ~term ~exn ~register_name in
+  let copies, posts =
+    List.fold_left_map
+      (fun acc t ->
+        let copies, t' = collect_old (old_down VSet.empty t) in
+        (copies @ acc, t'))
+      [] posts
+  in
+  let copies =
+    List.map
+      (fun (vs, t) ->
+        ( str "%a" Tterm.Ident.pp vs.Symbols.vs_name,
+          Ortac_core.Ocaml_of_gospel.term ~context t ))
+      copies
+  in
   let postconditions =
     conditions ~context ~term_printer violated nonexec posts
   in
-  { value with postconditions }
+  { value with copies = copies @ value.copies; postconditions }
 
 let with_constant_checks ~context ~term_printer checks (constant : Ir.constant)
     =
@@ -317,13 +533,11 @@ let register_name = gen_symbol ~prefix:"__error"
 let type_of_ty ~ir (ty : Ttypes.ty) =
   match ty.ty_node with
   | Tyvar a ->
-      Ir.type_ ~name:a.tv_name.id_str ~loc:a.tv_name.id_loc ~mutable_:Ir.Unknown
-        ~ghost:Tast.Nonghost
+      Ir.type_ ~name:a.tv_name.id_str ~loc:a.tv_name.id_loc ~ghost:Tast.Nonghost
   | Tyapp (ts, _tvs) -> (
       match Ir.get_type ts ir with
       | None ->
-          let mutable_ = Mutability.ty ~ir ty in
-          Ir.type_ ~name:ts.ts_ident.id_str ~loc:ts.ts_ident.id_loc ~mutable_
+          Ir.type_ ~name:ts.ts_ident.id_str ~loc:ts.ts_ident.id_loc
             ~ghost:Tast.Nonghost
       | Some type_ -> type_)
 
@@ -354,17 +568,12 @@ let type_ ~pack ~ghost (td : Tast.type_declaration) =
   let ir, context = P.unpack pack in
   let name = td.td_ts.ts_ident.id_str in
   let loc = td.td_loc in
-  let mutable_ = Mutability.type_declaration ~ir td in
-  let type_ = Ir.type_ ~name ~loc ~mutable_ ~ghost in
+  let type_ = Ir.type_ ~name ~loc ~ghost in
   let process ~type_ (spec : Tast.type_spec) =
     let term_printer = term_printer spec.ty_text spec.ty_loc in
-    let mutable_ = Mutability.(max type_.Ir.mutable_ (type_spec ~ir spec)) in
-    let type_ =
-      type_
-      |> with_models ~context spec.ty_fields
-      |> with_invariants ~context ~term_printer spec.ty_invariants
-    in
-    { type_ with mutable_ }
+    type_
+    |> with_models ~context spec.ty_fields
+    |> with_invariants ~context ~term_printer spec.ty_invariants
   in
   let type_ = Option.fold ~none:type_ ~some:(process ~type_) td.td_spec in
   let type_item = Ir.Type type_ in
