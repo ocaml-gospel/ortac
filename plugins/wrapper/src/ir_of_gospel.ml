@@ -414,7 +414,7 @@ let with_posts ~context ~term_printer posts (value : value) =
   let copies, posts =
     List.fold_left_map
       (fun acc t ->
-        let copies, t' = collect_old t (*(old_down VSet.empty t)*) in
+        let copies, t' = collect_old (old_down VSet.empty t) in
         (copies @ acc, t'))
       [] posts
   in
@@ -570,10 +570,14 @@ let type_ ~pack ~ghost (td : Tast.type_declaration) =
   let loc = td.td_loc in
   let type_ = Ir.type_ ~name ~loc ~ghost in
   let process ~type_ (spec : Tast.type_spec) =
+    let symb_t = match spec.ty_invariants with
+    | Some (s, l) -> Some s, l
+    | None -> None, []
+    in
     let term_printer = term_printer spec.ty_text spec.ty_loc in
     type_
     |> with_models ~context spec.ty_fields
-    |> with_invariants ~context ~term_printer spec.ty_invariants
+    |> with_invariants ~context ~term_printer symb_t
   in
   let type_ = Option.fold ~none:type_ ~some:(process ~type_) td.td_spec in
   let type_item = Ir.Type type_ in
