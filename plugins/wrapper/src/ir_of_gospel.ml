@@ -570,14 +570,10 @@ let type_ ~pack ~ghost (td : Tast.type_declaration) =
   let loc = td.td_loc in
   let type_ = Ir.type_ ~name ~loc ~ghost in
   let process ~type_ (spec : Tast.type_spec) =
-    let symb_t = match spec.ty_invariants with
-    | Some (s, l) -> Some s, l
-    | None -> None, []
-    in
     let term_printer = term_printer spec.ty_text spec.ty_loc in
     type_
     |> with_models ~context spec.ty_fields
-    |> with_invariants ~context ~term_printer symb_t
+    |> with_invariants ~context ~term_printer spec.ty_invariants
   in
   let type_ = Option.fold ~none:type_ ~some:(process ~type_) td.td_spec in
   let type_item = Ir.Type type_ in
