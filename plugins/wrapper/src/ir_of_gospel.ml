@@ -261,9 +261,9 @@ let rec old_vars b t : Tterm.term =
       in
       let t_node = Tterm.Tlambda (pl, t) in
       { t with t_node }
-  | Tquant (q, vsl, t) ->
-      let t = old_vars (VSet.union (VSet.of_list vsl) b) t in
-      let t_node = Tterm.Tquant (q, vsl, t) in
+  | Tquant (q, vsl, tq) ->
+      let tq = old_vars (VSet.union (VSet.of_list vsl) b) tq in
+      let t_node = Tterm.Tquant (q, vsl, tq) in
       { t with t_node }
   | Tbinop (op, t1, t2) ->
       let t1 = old_vars b t1 in
@@ -319,9 +319,9 @@ let rec old_down b t : Tterm.term =
       in
       let t_node = Tterm.Tlambda (pl, t) in
       { t with t_node }
-  | Tquant (q, vsl, t) ->
-      let t = old_down (VSet.union (VSet.of_list vsl) b) t in
-      let t_node = Tterm.Tquant (q, vsl, t) in
+  | Tquant (q, vsl, tq) ->
+      let tq = old_down (VSet.union (VSet.of_list vsl) b) tq in
+      let t_node = Tterm.Tquant (q, vsl, tq) in
       { t with t_node }
   | Tterm.Tbinop (op, t1, t2) ->
       let t1 = old_down b t1 in
@@ -387,9 +387,9 @@ let collect_old t =
         let acc, t = aux acc t in
         let t_node = Tterm.Tlambda (pl, t) in
         (acc, { t with t_node })
-    | Tquant (q, vsl, t) ->
-        let acc, t = aux acc t in
-        let t_node = Tterm.Tquant (q, vsl, t) in
+    | Tquant (q, vsl, tq) ->
+        let acc, tq = aux acc tq in
+        let t_node = Tterm.Tquant (q, vsl, tq) in
         (acc, { t with t_node })
     | Tterm.Tbinop (op, t1, t2) ->
         let acc, t1 = aux acc t1 in
