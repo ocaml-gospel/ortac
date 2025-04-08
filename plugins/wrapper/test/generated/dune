@@ -6,8 +6,9 @@
 (test
  (name test)
  (package ortac-wrapper)
- (modules test lib)
- (libraries alcotest ortac-runtime))
+ (modules test lib wrapper)
+ (libraries alcotest ortac-runtime)
+ (instrumentation (backend bisect_ppx)))
 
 (rule
  (copy lib.mli wrapper.mli))
