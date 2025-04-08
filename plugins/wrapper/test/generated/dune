@@ -3,6 +3,12 @@
  (package ortac-wrapper)
  (libraries ortac-runtime))
 
+(test
+ (name test)
+ (package ortac-wrapper)
+ (modules test lib)
+ (libraries alcotest ortac-runtime))
+
 (rule
  (copy lib.mli wrapper.mli))
 
