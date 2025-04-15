@@ -1,10 +1,11 @@
 # Unreleased
 
+- [Wrapper] Add support for old operator in the wrapper plugin
+  [\#297](https://github.com/ocaml-gospel/ortac/pull/297)
 - Fix `lwt_dllist_spec` signature in `/examples` to meet the implementation
   [\#301](https://github.com/ocaml-gospel/ortac/pull/301/)
-- Extend Wrapper plugin tests
+- [Wrapper] Extend Wrapper plugin tests
   [\#299](https://github.com/ocaml-gospel/ortac/pull/299)
-- Fix incorrect error type for violated preconditions and postconditions
 - [QCheck-STM] Modifies SUTs in place in the store
   [\#296](https://github.com/ocaml-gospel/ortac/pull/296)
 - [Wrapper] Fix incorrect error type for violated preconditions and
