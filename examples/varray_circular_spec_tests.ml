@@ -1054,64 +1054,61 @@ module Spec =
       | Push_back x ->
           Res
             (unit,
-              (let t_1__144_ = SUT.pop sut__143_ in
-               let res__145_ = push_back t_1__144_ x in
-               (SUT.push sut__143_ t_1__144_; res__145_)))
+              (let t_1__144_ = SUT.get sut__143_ 0 in
+               let res__145_ = push_back t_1__144_ x in res__145_))
       | Pop_back ->
           Res
             ((result (elt char) exn),
-              (let t_2__146_ = SUT.pop sut__143_ in
+              (let t_2__146_ = SUT.get sut__143_ 0 in
                let res__147_ = protect (fun () -> pop_back t_2__146_) () in
-               (SUT.push sut__143_ t_2__146_; res__147_)))
+               res__147_))
       | Push_front x_1 ->
           Res
             (unit,
-              (let t_3__148_ = SUT.pop sut__143_ in
-               let res__149_ = push_front t_3__148_ x_1 in
-               (SUT.push sut__143_ t_3__148_; res__149_)))
+              (let t_3__148_ = SUT.get sut__143_ 0 in
+               let res__149_ = push_front t_3__148_ x_1 in res__149_))
       | Pop_front ->
           Res
             ((result (elt char) exn),
-              (let t_4__150_ = SUT.pop sut__143_ in
+              (let t_4__150_ = SUT.get sut__143_ 0 in
                let res__151_ = protect (fun () -> pop_front t_4__150_) () in
-               (SUT.push sut__143_ t_4__150_; res__151_)))
+               res__151_))
       | Insert_at (i_1, x_2) ->
           Res
             ((result unit exn),
-              (let t_5__152_ = SUT.pop sut__143_ in
+              (let t_5__152_ = SUT.get sut__143_ 0 in
                let res__153_ =
                  protect (fun () -> insert_at t_5__152_ i_1 x_2) () in
-               (SUT.push sut__143_ t_5__152_; res__153_)))
+               res__153_))
       | Pop_at i_2 ->
           Res
             ((result (elt char) exn),
-              (let t_6__154_ = SUT.pop sut__143_ in
+              (let t_6__154_ = SUT.get sut__143_ 0 in
                let res__155_ = protect (fun () -> pop_at t_6__154_ i_2) () in
-               (SUT.push sut__143_ t_6__154_; res__155_)))
+               res__155_))
       | Delete_at i_3 ->
           Res
             ((result unit exn),
-              (let t_7__156_ = SUT.pop sut__143_ in
+              (let t_7__156_ = SUT.get sut__143_ 0 in
                let res__157_ = protect (fun () -> delete_at t_7__156_ i_3) () in
-               (SUT.push sut__143_ t_7__156_; res__157_)))
+               res__157_))
       | Get i_4 ->
           Res
             ((result (elt char) exn),
-              (let t_8__158_ = SUT.pop sut__143_ in
+              (let t_8__158_ = SUT.get sut__143_ 0 in
                let res__159_ = protect (fun () -> get t_8__158_ i_4) () in
-               (SUT.push sut__143_ t_8__158_; res__159_)))
+               res__159_))
       | Set (i_5, v) ->
           Res
             ((result unit exn),
-              (let t_9__160_ = SUT.pop sut__143_ in
+              (let t_9__160_ = SUT.get sut__143_ 0 in
                let res__161_ = protect (fun () -> set t_9__160_ i_5 v) () in
-               (SUT.push sut__143_ t_9__160_; res__161_)))
+               res__161_))
       | Length ->
           Res
             (int,
-              (let t_10__162_ = SUT.pop sut__143_ in
-               let res__163_ = length t_10__162_ in
-               (SUT.push sut__143_ t_10__162_; res__163_)))
+              (let t_10__162_ = SUT.get sut__143_ 0 in
+               let res__163_ = length t_10__162_ in res__163_))
       | Make (n, x_3) ->
           Res
             ((result sut exn),
@@ -1128,56 +1125,47 @@ module Spec =
       | Is_empty ->
           Res
             (bool,
-              (let t_13__166_ = SUT.pop sut__143_ in
-               let res__167_ = is_empty t_13__166_ in
-               (SUT.push sut__143_ t_13__166_; res__167_)))
+              (let t_13__166_ = SUT.get sut__143_ 0 in
+               let res__167_ = is_empty t_13__166_ in res__167_))
       | Append ->
           Res
             (sut,
-              (let a_1__168_ = SUT.pop sut__143_ in
-               let b__169_ = SUT.pop sut__143_ in
+              (let a_1__168_ = SUT.get sut__143_ 0 in
+               let b__169_ = SUT.get sut__143_ 1 in
                let res__170_ = append a_1__168_ b__169_ in
-               (SUT.push sut__143_ b__169_;
-                SUT.push sut__143_ a_1__168_;
-                SUT.push sut__143_ res__170_;
-                res__170_)))
+               (SUT.push sut__143_ res__170_; res__170_)))
       | Sub (i_6, n_1) ->
           Res
             ((result sut exn),
-              (let t_15__171_ = SUT.pop sut__143_ in
+              (let t_15__171_ = SUT.get sut__143_ 0 in
                let res__172_ = protect (fun () -> sub t_15__171_ i_6 n_1) () in
-               (SUT.push sut__143_ t_15__171_;
-                (match res__172_ with
+               ((match res__172_ with
                  | Ok res -> SUT.push sut__143_ res
                  | Error _ -> ());
                 res__172_)))
       | Copy ->
           Res
             (sut,
-              (let t_16__173_ = SUT.pop sut__143_ in
+              (let t_16__173_ = SUT.get sut__143_ 0 in
                let res__174_ = copy t_16__173_ in
-               (SUT.push sut__143_ t_16__173_;
-                SUT.push sut__143_ res__174_;
-                res__174_)))
+               (SUT.push sut__143_ res__174_; res__174_)))
       | Fill (pos, len, x_4) ->
           Res
             ((result unit exn),
-              (let t_17__175_ = SUT.pop sut__143_ in
+              (let t_17__175_ = SUT.get sut__143_ 0 in
                let res__176_ =
                  protect (fun () -> fill t_17__175_ pos len x_4) () in
-               (SUT.push sut__143_ t_17__175_; res__176_)))
+               res__176_))
       | Blit (src_pos, dst_pos, len_1) ->
           Res
             ((result unit exn),
-              (let src__177_ = SUT.pop sut__143_ in
-               let dst__178_ = SUT.pop sut__143_ in
+              (let src__177_ = SUT.get sut__143_ 0 in
+               let dst__178_ = SUT.get sut__143_ 1 in
                let res__179_ =
                  protect
                    (fun () -> blit src__177_ src_pos dst__178_ dst_pos len_1)
                    () in
-               (SUT.push sut__143_ dst__178_;
-                SUT.push sut__143_ src__177_;
-                res__179_)))
+               res__179_))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()

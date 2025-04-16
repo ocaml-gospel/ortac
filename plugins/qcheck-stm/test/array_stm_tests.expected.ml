@@ -663,21 +663,20 @@ module Spec =
       | Length ->
           Res
             (int,
-              (let t_1__093_ = SUT.pop sut__092_ in
-               let res__094_ = length t_1__093_ in
-               (SUT.push sut__092_ t_1__093_; res__094_)))
+              (let t_1__093_ = SUT.get sut__092_ 0 in
+               let res__094_ = length t_1__093_ in res__094_))
       | Get i ->
           Res
             ((result char exn),
-              (let t_2__095_ = SUT.pop sut__092_ in
+              (let t_2__095_ = SUT.get sut__092_ 0 in
                let res__096_ = protect (fun () -> get t_2__095_ i) () in
-               (SUT.push sut__092_ t_2__095_; res__096_)))
+               res__096_))
       | Set (i_1, a_1) ->
           Res
             ((result unit exn),
-              (let t_3__097_ = SUT.pop sut__092_ in
+              (let t_3__097_ = SUT.get sut__092_ 0 in
                let res__098_ = protect (fun () -> set t_3__097_ i_1 a_1) () in
-               (SUT.push sut__092_ t_3__097_; res__098_)))
+               res__098_))
       | Make (i_2, a_2) ->
           Res
             ((result sut exn),
@@ -689,44 +688,37 @@ module Spec =
       | Append ->
           Res
             (sut,
-              (let a_4__100_ = SUT.pop sut__092_ in
-               let b__101_ = SUT.pop sut__092_ in
+              (let a_4__100_ = SUT.get sut__092_ 0 in
+               let b__101_ = SUT.get sut__092_ 1 in
                let res__102_ = append a_4__100_ b__101_ in
-               (SUT.push sut__092_ b__101_;
-                SUT.push sut__092_ a_4__100_;
-                SUT.push sut__092_ res__102_;
-                res__102_)))
+               (SUT.push sut__092_ res__102_; res__102_)))
       | Sub (i_3, n) ->
           Res
             ((result sut exn),
-              (let t_6__103_ = SUT.pop sut__092_ in
+              (let t_6__103_ = SUT.get sut__092_ 0 in
                let res__104_ = protect (fun () -> sub t_6__103_ i_3 n) () in
-               (SUT.push sut__092_ t_6__103_;
-                (match res__104_ with
+               ((match res__104_ with
                  | Ok res -> SUT.push sut__092_ res
                  | Error _ -> ());
                 res__104_)))
       | Copy ->
           Res
             (sut,
-              (let t_7__105_ = SUT.pop sut__092_ in
+              (let t_7__105_ = SUT.get sut__092_ 0 in
                let res__106_ = copy t_7__105_ in
-               (SUT.push sut__092_ t_7__105_;
-                SUT.push sut__092_ res__106_;
-                res__106_)))
+               (SUT.push sut__092_ res__106_; res__106_)))
       | Fill (pos, len, x) ->
           Res
             ((result unit exn),
-              (let t_8__107_ = SUT.pop sut__092_ in
+              (let t_8__107_ = SUT.get sut__092_ 0 in
                let res__108_ =
                  protect (fun () -> fill t_8__107_ pos len x) () in
-               (SUT.push sut__092_ t_8__107_; res__108_)))
+               res__108_))
       | To_list ->
           Res
             ((list char),
-              (let t_9__109_ = SUT.pop sut__092_ in
-               let res__110_ = to_list t_9__109_ in
-               (SUT.push sut__092_ t_9__109_; res__110_)))
+              (let t_9__109_ = SUT.get sut__092_ 0 in
+               let res__110_ = to_list t_9__109_ in res__110_))
       | Of_list l ->
           Res
             (sut,
@@ -735,15 +727,14 @@ module Spec =
       | Mem a_3 ->
           Res
             (bool,
-              (let t_11__112_ = SUT.pop sut__092_ in
-               let res__113_ = mem a_3 t_11__112_ in
-               (SUT.push sut__092_ t_11__112_; res__113_)))
+              (let t_11__112_ = SUT.get sut__092_ 0 in
+               let res__113_ = mem a_3 t_11__112_ in res__113_))
       | For_all p ->
           Res
             (bool,
-              (let t_12__114_ = SUT.pop sut__092_ in
+              (let t_12__114_ = SUT.get sut__092_ 0 in
                let res__115_ = for_all (QCheck.Fn.apply p) t_12__114_ in
-               (SUT.push sut__092_ t_12__114_; res__115_)))
+               res__115_))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
