@@ -184,6 +184,7 @@ module R =
                 pos_cnum = 926
               }
           } "add" in
+      let ___ortac_copy_1 = Ortac_runtime.copy bv_2 in
       if
         not
           (try
@@ -225,6 +226,38 @@ module R =
                __invariant___001_ __error__015_ XPost bv_2;
                Ortac_runtime.Errors.report __error__015_);
               raise e) in
+       if
+         not
+           (try
+              Ortac_runtime.Z.forall
+                (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+                (Ortac_runtime.Gospelstdlib.pred
+                   (Ortac_runtime.Gospelstdlib.integer_of_int bv_2.size))
+                (fun j ->
+                   (__logical_mem__011_ j bv_2) =
+                     (let __t1__018_ =
+                        (Ortac_runtime.Gospelstdlib.integer_of_int i_2) = j in
+                      let __t2__019_ = __logical_mem__011_ j ___ortac_copy_1 in
+                      __t1__018_ || __t2__019_))
+            with
+            | e ->
+                ((Ortac_runtime.Specification_failure
+                    {
+                      term =
+                        "forall j. 0 <= j < bv.size ->\n                mem j bv <-> i = j \\/ mem j (old bv)";
+                      term_kind = Post;
+                      exn = e
+                    })
+                   |> (Ortac_runtime.Errors.register __error__015_);
+                 true))
+       then
+         (Ortac_runtime.Violated_condition
+            {
+              term =
+                "forall j. 0 <= j < bv.size ->\n                mem j bv <-> i = j \\/ mem j (old bv)";
+              term_kind = Post
+            })
+           |> (Ortac_runtime.Errors.register __error__015_);
        __invariant___006_ __error__015_ Post bv_2;
        __invariant___001_ __error__015_ Post bv_2;
        Ortac_runtime.Errors.report __error__015_;
