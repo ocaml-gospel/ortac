@@ -40,6 +40,7 @@ exception Partial_function of exn * location
 type integer
 
 val string_of_integer : integer -> string
+val copy : 'a -> 'a
 
 module Gospelstdlib : sig
   type 'a sequence
