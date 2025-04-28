@@ -1,4 +1,3 @@
-open Types
 open Gospel
 module W = Ortac_core.Warnings
 module F = Failure
@@ -317,13 +316,11 @@ let register_name = gen_symbol ~prefix:"__error"
 let type_of_ty ~ir (ty : Ttypes.ty) =
   match ty.ty_node with
   | Tyvar a ->
-      Ir.type_ ~name:a.tv_name.id_str ~loc:a.tv_name.id_loc ~mutable_:Ir.Unknown
-        ~ghost:Tast.Nonghost
+      Ir.type_ ~name:a.tv_name.id_str ~loc:a.tv_name.id_loc ~ghost:Tast.Nonghost
   | Tyapp (ts, _tvs) -> (
       match Ir.get_type ts ir with
       | None ->
-          let mutable_ = Mutability.ty ~ir ty in
-          Ir.type_ ~name:ts.ts_ident.id_str ~loc:ts.ts_ident.id_loc ~mutable_
+          Ir.type_ ~name:ts.ts_ident.id_str ~loc:ts.ts_ident.id_loc
             ~ghost:Tast.Nonghost
       | Some type_ -> type_)
 
@@ -354,17 +351,12 @@ let type_ ~pack ~ghost (td : Tast.type_declaration) =
   let ir, context = P.unpack pack in
   let name = td.td_ts.ts_ident.id_str in
   let loc = td.td_loc in
-  let mutable_ = Mutability.type_declaration ~ir td in
-  let type_ = Ir.type_ ~name ~loc ~mutable_ ~ghost in
+  let type_ = Ir.type_ ~name ~loc ~ghost in
   let process ~type_ (spec : Tast.type_spec) =
     let term_printer = term_printer spec.ty_text spec.ty_loc in
-    let mutable_ = Mutability.(max type_.Ir.mutable_ (type_spec ~ir spec)) in
-    let type_ =
-      type_
-      |> with_models ~context spec.ty_fields
-      |> with_invariants ~context ~term_printer spec.ty_invariants
-    in
-    { type_ with mutable_ }
+    type_
+    |> with_models ~context spec.ty_fields
+    |> with_invariants ~context ~term_printer spec.ty_invariants
   in
   let type_ = Option.fold ~none:type_ ~some:(process ~type_) td.td_spec in
   let type_item = Ir.Type type_ in
