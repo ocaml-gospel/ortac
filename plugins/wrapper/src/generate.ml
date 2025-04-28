@@ -13,6 +13,15 @@ let setup name loc register_name next =
     in
     [%e next]]
 
+let copies copies next =
+  if copies = [] then next
+  else
+    let vars, exprs = List.split copies in
+    let vars = List.map (fun v -> ppat_var (noloc v)) vars in
+    [%expr
+      let [%p ppat_tuple vars] = Ortac_runtime.copy [%e pexp_tuple exprs] in
+      [%e next]]
+
 let term (t : Ir.term) next =
   match t.translation with Error _ -> next | Ok c -> pexp_sequence c next
 
