@@ -528,7 +528,7 @@ let ortac_show_cmd cmd__096_ state__097_ last__099_ res__098_ =
       | (Create (random, size), Res ((SUT, _), h)) ->
           let lhs = if last__099_ then "r" else SUT.get_name state__097_ 0
           and shift = 1 in
-          Format.asprintf "let %s = %s %a %a" lhs "create"
+          Format.asprintf "let %s = %s ~random:%a %a" lhs "create"
             (Util.Pp.pp_bool true) random (Util.Pp.pp_int true) size
       | (Clear, Res ((Unit, _), _)) ->
           let lhs = if last__099_ then "r" else "_"
