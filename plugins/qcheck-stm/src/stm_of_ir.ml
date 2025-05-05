@@ -1552,21 +1552,26 @@ let pp_ortac_cmd_case config suts last value =
   in
   let* rhs =
     let name = str_of_ident value.id in
+    let label arg_label s =
+      match arg_label with
+      | Nolabel -> s
+      | Labelled l | Optional l -> "~" ^ l ^ ":" ^ s
+    in
     let rec aux ty n args =
       match (ty.ptyp_desc, args) with
-      | Ptyp_arrow (_, l, r), xs when Cfg.is_sut config l ->
+      | Ptyp_arrow (arg_label, l, r), xs when Cfg.is_sut config l ->
           let* fmt, pps = aux r (n + 1) xs in
           let get_sut =
             eapply
               (qualify [ "SUT" ] "get_name")
               [ evar suts; eapply (evar "+") [ eint n; evar "shift" ] ]
           in
-          ok ("%s" :: fmt, get_sut :: pps)
-      | Ptyp_arrow (_, _, r), (ty, id) :: xs ->
+          ok (label arg_label "%s" :: fmt, get_sut :: pps)
+      | Ptyp_arrow (arg_label, _, r), (ty, id) :: xs ->
           let ty = subst_core_type value.inst ty in
           let* pp = pp_of_ty ty and* fmt, pps = aux r n xs in
           ok
-            ( "%a" :: fmt,
+            ( label arg_label "%a" :: fmt,
               pexp_apply pp [ (Nolabel, ebool true) ] :: get_name id :: pps )
       | _, [] -> ok ([], [])
       | _, _ ->
