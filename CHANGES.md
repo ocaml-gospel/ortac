@@ -1,5 +1,7 @@
 # Unreleased
 
+- [QCheck-STM] Fix labelled arguments in runnable scenario
+  [\#302](https://github.com/ocaml-gospel/ortac/pull/300)
 - [Wrapper] Add support for old operator in the wrapper plugin
   [\#297](https://github.com/ocaml-gospel/ortac/pull/297)
 - Fix `lwt_dllist_spec` signature in `/examples` to meet the implementation
