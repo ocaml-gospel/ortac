@@ -1,5 +1,7 @@
 # Unreleased
 
+- Fix `lwt_dllist_spec` signature in `/examples` to meet the implementation
+  [\#301](https://github.com/ocaml-gospel/ortac/pull/301/)
 - Extend Wrapper plugin tests
   [\#299](https://github.com/ocaml-gospel/ortac/pull/299)
 - Fix incorrect error type for violated preconditions and postconditions

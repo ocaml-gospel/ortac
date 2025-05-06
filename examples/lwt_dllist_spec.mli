@@ -18,8 +18,8 @@ type 'a t
   (*@ mutable model contents : 'a sequence *)
 
 type 'a node = private {
-  mutable node_prev : 'a t;
-  mutable node_next : 'a t;
+  node_prev : 'a t;
+  node_next : 'a t;
   mutable node_data : 'a;
   mutable node_active : bool;
 }
@@ -43,6 +43,13 @@ val remove : 'a node -> unit
 val create : unit -> 'a t
   (** [create ()] creates a new empty sequence *)
   (*@ s = create ()
+      ensures s.contents = Sequence.empty *)
+
+val clear : 'a t -> unit
+  (** Removes all nodes from the given sequence. The nodes are not actually
+      mutated to note their removal. Only the sequence's pointers are updated. *)
+  (*@ clear s
+      modifies s.contents
       ensures s.contents = Sequence.empty *)
 
 val is_empty : 'a t -> bool

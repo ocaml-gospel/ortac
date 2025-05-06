@@ -208,6 +208,6 @@
   (ortac-core (= :version))
   (ortac-qcheck-stm (= :version))
   (ortac-dune (= :version))
-  lwt-dllist
+  (lwt-dllist (>= 1.1.0))
   (varray (>= 0.2))))
 
