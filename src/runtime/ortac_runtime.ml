@@ -163,6 +163,10 @@ module Aux = struct
   let drop n xs = drop (Z.to_int n) xs
 end
 
+let copy x =
+  let open Marshal in
+  from_string (to_string x []) 0
+
 module Gospelstdlib = struct
   (** Implementation of the Gospel Stdlib
 
