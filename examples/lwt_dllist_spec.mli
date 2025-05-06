@@ -18,8 +18,8 @@ type 'a t
   (*@ mutable model contents : 'a sequence *)
 
 type 'a node = private {
-  mutable node_prev : 'a t;
-  mutable node_next : 'a t;
+  node_prev : 'a t;
+  node_next : 'a t;
   mutable node_data : 'a;
   mutable node_active : bool;
 }
