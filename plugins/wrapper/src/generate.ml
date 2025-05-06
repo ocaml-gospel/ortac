@@ -173,6 +173,7 @@ let value (v : Ir.value) =
   let try_call = pexp_try call (group_xpost v) in
   let body =
     setup v.name v.loc v.register_name
+    @@ copies v.copies
     @@ terms v.preconditions
     @@ vars_invariants ~register_name "Pre" false v.arguments
     @@ compute_checks v.checks
