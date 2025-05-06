@@ -45,6 +45,13 @@ val create : unit -> 'a t
   (*@ s = create ()
       ensures s.contents = Sequence.empty *)
 
+val clear : 'a t -> unit
+  (** Removes all nodes from the given sequence. The nodes are not actually
+      mutated to note their removal. Only the sequence's pointers are updated. *)
+  (*@ clear s
+      modifies s.contents
+      ensures s.contents = Sequence.empty *)
+
 val is_empty : 'a t -> bool
   (** Returns [true] iff the given sequence is empty *)
   (*@ b = is_empty s
