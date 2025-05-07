@@ -1,18 +1,21 @@
 # Unreleased
 
-- [QCheck-STM] Fix labelled arguments in runnable scenario
-  [\#302](https://github.com/ocaml-gospel/ortac/pull/300)
 - [Wrapper] Add support for old operator in the wrapper plugin
   [\#297](https://github.com/ocaml-gospel/ortac/pull/297)
-- Fix `lwt_dllist_spec` signature in `/examples` to meet the implementation
-  [\#301](https://github.com/ocaml-gospel/ortac/pull/301/)
 - [Wrapper] Extend Wrapper plugin tests
   [\#299](https://github.com/ocaml-gospel/ortac/pull/299)
-- [QCheck-STM] Modifies SUTs in place in the store
-  [\#296](https://github.com/ocaml-gospel/ortac/pull/296)
 - [Wrapper] Fix incorrect error type for violated preconditions and
   postconditions
   [\#295](https://github.com/ocaml-gospel/ortac/pull/295)
+
+# 0.6.1
+
+- [QCheck-STM] Fix labelled arguments in runnable scenario
+  [\#302](https://github.com/ocaml-gospel/ortac/pull/300)
+- Fix `lwt_dllist_spec` signature in `/examples` to meet the implementation
+  [\#301](https://github.com/ocaml-gospel/ortac/pull/301/)
+- [QCheck-STM] Modifies SUTs in place in the store
+  [\#296](https://github.com/ocaml-gospel/ortac/pull/296)
 
 # 0.6.0
 
