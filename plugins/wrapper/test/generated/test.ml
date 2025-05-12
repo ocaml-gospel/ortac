@@ -1,4 +1,5 @@
 module To_test = Wrapper
+module To_test2 = Wrapper_behaviour
 
 let test_create () =
   let s = To_test.create 5 in
@@ -40,7 +41,7 @@ Runtime error in function `bad_create_int'
     was violated in the post-state.
 *)
   try
-    let _ = To_test.bad_create_int (-1) in
+    let _ = To_test2.bad_create_int (-1) in
     Alcotest.fail "Arg should be positiv."
   with Ortac_runtime.Error _ -> ()
 
@@ -52,31 +53,31 @@ Runtime error in function `create_int'
     was violated.
 *)
   try
-    let _ = To_test.create_int (-1) in
+    let _ = To_test2.create_int (-1) in
     Alcotest.fail "Arg should be > 0"
   with Ortac_runtime.Error _ -> ()
 
 let good_incr () =
-  let n = To_test.create_int 0 in
-  let r = To_test.increment_int n in
+  let n = To_test2.create_int 0 in
+  let r = To_test2.increment_int n in
   Alcotest.(check int) "incr 0 should be 1" 1 r;
   ()
 
 let incr_maxint () =
-  let n = To_test.create_int max_int in
+  let n = To_test2.create_int max_int in
   try
-    let _ = To_test.bad_increment_int n in
+    let _ = To_test2.bad_increment_int n in
     Alcotest.fail "Increment on int_max should raise Int_overflow"
-  with To_test.Int_overflow -> ()
+  with To_test2.Int_overflow -> ()
 
 let inv_arg () =
   (* -- Expected message without error handling --
 [invalid] According to checks clause, x.value should not be 1.
           Raised at Stdlib.invalid_arg in file
 *)
-  let n = To_test.create_int 1 in
+  let n = To_test2.create_int 1 in
   try
-    let _ = To_test.bad2_increment_int n in
+    let _ = To_test2.bad2_increment_int n in
     Alcotest.fail "Arg should not be 1 (checks clause)"
   with Invalid_argument _ -> ()
 
@@ -87,9 +88,9 @@ Runtime error in function `bad2_increment_int'
       `r = x.value + 1'
     was violated.
 *)
-  let n = To_test.create_int 0 in
+  let n = To_test2.create_int 0 in
   try
-    let _ = To_test.bad2_increment_int n in
+    let _ = To_test2.bad2_increment_int n in
     Alcotest.fail "n should be incremented"
   with Ortac_runtime.Error _ -> ()
 
@@ -105,7 +106,7 @@ let () =
           test_case "add fails with negativ arg." `Quick test_neg_add;
           test_case "mem fails with negativ arg" `Quick test_neg_mem;
         ] );
-      ( "int",
+      ( "behaviour tests",
         [
           test_case "invariant violated hit" `Quick vio_inv;
           test_case "good incrementation" `Quick good_incr;

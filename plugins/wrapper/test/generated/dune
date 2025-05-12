@@ -1,12 +1,6 @@
 (test
- (name wrapper)
- (package ortac-wrapper)
- (libraries alcotest ortac-runtime))
-
-(test
  (name test)
  (package ortac-wrapper)
- (modules test lib wrapper)
  (libraries alcotest ortac-runtime)
  (instrumentation
   (backend bisect_ppx)))
@@ -35,3 +29,28 @@
   (progn
    (diff errors.expected errors)
    (diff wrapper.expected.ml wrapper.ml))))
+
+(rule
+ (copy lib_behaviour.mli wrapper_behaviour.mli))
+
+(rule
+ (target wrapper_behaviour.ml)
+ (package ortac-wrapper)
+ (deps
+  (package ortac-core)
+  (package ortac-wrapper))
+ (action
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   wrapper
+   (with-stderr-to
+    errors_behaviour
+    (run ortac wrapper -o %{target} %{dep:lib_behaviour.mli})))))
+
+(rule
+ (alias runtest)
+ (package ortac-wrapper)
+ (action
+  (progn
+   (diff errors_behaviour.expected errors_behaviour)
+   (diff wrapper_behaviour.expected.ml wrapper_behaviour.ml))))
