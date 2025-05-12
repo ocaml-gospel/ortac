@@ -1,0 +1,489 @@
+include Lib_behaviour
+module Ortac_runtime = Ortac_runtime
+let __invariant___001_ __error___002_ __position___003_ t_1 =
+  if
+    not
+      (try
+         Ortac_runtime.Gospelstdlib.(>=)
+           (Ortac_runtime.Gospelstdlib.integer_of_int t_1.value)
+           (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+       with
+       | e ->
+           ((Ortac_runtime.Specification_failure
+               {
+                 term = "t.value >= 0";
+                 term_kind = __position___003_;
+                 exn = e
+               })
+              |> (Ortac_runtime.Errors.register __error___002_);
+            true))
+  then
+    (Ortac_runtime.Violated_invariant
+       { term = "t.value >= 0"; position = __position___003_ })
+      |> (Ortac_runtime.Errors.register __error___002_)
+let create_int n =
+  let __error__004_ =
+    Ortac_runtime.Errors.create
+      {
+        Ortac_runtime.start =
+          {
+            pos_fname = "lib_behaviour.mli";
+            pos_lnum = 7;
+            pos_bol = 211;
+            pos_cnum = 211
+          };
+        Ortac_runtime.stop =
+          {
+            pos_fname = "lib_behaviour.mli";
+            pos_lnum = 10;
+            pos_bol = 365;
+            pos_cnum = 392
+          }
+      } "create_int" in
+  if
+    not
+      (try
+         Ortac_runtime.Gospelstdlib.(>=)
+           (Ortac_runtime.Gospelstdlib.integer_of_int n)
+           (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+       with
+       | e ->
+           ((Ortac_runtime.Specification_failure
+               { term = "n >= 0"; term_kind = Pre; exn = e })
+              |> (Ortac_runtime.Errors.register __error__004_);
+            true))
+  then
+    (Ortac_runtime.Violated_condition { term = "n >= 0"; term_kind = Pre })
+      |> (Ortac_runtime.Errors.register __error__004_);
+  Ortac_runtime.Errors.report __error__004_;
+  (let r =
+     try create_int n
+     with
+     | Stack_overflow | Out_of_memory as e ->
+         (Ortac_runtime.Errors.report __error__004_; raise e)
+     | e ->
+         ((Ortac_runtime.Unexpected_exception { allowed_exn = []; exn = e })
+            |> (Ortac_runtime.Errors.register __error__004_);
+          Ortac_runtime.Errors.report __error__004_;
+          raise e) in
+   if
+     not
+       (try r.value = n
+        with
+        | e ->
+            ((Ortac_runtime.Specification_failure
+                { term = "r.value = n"; term_kind = Post; exn = e })
+               |> (Ortac_runtime.Errors.register __error__004_);
+             true))
+   then
+     (Ortac_runtime.Violated_condition
+        { term = "r.value = n"; term_kind = Post })
+       |> (Ortac_runtime.Errors.register __error__004_);
+   __invariant___001_ __error__004_ Post r;
+   Ortac_runtime.Errors.report __error__004_;
+   r)
+let bad_create_int n_1 =
+  let __error__005_ =
+    Ortac_runtime.Errors.create
+      {
+        Ortac_runtime.start =
+          {
+            pos_fname = "lib_behaviour.mli";
+            pos_lnum = 16;
+            pos_bol = 540;
+            pos_cnum = 540
+          };
+        Ortac_runtime.stop =
+          {
+            pos_fname = "lib_behaviour.mli";
+            pos_lnum = 18;
+            pos_bol = 683;
+            pos_cnum = 710
+          }
+      } "bad_create_int" in
+  Ortac_runtime.Errors.report __error__005_;
+  (let r_1 =
+     try bad_create_int n_1
+     with
+     | Stack_overflow | Out_of_memory as e ->
+         (Ortac_runtime.Errors.report __error__005_; raise e)
+     | e ->
+         ((Ortac_runtime.Unexpected_exception { allowed_exn = []; exn = e })
+            |> (Ortac_runtime.Errors.register __error__005_);
+          Ortac_runtime.Errors.report __error__005_;
+          raise e) in
+   if
+     not
+       (try r_1.value = n_1
+        with
+        | e ->
+            ((Ortac_runtime.Specification_failure
+                { term = "r.value = n"; term_kind = Post; exn = e })
+               |> (Ortac_runtime.Errors.register __error__005_);
+             true))
+   then
+     (Ortac_runtime.Violated_condition
+        { term = "r.value = n"; term_kind = Post })
+       |> (Ortac_runtime.Errors.register __error__005_);
+   __invariant___001_ __error__005_ Post r_1;
+   Ortac_runtime.Errors.report __error__005_;
+   r_1)
+let increment_int x =
+  let __error__006_ =
+    Ortac_runtime.Errors.create
+      {
+        Ortac_runtime.start =
+          {
+            pos_fname = "lib_behaviour.mli";
+            pos_lnum = 20;
+            pos_bol = 712;
+            pos_cnum = 712
+          };
+        Ortac_runtime.stop =
+          {
+            pos_fname = "lib_behaviour.mli";
+            pos_lnum = 25;
+            pos_bol = 948;
+            pos_cnum = 984
+          }
+      } "increment_int" in
+  if
+    not
+      (try
+         Ortac_runtime.Gospelstdlib.(<)
+           (Ortac_runtime.Gospelstdlib.integer_of_int x.value)
+           Ortac_runtime.Gospelstdlib.max_int
+       with
+       | e ->
+           ((Ortac_runtime.Specification_failure
+               { term = "x.value < max_int"; term_kind = Pre; exn = e })
+              |> (Ortac_runtime.Errors.register __error__006_);
+            true))
+  then
+    (Ortac_runtime.Violated_condition
+       { term = "x.value < max_int"; term_kind = Pre })
+      |> (Ortac_runtime.Errors.register __error__006_);
+  __invariant___001_ __error__006_ Pre x;
+  (let __check__007_ =
+     try
+       Ortac_runtime.Gospelstdlib.(>=)
+         (Ortac_runtime.Gospelstdlib.integer_of_int x.value)
+         (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+     with
+     | e ->
+         ((Ortac_runtime.Specification_failure
+             { term = "x.value >= 0"; term_kind = Check; exn = e })
+            |> (Ortac_runtime.Errors.register __error__006_);
+          true) in
+   Ortac_runtime.Errors.report __error__006_;
+   (let r_2 =
+      try increment_int x
+      with
+      | Int_overflow as __e___014_ ->
+          ((match __e___014_ with
+            | Int_overflow ->
+                if
+                  not
+                    (try true
+                     with
+                     | e ->
+                         ((Ortac_runtime.Specification_failure
+                             { term = "true"; term_kind = XPost; exn = e })
+                            |> (Ortac_runtime.Errors.register __error__006_);
+                          true))
+                then
+                  (Ortac_runtime.Violated_condition
+                     { term = "true"; term_kind = XPost })
+                    |> (Ortac_runtime.Errors.register __error__006_)
+            | _ -> assert false);
+           (if not __check__007_
+            then
+              (Ortac_runtime.Uncaught_checks { term = "x.value >= 0" }) |>
+                (Ortac_runtime.Errors.register __error__006_);
+            __invariant___001_ __error__006_ XPost x;
+            Ortac_runtime.Errors.report __error__006_);
+           raise __e___014_)
+      | Invalid_argument _ as e ->
+          ((if true && __check__007_
+            then
+              (Ortac_runtime.Unexpected_checks { terms = [] }) |>
+                (Ortac_runtime.Errors.register __error__006_);
+            __invariant___001_ __error__006_ XPost x;
+            Ortac_runtime.Errors.report __error__006_);
+           raise e)
+      | Stack_overflow | Out_of_memory as e ->
+          ((if not __check__007_
+            then
+              (Ortac_runtime.Uncaught_checks { term = "x.value >= 0" }) |>
+                (Ortac_runtime.Errors.register __error__006_);
+            __invariant___001_ __error__006_ XPost x;
+            Ortac_runtime.Errors.report __error__006_);
+           raise e)
+      | e ->
+          ((Ortac_runtime.Unexpected_exception { allowed_exn = []; exn = e })
+             |> (Ortac_runtime.Errors.register __error__006_);
+           (if not __check__007_
+            then
+              (Ortac_runtime.Uncaught_checks { term = "x.value >= 0" }) |>
+                (Ortac_runtime.Errors.register __error__006_);
+            __invariant___001_ __error__006_ XPost x;
+            Ortac_runtime.Errors.report __error__006_);
+           raise e) in
+    if
+      not
+        (try
+           (Ortac_runtime.Gospelstdlib.integer_of_int r_2) =
+             (Ortac_runtime.Gospelstdlib.(+)
+                (Ortac_runtime.Gospelstdlib.integer_of_int x.value)
+                (Ortac_runtime.Gospelstdlib.integer_of_int 1))
+         with
+         | e ->
+             ((Ortac_runtime.Specification_failure
+                 { term = "r = x.value + 1"; term_kind = Post; exn = e })
+                |> (Ortac_runtime.Errors.register __error__006_);
+              true))
+    then
+      (Ortac_runtime.Violated_condition
+         { term = "r = x.value + 1"; term_kind = Post })
+        |> (Ortac_runtime.Errors.register __error__006_);
+    if not __check__007_
+    then
+      (Ortac_runtime.Uncaught_checks { term = "x.value >= 0" }) |>
+        (Ortac_runtime.Errors.register __error__006_);
+    __invariant___001_ __error__006_ Post x;
+    Ortac_runtime.Errors.report __error__006_;
+    r_2))
+let bad_increment_int x_1 =
+  let __error__008_ =
+    Ortac_runtime.Errors.create
+      {
+        Ortac_runtime.start =
+          {
+            pos_fname = "lib_behaviour.mli";
+            pos_lnum = 30;
+            pos_bol = 1078;
+            pos_cnum = 1078
+          };
+        Ortac_runtime.stop =
+          {
+            pos_fname = "lib_behaviour.mli";
+            pos_lnum = 34;
+            pos_bol = 1291;
+            pos_cnum = 1327
+          }
+      } "bad_increment_int" in
+  __invariant___001_ __error__008_ Pre x_1;
+  (let __check__009_ =
+     try
+       Ortac_runtime.Gospelstdlib.(>=)
+         (Ortac_runtime.Gospelstdlib.integer_of_int x_1.value)
+         (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+     with
+     | e ->
+         ((Ortac_runtime.Specification_failure
+             { term = "x.value >= 0"; term_kind = Check; exn = e })
+            |> (Ortac_runtime.Errors.register __error__008_);
+          true) in
+   Ortac_runtime.Errors.report __error__008_;
+   (let r_3 =
+      try bad_increment_int x_1
+      with
+      | Int_overflow as __e___013_ ->
+          ((match __e___013_ with
+            | Int_overflow ->
+                if
+                  not
+                    (try true
+                     with
+                     | e ->
+                         ((Ortac_runtime.Specification_failure
+                             { term = "true"; term_kind = XPost; exn = e })
+                            |> (Ortac_runtime.Errors.register __error__008_);
+                          true))
+                then
+                  (Ortac_runtime.Violated_condition
+                     { term = "true"; term_kind = XPost })
+                    |> (Ortac_runtime.Errors.register __error__008_)
+            | _ -> assert false);
+           (if not __check__009_
+            then
+              (Ortac_runtime.Uncaught_checks { term = "x.value >= 0" }) |>
+                (Ortac_runtime.Errors.register __error__008_);
+            __invariant___001_ __error__008_ XPost x_1;
+            Ortac_runtime.Errors.report __error__008_);
+           raise __e___013_)
+      | Invalid_argument _ as e ->
+          ((if true && __check__009_
+            then
+              (Ortac_runtime.Unexpected_checks { terms = [] }) |>
+                (Ortac_runtime.Errors.register __error__008_);
+            __invariant___001_ __error__008_ XPost x_1;
+            Ortac_runtime.Errors.report __error__008_);
+           raise e)
+      | Stack_overflow | Out_of_memory as e ->
+          ((if not __check__009_
+            then
+              (Ortac_runtime.Uncaught_checks { term = "x.value >= 0" }) |>
+                (Ortac_runtime.Errors.register __error__008_);
+            __invariant___001_ __error__008_ XPost x_1;
+            Ortac_runtime.Errors.report __error__008_);
+           raise e)
+      | e ->
+          ((Ortac_runtime.Unexpected_exception { allowed_exn = []; exn = e })
+             |> (Ortac_runtime.Errors.register __error__008_);
+           (if not __check__009_
+            then
+              (Ortac_runtime.Uncaught_checks { term = "x.value >= 0" }) |>
+                (Ortac_runtime.Errors.register __error__008_);
+            __invariant___001_ __error__008_ XPost x_1;
+            Ortac_runtime.Errors.report __error__008_);
+           raise e) in
+    if
+      not
+        (try
+           (Ortac_runtime.Gospelstdlib.integer_of_int r_3) =
+             (Ortac_runtime.Gospelstdlib.(+)
+                (Ortac_runtime.Gospelstdlib.integer_of_int x_1.value)
+                (Ortac_runtime.Gospelstdlib.integer_of_int 1))
+         with
+         | e ->
+             ((Ortac_runtime.Specification_failure
+                 { term = "r = x.value + 1"; term_kind = Post; exn = e })
+                |> (Ortac_runtime.Errors.register __error__008_);
+              true))
+    then
+      (Ortac_runtime.Violated_condition
+         { term = "r = x.value + 1"; term_kind = Post })
+        |> (Ortac_runtime.Errors.register __error__008_);
+    if not __check__009_
+    then
+      (Ortac_runtime.Uncaught_checks { term = "x.value >= 0" }) |>
+        (Ortac_runtime.Errors.register __error__008_);
+    __invariant___001_ __error__008_ Post x_1;
+    Ortac_runtime.Errors.report __error__008_;
+    r_3))
+let bad2_increment_int x_2 =
+  let __error__010_ =
+    Ortac_runtime.Errors.create
+      {
+        Ortac_runtime.start =
+          {
+            pos_fname = "lib_behaviour.mli";
+            pos_lnum = 39;
+            pos_bol = 1426;
+            pos_cnum = 1426
+          };
+        Ortac_runtime.stop =
+          {
+            pos_fname = "lib_behaviour.mli";
+            pos_lnum = 44;
+            pos_bol = 1672;
+            pos_cnum = 1708
+          }
+      } "bad2_increment_int" in
+  if
+    not
+      (try
+         Ortac_runtime.Gospelstdlib.(<)
+           (Ortac_runtime.Gospelstdlib.integer_of_int x_2.value)
+           Ortac_runtime.Gospelstdlib.max_int
+       with
+       | e ->
+           ((Ortac_runtime.Specification_failure
+               { term = "x.value < max_int"; term_kind = Pre; exn = e })
+              |> (Ortac_runtime.Errors.register __error__010_);
+            true))
+  then
+    (Ortac_runtime.Violated_condition
+       { term = "x.value < max_int"; term_kind = Pre })
+      |> (Ortac_runtime.Errors.register __error__010_);
+  __invariant___001_ __error__010_ Pre x_2;
+  (let __check__011_ =
+     try
+       not
+         ((Ortac_runtime.Gospelstdlib.integer_of_int x_2.value) =
+            (Ortac_runtime.Gospelstdlib.integer_of_int 1))
+     with
+     | e ->
+         ((Ortac_runtime.Specification_failure
+             { term = "x.value <> 1"; term_kind = Check; exn = e })
+            |> (Ortac_runtime.Errors.register __error__010_);
+          true) in
+   Ortac_runtime.Errors.report __error__010_;
+   (let r_4 =
+      try bad2_increment_int x_2
+      with
+      | Int_overflow as __e___012_ ->
+          ((match __e___012_ with
+            | Int_overflow ->
+                if
+                  not
+                    (try true
+                     with
+                     | e ->
+                         ((Ortac_runtime.Specification_failure
+                             { term = "true"; term_kind = XPost; exn = e })
+                            |> (Ortac_runtime.Errors.register __error__010_);
+                          true))
+                then
+                  (Ortac_runtime.Violated_condition
+                     { term = "true"; term_kind = XPost })
+                    |> (Ortac_runtime.Errors.register __error__010_)
+            | _ -> assert false);
+           (if not __check__011_
+            then
+              (Ortac_runtime.Uncaught_checks { term = "x.value <> 1" }) |>
+                (Ortac_runtime.Errors.register __error__010_);
+            __invariant___001_ __error__010_ XPost x_2;
+            Ortac_runtime.Errors.report __error__010_);
+           raise __e___012_)
+      | Invalid_argument _ as e ->
+          ((if true && __check__011_
+            then
+              (Ortac_runtime.Unexpected_checks { terms = [] }) |>
+                (Ortac_runtime.Errors.register __error__010_);
+            __invariant___001_ __error__010_ XPost x_2;
+            Ortac_runtime.Errors.report __error__010_);
+           raise e)
+      | Stack_overflow | Out_of_memory as e ->
+          ((if not __check__011_
+            then
+              (Ortac_runtime.Uncaught_checks { term = "x.value <> 1" }) |>
+                (Ortac_runtime.Errors.register __error__010_);
+            __invariant___001_ __error__010_ XPost x_2;
+            Ortac_runtime.Errors.report __error__010_);
+           raise e)
+      | e ->
+          ((Ortac_runtime.Unexpected_exception { allowed_exn = []; exn = e })
+             |> (Ortac_runtime.Errors.register __error__010_);
+           (if not __check__011_
+            then
+              (Ortac_runtime.Uncaught_checks { term = "x.value <> 1" }) |>
+                (Ortac_runtime.Errors.register __error__010_);
+            __invariant___001_ __error__010_ XPost x_2;
+            Ortac_runtime.Errors.report __error__010_);
+           raise e) in
+    if
+      not
+        (try
+           (Ortac_runtime.Gospelstdlib.integer_of_int r_4) =
+             (Ortac_runtime.Gospelstdlib.(+)
+                (Ortac_runtime.Gospelstdlib.integer_of_int x_2.value)
+                (Ortac_runtime.Gospelstdlib.integer_of_int 1))
+         with
+         | e ->
+             ((Ortac_runtime.Specification_failure
+                 { term = "r = x.value + 1"; term_kind = Post; exn = e })
+                |> (Ortac_runtime.Errors.register __error__010_);
+              true))
+    then
+      (Ortac_runtime.Violated_condition
+         { term = "r = x.value + 1"; term_kind = Post })
+        |> (Ortac_runtime.Errors.register __error__010_);
+    if not __check__011_
+    then
+      (Ortac_runtime.Uncaught_checks { term = "x.value <> 1" }) |>
+        (Ortac_runtime.Errors.register __error__010_);
+    __invariant___001_ __error__010_ Post x_2;
+    Ortac_runtime.Errors.report __error__010_;
+    r_4))
