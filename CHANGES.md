@@ -1,5 +1,7 @@
 # Unreleased
 
+- [QCheck-STM] Disable warning 34 in generated code
+  [\#307](https://github.com/ocaml-gospel/ortac/pull/307)
 - [Wrapper] Reorganise tests into separate files
   [\#306](https://github.com/ocaml-gospel/ortac/pull/306)
 - [Wrapper] Add support for old operator in the wrapper plugin
