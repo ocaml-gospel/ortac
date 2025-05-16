@@ -1,0 +1,426 @@
+include Lib_model
+module Ortac_runtime = Ortac_runtime
+let __invariant___001_ __error___002_ __position___003_ t_1 =
+  if
+    not
+      (try
+         Ortac_runtime.Gospelstdlib.(>)
+           (Ortac_runtime.Gospelstdlib.integer_of_int (capacity t_1))
+           (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+       with
+       | e ->
+           ((Ortac_runtime.Specification_failure
+               {
+                 term = "t.capacity > 0";
+                 term_kind = __position___003_;
+                 exn = e
+               })
+              |> (Ortac_runtime.Errors.register __error___002_);
+            true))
+  then
+    (Ortac_runtime.Violated_invariant
+       { term = "t.capacity > 0"; position = __position___003_ })
+      |> (Ortac_runtime.Errors.register __error___002_)
+let __invariant___004_ __error___005_ __position___006_ t_1 =
+  if
+    not
+      (try
+         Ortac_runtime.Gospelstdlib.(<=)
+           (Ortac_runtime.Gospelstdlib.List.length (view t_1))
+           (Ortac_runtime.Gospelstdlib.integer_of_int (capacity t_1))
+       with
+       | e ->
+           ((Ortac_runtime.Specification_failure
+               {
+                 term = "List.length t.view <= t.capacity";
+                 term_kind = __position___006_;
+                 exn = e
+               })
+              |> (Ortac_runtime.Errors.register __error___005_);
+            true))
+  then
+    (Ortac_runtime.Violated_invariant
+       {
+         term = "List.length t.view <= t.capacity";
+         position = __position___006_
+       })
+      |> (Ortac_runtime.Errors.register __error___005_)
+let capacity __arg0 =
+  let __error__007_ =
+    Ortac_runtime.Errors.create
+      {
+        Ortac_runtime.start =
+          {
+            pos_fname = "lib_model.mli";
+            pos_lnum = 8;
+            pos_bol = 277;
+            pos_cnum = 277
+          };
+        Ortac_runtime.stop =
+          {
+            pos_fname = "lib_model.mli";
+            pos_lnum = 8;
+            pos_bol = 277;
+            pos_cnum = 313
+          }
+      } "capacity" in
+  __invariant___004_ __error__007_ Pre __arg0;
+  __invariant___001_ __error__007_ Pre __arg0;
+  Ortac_runtime.Errors.report __error__007_;
+  (let result =
+     try capacity __arg0
+     with
+     | Stack_overflow | Out_of_memory as e ->
+         ((__invariant___004_ __error__007_ XPost __arg0;
+           __invariant___001_ __error__007_ XPost __arg0;
+           Ortac_runtime.Errors.report __error__007_);
+          raise e)
+     | e ->
+         ((Ortac_runtime.Unexpected_exception { allowed_exn = []; exn = e })
+            |> (Ortac_runtime.Errors.register __error__007_);
+          (__invariant___004_ __error__007_ XPost __arg0;
+           __invariant___001_ __error__007_ XPost __arg0;
+           Ortac_runtime.Errors.report __error__007_);
+          raise e) in
+   __invariant___004_ __error__007_ Post __arg0;
+   __invariant___001_ __error__007_ Post __arg0;
+   Ortac_runtime.Errors.report __error__007_;
+   result)
+let view __arg0_1 =
+  let __error__008_ =
+    Ortac_runtime.Errors.create
+      {
+        Ortac_runtime.start =
+          {
+            pos_fname = "lib_model.mli";
+            pos_lnum = 9;
+            pos_bol = 314;
+            pos_cnum = 314
+          };
+        Ortac_runtime.stop =
+          {
+            pos_fname = "lib_model.mli";
+            pos_lnum = 9;
+            pos_bol = 314;
+            pos_cnum = 350
+          }
+      } "view" in
+  __invariant___004_ __error__008_ Pre __arg0_1;
+  __invariant___001_ __error__008_ Pre __arg0_1;
+  Ortac_runtime.Errors.report __error__008_;
+  (let result_1 =
+     try view __arg0_1
+     with
+     | Stack_overflow | Out_of_memory as e ->
+         ((__invariant___004_ __error__008_ XPost __arg0_1;
+           __invariant___001_ __error__008_ XPost __arg0_1;
+           Ortac_runtime.Errors.report __error__008_);
+          raise e)
+     | e ->
+         ((Ortac_runtime.Unexpected_exception { allowed_exn = []; exn = e })
+            |> (Ortac_runtime.Errors.register __error__008_);
+          (__invariant___004_ __error__008_ XPost __arg0_1;
+           __invariant___001_ __error__008_ XPost __arg0_1;
+           Ortac_runtime.Errors.report __error__008_);
+          raise e) in
+   __invariant___004_ __error__008_ Post __arg0_1;
+   __invariant___001_ __error__008_ Post __arg0_1;
+   Ortac_runtime.Errors.report __error__008_;
+   result_1)
+let create c =
+  let __error__009_ =
+    Ortac_runtime.Errors.create
+      {
+        Ortac_runtime.start =
+          {
+            pos_fname = "lib_model.mli";
+            pos_lnum = 10;
+            pos_bol = 351;
+            pos_cnum = 351
+          };
+        Ortac_runtime.stop =
+          {
+            pos_fname = "lib_model.mli";
+            pos_lnum = 14;
+            pos_bol = 518;
+            pos_cnum = 544
+          }
+      } "create" in
+  if
+    not
+      (try
+         Ortac_runtime.Gospelstdlib.(>)
+           (Ortac_runtime.Gospelstdlib.integer_of_int c)
+           (Ortac_runtime.Gospelstdlib.integer_of_int 0)
+       with
+       | e ->
+           ((Ortac_runtime.Specification_failure
+               { term = "c > 0"; term_kind = Pre; exn = e })
+              |> (Ortac_runtime.Errors.register __error__009_);
+            true))
+  then
+    (Ortac_runtime.Violated_condition { term = "c > 0"; term_kind = Pre }) |>
+      (Ortac_runtime.Errors.register __error__009_);
+  Ortac_runtime.Errors.report __error__009_;
+  (let t_2 =
+     try create c
+     with
+     | Stack_overflow | Out_of_memory as e ->
+         (Ortac_runtime.Errors.report __error__009_; raise e)
+     | e ->
+         ((Ortac_runtime.Unexpected_exception { allowed_exn = []; exn = e })
+            |> (Ortac_runtime.Errors.register __error__009_);
+          Ortac_runtime.Errors.report __error__009_;
+          raise e) in
+   if
+     not
+       (try (view t_2) = []
+        with
+        | e ->
+            ((Ortac_runtime.Specification_failure
+                { term = "t.view = []"; term_kind = Post; exn = e })
+               |> (Ortac_runtime.Errors.register __error__009_);
+             true))
+   then
+     (Ortac_runtime.Violated_condition
+        { term = "t.view = []"; term_kind = Post })
+       |> (Ortac_runtime.Errors.register __error__009_);
+   if
+     not
+       (try (capacity t_2) = c
+        with
+        | e ->
+            ((Ortac_runtime.Specification_failure
+                { term = "t.capacity = c"; term_kind = Post; exn = e })
+               |> (Ortac_runtime.Errors.register __error__009_);
+             true))
+   then
+     (Ortac_runtime.Violated_condition
+        { term = "t.capacity = c"; term_kind = Post })
+       |> (Ortac_runtime.Errors.register __error__009_);
+   __invariant___004_ __error__009_ Post t_2;
+   __invariant___001_ __error__009_ Post t_2;
+   Ortac_runtime.Errors.report __error__009_;
+   t_2)
+let is_empty t_3 =
+  let __error__010_ =
+    Ortac_runtime.Errors.create
+      {
+        Ortac_runtime.start =
+          {
+            pos_fname = "lib_model.mli";
+            pos_lnum = 16;
+            pos_bol = 546;
+            pos_cnum = 546
+          };
+        Ortac_runtime.stop =
+          {
+            pos_fname = "lib_model.mli";
+            pos_lnum = 19;
+            pos_bol = 687;
+            pos_cnum = 719
+          }
+      } "is_empty" in
+  __invariant___004_ __error__010_ Pre t_3;
+  __invariant___001_ __error__010_ Pre t_3;
+  Ortac_runtime.Errors.report __error__010_;
+  (let b =
+     try is_empty t_3
+     with
+     | Stack_overflow | Out_of_memory as e ->
+         ((__invariant___004_ __error__010_ XPost t_3;
+           __invariant___001_ __error__010_ XPost t_3;
+           Ortac_runtime.Errors.report __error__010_);
+          raise e)
+     | e ->
+         ((Ortac_runtime.Unexpected_exception { allowed_exn = []; exn = e })
+            |> (Ortac_runtime.Errors.register __error__010_);
+          (__invariant___004_ __error__010_ XPost t_3;
+           __invariant___001_ __error__010_ XPost t_3;
+           Ortac_runtime.Errors.report __error__010_);
+          raise e) in
+   if
+     not
+       (try (b = true) = ((view t_3) = [])
+        with
+        | e ->
+            ((Ortac_runtime.Specification_failure
+                { term = "b <-> t.view = []"; term_kind = Post; exn = e })
+               |> (Ortac_runtime.Errors.register __error__010_);
+             true))
+   then
+     (Ortac_runtime.Violated_condition
+        { term = "b <-> t.view = []"; term_kind = Post })
+       |> (Ortac_runtime.Errors.register __error__010_);
+   __invariant___004_ __error__010_ Post t_3;
+   __invariant___001_ __error__010_ Post t_3;
+   Ortac_runtime.Errors.report __error__010_;
+   b)
+let mem t_4 x =
+  let __error__011_ =
+    Ortac_runtime.Errors.create
+      {
+        Ortac_runtime.start =
+          {
+            pos_fname = "lib_model.mli";
+            pos_lnum = 21;
+            pos_bol = 721;
+            pos_cnum = 721
+          };
+        Ortac_runtime.stop =
+          {
+            pos_fname = "lib_model.mli";
+            pos_lnum = 24;
+            pos_bol = 866;
+            pos_cnum = 904
+          }
+      } "mem" in
+  __invariant___004_ __error__011_ Pre t_4;
+  __invariant___001_ __error__011_ Pre t_4;
+  Ortac_runtime.Errors.report __error__011_;
+  (let b_1 =
+     try mem t_4 x
+     with
+     | Stack_overflow | Out_of_memory as e ->
+         ((__invariant___004_ __error__011_ XPost t_4;
+           __invariant___001_ __error__011_ XPost t_4;
+           Ortac_runtime.Errors.report __error__011_);
+          raise e)
+     | e ->
+         ((Ortac_runtime.Unexpected_exception { allowed_exn = []; exn = e })
+            |> (Ortac_runtime.Errors.register __error__011_);
+          (__invariant___004_ __error__011_ XPost t_4;
+           __invariant___001_ __error__011_ XPost t_4;
+           Ortac_runtime.Errors.report __error__011_);
+          raise e) in
+   if
+     not
+       (try (b_1 = true) = (Ortac_runtime.Gospelstdlib.List.mem x (view t_4))
+        with
+        | e ->
+            ((Ortac_runtime.Specification_failure
+                { term = "b <-> List.mem x t.view"; term_kind = Post; exn = e
+                })
+               |> (Ortac_runtime.Errors.register __error__011_);
+             true))
+   then
+     (Ortac_runtime.Violated_condition
+        { term = "b <-> List.mem x t.view"; term_kind = Post })
+       |> (Ortac_runtime.Errors.register __error__011_);
+   __invariant___004_ __error__011_ Post t_4;
+   __invariant___001_ __error__011_ Post t_4;
+   Ortac_runtime.Errors.report __error__011_;
+   b_1)
+let clear t_5 =
+  let __error__012_ =
+    Ortac_runtime.Errors.create
+      {
+        Ortac_runtime.start =
+          {
+            pos_fname = "lib_model.mli";
+            pos_lnum = 26;
+            pos_bol = 906;
+            pos_cnum = 906
+          };
+        Ortac_runtime.stop =
+          {
+            pos_fname = "lib_model.mli";
+            pos_lnum = 29;
+            pos_bol = 1041;
+            pos_cnum = 1066
+          }
+      } "clear" in
+  __invariant___004_ __error__012_ Pre t_5;
+  __invariant___001_ __error__012_ Pre t_5;
+  Ortac_runtime.Errors.report __error__012_;
+  (let () =
+     try clear t_5
+     with
+     | Stack_overflow | Out_of_memory as e ->
+         ((__invariant___004_ __error__012_ XPost t_5;
+           __invariant___001_ __error__012_ XPost t_5;
+           Ortac_runtime.Errors.report __error__012_);
+          raise e)
+     | e ->
+         ((Ortac_runtime.Unexpected_exception { allowed_exn = []; exn = e })
+            |> (Ortac_runtime.Errors.register __error__012_);
+          (__invariant___004_ __error__012_ XPost t_5;
+           __invariant___001_ __error__012_ XPost t_5;
+           Ortac_runtime.Errors.report __error__012_);
+          raise e) in
+   if
+     not
+       (try (is_empty t_5) = true
+        with
+        | e ->
+            ((Ortac_runtime.Specification_failure
+                { term = "is_empty t"; term_kind = Post; exn = e })
+               |> (Ortac_runtime.Errors.register __error__012_);
+             true))
+   then
+     (Ortac_runtime.Violated_condition
+        { term = "is_empty t"; term_kind = Post })
+       |> (Ortac_runtime.Errors.register __error__012_);
+   __invariant___004_ __error__012_ Post t_5;
+   __invariant___001_ __error__012_ Post t_5;
+   Ortac_runtime.Errors.report __error__012_;
+   ())
+let add t_6 x_1 =
+  let __error__013_ =
+    Ortac_runtime.Errors.create
+      {
+        Ortac_runtime.start =
+          {
+            pos_fname = "lib_model.mli";
+            pos_lnum = 31;
+            pos_bol = 1068;
+            pos_cnum = 1068
+          };
+        Ortac_runtime.stop =
+          {
+            pos_fname = "lib_model.mli";
+            pos_lnum = 34;
+            pos_bol = 1223;
+            pos_cnum = 1264
+          }
+      } "add" in
+  let ___ortac_copy_1 = Ortac_runtime.copy t_6 in
+  __invariant___004_ __error__013_ Pre t_6;
+  __invariant___001_ __error__013_ Pre t_6;
+  Ortac_runtime.Errors.report __error__013_;
+  (let () =
+     try add t_6 x_1
+     with
+     | Stack_overflow | Out_of_memory as e ->
+         ((__invariant___004_ __error__013_ XPost t_6;
+           __invariant___001_ __error__013_ XPost t_6;
+           Ortac_runtime.Errors.report __error__013_);
+          raise e)
+     | e ->
+         ((Ortac_runtime.Unexpected_exception { allowed_exn = []; exn = e })
+            |> (Ortac_runtime.Errors.register __error__013_);
+          (__invariant___004_ __error__013_ XPost t_6;
+           __invariant___001_ __error__013_ XPost t_6;
+           Ortac_runtime.Errors.report __error__013_);
+          raise e) in
+   if
+     not
+       (try (view t_6) = (x_1 :: (view ___ortac_copy_1))
+        with
+        | e ->
+            ((Ortac_runtime.Specification_failure
+                {
+                  term = "t.view = x :: (old t.view)";
+                  term_kind = Post;
+                  exn = e
+                })
+               |> (Ortac_runtime.Errors.register __error__013_);
+             true))
+   then
+     (Ortac_runtime.Violated_condition
+        { term = "t.view = x :: (old t.view)"; term_kind = Post })
+       |> (Ortac_runtime.Errors.register __error__013_);
+   __invariant___004_ __error__013_ Post t_6;
+   __invariant___001_ __error__013_ Post t_6;
+   Ortac_runtime.Errors.report __error__013_;
+   ())
