@@ -586,6 +586,15 @@ let type_ ~pack ~ghost (td : Tast.type_declaration) =
 
 let types ~pack ~ghost = List.fold_left (fun pack -> type_ ~pack ~ghost) pack
 
+let has_target_model attr =
+  match attr with { attr_name = { txt = "model"; _ }; _ } -> true | _ -> false
+
+let rec iter_attrs = function
+  | [] -> false
+  | hd :: tl -> if has_target_model hd then true else iter_attrs tl
+
+let is_projection (vd : Tast.val_description) = iter_attrs vd.vd_attrs
+
 let value ~pack ~ghost (vd : Tast.val_description) =
   let ir, context = P.unpack pack in
   let name = vd.vd_name.id_str in
@@ -593,9 +602,10 @@ let value ~pack ~ghost (vd : Tast.val_description) =
   let register_name = register_name () in
   let arguments = List.map (var_of_arg ~ir) vd.vd_args in
   let returns = List.map (var_of_arg ~ir) vd.vd_ret in
+  let model = is_projection vd in
   let pure = false in
   let value =
-    Ir.value ~name ~loc ~register_name ~arguments ~returns ~pure ~ghost
+    Ir.value ~name ~loc ~register_name ~arguments ~returns ~pure ~ghost ~model
   in
   let process ~value (spec : Tast.val_spec) =
     let term_printer = term_printer spec.sp_text spec.sp_loc in
@@ -611,14 +621,14 @@ let value ~pack ~ghost (vd : Tast.val_description) =
     { value with pure = spec.sp_pure }
   in
   let value = Option.fold ~none:value ~some:(process ~value) vd.vd_spec in
-  let value_item = Ir.Value value in
+  let item = if model then Ir.Model value else Ir.Value value in
   let context =
     if value.pure then
       let ls = Ortac_core.Context.get_ls context [ name ] in
       Ortac_core.Context.add_function ls name context
     else context
   in
-  let ir = Ir.add_translation value_item ir in
+  let ir = Ir.add_translation item ir in
   P.pack ir context
 
 let constant ~pack ~ghost (vd : Tast.val_description) =

@@ -88,6 +88,7 @@ let emit_warnings ppf context =
   Ir.iter_translation context ~f:(function
     | Type t -> type_ ppf t
     | Value v -> value ppf v
+    | Model m -> value ppf m
     | Constant c -> constant ppf c
     | Function f -> function_ ppf f
     | Predicate p -> predicate ppf p
