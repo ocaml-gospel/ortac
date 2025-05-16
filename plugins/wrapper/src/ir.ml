@@ -62,6 +62,7 @@ type value = {
   arguments : ocaml_var list;
   returns : ocaml_var list;
   register_name : string;
+  model : bool;
   ghost : Gospel.Tast.ghost;
   pure : bool;
   checks : check list;
@@ -71,13 +72,14 @@ type value = {
   xpostconditions : xpost list;
 }
 
-let value ~name ~loc ~arguments ~returns ~register_name ~ghost ~pure =
+let value ~name ~loc ~arguments ~returns ~register_name ~model ~ghost ~pure =
   {
     name;
     loc;
     arguments;
     returns;
     register_name;
+    model;
     ghost;
     pure;
     checks = [];

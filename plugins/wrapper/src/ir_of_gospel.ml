@@ -586,6 +586,13 @@ let type_ ~pack ~ghost (td : Tast.type_declaration) =
 
 let types ~pack ~ghost = List.fold_left (fun pack -> type_ ~pack ~ghost) pack
 
+let is_projection (vd : Tast.val_description) =
+  let aux = function
+    | { attr_name = { txt = "model"; _ }; _ } -> true
+    | _ -> false
+  in
+  List.exists aux vd.vd_attrs
+
 let value ~pack ~ghost (vd : Tast.val_description) =
   let ir, context = P.unpack pack in
   let name = vd.vd_name.id_str in
@@ -593,9 +600,10 @@ let value ~pack ~ghost (vd : Tast.val_description) =
   let register_name = register_name () in
   let arguments = List.map (var_of_arg ~ir) vd.vd_args in
   let returns = List.map (var_of_arg ~ir) vd.vd_ret in
+  let model = is_projection vd in
   let pure = false in
   let value =
-    Ir.value ~name ~loc ~register_name ~arguments ~returns ~pure ~ghost
+    Ir.value ~name ~loc ~register_name ~arguments ~returns ~pure ~ghost ~model
   in
   let process ~value (spec : Tast.val_spec) =
     let term_printer = term_printer spec.sp_text spec.sp_loc in
