@@ -1,5 +1,7 @@
 # Unreleased
 
+- [Wrapper] Add support for models in the wrapper plugin
+  [\#305](https://github.com/ocaml-gospel/ortac/pull/305)
 - [Wrapper] Reorganise tests into separate files
   [\#306](https://github.com/ocaml-gospel/ortac/pull/306)
 - [Wrapper] Add support for old operator in the wrapper plugin
