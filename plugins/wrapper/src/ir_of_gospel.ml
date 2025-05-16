@@ -38,6 +38,71 @@ let with_models ~context:_ fields (type_ : type_) =
   in
   { type_ with models }
 
+let mem_model (ir : Ir.t) (field : string) =
+  let aux = function Type t -> List.mem_assoc field t.models | _ -> false in
+  List.exists aux ir.structure
+
+let collect_model (ir : Ir.t) =
+  (* replaces calls to the gospel model by the projection function *)
+  let rec collect term =
+    match term.Tterm.t_node with
+    | Tvar _ | Tconst _ | Ttrue | Tfalse -> term
+    | Tapp (ls, tl) ->
+        let tl = List.map collect tl in
+        let t_node = Tterm.Tapp (ls, tl) in
+        { term with t_node }
+    | Tfield (t, ls) ->
+        let t = collect t in
+        let field = ls.ls_name.id_str in
+        let vs =
+          let vs_ty = Option.value ls.ls_value ~default:Ttypes.ty_bool in
+          Symbols.{ vs_name = ls.ls_name; vs_ty }
+        in
+        let proj = Tterm_helper.t_var vs Location.none in
+        let t_node =
+          if mem_model ir field then Tterm.Tapp (Symbols.fs_apply, [ proj; t ])
+          else Tterm.Tfield (t, ls)
+        in
+        { term with t_node }
+    | Tif (t1, t2, t3) ->
+        let t1 = collect t1 in
+        let t2 = collect t2 in
+        let t3 = collect t3 in
+        let t_node = Tterm.Tif (t1, t2, t3) in
+        { term with t_node }
+    | Tlet (vs, t1, t2) ->
+        let t1 = collect t1 in
+        let t2 = collect t2 in
+        let t_node = Tterm.Tlet (vs, t1, t2) in
+        { term with t_node }
+    | Tcase (t, ptl) ->
+        let t = collect t in
+        let ptl =
+          List.map (fun (p, g, t) -> (p, Option.map collect g, collect t)) ptl
+        in
+        let t_node = Tterm.Tcase (t, ptl) in
+        { term with t_node }
+    | Tlambda (pl, t) ->
+        let t = collect t in
+        let t_node = Tterm.Tlambda (pl, t) in
+        { term with t_node }
+    | Tquant (q, vsl, t) ->
+        let t = collect t in
+        let t_node = Tterm.Tquant (q, vsl, t) in
+        { term with t_node }
+    | Tbinop (op, t1, t2) ->
+        let t1 = collect t1 in
+        let t2 = collect t2 in
+        let t_node = Tterm.Tbinop (op, t1, t2) in
+        { term with t_node }
+    | Tnot t ->
+        let t = collect t in
+        let t_node = Tterm.Tnot t in
+        { term with t_node }
+    | Told t -> collect t
+  in
+  collect
+
 let subst_invariant_fields var (t : Tterm.term) =
   let rec aux t =
     match t.Tterm.t_node with
@@ -93,7 +158,7 @@ let subst_invariant_fields var (t : Tterm.term) =
   in
   aux t
 
-let invariant ~context ~term_printer self (invariant : Tterm.term) =
+let invariant ~context ~term_printer self (ir : Ir.t) (invariant : Tterm.term) =
   let function_name = gen_symbol ~prefix:"__invariant_" () in
   let instance_arg =
     (Nolabel, pvar (Fmt.str "%a" Ident.pp self.Symbols.vs_name))
@@ -105,6 +170,7 @@ let invariant ~context ~term_printer self (invariant : Tterm.term) =
       { vs_name = self.Symbols.vs_name; vs_ty = Ttypes.ty_unit }
       loc
   in
+  let invariant = collect_model ir invariant in
 
   let register_name = gen_symbol ~prefix:"__error_" () in
   let register_name_arg = (Nolabel, pvar register_name) in
@@ -130,11 +196,12 @@ let invariant ~context ~term_printer self (invariant : Tterm.term) =
   in
   { txt; loc; translation }
 
-let with_invariants ~context ~term_printer invariants (type_ : type_) =
+let with_invariants ~context ~term_printer (ir : Ir.t) invariants
+    (type_ : type_) =
   Option.fold ~none:type_
     ~some:(fun (self, invariants) ->
       let invariants =
-        List.map (invariant ~context ~term_printer self) invariants
+        List.map (invariant ~context ~term_printer self ir) invariants
       in
       { type_ with invariants })
     invariants
@@ -411,7 +478,7 @@ let collect_old t =
   in
   aux [] t
 
-let with_posts ~context ~term_printer posts (value : value) =
+let with_posts ~context ~term_printer (ir : Ir.t) posts (value : value) =
   let register_name = evar value.register_name in
   let violated term = F.violated_condition `Post ~term ~register_name in
   let nonexec term exn = F.spec_failure `Post ~term ~exn ~register_name in
@@ -429,6 +496,7 @@ let with_posts ~context ~term_printer posts (value : value) =
           Ortac_core.Ocaml_of_gospel.term ~context t ))
       copies
   in
+  let posts = List.map (collect_model ir) posts in
   let postconditions =
     conditions ~context ~term_printer violated nonexec posts
   in
@@ -575,9 +643,12 @@ let type_ ~pack ~ghost (td : Tast.type_declaration) =
   let type_ = Ir.type_ ~name ~loc ~ghost in
   let process ~type_ (spec : Tast.type_spec) =
     let term_printer = term_printer spec.ty_text spec.ty_loc in
-    type_
-    |> with_models ~context spec.ty_fields
-    |> with_invariants ~context ~term_printer spec.ty_invariants
+    let type_ = with_models ~context spec.ty_fields type_ in
+    let temp_item = Ir.Type type_ in
+    let temp_ir =
+      ir |> Ir.add_translation temp_item |> Ir.add_type td.td_ts type_
+    in
+    with_invariants ~context ~term_printer temp_ir spec.ty_invariants type_
   in
   let type_ = Option.fold ~none:type_ ~some:(process ~type_) td.td_spec in
   let type_item = Ir.Type type_ in
@@ -611,7 +682,7 @@ let value ~pack ~ghost (vd : Tast.val_description) =
       value
       |> with_checks ~context ~term_printer spec.sp_checks
       |> with_pres ~context ~term_printer spec.sp_pre
-      |> with_posts ~context ~term_printer spec.sp_post
+      |> with_posts ~context ~term_printer ir spec.sp_post
       |> with_xposts ~context ~term_printer spec.sp_xpost
       |> with_consumes spec.sp_cs
       |> with_modified spec.sp_wr
