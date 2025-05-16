@@ -231,6 +231,7 @@ let structure runtime module_name ir : Ppxlib.structure =
           ~expr:(pmod_ident (lident runtime)))
   :: (Ir.map_translation ir ~f:(function
         | Ir.Value v -> value v
+        | Ir.Model m -> value m
         | Ir.Function f -> function_ f
         | Ir.Predicate f -> function_ f
         | Ir.Constant c -> constant c
