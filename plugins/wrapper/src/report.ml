@@ -3,13 +3,12 @@ module W = Ortac_core.Warnings
 type W.kind +=
   | Ghost_value of string
   | Ghost_type of string
-  | Unsupported_model of string * string
   | Function_without_definition of string
   | Predicate_without_definition of string
 
 let level = function
-  | Ghost_value _ | Ghost_type _ | Unsupported_model _
-  | Function_without_definition _ | Predicate_without_definition _ ->
+  | Ghost_value _ | Ghost_type _ | Function_without_definition _
+  | Predicate_without_definition _ ->
       W.Warning
   | kind -> W.level kind
 
@@ -19,9 +18,6 @@ let pp_kind ppf = function
   | Ghost_value name ->
       pf ppf "%s is a ghost value. It was not translated." name
   | Ghost_type name -> pf ppf "%s is a ghost type. It was not translated." name
-  | Unsupported_model (type_, name) ->
-      pf ppf "Model %s of type %s is not supported. It was not translated." name
-        type_
   | Function_without_definition name ->
       pf ppf "The function %s has no definition. It was not translated." name
   | Predicate_without_definition name ->
@@ -55,11 +51,6 @@ let type_ ppf (t : type_) =
   match t.ghost with
   | Gospel.Tast.Ghost -> pp ppf (Ghost_type t.name, t.loc)
   | Nonghost ->
-      List.iter
-        (fun (m, _) ->
-          let t = (Unsupported_model (t.name, m), t.loc) in
-          pp ppf t)
-        t.models;
       (* Result.iter_error (W.pp ppf) t.equality; *)
       (* Result.iter_error (W.pp ppf) t.comparison; *)
       (* Result.iter_error (W.pp ppf) t.copy; *)
