@@ -9,6 +9,8 @@ module Ident = Identifier.Ident
 open Ortac_core.Utils
 module VSet = Set.Make (Symbols.Vs)
 
+let models : string list ref = ref [] (* stores the existing gospel models *)
+
 let term ~context fail t =
   try
     Ok
@@ -34,9 +36,70 @@ let conditions ~context ~term_printer fail_violated fail_nonexec terms =
 
 let with_models ~context:_ fields (type_ : type_) =
   let models =
-    List.map (fun ((ls : Symbols.lsymbol), b) -> (ls.ls_name.id_str, b)) fields
+    List.map
+      (fun ((ls : Symbols.lsymbol), b) ->
+        let name = ls.ls_name.id_str in
+        models := name :: !models;
+        (name, b))
+      fields
   in
   { type_ with models }
+
+let rec collect_model term : Tterm.term =
+  (* replaces calls to the gospel model by the projection function *)
+  match term.Tterm.t_node with
+  | Tvar _ | Tconst _ | Ttrue | Tfalse -> term
+  | Tapp (ls, tl) ->
+      let tl = List.map collect_model tl in
+      let t_node = Tterm.Tapp (ls, tl) in
+      { term with t_node }
+  | Tfield (t, ls) ->
+      let t = collect_model t in
+      let field = ls.ls_name.id_str in
+      let t_node =
+        if List.mem field !models then
+          Tterm.Tapp ({ ls with ls_constr = true }, [ t ])
+        else Tterm.Tfield (t, ls)
+      in
+      { term with t_node }
+  | Tif (t1, t2, t3) ->
+      let t1 = collect_model t1 in
+      let t2 = collect_model t2 in
+      let t3 = collect_model t3 in
+      let t_node = Tterm.Tif (t1, t2, t3) in
+      { term with t_node }
+  | Tlet (vs, t1, t2) ->
+      let t1 = collect_model t1 in
+      let t2 = collect_model t2 in
+      let t_node = Tterm.Tlet (vs, t1, t2) in
+      { term with t_node }
+  | Tcase (t, ptl) ->
+      let t = collect_model t in
+      let ptl =
+        List.map
+          (fun (p, g, t) -> (p, Option.map collect_model g, collect_model t))
+          ptl
+      in
+      let t_node = Tterm.Tcase (t, ptl) in
+      { term with t_node }
+  | Tlambda (pl, t) ->
+      let t = collect_model t in
+      let t_node = Tterm.Tlambda (pl, t) in
+      { term with t_node }
+  | Tquant (q, vsl, t) ->
+      let t = collect_model t in
+      let t_node = Tterm.Tquant (q, vsl, t) in
+      { term with t_node }
+  | Tbinop (op, t1, t2) ->
+      let t1 = collect_model t1 in
+      let t2 = collect_model t2 in
+      let t_node = Tterm.Tbinop (op, t1, t2) in
+      { term with t_node }
+  | Tnot t ->
+      let t = collect_model t in
+      let t_node = Tterm.Tnot t in
+      { term with t_node }
+  | Told t -> collect_model t
 
 let subst_invariant_fields var (t : Tterm.term) =
   let rec aux t =
@@ -105,6 +168,7 @@ let invariant ~context ~term_printer self (invariant : Tterm.term) =
       { vs_name = self.Symbols.vs_name; vs_ty = Ttypes.ty_unit }
       loc
   in
+  let invariant = collect_model invariant in
 
   let register_name = gen_symbol ~prefix:"__error_" () in
   let register_name_arg = (Nolabel, pvar register_name) in
@@ -429,6 +493,7 @@ let with_posts ~context ~term_printer posts (value : value) =
           Ortac_core.Ocaml_of_gospel.term ~context t ))
       copies
   in
+  let posts = List.map collect_model posts in
   let postconditions =
     conditions ~context ~term_printer violated nonexec posts
   in
