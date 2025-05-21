@@ -1,5 +1,6 @@
 module To_test = Wrapper
 module To_test2 = Wrapper_behaviour
+module To_test3 = Wrapper_model
 
 let test_create () =
   let s = To_test.create 5 in
@@ -94,6 +95,12 @@ Runtime error in function `bad2_increment_int'
     Alcotest.fail "n should be incremented"
   with Ortac_runtime.Error _ -> ()
 
+let add_model () =
+  let s = To_test3.create 4 in
+  To_test3.add s 1;
+  To_test3.add s 2;
+  To_test3.add s 3
+
 let () =
   let open Alcotest in
   run "Wrapped lib"
@@ -115,4 +122,5 @@ let () =
           test_case "checks no hold, Invalid_argument hit" `Quick inv_arg;
           test_case "postcondition hit" `Quick post_cond;
         ] );
+      ("model tests", [ test_case "add model" `Quick add_model ]);
     ]

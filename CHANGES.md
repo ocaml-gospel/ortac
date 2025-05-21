@@ -1,5 +1,7 @@
 # Unreleased
 
+- [Wrapper] Add support for models in the wrapper plugin
+  [\#305](https://github.com/ocaml-gospel/ortac/pull/305)
 - [QCheck-STM] Disable warning 34 in generated code
   [\#307](https://github.com/ocaml-gospel/ortac/pull/307)
 - [Wrapper] Reorganise tests into separate files
