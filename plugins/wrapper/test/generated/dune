@@ -79,3 +79,28 @@
   (progn
    (diff errors_model.expected errors_model)
    (diff wrapper_model.expected.ml wrapper_model.ml))))
+
+(rule
+ (copy braun_tree.mli wrapper_braun_tree.mli))
+
+(rule
+ (target wrapper_braun_tree.ml)
+ (package ortac-wrapper)
+ (deps
+  (package ortac-core)
+  (package ortac-wrapper))
+ (action
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   wrapper
+   (with-stderr-to
+    errors_braun_tree
+    (run ortac wrapper -o %{target} %{dep:braun_tree.mli})))))
+
+(rule
+ (alias runtest)
+ (package ortac-wrapper)
+ (action
+  (progn
+   (diff errors_braun_tree.expected errors_braun_tree)
+   (diff wrapper_braun_tree.expected.ml wrapper_braun_tree.ml))))

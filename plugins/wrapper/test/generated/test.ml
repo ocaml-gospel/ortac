@@ -1,6 +1,7 @@
 module To_test = Wrapper
 module To_test2 = Wrapper_behaviour
 module To_test3 = Wrapper_model
+module Braun = Wrapper_braun_tree
 
 let test_create () =
   let s = To_test.create 5 in
@@ -101,8 +102,23 @@ let add_model () =
   To_test3.add s 2;
   To_test3.add s 3
 
+
+let pp t =
+  List.iter (fun e -> Format.printf "[%d]" e) (Braun.cont t);
+  Format.printf "@."
+
+let braun_tree () =
+  let b = Braun.of_list [1;2;3;4] in
+  let b = Braun.cons 0 b in
+  let b = Braun.snoc 5 b in
+  let b = Braun.tail b in
+  let b = Braun.liat b in
+  pp b;
+  ()
+
 let () =
   let open Alcotest in
+  braun_tree ();
   run "Wrapped lib"
     [
       ( "lib",
@@ -123,4 +139,5 @@ let () =
           test_case "postcondition hit" `Quick post_cond;
         ] );
       ("model tests", [ test_case "add model" `Quick add_model ]);
+      ("braun tree tests", [ test_case "Braun tree" `Quick braun_tree ]);
     ]
