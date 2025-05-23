@@ -76,3 +76,7 @@ following command for `varray_spec.mli` and an adapted version for
 $ ortac dune qcheck-stm varray_spec.mli varray_config.ml varray_tests.ml --package=ortac-examples --with-stdout-to=dune.varray.inc
 ```
 
+## `pascal` library
+
+This is an implementation of the calculus of the next line of Pascal triangle,
+calculating binomial coefficient using the same idea as [why3 proof](https://toccata.gitlabpages.inria.fr/toccata/gallery/binomial.en.html).
