@@ -240,10 +240,11 @@ let with_modified modifies (value : value) =
   in
   { value with arguments }
 
-let with_pres ~context ~term_printer pres (value : value) =
+let with_pres ~context ~term_printer ir pres (value : value) =
   let register_name = evar value.register_name in
   let violated term = F.violated_condition `Pre ~term ~register_name in
   let nonexec term exn = F.spec_failure `Pre ~term ~exn ~register_name in
+  let pres = List.map (collect_model ir) pres in
   let preconditions = conditions ~context ~term_printer violated nonexec pres in
   { value with preconditions }
 
@@ -681,7 +682,7 @@ let value ~pack ~ghost (vd : Tast.val_description) =
     let value =
       value
       |> with_checks ~context ~term_printer spec.sp_checks
-      |> with_pres ~context ~term_printer spec.sp_pre
+      |> with_pres ~context ~term_printer ir spec.sp_pre
       |> with_posts ~context ~term_printer ir spec.sp_post
       |> with_xposts ~context ~term_printer spec.sp_xpost
       |> with_consumes spec.sp_cs
