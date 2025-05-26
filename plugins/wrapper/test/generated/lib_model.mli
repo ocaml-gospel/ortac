@@ -32,3 +32,10 @@ val add : 'a t -> 'a -> unit
 (*@ add t x
     modifies t.view
     ensures t.view = x :: (old t.view) *)
+
+val tail : 'a t -> unit
+(*@ tail t
+    modifies t.view
+    requires t.view <> []
+    ensures t.capacity = old t.capacity - 1
+    ensures t.view = List.tl (old t.view) *)
