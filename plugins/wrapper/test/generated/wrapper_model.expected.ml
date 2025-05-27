@@ -424,3 +424,99 @@ let add t_6 x_1 =
    __invariant___001_ __error__013_ Post t_6;
    Ortac_runtime.Errors.report __error__013_;
    ())
+let tail t_7 =
+  let __error__014_ =
+    Ortac_runtime.Errors.create
+      {
+        Ortac_runtime.start =
+          {
+            pos_fname = "lib_model.mli";
+            pos_lnum = 36;
+            pos_bol = 1266;
+            pos_cnum = 1266
+          };
+        Ortac_runtime.stop =
+          {
+            pos_fname = "lib_model.mli";
+            pos_lnum = 41;
+            pos_bol = 1488;
+            pos_cnum = 1532
+          }
+      } "tail" in
+  let (___ortac_copy_3, ___ortac_copy_2) = Ortac_runtime.copy (t_7, t_7) in
+  if
+    not
+      (try not ((view t_7) = [])
+       with
+       | e ->
+           ((Ortac_runtime.Specification_failure
+               { term = "t.view <> []"; term_kind = Pre; exn = e })
+              |> (Ortac_runtime.Errors.register __error__014_);
+            true))
+  then
+    (Ortac_runtime.Violated_condition
+       { term = "t.view <> []"; term_kind = Pre })
+      |> (Ortac_runtime.Errors.register __error__014_);
+  __invariant___004_ __error__014_ Pre t_7;
+  __invariant___001_ __error__014_ Pre t_7;
+  Ortac_runtime.Errors.report __error__014_;
+  (let () =
+     try tail t_7
+     with
+     | Stack_overflow | Out_of_memory as e ->
+         ((__invariant___004_ __error__014_ XPost t_7;
+           __invariant___001_ __error__014_ XPost t_7;
+           Ortac_runtime.Errors.report __error__014_);
+          raise e)
+     | e ->
+         ((Ortac_runtime.Unexpected_exception { allowed_exn = []; exn = e })
+            |> (Ortac_runtime.Errors.register __error__014_);
+          (__invariant___004_ __error__014_ XPost t_7;
+           __invariant___001_ __error__014_ XPost t_7;
+           Ortac_runtime.Errors.report __error__014_);
+          raise e) in
+   if
+     not
+       (try
+          (view t_7) =
+            (Ortac_runtime.Gospelstdlib.List.tl (view ___ortac_copy_3))
+        with
+        | e ->
+            ((Ortac_runtime.Specification_failure
+                {
+                  term = "t.view = List.tl (old t.view)";
+                  term_kind = Post;
+                  exn = e
+                })
+               |> (Ortac_runtime.Errors.register __error__014_);
+             true))
+   then
+     (Ortac_runtime.Violated_condition
+        { term = "t.view = List.tl (old t.view)"; term_kind = Post })
+       |> (Ortac_runtime.Errors.register __error__014_);
+   if
+     not
+       (try
+          (Ortac_runtime.Gospelstdlib.integer_of_int (capacity t_7)) =
+            (Ortac_runtime.Gospelstdlib.(-)
+               (Ortac_runtime.Gospelstdlib.integer_of_int
+                  (capacity ___ortac_copy_2))
+               (Ortac_runtime.Gospelstdlib.integer_of_int 1))
+        with
+        | e ->
+            ((Ortac_runtime.Specification_failure
+                {
+                  term = "t.capacity = old t.capacity - 1";
+                  term_kind = Post;
+                  exn = e
+                })
+               |> (Ortac_runtime.Errors.register __error__014_);
+             true))
+   then
+     (Ortac_runtime.Violated_condition
+        { term = "t.capacity = old t.capacity - 1"; term_kind = Post })
+       |> (Ortac_runtime.Errors.register __error__014_);
+   __invariant___004_ __error__014_ Post t_7;
+   __invariant___001_ __error__014_ Post t_7;
+   Ortac_runtime.Errors.report __error__014_;
+   ())

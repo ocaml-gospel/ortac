@@ -1,5 +1,6 @@
 # Unreleased
-
+- [Wrapper] Fix missing model support in preconditions
+  [\#313](https://github.com/ocaml-gospel/ortac/pull/313)
 - [Wrapper] Add support for models in the wrapper plugin
   [\#305](https://github.com/ocaml-gospel/ortac/pull/305)
 - [QCheck-STM] Disable warning 34 in generated code

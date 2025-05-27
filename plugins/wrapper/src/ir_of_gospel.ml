@@ -38,11 +38,11 @@ let with_models ~context:_ fields (type_ : type_) =
   in
   { type_ with models }
 
-let mem_model (ir : Ir.t) (field : string) =
+let mem_model ir field =
   let aux = function Type t -> List.mem_assoc field t.models | _ -> false in
   List.exists aux ir.structure
 
-let collect_model (ir : Ir.t) =
+let collect_model ir =
   (* replaces calls to the gospel model by the projection function *)
   let rec collect term =
     match term.Tterm.t_node with
@@ -158,7 +158,7 @@ let subst_invariant_fields var (t : Tterm.term) =
   in
   aux t
 
-let invariant ~context ~term_printer self (ir : Ir.t) (invariant : Tterm.term) =
+let invariant ~context ~term_printer self ir (invariant : Tterm.term) =
   let function_name = gen_symbol ~prefix:"__invariant_" () in
   let instance_arg =
     (Nolabel, pvar (Fmt.str "%a" Ident.pp self.Symbols.vs_name))
@@ -196,8 +196,7 @@ let invariant ~context ~term_printer self (ir : Ir.t) (invariant : Tterm.term) =
   in
   { txt; loc; translation }
 
-let with_invariants ~context ~term_printer (ir : Ir.t) invariants
-    (type_ : type_) =
+let with_invariants ~context ~term_printer ir invariants (type_ : type_) =
   Option.fold ~none:type_
     ~some:(fun (self, invariants) ->
       let invariants =
@@ -240,10 +239,11 @@ let with_modified modifies (value : value) =
   in
   { value with arguments }
 
-let with_pres ~context ~term_printer pres (value : value) =
+let with_pres ~context ~term_printer ir pres (value : value) =
   let register_name = evar value.register_name in
   let violated term = F.violated_condition `Pre ~term ~register_name in
   let nonexec term exn = F.spec_failure `Pre ~term ~exn ~register_name in
+  let pres = List.map (collect_model ir) pres in
   let preconditions = conditions ~context ~term_printer violated nonexec pres in
   { value with preconditions }
 
@@ -478,7 +478,7 @@ let collect_old t =
   in
   aux [] t
 
-let with_posts ~context ~term_printer (ir : Ir.t) posts (value : value) =
+let with_posts ~context ~term_printer ir posts (value : value) =
   let register_name = evar value.register_name in
   let violated term = F.violated_condition `Post ~term ~register_name in
   let nonexec term exn = F.spec_failure `Post ~term ~exn ~register_name in
@@ -681,7 +681,7 @@ let value ~pack ~ghost (vd : Tast.val_description) =
     let value =
       value
       |> with_checks ~context ~term_printer spec.sp_checks
-      |> with_pres ~context ~term_printer spec.sp_pre
+      |> with_pres ~context ~term_printer ir spec.sp_pre
       |> with_posts ~context ~term_printer ir spec.sp_post
       |> with_xposts ~context ~term_printer spec.sp_xpost
       |> with_consumes spec.sp_cs
