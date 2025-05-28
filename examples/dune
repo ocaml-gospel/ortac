@@ -79,3 +79,25 @@
      --package=ortac-examples)))))
 
 (include dune.varray_circular.inc)
+
+(library
+ (name braun_tree)
+ (modules braun_tree)
+ (package ortac-examples))
+
+(rule
+ (targets braun_tree_wrapped.mli)
+ (deps braun_tree.mli)
+ (action
+  (copy %{deps} %{targets})))
+
+(rule
+ (mode promote)
+ (targets braun_tree_wrapped.ml)
+ (deps braun_tree.mli)
+ (action
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   wrapper
+   (ignore-stderr
+    (run ortac wrapper -o %{targets} %{deps})))))
