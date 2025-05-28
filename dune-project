@@ -207,6 +207,7 @@
   (ocaml (>= 4.12.0))
   (ortac-core (= :version))
   (ortac-qcheck-stm (= :version))
+  (ortac-wrapper (= :version))
   (ortac-dune (= :version))
   (lwt-dllist (>= 1.1.0))
   (varray (>= 0.2))))

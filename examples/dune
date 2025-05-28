@@ -79,3 +79,45 @@
      --package=ortac-examples)))))
 
 (include dune.varray_circular.inc)
+
+(library
+ (name braun_tree)
+ (modules braun_tree)
+ (package ortac-examples))
+
+(rule
+ (targets braun_tree_wrapped.mli)
+ (deps braun_tree.mli)
+ (action
+  (copy %{deps} %{targets})))
+
+(rule
+ (mode promote)
+ (targets braun_tree_wrapped.ml)
+ (deps braun_tree.mli)
+ (action
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   wrapper
+   (with-stderr-to
+    braun_tree_errors
+    (run ortac wrapper -o %{targets} %{deps})))))
+
+(library
+ (name braun_tree_wrapped)
+ (modules braun_tree_wrapped)
+ (libraries braun_tree ortac-runtime)
+ (package ortac-examples))
+
+(executable
+ (name braun_tree_client)
+ (modules braun_tree_client)
+ (libraries braun_tree_wrapped ortac-runtime)
+ (preprocess
+  (pps ppxlib.metaquot)))
+
+(rule
+ (alias runtest)
+ (deps braun_tree_client.exe)
+ (action
+  (run ./braun_tree_client.exe)))
