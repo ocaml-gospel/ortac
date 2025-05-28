@@ -1,4 +1,7 @@
 # Unreleased
+
+- [Wrapper] Add wrapper examples
+  [\#310](https://github.com/ocaml-gospel/ortac/pull/310)
 - [Wrapper] Fix missing model support in preconditions
   [\#313](https://github.com/ocaml-gospel/ortac/pull/313)
 - [Wrapper] Add support for models in the wrapper plugin
