@@ -76,3 +76,28 @@ following command for `varray_spec.mli` and an adapted version for
 $ ortac dune qcheck-stm varray_spec.mli varray_config.ml varray_tests.ml --package=ortac-examples --with-stdout-to=dune.varray.inc
 ```
 
+## `Braun trees` library
+
+This example demonstrates the use of the Ortac wrapper plugin on a functional
+data structure: the
+[Braun tree](https://www.proof.cit.tum.de/~nipkow/pubs/cpp20-devel.pdf).
+
+A Braun tree is a balanced binary tree that maintains a structural invariant:
+the left subtree is the same size as the right one or contains one more element.
+This invariant allows efficient implementations of array-like structures in a
+purely functional setting, such as flexible arrays or priority queues.
+
+In this example, we implemented a simple library for Braun trees and specified
+its interface using Gospel. We then used Ortac’s wrapper plugin to generate a
+wrapped `.ml file` automatically. This file preserves the same interface as the
+original module but adds runtime checks derived from the formal specifications.
+Note that this setup does not aim to test or verify the full semantics of the
+data structure. The wrapped module is used in `braun_tree_client.ml` as a
+transparent replacement for the original one, with the added benefit of
+runtime contract checking to ensure that the implementation behaves according to
+its specification during execution.
+
+Unlike the QCheck-STM plugin, which focuses on property-based testing, the
+wrapper plugin is more suited to runtime validation during development or
+realistic usage scenarios. As expected, these additional checks come with a
+performance cost, making the wrapper version less efficient than the original.
