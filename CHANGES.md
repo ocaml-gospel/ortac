@@ -1,4 +1,7 @@
 # Unreleased
+
+- [Dune] Add automatic dune file generation to the wrapper plugin
+  [\#314](https://github.com/ocaml-gospel/ortac/pull/314)
 - [Wrapper] Fix missing model support in preconditions
   [\#313](https://github.com/ocaml-gospel/ortac/pull/313)
 - [Wrapper] Add support for models in the wrapper plugin
