@@ -203,15 +203,15 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Record" "make 42"
+              (Ortac_runtime.Report.report "Record" "make 42"
                  (try
-                    Ortac_runtime.Value
+                    Ortac_runtime.Report.Value
                       (Res
                          (integer,
                            (Ortac_runtime.Gospelstdlib.(+)
                               (Ortac_runtime.Gospelstdlib.integer_of_int i_2)
                               (Ortac_runtime.Gospelstdlib.integer_of_int 1))))
-                  with | e -> Ortac_runtime.Out_of_domain) "plus1"
+                  with | e -> Ortac_runtime.Report.Out_of_domain) "plus1"
                  [("i1 = i + 1",
                     {
                       Ortac_runtime.start =
@@ -240,15 +240,15 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Record" "make 42"
+              (Ortac_runtime.Report.report "Record" "make 42"
                  (try
-                    Ortac_runtime.Value
+                    Ortac_runtime.Report.Value
                       (Res
                          (integer,
                            (Ortac_runtime.Gospelstdlib.(+)
                               (Ortac_runtime.Gospelstdlib.integer_of_int i_3)
                               (Ortac_runtime.Gospelstdlib.integer_of_int 2))))
-                  with | e -> Ortac_runtime.Out_of_domain) "plus2"
+                  with | e -> Ortac_runtime.Report.Out_of_domain) "plus2"
                  [("i2 = i + 2",
                     {
                       Ortac_runtime.start =
@@ -267,7 +267,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                         }
                     })])
       | (Get, Res ((Int, _), i_4)) ->
-          Ortac_runtime.append
+          Ortac_runtime.Report.append
             (if
                let r_old__017_ = Model.get state__009_ 0
                and r_new__018_ =
@@ -279,9 +279,9 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
              then None
              else
                Some
-                 (Ortac_runtime.report "Record" "make 42"
+                 (Ortac_runtime.Report.report "Record" "make 42"
                     (try
-                       Ortac_runtime.Value
+                       Ortac_runtime.Report.Value
                          (Res
                             (integer,
                               (let r_old__013_ = Model.get state__009_ 0
@@ -289,7 +289,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                                  lazy
                                    (Model.get (Lazy.force new_state__011_) 0) in
                                (Lazy.force r_new__014_).value)))
-                     with | e -> Ortac_runtime.Out_of_domain) "get"
+                     with | e -> Ortac_runtime.Report.Out_of_domain) "get"
                     [("i = r.value",
                        {
                          Ortac_runtime.start =
@@ -307,7 +307,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                              pos_cnum = 891
                            }
                        })]))
-            (Ortac_runtime.append
+            (Ortac_runtime.Report.append
                (if
                   let r_old__021_ = Model.get state__009_ 0
                   and r_new__022_ =
@@ -322,9 +322,9 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                 then None
                 else
                   Some
-                    (Ortac_runtime.report "Record" "make 42"
+                    (Ortac_runtime.Report.report "Record" "make 42"
                        (try
-                          Ortac_runtime.Value
+                          Ortac_runtime.Report.Value
                             (Res
                                (integer,
                                  (let r_old__013_ = Model.get state__009_ 0
@@ -333,7 +333,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                                       (Model.get (Lazy.force new_state__011_)
                                          0) in
                                   (Lazy.force r_new__014_).value)))
-                        with | e -> Ortac_runtime.Out_of_domain) "get"
+                        with | e -> Ortac_runtime.Report.Out_of_domain) "get"
                        [("plus1 i = i + 1",
                           {
                             Ortac_runtime.start =
@@ -364,9 +364,9 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                 then None
                 else
                   Some
-                    (Ortac_runtime.report "Record" "make 42"
+                    (Ortac_runtime.Report.report "Record" "make 42"
                        (try
-                          Ortac_runtime.Value
+                          Ortac_runtime.Report.Value
                             (Res
                                (integer,
                                  (let r_old__013_ = Model.get state__009_ 0
@@ -375,7 +375,7 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                                       (Model.get (Lazy.force new_state__011_)
                                          0) in
                                   (Lazy.force r_new__014_).value)))
-                        with | e -> Ortac_runtime.Out_of_domain) "get"
+                        with | e -> Ortac_runtime.Report.Out_of_domain) "get"
                        [("plus2 i = i + 2",
                           {
                             Ortac_runtime.start =

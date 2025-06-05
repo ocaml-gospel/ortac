@@ -228,10 +228,12 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "Conjunctive_clauses"
+                     (Ortac_runtime.Report.report "Conjunctive_clauses"
                         "make 42 'a'"
-                        (try Ortac_runtime.Exception "Invalid_argument"
-                         with | e -> Ortac_runtime.Out_of_domain) "make"
+                        (try
+                           Ortac_runtime.Report.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Report.Out_of_domain)
+                        "make"
                         [("i >= 0",
                            {
                              Ortac_runtime.start =
@@ -264,10 +266,13 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Conjunctive_clauses"
+                        (Ortac_runtime.Report.report "Conjunctive_clauses"
                            "make 42 'a'"
-                           (try Ortac_runtime.Exception "Invalid_argument"
-                            with | e -> Ortac_runtime.Out_of_domain) "make"
+                           (try
+                              Ortac_runtime.Report.Exception
+                                "Invalid_argument"
+                            with | e -> Ortac_runtime.Report.Out_of_domain)
+                           "make"
                            [("i >= 0",
                               {
                                 Ortac_runtime.start =
@@ -303,10 +308,12 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "Conjunctive_clauses"
+                     (Ortac_runtime.Report.report "Conjunctive_clauses"
                         "make 42 'a'"
-                        (try Ortac_runtime.Exception "Invalid_argument"
-                         with | e -> Ortac_runtime.Out_of_domain) "set"
+                        (try
+                           Ortac_runtime.Report.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Report.Out_of_domain)
+                        "set"
                         [("0 <= i < Sequence.length t.contents",
                            {
                              Ortac_runtime.start =
@@ -347,10 +354,13 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Conjunctive_clauses"
+                        (Ortac_runtime.Report.report "Conjunctive_clauses"
                            "make 42 'a'"
-                           (try Ortac_runtime.Exception "Invalid_argument"
-                            with | e -> Ortac_runtime.Out_of_domain) "set"
+                           (try
+                              Ortac_runtime.Report.Exception
+                                "Invalid_argument"
+                            with | e -> Ortac_runtime.Report.Out_of_domain)
+                           "set"
                            [("0 <= i < Sequence.length t.contents",
                               {
                                 Ortac_runtime.start =
