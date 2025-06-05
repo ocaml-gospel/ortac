@@ -3,4 +3,5 @@
  (deps
   (package ortac-core)
   (package ortac-qcheck-stm)
+  (package ortac-wrapper)
   (package ortac-dune)))
