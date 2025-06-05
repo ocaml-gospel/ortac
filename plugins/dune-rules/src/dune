@@ -1,6 +1,7 @@
 (library
  (public_name ortac-dune.plugin)
  (name ortac_dune)
+ (modules utils qcheck_stm dune_rules)
  (libraries cmdliner fmt ortac-core.register))
 
 (plugin
