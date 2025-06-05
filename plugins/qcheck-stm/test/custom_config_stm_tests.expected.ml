@@ -251,9 +251,11 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "Custom_config" "empty ()"
-                        (try Ortac_runtime.Exception "Invalid_argument"
-                         with | e -> Ortac_runtime.Out_of_domain) "top"
+                     (Ortac_runtime.Report.report "Custom_config" "empty ()"
+                        (try
+                           Ortac_runtime.Report.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Report.Out_of_domain)
+                        "top"
                         [("t.contents <> Sequence.empty",
                            {
                              Ortac_runtime.start =
@@ -287,11 +289,13 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Custom_config" "empty ()"
+                        (Ortac_runtime.Report.report "Custom_config"
+                           "empty ()"
                            (try
-                              Ortac_runtime.Protected_value
-                                (Res (Ortac_runtime.dummy, ()))
-                            with | e -> Ortac_runtime.Out_of_domain) "top"
+                              Ortac_runtime.Report.Protected_value
+                                (Res (Ortac_runtime.Report.dummy, ()))
+                            with | e -> Ortac_runtime.Report.Out_of_domain)
+                           "top"
                            [("proj a = Sequence.hd t.contents",
                               {
                                 Ortac_runtime.start =
@@ -324,9 +328,13 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Custom_config" "empty ()"
-                           (try Ortac_runtime.Exception "Invalid_argument"
-                            with | e -> Ortac_runtime.Out_of_domain) "top"
+                        (Ortac_runtime.Report.report "Custom_config"
+                           "empty ()"
+                           (try
+                              Ortac_runtime.Report.Exception
+                                "Invalid_argument"
+                            with | e -> Ortac_runtime.Report.Out_of_domain)
+                           "top"
                            [("t.contents <> Sequence.empty",
                               {
                                 Ortac_runtime.start =

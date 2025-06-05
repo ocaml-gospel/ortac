@@ -652,7 +652,7 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
       | (Take, Res ((Result (Int, Exn), _), v_2)) ->
           (match v_2 with
            | Ok v_2 ->
-               Ortac_runtime.append
+               Ortac_runtime.Report.append
                  (if
                     let t_old__046_ = Model.get state__039_ 0
                     and t_new__047_ =
@@ -665,9 +665,9 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                   then None
                   else
                     Some
-                      (Ortac_runtime.report "Queue" "create ()"
+                      (Ortac_runtime.Report.report "Queue" "create ()"
                          (try
-                            Ortac_runtime.Protected_value
+                            Ortac_runtime.Report.Protected_value
                               (Res
                                  (int,
                                    (let t_old__044_ = Model.get state__039_ 0
@@ -677,7 +677,8 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                                            (Lazy.force new_state__041_) 0) in
                                     Ortac_runtime.Gospelstdlib.Sequence.hd
                                       t_old__044_.contents)))
-                          with | e -> Ortac_runtime.Out_of_domain) "take"
+                          with | e -> Ortac_runtime.Report.Out_of_domain)
+                         "take"
                          [("v = Sequence.hd (old t.contents)",
                             {
                               Ortac_runtime.start =
@@ -707,9 +708,9 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                   then None
                   else
                     Some
-                      (Ortac_runtime.report "Queue" "create ()"
+                      (Ortac_runtime.Report.report "Queue" "create ()"
                          (try
-                            Ortac_runtime.Protected_value
+                            Ortac_runtime.Report.Protected_value
                               (Res
                                  (int,
                                    (let t_old__044_ = Model.get state__039_ 0
@@ -719,7 +720,8 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                                            (Lazy.force new_state__041_) 0) in
                                     Ortac_runtime.Gospelstdlib.Sequence.hd
                                       t_old__044_.contents)))
-                          with | e -> Ortac_runtime.Out_of_domain) "take"
+                          with | e -> Ortac_runtime.Report.Out_of_domain)
+                         "take"
                          [("old t.contents <> Sequence.empty",
                             {
                               Ortac_runtime.start =
@@ -754,9 +756,9 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "Queue" "create ()"
-                      (try Ortac_runtime.Exception "Empty"
-                       with | e -> Ortac_runtime.Out_of_domain) "take"
+                   (Ortac_runtime.Report.report "Queue" "create ()"
+                      (try Ortac_runtime.Report.Exception "Empty"
+                       with | e -> Ortac_runtime.Report.Out_of_domain) "take"
                       [("t.contents = old t.contents = Sequence.empty",
                          {
                            Ortac_runtime.start =
@@ -793,9 +795,9 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Queue" "create ()"
+              (Ortac_runtime.Report.report "Queue" "create ()"
                  (try
-                    Ortac_runtime.Value
+                    Ortac_runtime.Report.Value
                       (Res
                          ((option int),
                            (let t_old__055_ = Model.get state__039_ 0
@@ -809,7 +811,7 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                               Some
                                 (Ortac_runtime.Gospelstdlib.Sequence.hd
                                    t_old__055_.contents))))
-                  with | e -> Ortac_runtime.Out_of_domain) "take_opt"
+                  with | e -> Ortac_runtime.Report.Out_of_domain) "take_opt"
                  [("r = if (old t.contents) = Sequence.empty then\n        None else Some (Sequence.hd (old t.contents))",
                     {
                       Ortac_runtime.start =
@@ -830,7 +832,7 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
       | (Pop, Res ((Result (Int, Exn), _), v_3)) ->
           (match v_3 with
            | Ok v_3 ->
-               Ortac_runtime.append
+               Ortac_runtime.Report.append
                  (if
                     let t_old__062_ = Model.get state__039_ 0
                     and t_new__063_ =
@@ -843,9 +845,9 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                   then None
                   else
                     Some
-                      (Ortac_runtime.report "Queue" "create ()"
+                      (Ortac_runtime.Report.report "Queue" "create ()"
                          (try
-                            Ortac_runtime.Protected_value
+                            Ortac_runtime.Report.Protected_value
                               (Res
                                  (int,
                                    (let t_old__060_ = Model.get state__039_ 0
@@ -855,7 +857,8 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                                            (Lazy.force new_state__041_) 0) in
                                     Ortac_runtime.Gospelstdlib.Sequence.hd
                                       t_old__060_.contents)))
-                          with | e -> Ortac_runtime.Out_of_domain) "pop"
+                          with | e -> Ortac_runtime.Report.Out_of_domain)
+                         "pop"
                          [("v = Sequence.hd (old t.contents)",
                             {
                               Ortac_runtime.start =
@@ -885,9 +888,9 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                   then None
                   else
                     Some
-                      (Ortac_runtime.report "Queue" "create ()"
+                      (Ortac_runtime.Report.report "Queue" "create ()"
                          (try
-                            Ortac_runtime.Protected_value
+                            Ortac_runtime.Report.Protected_value
                               (Res
                                  (int,
                                    (let t_old__060_ = Model.get state__039_ 0
@@ -897,7 +900,8 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                                            (Lazy.force new_state__041_) 0) in
                                     Ortac_runtime.Gospelstdlib.Sequence.hd
                                       t_old__060_.contents)))
-                          with | e -> Ortac_runtime.Out_of_domain) "pop"
+                          with | e -> Ortac_runtime.Report.Out_of_domain)
+                         "pop"
                          [("old t.contents <> Sequence.empty",
                             {
                               Ortac_runtime.start =
@@ -932,9 +936,9 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "Queue" "create ()"
-                      (try Ortac_runtime.Exception "Empty"
-                       with | e -> Ortac_runtime.Out_of_domain) "pop"
+                   (Ortac_runtime.Report.report "Queue" "create ()"
+                      (try Ortac_runtime.Report.Exception "Empty"
+                       with | e -> Ortac_runtime.Report.Out_of_domain) "pop"
                       [("t.contents = old t.contents = Sequence.empty",
                          {
                            Ortac_runtime.start =
@@ -968,9 +972,9 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "Queue" "create ()"
+                   (Ortac_runtime.Report.report "Queue" "create ()"
                       (try
-                         Ortac_runtime.Protected_value
+                         Ortac_runtime.Report.Protected_value
                            (Res
                               (int,
                                 (let t_old__071_ = Model.get state__039_ 0
@@ -980,7 +984,7 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                                         0) in
                                  Ortac_runtime.Gospelstdlib.Sequence.hd
                                    (Lazy.force t_new__072_).contents)))
-                       with | e -> Ortac_runtime.Out_of_domain) "peek"
+                       with | e -> Ortac_runtime.Report.Out_of_domain) "peek"
                       [("v = Sequence.hd t.contents",
                          {
                            Ortac_runtime.start =
@@ -1015,9 +1019,9 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "Queue" "create ()"
-                      (try Ortac_runtime.Exception "Empty"
-                       with | e -> Ortac_runtime.Out_of_domain) "peek"
+                   (Ortac_runtime.Report.report "Queue" "create ()"
+                      (try Ortac_runtime.Report.Exception "Empty"
+                       with | e -> Ortac_runtime.Report.Out_of_domain) "peek"
                       [("t.contents = old t.contents = Sequence.empty",
                          {
                            Ortac_runtime.start =
@@ -1051,9 +1055,9 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "Queue" "create ()"
+                   (Ortac_runtime.Report.report "Queue" "create ()"
                       (try
-                         Ortac_runtime.Protected_value
+                         Ortac_runtime.Report.Protected_value
                            (Res
                               (int,
                                 (let t_old__080_ = Model.get state__039_ 0
@@ -1063,7 +1067,7 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                                         0) in
                                  Ortac_runtime.Gospelstdlib.Sequence.hd
                                    (Lazy.force t_new__081_).contents)))
-                       with | e -> Ortac_runtime.Out_of_domain) "top"
+                       with | e -> Ortac_runtime.Report.Out_of_domain) "top"
                       [("v = Sequence.hd t.contents",
                          {
                            Ortac_runtime.start =
@@ -1098,9 +1102,9 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "Queue" "create ()"
-                      (try Ortac_runtime.Exception "Empty"
-                       with | e -> Ortac_runtime.Out_of_domain) "top"
+                   (Ortac_runtime.Report.report "Queue" "create ()"
+                      (try Ortac_runtime.Report.Exception "Empty"
+                       with | e -> Ortac_runtime.Report.Out_of_domain) "top"
                       [("t.contents = old t.contents = Sequence.empty",
                          {
                            Ortac_runtime.start =
@@ -1143,9 +1147,11 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Queue" "create ()"
-                 (try Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
-                  with | e -> Ortac_runtime.Out_of_domain) "peek_opt"
+              (Ortac_runtime.Report.report "Queue" "create ()"
+                 (try
+                    Ortac_runtime.Report.Value
+                      (Res (Ortac_runtime.Report.dummy, ()))
+                  with | e -> Ortac_runtime.Report.Out_of_domain) "peek_opt"
                  [("match v with\n        | None -> t.contents = Sequence.empty\n        | Some a -> a = Sequence.hd t.contents",
                     {
                       Ortac_runtime.start =
@@ -1183,9 +1189,9 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Queue" "create ()"
+              (Ortac_runtime.Report.report "Queue" "create ()"
                  (try
-                    Ortac_runtime.Value
+                    Ortac_runtime.Report.Value
                       (Res
                          (bool,
                            (let t_old__094_ = Model.get state__039_ 0
@@ -1200,7 +1206,7 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                                      0)
                                 -> true
                             | _ -> false)))
-                  with | e -> Ortac_runtime.Out_of_domain) "is_empty"
+                  with | e -> Ortac_runtime.Report.Out_of_domain) "is_empty"
                  [("b = match Sequence.length t.contents with\n        | 0 -> true\n        | _ -> false",
                     {
                       Ortac_runtime.start =
@@ -1230,9 +1236,9 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Queue" "create ()"
+              (Ortac_runtime.Report.report "Queue" "create ()"
                  (try
-                    Ortac_runtime.Value
+                    Ortac_runtime.Report.Value
                       (Res
                          (integer,
                            (let t_old__101_ = Model.get state__039_ 0
@@ -1240,7 +1246,7 @@ let ortac_postcond cmd__038_ state__039_ res__040_ =
                               lazy (Model.get (Lazy.force new_state__041_) 0) in
                             Ortac_runtime.Gospelstdlib.Sequence.length
                               (Lazy.force t_new__102_).contents)))
-                  with | e -> Ortac_runtime.Out_of_domain) "length"
+                  with | e -> Ortac_runtime.Report.Out_of_domain) "length"
                  [("l = Sequence.length t.contents",
                     {
                       Ortac_runtime.start =

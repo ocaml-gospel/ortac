@@ -469,9 +469,11 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Invariants" "create 42"
-                 (try Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
-                  with | e -> Ortac_runtime.Out_of_domain) "create"
+              (Ortac_runtime.Report.report "Invariants" "create 42"
+                 (try
+                    Ortac_runtime.Report.Value
+                      (Res (Ortac_runtime.Report.dummy, ()))
+                  with | e -> Ortac_runtime.Report.Out_of_domain) "create"
                  [("Sequence.length x.contents > 0",
                     {
                       Ortac_runtime.start =
@@ -521,9 +523,9 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Invariants" "create 42"
-                 (try Ortac_runtime.Value (Res (unit, ()))
-                  with | e -> Ortac_runtime.Out_of_domain) "push"
+              (Ortac_runtime.Report.report "Invariants" "create 42"
+                 (try Ortac_runtime.Report.Value (Res (unit, ()))
+                  with | e -> Ortac_runtime.Report.Out_of_domain) "push"
                  [("Sequence.length x.contents > 0",
                     {
                       Ortac_runtime.start =
@@ -542,7 +544,7 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                         }
                     })])
       | (Transfer, Res ((Unit, _), _)) ->
-          Ortac_runtime.append
+          Ortac_runtime.Report.append
             (if
                let t1__031_ = lazy (Model.get (Lazy.force new_state__027_) 0) in
                try
@@ -574,9 +576,10 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
              then None
              else
                Some
-                 (Ortac_runtime.report "Invariants" "create 42"
-                    (try Ortac_runtime.Value (Res (unit, ()))
-                     with | e -> Ortac_runtime.Out_of_domain) "transfer"
+                 (Ortac_runtime.Report.report "Invariants" "create 42"
+                    (try Ortac_runtime.Report.Value (Res (unit, ()))
+                     with | e -> Ortac_runtime.Report.Out_of_domain)
+                    "transfer"
                     [("Sequence.length x.contents > 0",
                        {
                          Ortac_runtime.start =
@@ -625,9 +628,10 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
              then None
              else
                Some
-                 (Ortac_runtime.report "Invariants" "create 42"
-                    (try Ortac_runtime.Value (Res (unit, ()))
-                     with | e -> Ortac_runtime.Out_of_domain) "transfer"
+                 (Ortac_runtime.Report.report "Invariants" "create 42"
+                    (try Ortac_runtime.Report.Value (Res (unit, ()))
+                     with | e -> Ortac_runtime.Report.Out_of_domain)
+                    "transfer"
                     [("Sequence.length x.contents > 0",
                        {
                          Ortac_runtime.start =
@@ -646,7 +650,7 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                            }
                        })]))
       | (Copy, Res ((SUT, _), r)) ->
-          Ortac_runtime.append
+          Ortac_runtime.Report.append
             (if
                let r__035_ = lazy (Model.get (Lazy.force new_state__027_) 0) in
                try
@@ -678,9 +682,11 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
              then None
              else
                Some
-                 (Ortac_runtime.report "Invariants" "create 42"
-                    (try Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
-                     with | e -> Ortac_runtime.Out_of_domain) "copy"
+                 (Ortac_runtime.Report.report "Invariants" "create 42"
+                    (try
+                       Ortac_runtime.Report.Value
+                         (Res (Ortac_runtime.Report.dummy, ()))
+                     with | e -> Ortac_runtime.Report.Out_of_domain) "copy"
                     [("Sequence.length x.contents > 0",
                        {
                          Ortac_runtime.start =
@@ -729,9 +735,11 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
              then None
              else
                Some
-                 (Ortac_runtime.report "Invariants" "create 42"
-                    (try Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
-                     with | e -> Ortac_runtime.Out_of_domain) "copy"
+                 (Ortac_runtime.Report.report "Invariants" "create 42"
+                    (try
+                       Ortac_runtime.Report.Value
+                         (Res (Ortac_runtime.Report.dummy, ()))
+                     with | e -> Ortac_runtime.Report.Out_of_domain) "copy"
                     [("Sequence.length x.contents > 0",
                        {
                          Ortac_runtime.start =
@@ -750,7 +758,7 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                            }
                        })]))
       | (Sub (i, n), Res ((Result (SUT, Exn), _), r_1)) ->
-          (match Ortac_runtime.append
+          (match Ortac_runtime.Report.append
                    (if
                       let tmp__040_ = Model.get state__025_ 0 in
                       try
@@ -768,9 +776,12 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Invariants" "create 42"
-                           (try Ortac_runtime.Exception "Invalid_argument"
-                            with | e -> Ortac_runtime.Out_of_domain) "sub"
+                        (Ortac_runtime.Report.report "Invariants" "create 42"
+                           (try
+                              Ortac_runtime.Report.Exception
+                                "Invalid_argument"
+                            with | e -> Ortac_runtime.Report.Out_of_domain)
+                           "sub"
                            [("0 <= i <= Sequence.length t.contents",
                               {
                                 Ortac_runtime.start =
@@ -788,7 +799,7 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                                     pos_cnum = 1344
                                   }
                               })]))
-                   (Ortac_runtime.append
+                   (Ortac_runtime.Report.append
                       (if
                          let tmp__040_ = Model.get state__025_ 0 in
                          try
@@ -814,9 +825,13 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                        then None
                        else
                          Some
-                           (Ortac_runtime.report "Invariants" "create 42"
-                              (try Ortac_runtime.Exception "Invalid_argument"
-                               with | e -> Ortac_runtime.Out_of_domain) "sub"
+                           (Ortac_runtime.Report.report "Invariants"
+                              "create 42"
+                              (try
+                                 Ortac_runtime.Report.Exception
+                                   "Invalid_argument"
+                               with | e -> Ortac_runtime.Report.Out_of_domain)
+                              "sub"
                               [("i <= i + n <= Sequence.length t.contents",
                                  {
                                    Ortac_runtime.start =
@@ -844,9 +859,13 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                        then None
                        else
                          Some
-                           (Ortac_runtime.report "Invariants" "create 42"
-                              (try Ortac_runtime.Exception "Invalid_argument"
-                               with | e -> Ortac_runtime.Out_of_domain) "sub"
+                           (Ortac_runtime.Report.report "Invariants"
+                              "create 42"
+                              (try
+                                 Ortac_runtime.Report.Exception
+                                   "Invalid_argument"
+                               with | e -> Ortac_runtime.Report.Out_of_domain)
+                              "sub"
                               [("n >= 1",
                                  {
                                    Ortac_runtime.start =
@@ -868,7 +887,7 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
            | None ->
                (match r_1 with
                 | Ok r_1 ->
-                    Ortac_runtime.append
+                    Ortac_runtime.Report.append
                       (if
                          let r__038_ =
                            lazy (Model.get (Lazy.force new_state__027_) 0) in
@@ -901,11 +920,13 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                        then None
                        else
                          Some
-                           (Ortac_runtime.report "Invariants" "create 42"
+                           (Ortac_runtime.Report.report "Invariants"
+                              "create 42"
                               (try
-                                 Ortac_runtime.Protected_value
-                                   (Res (Ortac_runtime.dummy, ()))
-                               with | e -> Ortac_runtime.Out_of_domain) "sub"
+                                 Ortac_runtime.Report.Protected_value
+                                   (Res (Ortac_runtime.Report.dummy, ()))
+                               with | e -> Ortac_runtime.Report.Out_of_domain)
+                              "sub"
                               [("Sequence.length x.contents > 0",
                                  {
                                    Ortac_runtime.start =
@@ -955,11 +976,13 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                        then None
                        else
                          Some
-                           (Ortac_runtime.report "Invariants" "create 42"
+                           (Ortac_runtime.Report.report "Invariants"
+                              "create 42"
                               (try
-                                 Ortac_runtime.Protected_value
-                                   (Res (Ortac_runtime.dummy, ()))
-                               with | e -> Ortac_runtime.Out_of_domain) "sub"
+                                 Ortac_runtime.Report.Protected_value
+                                   (Res (Ortac_runtime.Report.dummy, ()))
+                               with | e -> Ortac_runtime.Report.Out_of_domain)
+                              "sub"
                               [("Sequence.length x.contents > 0",
                                  {
                                    Ortac_runtime.start =
@@ -982,7 +1005,7 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                (match r_1 with
                 | Error (Invalid_argument _) -> None
                 | _ ->
-                    Ortac_runtime.append
+                    Ortac_runtime.Report.append
                       (if
                          let tmp__040_ = Model.get state__025_ 0 in
                          try
@@ -1000,9 +1023,13 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                        then None
                        else
                          Some
-                           (Ortac_runtime.report "Invariants" "create 42"
-                              (try Ortac_runtime.Exception "Invalid_argument"
-                               with | e -> Ortac_runtime.Out_of_domain) "sub"
+                           (Ortac_runtime.Report.report "Invariants"
+                              "create 42"
+                              (try
+                                 Ortac_runtime.Report.Exception
+                                   "Invalid_argument"
+                               with | e -> Ortac_runtime.Report.Out_of_domain)
+                              "sub"
                               [("0 <= i <= Sequence.length t.contents",
                                  {
                                    Ortac_runtime.start =
@@ -1020,7 +1047,7 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                                        pos_cnum = 1344
                                      }
                                  })]))
-                      (Ortac_runtime.append
+                      (Ortac_runtime.Report.append
                          (if
                             let tmp__040_ = Model.get state__025_ 0 in
                             try
@@ -1047,11 +1074,13 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                           then None
                           else
                             Some
-                              (Ortac_runtime.report "Invariants" "create 42"
+                              (Ortac_runtime.Report.report "Invariants"
+                                 "create 42"
                                  (try
-                                    Ortac_runtime.Exception
+                                    Ortac_runtime.Report.Exception
                                       "Invalid_argument"
-                                  with | e -> Ortac_runtime.Out_of_domain)
+                                  with
+                                  | e -> Ortac_runtime.Report.Out_of_domain)
                                  "sub"
                                  [("i <= i + n <= Sequence.length t.contents",
                                     {
@@ -1080,11 +1109,13 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
                           then None
                           else
                             Some
-                              (Ortac_runtime.report "Invariants" "create 42"
+                              (Ortac_runtime.Report.report "Invariants"
+                                 "create 42"
                                  (try
-                                    Ortac_runtime.Exception
+                                    Ortac_runtime.Report.Exception
                                       "Invalid_argument"
-                                  with | e -> Ortac_runtime.Out_of_domain)
+                                  with
+                                  | e -> Ortac_runtime.Report.Out_of_domain)
                                  "sub"
                                  [("n >= 1",
                                     {
