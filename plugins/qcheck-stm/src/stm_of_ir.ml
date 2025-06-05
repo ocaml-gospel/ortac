@@ -14,15 +14,20 @@ let pat_default = ppat_construct (lident "Char") None
 let exp_default_name = "char"
 let exp_default = evar exp_default_name
 let res_default = Ident.create ~loc:Location.none "res"
-let list_append = list_fold_expr (qualify [ "Ortac_runtime" ] "append") "None"
+
+let list_append =
+  list_fold_expr (qualify [ "Ortac_runtime"; "Report" ] "append") "None"
+
 let res = lident "Res"
 let fn_apply_name = Ident.create ~loc:Location.none "QCheck.Fn.apply"
 
 let eexpected_value case e =
   let x =
-    pexp_construct (noloc (Ldot (Lident "Ortac_runtime", case))) (Some e)
+    pexp_construct
+      (noloc (Ldot (Ldot (Lident "Ortac_runtime", "Report"), case)))
+      (Some e)
   in
-  [%expr try [%e x] with e -> Ortac_runtime.Out_of_domain]
+  [%expr try [%e x] with e -> Ortac_runtime.Report.Out_of_domain]
 
 let evalue = eexpected_value "Value"
 let eprotected = eexpected_value "Protected_value"
@@ -793,7 +798,8 @@ let postcond_case config state invariants idx state_ident new_state_ident value
     let* ocaml_term = ocaml_of_term config subst_term in
     ocaml_term |> wrap |> ok
   and dummy =
-    let ty_show = qualify [ "Ortac_runtime" ] "dummy" and value = eunit in
+    let ty_show = qualify [ "Ortac_runtime"; "Report" ] "dummy"
+    and value = eunit in
     let args = pexp_tuple_opt [ ty_show; value ] in
     pexp_construct res args
   in
@@ -830,7 +836,7 @@ let postcond_case config state invariants idx state_ident new_state_ident value
       (Some
          (esome
          @@ pexp_apply
-              (qualify [ "Ortac_runtime" ] "report")
+              (qualify [ "Ortac_runtime"; "Report" ] "report")
               [
                 ( Nolabel,
                   estring @@ Ortac_core.Context.module_name config.context );
@@ -1736,12 +1742,10 @@ let stm config ir =
     pstr_module (module_binding ~name:(noloc (Some "Spec")) ~expr:spec_expr)
   in
   let tests =
+    let make = noloc (Ldot (Lident "Ortac_runtime", "Make")) in
     pstr_module
       (module_binding ~name:(noloc (Some "STMTests"))
-         ~expr:
-           (pmod_apply
-              (pmod_ident (Ldot (Lident "Ortac_runtime", "Make") |> noloc))
-              (pmod_ident (lident "Spec"))))
+         ~expr:(pmod_apply (pmod_ident make) (pmod_ident (lident "Spec"))))
   in
   let module_name = Ortac_core.Context.module_name config.context in
   let call_tests =
