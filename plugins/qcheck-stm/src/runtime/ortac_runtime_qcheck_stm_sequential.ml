@@ -1,8 +1,9 @@
+open Ortac_runtime_qcheck_stm_util
+open STM
 include Ortac_runtime
 module Report = Report
 module Model = Stores.Model
 module SUT = Stores.SUT
-open STM
 
 module Make (Spec : Spec) = struct
   open Report

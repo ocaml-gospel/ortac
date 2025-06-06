@@ -2,7 +2,7 @@
    edit how you run the tool instead *)
 [@@@ocaml.warning "-26-27-69-32-34-38"]
 open Hashtbl
-module Ortac_runtime = Ortac_runtime_qcheck_stm
+module Ortac_runtime = Ortac_runtime_qcheck_stm_sequential
 let rec remove_first x xs =
   try
     if Ortac_runtime.Gospelstdlib.Sequence.empty = xs

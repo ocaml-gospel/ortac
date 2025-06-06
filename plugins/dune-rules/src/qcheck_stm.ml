@@ -47,7 +47,7 @@ let libraries =
   let k ppf config =
     pf ppf
       "libraries@ %aqcheck-stm.stm@ qcheck-stm.sequential@ \
-       qcheck-multicoretests-util@ ortac-runtime-qcheck-stm"
+       qcheck-multicoretests-util@ ortac-runtime-qcheck-stm.sequential"
       library config
   in
   stanza k

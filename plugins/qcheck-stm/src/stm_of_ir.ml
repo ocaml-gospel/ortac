@@ -1774,7 +1774,7 @@ let stm config ir =
   ok
     (warn
      :: open_mod opened_mod
-     :: [%stri module Ortac_runtime = Ortac_runtime_qcheck_stm]
+     :: [%stri module Ortac_runtime = Ortac_runtime_qcheck_stm_sequential]
      :: ghost_types
     @ ghost_functions
     @ sut_mod

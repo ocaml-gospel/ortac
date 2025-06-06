@@ -2,7 +2,7 @@
    edit how you run the tool instead *)
 [@@@ocaml.warning "-26-27-69-32-34-38"]
 open Ghost_as_model
-module Ortac_runtime = Ortac_runtime_qcheck_stm
+module Ortac_runtime = Ortac_runtime_qcheck_stm_sequential
 type m =
   | A of Ortac_runtime.integer 
 module SUT =
