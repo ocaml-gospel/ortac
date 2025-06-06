@@ -2,7 +2,7 @@
    edit how you run the tool instead *)
 [@@@ocaml.warning "-26-27-69-32-34-38"]
 open Record
-module Ortac_runtime = Ortac_runtime_qcheck_stm
+module Ortac_runtime = Ortac_runtime_qcheck_stm_sequential
 let plus1_1 i =
   try
     Ortac_runtime.Gospelstdlib.(+) i
