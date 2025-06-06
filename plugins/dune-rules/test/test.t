@@ -41,7 +41,7 @@ generated.
     qcheck-stm.stm
     qcheck-stm.sequential
     qcheck-multicoretests-util
-    ortac-runtime-qcheck-stm)
+    ortac-runtime-qcheck-stm.sequential)
    (package my_package)
    (action
     (run
@@ -83,7 +83,7 @@ When the optional output argument is set, rules will be written in the file.
     qcheck-stm.stm
     qcheck-stm.sequential
     qcheck-multicoretests-util
-    ortac-runtime-qcheck-stm)
+    ortac-runtime-qcheck-stm.sequential)
    (package my_package)
    (action
     (run
@@ -124,7 +124,7 @@ Specifying a timeout causes ORTAC_QCHECK_STM_TIMEOUT to be set before running th
     qcheck-stm.stm
     qcheck-stm.sequential
     qcheck-multicoretests-util
-    ortac-runtime-qcheck-stm)
+    ortac-runtime-qcheck-stm.sequential)
    (package my_package)
    (action
     (setenv

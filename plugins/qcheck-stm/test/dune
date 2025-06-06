@@ -73,7 +73,7 @@
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime-qcheck-stm
+  ortac-runtime-qcheck-stm.sequential
   submodule)
  (action
   (echo
@@ -122,7 +122,7 @@
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime-qcheck-stm
+  ortac-runtime-qcheck-stm.sequential
   module_prefix_lib)
  (action
   (echo
@@ -174,7 +174,7 @@
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime-qcheck-stm
+  ortac-runtime-qcheck-stm.sequential
   submodule_and_prefix_lib)
  (action
   (echo
