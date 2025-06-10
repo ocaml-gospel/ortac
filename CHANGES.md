@@ -1,8 +1,13 @@
+# Unreleased
+
+- [QCheck-STM] Refactor runtime to allow for OCaml5-only sub-library
+  [\#316](https://github.com/ocaml-gospel/ortac/pull/316)
+
 # 0.7.1
 
 - [Dune] Fix dependencies in generated library declaration for Ortac/Wrapper
   [\#342](https://github.com/ocaml-gospel/ortac/pull/342)
-- [Dune] Fix dependancies in `ortac-dune`
+- [Dune] Fix dependencies in `ortac-dune`
   [\#340](https://github.com/ocaml-gospel/ortac/pull/340)
 
 # 0.7.0
