@@ -17,6 +17,8 @@
   [\#324](https://github.com/ocaml-gospel/ortac/pull/324)
 - [Wrapper] Add header message in generated files with wrapper mode
   [\#322](https://github.com/ocaml-gospel/ortac/pull/322)
+- [QCheck-STM] Refactor runtime to allow for OCaml5-only sub-library
+  [\#316](https://github.com/ocaml-gospel/ortac/pull/316)
 - [Dune] Add automatic dune file generation to the wrapper plugin
   [\#314](https://github.com/ocaml-gospel/ortac/pull/314) and
   [\#335](https://github.com/ocaml-gospel/ortac/pull/335)
