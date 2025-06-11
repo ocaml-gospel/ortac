@@ -1771,11 +1771,13 @@ let stm config ir =
     let m, ms = split_list @@ prefix @ (module_name :: submodule) in
     noloc @@ List.fold_left (fun acc x -> Ldot (acc, x)) (Lident m) ms
   in
+  let ortac_runtime =
+    if config.domain then
+      [%stri module Ortac_runtime = Ortac_runtime_qcheck_stm_domain]
+    else [%stri module Ortac_runtime = Ortac_runtime_qcheck_stm_sequential]
+  in
   ok
-    (warn
-     :: open_mod opened_mod
-     :: [%stri module Ortac_runtime = Ortac_runtime_qcheck_stm_sequential]
-     :: ghost_types
+    ((warn :: open_mod opened_mod :: ortac_runtime :: ghost_types)
     @ ghost_functions
     @ sut_mod
     @ model_mod
