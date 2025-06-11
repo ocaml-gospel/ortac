@@ -126,9 +126,70 @@ end = struct
     let cmd = Cmd.v info term
   end
 
+  module Wrapper : sig
+    val cmd : unit Cmd.t
+  end = struct
+    let info =
+      Cmd.info "wrapper" ~doc:"Generate Dune rules for the wrapper plugin."
+
+    let interface_file =
+      Arg.(
+        required
+        & pos 0 (some string) None
+        & info [] ~doc:"Interface file containing Gospel specifications."
+            ~docv:"INTERFACE")
+
+    let ocaml_output =
+      Arg.(
+        value
+        & opt (some string) None
+        & info [ "o"; "output" ]
+            ~doc:
+              "Filename for the generated tests. Useful for generating \
+               multiple test files per module under test."
+            ~absent:
+              "concatenation of INTERFACE without the file extension and \
+               \"_tests.ml\""
+            ~docv:"OCAML_OUTPUT")
+
+    let package_name =
+      Arg.(
+        value
+        & opt (some string) None
+        & info [ "p"; "package" ] ~doc:"Package name." ~docv:"PACKAGE")
+
+    let with_stdout_to =
+      Arg.(
+        value
+        & opt (some string) None
+        & info [ "w"; "with-stdout-to" ]
+            ~doc:
+              "Filename for the generated dune rules. For use on the command \
+               line."
+            ~docv:"DUNE_OUTPUT")
+
+    let main interface_file package_name ocaml_output dune_output =
+      let open Wrapper in
+      let config =
+        { interface_file; package_name; ocaml_output; dune_output }
+      in
+      let ppf = Registration.get_out_formatter dune_output in
+      Wrapper.gen_dune_rules ppf config
+
+    let term =
+      Term.(
+        const main
+        $ interface_file
+        $ package_name
+        $ ocaml_output
+        $ with_stdout_to)
+
+    let cmd = Cmd.v info term
+  end
+
   let cmd =
     let info = Cmd.info "dune" ~doc:"Generate Dune rule for ortac plugins." in
-    Cmd.group info [ Qcheck_stm.cmd ]
+    Cmd.group info [ Qcheck_stm.cmd; Wrapper.cmd ]
 end
 
 (* let () = Stdlib.exit (Cmd.eval Plugin.cmd) *)
