@@ -12,10 +12,10 @@
   (package ortac-wrapper)))
 
 (rule
- (copy lib.mli wrapper.mli))
+ (copy set.mli set_wrapped.mli))
 
 (rule
- (target wrapper.ml)
+ (target set_wrapped.ml)
  (package ortac-wrapper)
  (deps
   (package ortac-core)
@@ -25,16 +25,16 @@
    ORTAC_ONLY_PLUGIN
    wrapper
    (with-stderr-to
-    errors
-    (run ortac wrapper -o %{target} %{dep:lib.mli})))))
+    set_errors
+    (run ortac wrapper -o %{target} %{dep:set.mli})))))
 
 (rule
  (alias runtest)
  (package ortac-wrapper)
  (action
   (progn
-   (diff errors.expected errors)
-   (diff wrapper.expected.ml wrapper.ml))))
+   (diff set_errors.expected set_errors)
+   (diff set_wrapped.expected.ml set_wrapped.ml))))
 
 (rule
  (copy lib_behaviour.mli wrapper_behaviour.mli))
