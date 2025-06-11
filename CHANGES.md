@@ -1,5 +1,7 @@
 # Unreleased
 
+- [Wrapper] Rename wrapper tests to make them more readable
+  [\#323](https://github.com/ocaml-gospel/ortac/pull/323)
 - [Wrapper] Prevent code generation if required model projection is absent
   [\#327](https://github.com/ocaml-gospel/ortac/pull/327)
 - [QCheck-STM] Fix next-state computation for functions specialised for `int`s
