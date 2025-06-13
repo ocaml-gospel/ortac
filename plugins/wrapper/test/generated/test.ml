@@ -1,5 +1,5 @@
 module To_test = Set_wrapped
-module To_test2 = Wrapper_behaviour
+module To_test2 = Runtime_assertion_checking_wrapped
 module To_test3 = Wrapper_model
 module Pascal = Pascal_wrapped
 
