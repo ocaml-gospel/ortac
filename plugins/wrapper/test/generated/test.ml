@@ -1,6 +1,7 @@
 module To_test = Wrapper
 module To_test2 = Wrapper_behaviour
 module To_test3 = Wrapper_model
+module Pascal = Pascal_wrapped
 
 let test_create () =
   let s = To_test.create 5 in
@@ -101,6 +102,13 @@ let add_model () =
   To_test3.add s 2;
   To_test3.add s 3
 
+let pascal () =
+  let p = Pascal.init () in
+  Pascal.next p;
+  Pascal.next p;
+  Pascal.next p;
+  ()
+
 let () =
   let open Alcotest in
   run "Wrapped lib"
@@ -123,4 +131,5 @@ let () =
           test_case "postcondition hit" `Quick post_cond;
         ] );
       ("model tests", [ test_case "add model" `Quick add_model ]);
+      ("pascal tests", [ test_case "three nexts" `Quick pascal ]);
     ]

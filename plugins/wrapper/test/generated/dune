@@ -79,3 +79,28 @@
   (progn
    (diff errors_model.expected errors_model)
    (diff wrapper_model.expected.ml wrapper_model.ml))))
+
+(rule
+ (copy pascal.mli pascal_wrapped.mli))
+
+(rule
+ (target pascal_wrapped.ml)
+ (package ortac-wrapper)
+ (deps
+  (package ortac-core)
+  (package ortac-wrapper))
+ (action
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   wrapper
+   (with-stderr-to
+    pascal_errors
+    (run ortac wrapper -o %{target} %{dep:pascal.mli})))))
+
+(rule
+ (alias runtest)
+ (package ortac-wrapper)
+ (action
+  (progn
+   (diff pascal_errors.expected pascal_errors)
+   (diff pascal_wrapped.expected.ml pascal_wrapped.ml))))
