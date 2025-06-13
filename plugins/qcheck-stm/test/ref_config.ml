@@ -1,5 +1,3 @@
-open Ref
-
 let init_sut = make 42
 
-type sut = t
+type sut = int t

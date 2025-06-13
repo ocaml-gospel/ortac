@@ -1,5 +1,0 @@
-File "ref.mli", line 12, characters 26-27:
-12 |     ensures i + 1 = succ !r *)
-                               ^
-Warning: Skipping clause: occurrences of the SUT in clauses are only
-         supported to access its model fields.

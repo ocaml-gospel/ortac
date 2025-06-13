@@ -219,6 +219,7 @@ module Gospelstdlib = struct
   let shift_right v s = Z.shift_right v (Z.to_int s)
   let shift_right_trunc v s = Z.shift_right_trunc v (Z.to_int s)
   let integer_of_int = Z.of_int
+  let int_of_integer = Z.to_int
   let max_int = Z.of_int max_int
   let min_int = Z.of_int min_int
   let fst = fst
