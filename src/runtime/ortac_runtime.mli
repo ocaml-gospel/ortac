@@ -82,6 +82,7 @@ module Gospelstdlib : sig
   (** {2 Machine integers} *)
 
   val integer_of_int : int -> integer
+  val int_of_integer : integer -> int
   val max_int : integer
   val min_int : integer
 
