@@ -62,13 +62,24 @@ type xpost = {
   translation : (cases, W.t list) result;
 }
 
+type projection = {
+  name : string;
+  model_name : string;
+  loc : Location.t;
+  arguments : ocaml_var list;
+  returns : ocaml_var list;
+  register_name : string;
+}
+
+let projection ~name ~model_name ~loc ~arguments ~returns ~register_name =
+  { name; model_name; loc; arguments; returns; register_name }
+
 type value = {
   name : string;
   loc : Location.t;
   arguments : ocaml_var list;
   returns : ocaml_var list;
   register_name : string;
-  model : bool;
   ghost : Gospel.Tast.ghost;
   pure : bool;
   checks : check list;
@@ -78,14 +89,13 @@ type value = {
   xpostconditions : xpost list;
 }
 
-let value ~name ~loc ~arguments ~returns ~register_name ~model ~ghost ~pure =
+let value ~name ~loc ~arguments ~returns ~register_name ~ghost ~pure =
   {
     name;
     loc;
     arguments;
     returns;
     register_name;
-    model;
     ghost;
     pure;
     checks = [];
@@ -125,6 +135,7 @@ type function_ = {
 
 type structure_item =
   | Type of type_
+  | Projection of projection
   | Value of value
   | Constant of constant
   | Function of function_

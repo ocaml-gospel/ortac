@@ -167,6 +167,39 @@ let rets (returns : ocaml_var list) =
         ret ([], [])
       |> fun (e, p) -> (pexp_tuple e, ppat_tuple p)
 
+let projection (p : Ir.projection) =
+  let register_name = evar p.register_name in
+  let default_cases =
+    [
+      case ~guard:None
+        ~lhs:[%pat? (Stack_overflow | Out_of_memory) as e]
+        ~rhs:
+          [%expr
+            [%e F.report ~register_name];
+            raise e];
+      case ~guard:None
+        ~lhs:[%pat? e]
+        ~rhs:
+          [%expr
+            [%e F.unexpected_exn ~allowed_exn:[] ~exn:(evar "e") ~register_name];
+            [%e F.report ~register_name];
+            raise e];
+    ]
+  in
+  let report = pexp_sequence (F.report ~register_name) in
+  let eargs = args evar p.arguments in
+  let pargs = args pvar p.arguments in
+  let eret, pret = rets p.returns in
+  let call = pexp_apply (evar p.model_name) eargs in
+  let try_call = pexp_try call default_cases in
+  let body =
+    setup p.name p.loc p.register_name
+    @@ pexp_let Nonrecursive [ value_binding ~pat:pret ~expr:try_call ]
+    @@ report
+    @@ eret
+  in
+  [ [%stri let [%p pvar p.name] = [%e efun pargs body]] ]
+
 let value (v : Ir.value) =
   let register_name = evar v.register_name in
   let report = pexp_sequence (F.report ~register_name) in
@@ -235,6 +268,7 @@ let structure runtime module_name ir : Ppxlib.structure =
           ~expr:(pmod_ident (lident runtime)))
   :: (Ir.map_translation ir ~f:(function
         | Ir.Value v -> value v
+        | Ir.Projection p -> projection p
         | Ir.Function f -> function_ f
         | Ir.Predicate f -> function_ f
         | Ir.Constant c -> constant c
