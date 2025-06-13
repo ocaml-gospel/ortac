@@ -1,12 +1,21 @@
-type t = private int ref
-(*@ mutable model value : integer *)
+type 'a t
+(*@ mutable model value : 'a *)
 
-val make : int -> t
-(*@ r = make i
-    ensures r.value = i *)
+val make : 'a -> 'a t
+(*@ r = make v
+    ensures r.value = v *)
 
-val get : t -> int
-(*@ i = get r
+val get : 'a t -> 'a
+(*@ v = get r
     pure
-    ensures i = r.value
-    ensures i + 1 = succ !r *)
+    ensures v = r.value *)
+
+val set : 'a t -> 'a -> unit
+(*@ set r v
+    modifies r.value
+    ensures r.value = v *)
+
+val incr : int t -> unit
+(*@ incr r
+    modifies r.value
+    ensures r.value = succ (old r.value) *)
