@@ -66,10 +66,10 @@
     runtime_assertion_checking_wrapped.ml))))
 
 (rule
- (copy lib_model.mli wrapper_model.mli))
+ (copy model.mli model_wrapped.mli))
 
 (rule
- (target wrapper_model.ml)
+ (target model_wrapped.ml)
  (package ortac-wrapper)
  (deps
   (package ortac-core)
@@ -79,16 +79,16 @@
    ORTAC_ONLY_PLUGIN
    wrapper
    (with-stderr-to
-    errors_model
-    (run ortac wrapper -o %{target} %{dep:lib_model.mli})))))
+    model_wrapped
+    (run ortac wrapper -o %{target} %{dep:model.mli})))))
 
 (rule
  (alias runtest)
  (package ortac-wrapper)
  (action
   (progn
-   (diff errors_model.expected errors_model)
-   (diff wrapper_model.expected.ml wrapper_model.ml))))
+   (diff model_wrapped.expected model_wrapped)
+   (diff model_wrapped.expected.ml model_wrapped.ml))))
 
 (rule
  (copy pascal.mli pascal_wrapped.mli))
