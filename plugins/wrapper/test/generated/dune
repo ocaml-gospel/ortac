@@ -37,10 +37,10 @@
    (diff set_wrapped.expected.ml set_wrapped.ml))))
 
 (rule
- (copy lib_behaviour.mli wrapper_behaviour.mli))
+ (copy runtime_assertion_checking.mli runtime_assertion_checking_wrapped.mli))
 
 (rule
- (target wrapper_behaviour.ml)
+ (target runtime_assertion_checking_wrapped.ml)
  (package ortac-wrapper)
  (deps
   (package ortac-core)
@@ -50,16 +50,20 @@
    ORTAC_ONLY_PLUGIN
    wrapper
    (with-stderr-to
-    errors_behaviour
-    (run ortac wrapper -o %{target} %{dep:lib_behaviour.mli})))))
+    runtime_assertion_checking_errors
+    (run ortac wrapper -o %{target} %{dep:runtime_assertion_checking.mli})))))
 
 (rule
  (alias runtest)
  (package ortac-wrapper)
  (action
   (progn
-   (diff errors_behaviour.expected errors_behaviour)
-   (diff wrapper_behaviour.expected.ml wrapper_behaviour.ml))))
+   (diff
+    runtime_assertion_checking_errors.expected
+    runtime_assertion_checking_errors)
+   (diff
+    runtime_assertion_checking_wrapped.expected.ml
+    runtime_assertion_checking_wrapped.ml))))
 
 (rule
  (copy lib_model.mli wrapper_model.mli))
