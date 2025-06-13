@@ -34,13 +34,26 @@ let conditions ~context ~term_printer fail_violated fail_nonexec terms =
 
 let with_models ~context:_ fields (type_ : type_) =
   let models =
-    List.map (fun ((ls : Symbols.lsymbol), b) -> (ls.ls_name.id_str, b)) fields
+    List.map
+      (fun ((ls : Symbols.lsymbol), b) ->
+        let name = ls.ls_name.id_str in
+        let prefix = "__projection_" ^ name in
+        let proj_name = gen_symbol ~prefix () in
+        let ident = Ident.create ~loc:Location.none proj_name in
+        (name, ident, b))
+      fields
   in
   { type_ with models }
 
-let mem_model ir field =
-  let aux = function Type t -> List.mem_assoc field t.models | _ -> false in
-  List.exists aux ir.structure
+let find_projection ir field =
+  let aux = function
+    | Type t ->
+        List.find_map
+          (fun (name, ident, _) -> if field = name then Some ident else None)
+          t.models
+    | _ -> None
+  in
+  List.find_map aux ir.structure
 
 let collect_model ir =
   (* replaces calls to the gospel model by the projection function *)
@@ -54,14 +67,16 @@ let collect_model ir =
     | Tfield (t, ls) ->
         let t = collect t in
         let field = ls.ls_name.id_str in
-        let vs =
-          let vs_ty = Option.value ls.ls_value ~default:Ttypes.ty_bool in
-          Symbols.{ vs_name = ls.ls_name; vs_ty }
-        in
-        let proj = Tterm_helper.t_var vs Location.none in
         let t_node =
-          if mem_model ir field then Tterm.Tapp (Symbols.fs_apply, [ proj; t ])
-          else Tterm.Tfield (t, ls)
+          match find_projection ir field with
+          | Some proj_ident ->
+              let vs =
+                let vs_ty = Option.value ls.ls_value ~default:Ttypes.ty_bool in
+                Symbols.{ vs_name = proj_ident; vs_ty }
+              in
+              let projection_term = Tterm_helper.t_var vs Location.none in
+              Tterm.Tapp (Symbols.fs_apply, [ projection_term; t ])
+          | None -> Tterm.Tfield (t, ls)
         in
         { term with t_node }
     | Tif (t1, t2, t3) ->
@@ -671,33 +686,46 @@ let value ~pack ~ghost (vd : Tast.val_description) =
   let register_name = register_name () in
   let arguments = List.map (var_of_arg ~ir) vd.vd_args in
   let returns = List.map (var_of_arg ~ir) vd.vd_ret in
-  let model = is_projection vd in
-  let pure = false in
-  let value =
-    Ir.value ~name ~loc ~register_name ~arguments ~returns ~pure ~ghost ~model
+  let context, item =
+    if is_projection vd then
+      let proj_name =
+        match find_projection ir name with
+        | Some i -> i.id_str
+        | None -> assert false
+      in
+      let projection =
+        Ir.projection ~name:proj_name ~model_name:name ~loc ~arguments ~returns
+          ~register_name
+      in
+      (context, Ir.Projection projection)
+    else
+      let pure = false in
+      let value =
+        Ir.value ~name ~loc ~register_name ~arguments ~returns ~pure ~ghost
+      in
+      let process ~value (spec : Tast.val_spec) =
+        let term_printer = term_printer spec.sp_text spec.sp_loc in
+        let value =
+          value
+          |> with_checks ~context ~term_printer spec.sp_checks
+          |> with_pres ~context ~term_printer ir spec.sp_pre
+          |> with_posts ~context ~term_printer ir spec.sp_post
+          |> with_xposts ~context ~term_printer spec.sp_xpost
+          |> with_consumes spec.sp_cs
+          |> with_modified spec.sp_wr
+        in
+        { value with pure = spec.sp_pure }
+      in
+      let value = Option.fold ~none:value ~some:(process ~value) vd.vd_spec in
+      let context =
+        if value.pure then
+          let ls = Ortac_core.Context.get_ls context [ name ] in
+          Ortac_core.Context.add_function ls name context
+        else context
+      in
+      (context, Ir.Value value)
   in
-  let process ~value (spec : Tast.val_spec) =
-    let term_printer = term_printer spec.sp_text spec.sp_loc in
-    let value =
-      value
-      |> with_checks ~context ~term_printer spec.sp_checks
-      |> with_pres ~context ~term_printer ir spec.sp_pre
-      |> with_posts ~context ~term_printer ir spec.sp_post
-      |> with_xposts ~context ~term_printer spec.sp_xpost
-      |> with_consumes spec.sp_cs
-      |> with_modified spec.sp_wr
-    in
-    { value with pure = spec.sp_pure }
-  in
-  let value = Option.fold ~none:value ~some:(process ~value) vd.vd_spec in
-  let value_item = Ir.Value value in
-  let context =
-    if value.pure then
-      let ls = Ortac_core.Context.get_ls context [ name ] in
-      Ortac_core.Context.add_function ls name context
-    else context
-  in
-  let ir = Ir.add_translation value_item ir in
+  let ir = Ir.add_translation item ir in
   P.pack ir context
 
 let constant ~pack ~ghost (vd : Tast.val_description) =

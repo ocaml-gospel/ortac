@@ -38,6 +38,7 @@ let xpost ppf (xp : xpost) =
   Result.iter_error (List.iter (W.pp ppf)) xp.translation
 
 let xposts ppf = List.iter (xpost ppf)
+let projection _ppf (_p : projection) = ()
 
 let value ppf (v : value) =
   match v.ghost with
@@ -78,6 +79,7 @@ let axiom ppf (a : axiom) = term ppf a.definition
 let emit_warnings ppf context =
   Ir.iter_translation context ~f:(function
     | Type t -> type_ ppf t
+    | Projection p -> projection ppf p
     | Value v -> value ppf v
     | Constant c -> constant ppf c
     | Function f -> function_ ppf f
