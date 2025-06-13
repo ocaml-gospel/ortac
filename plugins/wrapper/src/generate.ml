@@ -260,7 +260,15 @@ let axiom (a : Ir.axiom) =
   in
   [ [%stri let () = [%e body]] ]
 
+let reorder_structure_items items =
+  let is_projection = function Projection _ -> true | _ -> false in
+  let non_projections, projections =
+    List.partition (fun item -> not (is_projection item)) items
+  in
+  non_projections @ projections
+
 let structure runtime module_name ir : Ppxlib.structure =
+  let ir = { ir with structure = reorder_structure_items ir.structure } in
   (pmod_ident (lident module_name) |> include_infos |> pstr_include)
   :: pstr_module
        (module_binding
