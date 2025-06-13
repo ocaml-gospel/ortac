@@ -1,5 +1,8 @@
-File "ref.mli", line 12, characters 26-27:
-12 |     ensures i + 1 = succ !r *)
-                               ^
-Warning: Skipping clause: occurrences of the SUT in clauses are only
-         supported to access its model fields.
+File "ref.mli", line 20, characters 13-20:
+20 |     modifies r.value
+                  ^^^^^^^
+Warning: Skipping incr: model value is declared as modified by the function
+         but no suitable ensures clause was found. Specifications should
+         contain at least one "ensures x.value = expr" where x is the SUT and
+         expr can refer to the SUT only under an old operator and can't refer
+         to the returned value.
