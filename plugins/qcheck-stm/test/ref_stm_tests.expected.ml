@@ -141,63 +141,93 @@ module Spec =
           Model.push (Model.drop_n state__003_ 1) r_2__009_
       | Incr ->
           let r_3__010_ = Model.get state__003_ 0 in
-          let r_3__011_ = r_3__010_ in
+          let r_3__011_ =
+            let open ModelElt in
+              {
+                value =
+                  (try
+                     Ortac_runtime.Gospelstdlib.int_of_integer
+                       (Ortac_runtime.Gospelstdlib.succ
+                          (Ortac_runtime.Gospelstdlib.integer_of_int
+                             r_3__010_.value))
+                   with
+                   | e ->
+                       raise
+                         (Ortac_runtime.Partial_function
+                            (e,
+                              {
+                                Ortac_runtime.start =
+                                  {
+                                    pos_fname = "_none_";
+                                    pos_lnum = 0;
+                                    pos_bol = 0;
+                                    pos_cnum = (-1)
+                                  };
+                                Ortac_runtime.stop =
+                                  {
+                                    pos_fname = "_none_";
+                                    pos_lnum = 0;
+                                    pos_bol = 0;
+                                    pos_cnum = (-1)
+                                  }
+                              })))
+              } in
           Model.push (Model.drop_n state__003_ 1) r_3__011_
-    let precond cmd__025_ state__026_ =
-      match cmd__025_ with
+    let precond cmd__023_ state__024_ =
+      match cmd__023_ with
       | Make v -> true
       | Get -> true
       | Set v_1 -> true
       | Incr -> true
     let postcond _ _ _ = true
-    let run cmd__027_ sut__028_ =
-      match cmd__027_ with
+    let run cmd__025_ sut__026_ =
+      match cmd__025_ with
       | Make v ->
           Res
             (sut,
-              (let res__029_ = make v in
-               (SUT.push sut__028_ res__029_; res__029_)))
+              (let res__027_ = make v in
+               (SUT.push sut__026_ res__027_; res__027_)))
       | Get ->
           Res
             (int,
-              (let r_1__030_ = SUT.get sut__028_ 0 in
-               let res__031_ = get r_1__030_ in res__031_))
+              (let r_1__028_ = SUT.get sut__026_ 0 in
+               let res__029_ = get r_1__028_ in res__029_))
       | Set v_1 ->
           Res
             (unit,
-              (let r_2__032_ = SUT.get sut__028_ 0 in
-               let res__033_ = set r_2__032_ v_1 in res__033_))
+              (let r_2__030_ = SUT.get sut__026_ 0 in
+               let res__031_ = set r_2__030_ v_1 in res__031_))
       | Incr ->
           Res
             (unit,
-              (let r_3__034_ = SUT.get sut__028_ 0 in
-               let res__035_ = incr r_3__034_ in res__035_))
+              (let r_3__032_ = SUT.get sut__026_ 0 in
+               let res__033_ = incr r_3__032_ in res__033_))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__037_ state__038_ last__040_ res__039_ =
+let ortac_show_cmd cmd__035_ state__036_ last__038_ res__037_ =
   let open Spec in
     let open STM in
-      match (cmd__037_, res__039_) with
+      match (cmd__035_, res__037_) with
       | (Make v, Res ((SUT, _), r)) ->
-          let lhs = if last__040_ then "r" else SUT.get_name state__038_ 0
+          let lhs = if last__038_ then "r" else SUT.get_name state__036_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a" lhs "make" (Util.Pp.pp_int true) v
       | (Get, Res ((Int, _), _)) ->
-          let lhs = if last__040_ then "r" else "_"
+          let lhs = if last__038_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "get"
-            (SUT.get_name state__038_ (0 + shift))
+            (SUT.get_name state__036_ (0 + shift))
       | (Set v_1, Res ((Unit, _), _)) ->
-          let lhs = if last__040_ then "r" else "_"
+          let lhs = if last__038_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "set"
-            (SUT.get_name state__038_ (0 + shift)) (Util.Pp.pp_int true) v_1
+            (SUT.get_name state__036_ (0 + shift)) (Util.Pp.pp_int true) v_1
       | (Incr, Res ((Unit, _), _)) ->
-          let lhs = if last__040_ then "r" else "_"
+          let lhs = if last__038_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "incr"
-            (SUT.get_name state__038_ (0 + shift))
+            (SUT.get_name state__036_ (0 + shift))
       | _ -> assert false
 let ortac_postcond cmd__012_ state__013_ res__014_ =
   let open Spec in
@@ -241,41 +271,7 @@ let ortac_postcond cmd__012_ state__013_ res__014_ =
                         }
                     })])
       | (Set v_1, Res ((Unit, _), _)) -> None
-      | (Incr, Res ((Unit, _), _)) ->
-          if
-            let r_old__022_ = Model.get state__013_ 0
-            and r_new__023_ = lazy (Model.get (Lazy.force new_state__015_) 0) in
-            (try
-               (Ortac_runtime.Gospelstdlib.integer_of_int
-                  (Lazy.force r_new__023_).value)
-                 =
-                 (Ortac_runtime.Gospelstdlib.succ
-                    (Ortac_runtime.Gospelstdlib.integer_of_int
-                       r_old__022_.value))
-             with | e -> false)
-          then None
-          else
-            Some
-              (Ortac_runtime.report "Ref" "make 42"
-                 (try Ortac_runtime.Value (Res (unit, ()))
-                  with | e -> Ortac_runtime.Out_of_domain) "incr"
-                 [("r.value = succ (old r.value)",
-                    {
-                      Ortac_runtime.start =
-                        {
-                          pos_fname = "ref.mli";
-                          pos_lnum = 21;
-                          pos_bol = 634;
-                          pos_cnum = 646
-                        };
-                      Ortac_runtime.stop =
-                        {
-                          pos_fname = "ref.mli";
-                          pos_lnum = 21;
-                          pos_bol = 634;
-                          pos_cnum = 674
-                        }
-                    })])
+      | (Incr, Res ((Unit, _), _)) -> None
       | _ -> None
 let _ =
   QCheck_base_runner.run_tests_main
