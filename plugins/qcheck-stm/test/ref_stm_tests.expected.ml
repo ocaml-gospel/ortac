@@ -2,7 +2,7 @@
    edit how you run the tool instead *)
 [@@@ocaml.warning "-26-27-69-32-34-38"]
 open Ref
-module Ortac_runtime = Ortac_runtime_qcheck_stm
+module Ortac_runtime = Ortac_runtime_qcheck_stm_sequential
 module SUT =
   (Ortac_runtime.SUT.Make)(struct type sut = t
                                   let init () = make 42 end)
@@ -149,16 +149,16 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Ref" "make 42"
+              (Ortac_runtime.Report.report "Ref" "make 42"
                  (try
-                    Ortac_runtime.Value
+                    Ortac_runtime.Report.Value
                       (Res
                          (integer,
                            (let r_old__012_ = Model.get state__009_ 0
                             and r_new__013_ =
                               lazy (Model.get (Lazy.force new_state__011_) 0) in
                             (Lazy.force r_new__013_).value)))
-                  with | e -> Ortac_runtime.Out_of_domain) "get"
+                  with | e -> Ortac_runtime.Report.Out_of_domain) "get"
                  [("i = r.value",
                     {
                       Ortac_runtime.start =

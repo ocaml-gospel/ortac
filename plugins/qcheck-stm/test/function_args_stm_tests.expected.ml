@@ -2,7 +2,7 @@
    edit how you run the tool instead *)
 [@@@ocaml.warning "-26-27-69-32-34-38"]
 open Function_args
-module Ortac_runtime = Ortac_runtime_qcheck_stm
+module Ortac_runtime = Ortac_runtime_qcheck_stm_sequential
 module SUT =
   (Ortac_runtime.SUT.Make)(struct type sut = t
                                   let init () = make 16 'a' end)
@@ -290,9 +290,12 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "Function_args" "make 16 'a'"
-                        (try Ortac_runtime.Exception "Invalid_argument"
-                         with | e -> Ortac_runtime.Out_of_domain) "make"
+                     (Ortac_runtime.Report.report "Function_args"
+                        "make 16 'a'"
+                        (try
+                           Ortac_runtime.Report.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Report.Out_of_domain)
+                        "make"
                         [("len >= 0",
                            {
                              Ortac_runtime.start =
@@ -325,9 +328,13 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Function_args" "make 16 'a'"
-                           (try Ortac_runtime.Exception "Invalid_argument"
-                            with | e -> Ortac_runtime.Out_of_domain) "make"
+                        (Ortac_runtime.Report.report "Function_args"
+                           "make 16 'a'"
+                           (try
+                              Ortac_runtime.Report.Exception
+                                "Invalid_argument"
+                            with | e -> Ortac_runtime.Report.Out_of_domain)
+                           "make"
                            [("len >= 0",
                               {
                                 Ortac_runtime.start =
