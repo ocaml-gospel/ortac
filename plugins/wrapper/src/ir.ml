@@ -19,11 +19,17 @@ type invariant = {
   translation : (string * structure_item, W.t) result;
 }
 
+type model =
+  string (* the name of the model *)
+  * Gospel.Identifier.Ident.t
+    (* the stored generated unique name for the associated projection function *)
+  * bool (* if declared as mutable*)
+
 type type_ = {
   name : string;
   loc : Location.t;
   ghost : Gospel.Tast.ghost;
-  models : (string * bool) list;
+  models : model list;
   invariants : invariant list;
   equality : (expression, W.t) result;
   comparison : (expression, W.t) result;

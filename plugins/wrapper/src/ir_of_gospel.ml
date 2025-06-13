@@ -34,13 +34,26 @@ let conditions ~context ~term_printer fail_violated fail_nonexec terms =
 
 let with_models ~context:_ fields (type_ : type_) =
   let models =
-    List.map (fun ((ls : Symbols.lsymbol), b) -> (ls.ls_name.id_str, b)) fields
+    List.map
+      (fun ((ls : Symbols.lsymbol), b) ->
+        let name = ls.ls_name.id_str in
+        let prefix = "__projection_" ^ name in
+        let proj_name = gen_symbol ~prefix () in
+        let ident = Ident.create ~loc:Location.none proj_name in
+        (name, ident, b))
+      fields
   in
   { type_ with models }
 
-let mem_model ir field =
-  let aux = function Type t -> List.mem_assoc field t.models | _ -> false in
-  List.exists aux ir.structure
+let find_projection ir field =
+  let aux = function
+    | Type t ->
+        List.find_map
+          (fun (name, ident, _) -> if field = name then Some ident else None)
+          t.models
+    | _ -> None
+  in
+  List.find_map aux ir.structure
 
 let collect_model ir =
   (* replaces calls to the gospel model by the projection function *)
