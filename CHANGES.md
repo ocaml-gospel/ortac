@@ -1,5 +1,7 @@
 # Unreleased
 
+- [QCheck-STM] Fix next-state computation for functions specialised for `int`s
+  [\#326](https://github.com/ocaml-gospel/ortac/pull/326)
 - [Wrapper] Fix naming conflicts between model projections and function arguments
   [\#324](https://github.com/ocaml-gospel/ortac/pull/324)
 - [Wrapper] Add header message in generated files with wrapper mode
