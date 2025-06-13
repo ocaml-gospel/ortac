@@ -1,5 +1,7 @@
 # Unreleased
 
+- [QCheck-STM] Fix next-state computation for functions specialised for `int`s
+  [\#326](https://github.com/ocaml-gospel/ortac/pull/326)
 - [Wrapper] Add header message in generated files with wrapper mode
   [\#322](https://github.com/ocaml-gospel/ortac/pull/322)
 - [Dune] Add automatic dune file generation to the wrapper plugin
