@@ -1,6 +1,6 @@
-module To_test = Wrapper
-module To_test2 = Wrapper_behaviour
-module To_test3 = Wrapper_model
+module To_test = Set_wrapped
+module To_test2 = Runtime_assertion_checking_wrapped
+module To_test3 = Model_wrapped
 
 let test_create () =
   let s = To_test.create 5 in

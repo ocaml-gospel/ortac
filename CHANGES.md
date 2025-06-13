@@ -1,5 +1,7 @@
 # Unreleased
 
+- [Wrapper] Rename wrapper tests to make them more readable
+  [\#323](https://github.com/ocaml-gospel/ortac/pull/323)
 - [Wrapper] Add header message in generated files with wrapper mode
   [\#322](https://github.com/ocaml-gospel/ortac/pull/322)
 - [Dune] Add automatic dune file generation to the wrapper plugin
