@@ -12,3 +12,12 @@ We first load the plugin
   >     mutable model n: int *)
   > EOF
   $ ortac wrapper -o missing_wrapped.ml missing.mli
+  File "missing.mli", line 1, characters 0-59:
+  1 | type t
+  2 | (*@ mutable model m: int
+  3 |     mutable model n: int *)
+  Error: The model m has no projection function. It was not translated..File "missing.mli", line 1, characters 0-59:
+  1 | type t
+  2 | (*@ mutable model m: int
+  3 |     mutable model n: int *)
+  Error: The model n has no projection function. It was not translated..
