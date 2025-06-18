@@ -64,6 +64,7 @@ let module_prefix =
   optional_argument "--module-prefix" (fun cfg -> cfg.module_prefix)
 
 let submodule = optional_argument "--submodule" (fun cfg -> cfg.submodule)
+let domain cfg = if cfg.domain then [ (fun ppf _ -> pf ppf "--domain") ] else []
 
 let gen_ortac_rule ppf config =
   let args =
@@ -73,6 +74,7 @@ let gen_ortac_rule ppf config =
     :: dep config_file
     :: quiet
     :: module_prefix config
+    @ domain config
     @ submodule config
   in
   let run ppf = run ppf args in
