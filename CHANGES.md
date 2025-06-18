@@ -1,5 +1,7 @@
 # Unreleased
 
+- [QCheck-STM] Add basic runtime for domain testing
+  [\#328](https://github.com/ocaml-gospel/ortac/pull/328)
 - [Dune] Fix dependancies in `ortac-dune`
   [\#340](https://github.com/ocaml-gospel/ortac/pull/340)
 
