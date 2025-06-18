@@ -46,10 +46,11 @@ let libraries =
          ~default:Filename.(basename config.interface_file |> chop_extension))
   in
   let k ppf config =
+    let backend = if config.domain then "domain" else "sequential" in
     pf ppf
-      "libraries@ %aqcheck-stm.stm@ qcheck-stm.sequential@ \
-       qcheck-multicoretests-util@ ortac-runtime-qcheck-stm.sequential"
-      library config
+      "libraries@ %aqcheck-stm.stm@ qcheck-stm.%s@ qcheck-multicoretests-util@ \
+       ortac-runtime-qcheck-stm.%s"
+      library config backend backend
   in
   stanza k
 

@@ -164,9 +164,9 @@ Specifying a timeout causes ORTAC_QCHECK_STM_TIMEOUT to be set before running th
    (libraries
     intf_spec
     qcheck-stm.stm
-    qcheck-stm.sequential
+    qcheck-stm.domain
     qcheck-multicoretests-util
-    ortac-runtime-qcheck-stm.sequential)
+    ortac-runtime-qcheck-stm.domain)
    (action
     (run
      %{test}
@@ -248,9 +248,9 @@ The following Dune files are tested to ensure it produces correct files.
    (libraries
     intf_spec
     qcheck-stm.stm
-    qcheck-stm.sequential
+    qcheck-stm.domain
     qcheck-multicoretests-util
-    ortac-runtime-qcheck-stm.sequential)
+    ortac-runtime-qcheck-stm.domain)
    (action
     (run
      %{test}
