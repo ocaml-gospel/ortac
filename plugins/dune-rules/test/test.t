@@ -191,7 +191,8 @@ Specifying a timeout causes ORTAC_QCHECK_STM_TIMEOUT to be set before running th
        qcheck-stm
        %{dep:intf_spec.mli}
        %{dep:intf_spec_config.ml}
-       --quiet)))))
+       --quiet
+       --domain)))))
   
   (test
    (name intf_spec_tests)
