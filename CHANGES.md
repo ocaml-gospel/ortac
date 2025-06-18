@@ -1,5 +1,7 @@
 # Unreleased
 
+- [QCheck-STM] Add basic runtime for domain testing
+  [\#328](https://github.com/ocaml-gospel/ortac/pull/328)
 - [QCheck-STM] Fix next-state computation for functions specialised for `int`s
   [\#326](https://github.com/ocaml-gospel/ortac/pull/326)
 - [Wrapper] Fix naming conflicts between model projections and function arguments
