@@ -183,6 +183,18 @@ let split_args config vd args =
   in
   aux [] [] [] vd.vd_type args
 
+let int_of_integer =
+  let vs_name =
+    Ident.create "Ortac_runtime.Gospelstdlib.int_of_integer" ~loc:Location.none
+  and vs_ty = Ttypes.fresh_ty_var "a" in
+  fun integer_term ->
+    let term =
+      Tterm_helper.mk_term (Tvar { vs_name; vs_ty }) None Location.none
+    in
+    Tterm_helper.mk_term
+      (Tapp (Symbols.fs_apply, [ term; integer_term ]))
+      None Location.none
+
 let get_state_description_with_index is_t state spec =
   let open Tterm in
   let rec pred i t =
@@ -191,6 +203,23 @@ let get_state_description_with_index is_t state spec =
       when Symbols.(ls_equal ps_equ ls) && is_t vs ->
         if List.exists (fun (id, _) -> Ident.equal id m.ls_name) state then
           Some (i, Ir.{ model = m.ls_name; description = right })
+        else None
+    | Tapp
+        ( ls_eq,
+          [
+            {
+              t_node =
+                Tapp
+                  (ls, [ { t_node = Tfield ({ t_node = Tvar vs; _ }, m); _ } ]);
+              _;
+            };
+            right;
+          ] )
+      when Symbols.(ls_equal ps_equ ls_eq)
+           && ls.ls_name.id_str = "integer_of_int"
+           && is_t vs ->
+        if List.exists (fun (id, _) -> Ident.equal id m.ls_name) state then
+          Some (i, Ir.{ model = m.ls_name; description = int_of_integer right })
         else None
     | Tbinop ((Tand | Tand_asym), l, r) -> (
         match pred i l with None -> pred i r | o -> o)
