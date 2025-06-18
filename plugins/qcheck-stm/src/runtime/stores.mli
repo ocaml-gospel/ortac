@@ -1,37 +1,3 @@
-include module type of Ortac_runtime
-open STM
-
-(** This type carries the expected value computed from the Gospel specification
-    if possible. *)
-type expected_result =
-  | Value of res  (** The value has been computed *)
-  | Protected_value of res
-      (** The value has been computed but is protected as it could have been an
-          exception *)
-  | Exception of string  (** An exception is expected *)
-  | Out_of_domain
-      (** The computation of the expected returned value called a Gospel
-          function out of its domain *)
-
-type report
-(** Information for the bug report in case of test failure *)
-
-val report :
-  string ->
-  string ->
-  expected_result ->
-  string ->
-  (string * location) list ->
-  report
-(** [report module_name init_sut ret cmd terms] *)
-
-val append : report option -> report option -> report option
-(** [append a b] appends the violated terms of [a] and [b] if any in the
-    returned report *)
-
-val dummy : 'a ty * ('b -> string)
-(** A dummy [STM.res] for unknown returned values *)
-
 module Model : sig
   module Make (M : sig
     type elt
@@ -93,19 +59,4 @@ module SUT : sig
         of SUTs *)
   end
   with type elt = M.sut
-end
-
-module Make (Spec : Spec) : sig
-  open QCheck
-
-  val agree_test :
-    count:int ->
-    name:string ->
-    int ->
-    (unit -> unit) ->
-    (Spec.cmd -> Spec.sut -> bool -> res -> string) ->
-    (Spec.cmd -> Spec.state -> res -> report option) ->
-    Test.t
-  (** [agree_test ~count ~name max_suts init_state show_cmd postcond] An
-      agreement test specialised to be used by Ortac/QCheck-STM. *)
 end
