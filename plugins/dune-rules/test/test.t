@@ -134,6 +134,11 @@ Specifying a timeout causes ORTAC_QCHECK_STM_TIMEOUT to be set before running th
       %{test}
       --verbose))))
 
+  $ ortac dune qcheck-stm intf_spec.mli --domain
+  ortac: unknown option '--domain'.
+  Usage: ortac dune qcheck-stm [OPTION]… INTERFACE
+  Try 'ortac dune qcheck-stm --help' or 'ortac --help' for more information.
+  [124]
 
 The following Dune files are tested to ensure it produces correct files.
   $ cat > dune-project <<EOF
