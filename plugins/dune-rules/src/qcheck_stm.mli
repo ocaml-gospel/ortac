@@ -7,6 +7,7 @@ type config = {
   dune_output : string option;
   module_prefix : string option;
   submodule : string option;
+  domain : bool;
   fork_timeout : int option;
 }
 
