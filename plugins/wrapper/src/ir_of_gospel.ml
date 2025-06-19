@@ -679,6 +679,16 @@ let is_projection (vd : Tast.val_description) =
   in
   List.exists aux vd.vd_attrs
 
+let projection ~loc ir model_name arguments returns register_name =
+  match find_projection ir model_name with
+  | Some ident ->
+      let name = ident.id_str in
+      let projection =
+        Ir.projection ~name ~model_name ~loc ~arguments ~returns ~register_name
+      in
+      Ir.add_translation (Ir.Projection projection) ir
+  | None -> ir
+
 let value ~pack ~ghost (vd : Tast.val_description) =
   let ir, context = P.unpack pack in
   let name = vd.vd_name.id_str in
@@ -686,46 +696,36 @@ let value ~pack ~ghost (vd : Tast.val_description) =
   let register_name = register_name () in
   let arguments = List.map (var_of_arg ~ir) vd.vd_args in
   let returns = List.map (var_of_arg ~ir) vd.vd_ret in
-  let context, item =
+  let ir =
     if is_projection vd then
-      let proj_name =
-        match find_projection ir name with
-        | Some i -> i.id_str
-        | None -> assert false
-      in
-      let projection =
-        Ir.projection ~name:proj_name ~model_name:name ~loc ~arguments ~returns
-          ~register_name
-      in
-      (context, Ir.Projection projection)
-    else
-      let pure = false in
-      let value =
-        Ir.value ~name ~loc ~register_name ~arguments ~returns ~pure ~ghost
-      in
-      let process ~value (spec : Tast.val_spec) =
-        let term_printer = term_printer spec.sp_text spec.sp_loc in
-        let value =
-          value
-          |> with_checks ~context ~term_printer spec.sp_checks
-          |> with_pres ~context ~term_printer ir spec.sp_pre
-          |> with_posts ~context ~term_printer ir spec.sp_post
-          |> with_xposts ~context ~term_printer spec.sp_xpost
-          |> with_consumes spec.sp_cs
-          |> with_modified spec.sp_wr
-        in
-        { value with pure = spec.sp_pure }
-      in
-      let value = Option.fold ~none:value ~some:(process ~value) vd.vd_spec in
-      let context =
-        if value.pure then
-          let ls = Ortac_core.Context.get_ls context [ name ] in
-          Ortac_core.Context.add_function ls name context
-        else context
-      in
-      (context, Ir.Value value)
+      projection ~loc ir name arguments returns register_name
+    else ir
   in
-  let ir = Ir.add_translation item ir in
+  let pure = false in
+  let value =
+    Ir.value ~name ~loc ~register_name ~arguments ~returns ~pure ~ghost
+  in
+  let process ~value (spec : Tast.val_spec) =
+    let term_printer = term_printer spec.sp_text spec.sp_loc in
+    let value =
+      value
+      |> with_checks ~context ~term_printer spec.sp_checks
+      |> with_pres ~context ~term_printer ir spec.sp_pre
+      |> with_posts ~context ~term_printer ir spec.sp_post
+      |> with_xposts ~context ~term_printer spec.sp_xpost
+      |> with_consumes spec.sp_cs
+      |> with_modified spec.sp_wr
+    in
+    { value with pure = spec.sp_pure }
+  in
+  let value = Option.fold ~none:value ~some:(process ~value) vd.vd_spec in
+  let context =
+    if value.pure then
+      let ls = Ortac_core.Context.get_ls context [ name ] in
+      Ortac_core.Context.add_function ls name context
+    else context
+  in
+  let ir = Ir.add_translation (Ir.Value value) ir in
   P.pack ir context
 
 let constant ~pack ~ghost (vd : Tast.val_description) =

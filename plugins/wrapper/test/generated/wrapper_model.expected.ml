@@ -110,6 +110,88 @@ let __invariant___006_ __error___007_ __position___008_ t_1 =
          position = __position___008_
        })
       |> (Ortac_runtime.Errors.register __error___007_)
+let capacity __arg0 =
+  let __error__009_ =
+    Ortac_runtime.Errors.create
+      {
+        Ortac_runtime.start =
+          {
+            pos_fname = "lib_model.mli";
+            pos_lnum = 8;
+            pos_bol = 277;
+            pos_cnum = 277
+          };
+        Ortac_runtime.stop =
+          {
+            pos_fname = "lib_model.mli";
+            pos_lnum = 8;
+            pos_bol = 277;
+            pos_cnum = 313
+          }
+      } "capacity" in
+  __invariant___006_ __error__009_ Pre __arg0;
+  __invariant___003_ __error__009_ Pre __arg0;
+  Ortac_runtime.Errors.report __error__009_;
+  (let result =
+     try capacity __arg0
+     with
+     | Stack_overflow | Out_of_memory as e ->
+         ((__invariant___006_ __error__009_ XPost __arg0;
+           __invariant___003_ __error__009_ XPost __arg0;
+           Ortac_runtime.Errors.report __error__009_);
+          raise e)
+     | e ->
+         ((Ortac_runtime.Unexpected_exception { allowed_exn = []; exn = e })
+            |> (Ortac_runtime.Errors.register __error__009_);
+          (__invariant___006_ __error__009_ XPost __arg0;
+           __invariant___003_ __error__009_ XPost __arg0;
+           Ortac_runtime.Errors.report __error__009_);
+          raise e) in
+   __invariant___006_ __error__009_ Post __arg0;
+   __invariant___003_ __error__009_ Post __arg0;
+   Ortac_runtime.Errors.report __error__009_;
+   result)
+let view __arg0_1 =
+  let __error__010_ =
+    Ortac_runtime.Errors.create
+      {
+        Ortac_runtime.start =
+          {
+            pos_fname = "lib_model.mli";
+            pos_lnum = 9;
+            pos_bol = 314;
+            pos_cnum = 314
+          };
+        Ortac_runtime.stop =
+          {
+            pos_fname = "lib_model.mli";
+            pos_lnum = 9;
+            pos_bol = 314;
+            pos_cnum = 350
+          }
+      } "view" in
+  __invariant___006_ __error__010_ Pre __arg0_1;
+  __invariant___003_ __error__010_ Pre __arg0_1;
+  Ortac_runtime.Errors.report __error__010_;
+  (let result_1 =
+     try view __arg0_1
+     with
+     | Stack_overflow | Out_of_memory as e ->
+         ((__invariant___006_ __error__010_ XPost __arg0_1;
+           __invariant___003_ __error__010_ XPost __arg0_1;
+           Ortac_runtime.Errors.report __error__010_);
+          raise e)
+     | e ->
+         ((Ortac_runtime.Unexpected_exception { allowed_exn = []; exn = e })
+            |> (Ortac_runtime.Errors.register __error__010_);
+          (__invariant___006_ __error__010_ XPost __arg0_1;
+           __invariant___003_ __error__010_ XPost __arg0_1;
+           Ortac_runtime.Errors.report __error__010_);
+          raise e) in
+   __invariant___006_ __error__010_ Post __arg0_1;
+   __invariant___003_ __error__010_ Post __arg0_1;
+   Ortac_runtime.Errors.report __error__010_;
+   result_1)
 let create c =
   let __error__011_ =
     Ortac_runtime.Errors.create
