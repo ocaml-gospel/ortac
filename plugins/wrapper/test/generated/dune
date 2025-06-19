@@ -5,6 +5,12 @@
  (instrumentation
   (backend bisect_ppx)))
 
+(cram
+ (package ortac-wrapper)
+ (deps
+  (package ortac-core)
+  (package ortac-wrapper)))
+
 (rule
  (copy lib.mli wrapper.mli))
 

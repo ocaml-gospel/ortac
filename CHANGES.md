@@ -1,5 +1,7 @@
 # Unreleased
 
+- [Wrapper] Prevent code generation if required model projection is absent
+  [\#327](https://github.com/ocaml-gospel/ortac/pull/327)
 - [QCheck-STM] Fix next-state computation for functions specialised for `int`s
   [\#326](https://github.com/ocaml-gospel/ortac/pull/326)
 - [Wrapper] Fix naming conflicts between model projections and function arguments
