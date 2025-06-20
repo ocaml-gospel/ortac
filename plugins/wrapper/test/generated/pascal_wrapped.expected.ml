@@ -76,6 +76,68 @@ let rec __logical_comb_aux__003_ c n i k =
 let __logical_comb__004_ n_1 k_1 =
   __logical_comb_aux__003_ (Ortac_runtime.Gospelstdlib.integer_of_int 1) n_1
     (Ortac_runtime.Gospelstdlib.integer_of_int 1) k_1
+let n __arg0 =
+  let __error__005_ =
+    Ortac_runtime.Errors.create
+      {
+        Ortac_runtime.start =
+          {
+            pos_fname = "pascal.mli";
+            pos_lnum = 10;
+            pos_bol = 617;
+            pos_cnum = 617
+          };
+        Ortac_runtime.stop =
+          {
+            pos_fname = "pascal.mli";
+            pos_lnum = 10;
+            pos_bol = 617;
+            pos_cnum = 648
+          }
+      } "n" in
+  Ortac_runtime.Errors.report __error__005_;
+  (let result =
+     try n __arg0
+     with
+     | Stack_overflow | Out_of_memory as e ->
+         (Ortac_runtime.Errors.report __error__005_; raise e)
+     | e ->
+         ((Ortac_runtime.Unexpected_exception { allowed_exn = []; exn = e })
+            |> (Ortac_runtime.Errors.register __error__005_);
+          Ortac_runtime.Errors.report __error__005_;
+          raise e) in
+   Ortac_runtime.Errors.report __error__005_; result)
+let row __arg0_1 =
+  let __error__006_ =
+    Ortac_runtime.Errors.create
+      {
+        Ortac_runtime.start =
+          {
+            pos_fname = "pascal.mli";
+            pos_lnum = 11;
+            pos_bol = 649;
+            pos_cnum = 649
+          };
+        Ortac_runtime.stop =
+          {
+            pos_fname = "pascal.mli";
+            pos_lnum = 11;
+            pos_bol = 649;
+            pos_cnum = 687
+          }
+      } "row" in
+  Ortac_runtime.Errors.report __error__006_;
+  (let result_1 =
+     try row __arg0_1
+     with
+     | Stack_overflow | Out_of_memory as e ->
+         (Ortac_runtime.Errors.report __error__006_; raise e)
+     | e ->
+         ((Ortac_runtime.Unexpected_exception { allowed_exn = []; exn = e })
+            |> (Ortac_runtime.Errors.register __error__006_);
+          Ortac_runtime.Errors.report __error__006_;
+          raise e) in
+   Ortac_runtime.Errors.report __error__006_; result_1)
 let init () =
   let __error__007_ =
     Ortac_runtime.Errors.create
