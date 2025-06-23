@@ -1,5 +1,7 @@
 # Unreleased
 
+- [Wrapper] Add a better management of attribute for projection functions
+  [\#332](https://github.com/ocaml-gospel/ortac/pull/332)
 - [Wrapper] Print projection function as Ir.Projection and Ir.Value
   [\#331](https://github.com/ocaml-gospel/ortac/pull/331)
 - [Wrapper] Prevent code generation if required model projection is absent
