@@ -18,7 +18,7 @@ let __projection_n__001_ __arg0 =
             pos_fname = "pascal.mli";
             pos_lnum = 10;
             pos_bol = 617;
-            pos_cnum = 648
+            pos_cnum = 638
           }
       } "__projection_n__001_" in
   let result =
@@ -40,15 +40,15 @@ let __projection_row__002_ __arg0_1 =
           {
             pos_fname = "pascal.mli";
             pos_lnum = 11;
-            pos_bol = 649;
-            pos_cnum = 649
+            pos_bol = 639;
+            pos_cnum = 639
           };
         Ortac_runtime.stop =
           {
             pos_fname = "pascal.mli";
             pos_lnum = 11;
-            pos_bol = 649;
-            pos_cnum = 687
+            pos_bol = 639;
+            pos_cnum = 667
           }
       } "__projection_row__002_" in
   let result_1 =
@@ -92,7 +92,7 @@ let n __arg0 =
             pos_fname = "pascal.mli";
             pos_lnum = 10;
             pos_bol = 617;
-            pos_cnum = 648
+            pos_cnum = 638
           }
       } "n" in
   Ortac_runtime.Errors.report __error__005_;
@@ -115,15 +115,15 @@ let row __arg0_1 =
           {
             pos_fname = "pascal.mli";
             pos_lnum = 11;
-            pos_bol = 649;
-            pos_cnum = 649
+            pos_bol = 639;
+            pos_cnum = 639
           };
         Ortac_runtime.stop =
           {
             pos_fname = "pascal.mli";
             pos_lnum = 11;
-            pos_bol = 649;
-            pos_cnum = 687
+            pos_bol = 639;
+            pos_cnum = 667
           }
       } "row" in
   Ortac_runtime.Errors.report __error__006_;
@@ -146,15 +146,15 @@ let init () =
           {
             pos_fname = "pascal.mli";
             pos_lnum = 12;
-            pos_bol = 688;
-            pos_cnum = 688
+            pos_bol = 668;
+            pos_cnum = 668
           };
         Ortac_runtime.stop =
           {
             pos_fname = "pascal.mli";
             pos_lnum = 14;
-            pos_bol = 799;
-            pos_cnum = 821
+            pos_bol = 779;
+            pos_cnum = 801
           }
       } "init" in
   Ortac_runtime.Errors.report __error__007_;
@@ -192,15 +192,15 @@ let next r_1 =
           {
             pos_fname = "pascal.mli";
             pos_lnum = 16;
-            pos_bol = 823;
-            pos_cnum = 823
+            pos_bol = 803;
+            pos_cnum = 803
           };
         Ortac_runtime.stop =
           {
             pos_fname = "pascal.mli";
             pos_lnum = 20;
-            pos_bol = 1015;
-            pos_cnum = 1078
+            pos_bol = 995;
+            pos_cnum = 1058
           }
       } "next" in
   let ___ortac_copy_1 = Ortac_runtime.copy r_1 in

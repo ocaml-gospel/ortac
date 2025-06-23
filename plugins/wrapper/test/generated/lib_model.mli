@@ -5,8 +5,8 @@ type 'a t
     invariant t.capacity > 0
     invariant List.length t.view <= t.capacity *)
 
-val capacity : 'a t -> int [@@model]
-val view : 'a t -> 'a list [@@model]
+val capacity : 'a t -> int
+val view : 'a t -> 'a list
 val create : int -> 'a t
 (*@ t = create c
     requires c > 0

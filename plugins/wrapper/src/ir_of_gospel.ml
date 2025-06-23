@@ -672,13 +672,6 @@ let type_ ~pack ~ghost (td : Tast.type_declaration) =
 
 let types ~pack ~ghost = List.fold_left (fun pack -> type_ ~pack ~ghost) pack
 
-let is_projection (vd : Tast.val_description) =
-  let aux = function
-    | { attr_name = { txt = "model"; _ }; _ } -> true
-    | _ -> false
-  in
-  List.exists aux vd.vd_attrs
-
 let projection ~loc ir model_name arguments returns register_name =
   match find_projection ir model_name with
   | Some ident ->
@@ -696,11 +689,7 @@ let value ~pack ~ghost (vd : Tast.val_description) =
   let register_name = register_name () in
   let arguments = List.map (var_of_arg ~ir) vd.vd_args in
   let returns = List.map (var_of_arg ~ir) vd.vd_ret in
-  let ir =
-    if is_projection vd then
-      projection ~loc ir name arguments returns register_name
-    else ir
-  in
+  let ir = projection ~loc ir name arguments returns register_name in
   let pure = false in
   let value =
     Ir.value ~name ~loc ~register_name ~arguments ~returns ~pure ~ghost
