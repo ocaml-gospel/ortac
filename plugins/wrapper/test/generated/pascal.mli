@@ -8,7 +8,7 @@ type pascal
 (*@ function comb (n: integer) (k: integer) : integer = comb_aux 1 n 1 k *)
 
 val n : pascal -> int
-val row : pascal -> int list
+val to_list : pascal -> int list [@@projection_for row]
 val init : unit -> pascal
 (*@ r = init ()
     ensures r.n = 0 *)

@@ -1,7 +1,7 @@
 type pascal = int Array.t ref
 
 let n (r : pascal) = Array.length !r - 1
-let row (r : pascal) = Array.to_list !r
+let to_list (r : pascal) = Array.to_list !r
 let init () : pascal = ref (Array.make 1 1)
 
 let next (r : pascal) =

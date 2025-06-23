@@ -190,7 +190,7 @@ let projection (p : Ir.projection) =
   let eargs = args evar p.arguments in
   let pargs = args pvar p.arguments in
   let eret, pret = rets p.returns in
-  let call = pexp_apply (evar p.model_name) eargs in
+  let call = pexp_apply (evar p.ocaml_name) eargs in
   let try_call = pexp_try call default_cases in
   let body =
     setup p.name p.loc p.register_name
