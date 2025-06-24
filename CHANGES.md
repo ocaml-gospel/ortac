@@ -1,5 +1,7 @@
 # Unreleased
 
+- [Wrapper] Rename wrapper tests to make them more readable
+  [\#323](https://github.com/ocaml-gospel/ortac/pull/323)
 - [Wrapper] Print projection function as Ir.Projection and Ir.Value
   [\#331](https://github.com/ocaml-gospel/ortac/pull/331)
 - [Wrapper] Prevent code generation if required model projection is absent

@@ -2,7 +2,7 @@ open Monolith
 module M = Ortac_runtime_monolith
 module R =
   struct
-    include Lib
+    include Set
     module Ortac_runtime = Ortac_runtime_monolith
     let __invariant___001_ __error___002_ __position___003_ t =
       if
@@ -76,14 +76,14 @@ module R =
           {
             Ortac_runtime.start =
               {
-                pos_fname = "lib.mli";
+                pos_fname = "set.mli";
                 pos_lnum = 9;
                 pos_bol = 399;
                 pos_cnum = 399
               };
             Ortac_runtime.stop =
               {
-                pos_fname = "lib.mli";
+                pos_fname = "set.mli";
                 pos_lnum = 13;
                 pos_bol = 585;
                 pos_cnum = 638
@@ -171,14 +171,14 @@ module R =
           {
             Ortac_runtime.start =
               {
-                pos_fname = "lib.mli";
+                pos_fname = "set.mli";
                 pos_lnum = 15;
                 pos_bol = 640;
                 pos_cnum = 640
               };
             Ortac_runtime.stop =
               {
-                pos_fname = "lib.mli";
+                pos_fname = "set.mli";
                 pos_lnum = 20;
                 pos_bol = 871;
                 pos_cnum = 926
@@ -268,14 +268,14 @@ module R =
           {
             Ortac_runtime.start =
               {
-                pos_fname = "lib.mli";
+                pos_fname = "set.mli";
                 pos_lnum = 22;
                 pos_bol = 928;
                 pos_cnum = 928
               };
             Ortac_runtime.stop =
               {
-                pos_fname = "lib.mli";
+                pos_fname = "set.mli";
                 pos_lnum = 25;
                 pos_bol = 1074;
                 pos_cnum = 1103
@@ -343,7 +343,7 @@ module R =
        Ortac_runtime.Errors.report __error__020_;
        b)
   end
-module C = Lib
+module C = Set
 module G = struct  end
 module P = struct  end
 module S = struct let set = declare_abstract_type ~var:"set" () end

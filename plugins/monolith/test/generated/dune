@@ -35,13 +35,13 @@
    monolith
    (with-stderr-to
     errors
-    (run ortac monolith -o %{target} %{dep:lib.mli})))))
+    (run ortac monolith -o %{target} %{dep:set.mli})))))
 
 (rule
- (copy ../../../wrapper/test/generated/lib.mli lib.mli))
+ (copy ../../../wrapper/test/generated/set.mli set.mli))
 
 (rule
- (copy ../../../wrapper/test/generated/lib.ml lib.ml))
+ (copy ../../../wrapper/test/generated/set.ml set.ml))
 
 (rule
  (alias runtest)
