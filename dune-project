@@ -74,7 +74,8 @@
   )
  (authors
   "Clément Pascutto <clement@pascutto.fr>"
-  "Nicolas Osborne <nicolas.osborne@tarides.com>")
+  "Nicolas Osborne <nicolas.osborne@tarides.com>"
+  "Charlène Gros <charlène@tarides.com>")
  (depends
   (ocaml (>= 4.12.0))
   (cmdliner (>= 1.1.0))
@@ -169,7 +170,8 @@
  (synopsis "Generate dune rules for other ortac plugins")
  (description "Generate dune rules for other ortac plugins")
  (authors
-  "Nicolas Osborne <nicolas.osborne@tarides.com>")
+  "Nicolas Osborne <nicolas.osborne@tarides.com>"
+  "Charlène Gros <charlène@tarides.com>")
  (depends
   (ocaml (>= 4.12.0))
   fmt

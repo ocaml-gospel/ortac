@@ -4,7 +4,10 @@ version: "0.6.1~dev"
 synopsis: "Generate dune rules for other ortac plugins"
 description: "Generate dune rules for other ortac plugins"
 maintainer: ["Nicolas Osborne <nicolas.osborne@tarides.com>"]
-authors: ["Nicolas Osborne <nicolas.osborne@tarides.com>"]
+authors: [
+  "Nicolas Osborne <nicolas.osborne@tarides.com>"
+  "Charlène Gros <charlène@tarides.com>"
+]
 license: "MIT"
 homepage: "https://github.com/ocaml-gospel/ortac"
 bug-reports: "https://github.com/ocaml-gospel/ortac/issues"
