@@ -1,4 +1,4 @@
-# Unreleased
+# 0.7.0
 
 - [Wrapper] Add a better management of attribute for projection functions
   [\#332](https://github.com/ocaml-gospel/ortac/pull/332)
