@@ -13,10 +13,10 @@ repository. The dune-rules plugin is provided by the OPAM package
 
 [installation instructions]: ../../README.md#installation
 
-## Quick start
+## QCheck-STM - Quick start
 
 The dune-rules plugin can be used to generate dune rules for other ortac
-plugins (the qcheck-stm plugin for now). You have to give it the option you
+plugins. You have to give it the option you
 want to pass to the other plugins and some more information for dune.
 
 Let's say you want use the [Ortac/QCheck-STM] plugin on a module interface
@@ -50,6 +50,54 @@ More information about this can be found in [Ortac/QCheck-STM].
 
 [Ortac/QCheck-STM]: ../qcheck-stm/README.md
 
+## Wrapper - Quick start
+
+The dune-rules plugin can also generate dune rules for the [Ortac/Wrapper]
+plugin.
+This plugin generates a wrapped implementation from an interface file.
+
+For instance, to apply the wrapper to a module interface `lib.mli`,
+you can use the following dune stanza:
+
+First you should instantiate your library,
+```dune
+(library
+ (name lib)
+ (modules lib)
+ (package my_pkg))
+```
+
+```dune
+(rule
+ (alias runtest)
+ (mode promote)
+ (action
+  (with-stdout-to
+   dune.wrapper.inc
+   (setenv
+    ORTAC_ONLY_PLUGIN
+    dune-rules
+   (run ortac dune wrapper lib.mli --package=my_pkg --output=wrapper.ml)))))
+
+(include dune.wrapper.inc)
+```
+
+This will generate a `wrapper.ml` file based on `lib.mli`, which has the
+same signature. The `--output` is optional. If it is not present,
+the output file will, by default, append `__wrapped` to the name of the
+given interface.
+
+The generated rules in `dune.wrapper.inc` will first declare the generated module
+as part of a library, then copy the original interface to the
+target name (or appended with `__wrapped`) to separate the
+generated couple of files and users ones. Finally, it runs Ortac with
+the wrapper plugin to generate the wrapped OCaml file.
+
+More details about the wrapper can be found in [Ortac/Wrapper].
+
+[Ortac/Wrapper]: ../wrapper/README.md
+
 ## Supported plugins
 
 - `qcheck-stm`
+- `wrapper`
