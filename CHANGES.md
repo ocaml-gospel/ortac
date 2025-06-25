@@ -11,7 +11,8 @@
 - [Wrapper] Add header message in generated files with wrapper mode
   [\#322](https://github.com/ocaml-gospel/ortac/pull/322)
 - [Dune] Add automatic dune file generation to the wrapper plugin
-  [\#314](https://github.com/ocaml-gospel/ortac/pull/314)
+  [\#314](https://github.com/ocaml-gospel/ortac/pull/314) and
+  [\#335](https://github.com/ocaml-gospel/ortac/pull/335)
 - [Wrapper] Fix missing model support in preconditions
   [\#313](https://github.com/ocaml-gospel/ortac/pull/313)
 - [Wrapper] Add support for models in the wrapper plugin
