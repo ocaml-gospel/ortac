@@ -84,7 +84,7 @@
   (gospel (= 0.3.0))
   (alcotest (and :with-test (>= 0.8.1)))
   (ortac-core (= :version))
-  (ortac-runtime (and :with-test (= :version)))))
+  (ortac-runtime (= :version))))
 
 ; Monolith plugin
 (package

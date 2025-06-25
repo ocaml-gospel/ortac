@@ -28,7 +28,7 @@ depends: [
   "gospel" {= "0.3.0"}
   "alcotest" {with-test & >= "0.8.1"}
   "ortac-core" {= version}
-  "ortac-runtime" {with-test & = version}
+  "ortac-runtime" {= version}
   "odoc" {with-doc}
 ]
 build: [
