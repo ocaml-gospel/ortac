@@ -66,7 +66,13 @@ let gen_copy_rule ppf config =
   in
   let action ppf = action ppf (stanza copy) in
   let stanzas =
-    [ targets get_intf_output; deps (fun c -> c.interface_file); action ]
+    [
+      runtest;
+      promote;
+      targets get_intf_output;
+      deps (fun c -> c.interface_file);
+      action;
+    ]
   in
   let rule ppf = rule ppf stanzas in
   stanza_rule rule ppf config

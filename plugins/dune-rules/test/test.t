@@ -139,6 +139,8 @@ Specifying a timeout causes ORTAC_QCHECK_STM_TIMEOUT to be set before running th
   ; It contains the rules for generating a wrapper for my_lib.mli
   
   (rule
+   (alias runtest)
+   (mode promote)
    (targets my_lib_wrapped.mli)
    (deps my_lib.mli)
    (action
@@ -172,6 +174,8 @@ Specifying a timeout causes ORTAC_QCHECK_STM_TIMEOUT to be set before running th
   ; It contains the rules for generating a wrapper for my_lib.mli
   
   (rule
+   (alias runtest)
+   (mode promote)
    (targets named_wrapper.mli)
    (deps my_lib.mli)
    (action
