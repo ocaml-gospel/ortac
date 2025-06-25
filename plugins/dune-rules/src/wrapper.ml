@@ -19,6 +19,14 @@ let get_optional proj suffix config =
 
 let get_ocaml_output = get_optional (fun cfg -> cfg.ocaml_output) "wrapped.ml"
 
+let get_name_output =
+  get_optional
+    (fun cfg ->
+      match cfg.ocaml_output with
+      | Some s -> Some (Filename.chop_extension s)
+      | None -> None)
+    "wrapped"
+
 let get_intf_output =
   get_optional
     (fun cfg ->
@@ -35,18 +43,15 @@ let msg ppf config =
      ; It contains the rules for generating a wrapper for %s@\n"
     config.interface_file
 
-let name ppf config =
-  pf ppf "(name %s)" (Filename.chop_extension config.interface_file)
-
 let package config =
   match config.package_name with
   | None -> []
   | Some s -> [ (fun ppf _ -> pf ppf "(package %s)" s) ]
 
 let gen_ortac_lib ppf config =
-  let modules ppf config =
-    pf ppf "(modules %s)" (Filename.chop_extension config.interface_file)
-  in
+  let gen_name = get_name_output config in
+  let modules ppf _ = pf ppf "(modules %s)" gen_name in
+  let name ppf _ = pf ppf "(name %s)" gen_name in
   let stanzas = [ name; modules ] @ package config in
   let library ppf = library ppf stanzas in
   stanza_rule library ppf config
@@ -61,7 +66,13 @@ let gen_copy_rule ppf config =
   in
   let action ppf = action ppf (stanza copy) in
   let stanzas =
-    [ targets get_intf_output; deps (fun c -> c.interface_file); action ]
+    [
+      runtest;
+      promote;
+      targets get_intf_output;
+      deps (fun c -> c.interface_file);
+      action;
+    ]
   in
   let rule ppf = rule ppf stanzas in
   stanza_rule rule ppf config
@@ -74,11 +85,17 @@ let gen_ortac_rule ppf config =
     action_with_env "ORTAC_ONLY_PLUGIN" "wrapper" ppf (with_target ignore_err)
   in
   let stanzas =
-    [ promote; targets get_ocaml_output; deps get_intf_output; action ]
+    [
+      runtest;
+      promote;
+      targets get_ocaml_output;
+      deps (fun cfg -> cfg.interface_file);
+      action;
+    ]
   in
   let rule ppf = rule ppf stanzas in
   stanza_rule rule ppf config
 
 let gen_dune_rules ppf config =
-  let rules = [ msg; gen_ortac_lib; gen_copy_rule; gen_ortac_rule ] in
+  let rules = [ msg; gen_copy_rule; gen_ortac_rule; gen_ortac_lib ] in
   concat ~sep:cut rules ppf config
