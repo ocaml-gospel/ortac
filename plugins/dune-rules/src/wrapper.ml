@@ -85,7 +85,13 @@ let gen_ortac_rule ppf config =
     action_with_env "ORTAC_ONLY_PLUGIN" "wrapper" ppf (with_target ignore_err)
   in
   let stanzas =
-    [ runtest; promote; targets get_ocaml_output; deps get_intf_output; action ]
+    [
+      runtest;
+      promote;
+      targets get_ocaml_output;
+      deps (fun cfg -> cfg.interface_file);
+      action;
+    ]
   in
   let rule ppf = rule ppf stanzas in
   stanza_rule rule ppf config

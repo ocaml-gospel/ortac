@@ -152,7 +152,7 @@ Specifying a timeout causes ORTAC_QCHECK_STM_TIMEOUT to be set before running th
    (alias runtest)
    (mode promote)
    (targets my_lib_wrapped.ml)
-   (deps my_lib_wrapped.mli)
+   (deps my_lib.mli)
    (action
     (setenv
      ORTAC_ONLY_PLUGIN
@@ -188,7 +188,7 @@ Specifying a timeout causes ORTAC_QCHECK_STM_TIMEOUT to be set before running th
    (alias runtest)
    (mode promote)
    (targets named_wrapper.ml)
-   (deps named_wrapper.mli)
+   (deps my_lib.mli)
    (action
     (setenv
      ORTAC_ONLY_PLUGIN
