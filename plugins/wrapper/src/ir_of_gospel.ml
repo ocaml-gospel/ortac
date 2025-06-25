@@ -45,7 +45,7 @@ let with_models ~context:_ fields (type_ : type_) =
   in
   { type_ with models }
 
-let find_projection ir field =
+let find_ident ir field =
   let aux = function
     | Type t ->
         List.find_map
@@ -68,7 +68,7 @@ let collect_model ir =
         let t = collect t in
         let field = ls.ls_name.id_str in
         let t_node =
-          match find_projection ir field with
+          match find_ident ir field with
           | Some proj_ident ->
               let vs =
                 let vs_ty = Option.value ls.ls_value ~default:Ttypes.ty_bool in
@@ -672,19 +672,30 @@ let type_ ~pack ~ghost (td : Tast.type_declaration) =
 
 let types ~pack ~ghost = List.fold_left (fun pack -> type_ ~pack ~ghost) pack
 
-let is_projection (vd : Tast.val_description) =
-  let aux = function
-    | { attr_name = { txt = "model"; _ }; _ } -> true
-    | _ -> false
+let find_model_attributes (vd : Tast.val_description) : string option =
+  let aux attr =
+    match attr with
+    | { attr_name = { txt = "projection_for"; _ }; attr_payload; _ } -> (
+        match attr_payload with
+        | PStr [ { pstr_desc = Pstr_eval (expr, _); _ } ] -> (
+            match expr.pexp_desc with
+            | Pexp_ident { txt = Lident id; _ } -> Some id
+            | _ -> None)
+        | _ -> None)
+    | _ -> None
   in
-  List.exists aux vd.vd_attrs
+  List.find_map aux vd.vd_attrs
 
-let projection ~loc ir model_name arguments returns register_name =
-  match find_projection ir model_name with
+let projection ~loc ir ocaml_name arguments returns register_name vd =
+  let model_name =
+    Option.value (find_model_attributes vd) ~default:ocaml_name
+  in
+  match find_ident ir model_name with
   | Some ident ->
       let name = ident.id_str in
       let projection =
-        Ir.projection ~name ~model_name ~loc ~arguments ~returns ~register_name
+        Ir.projection ~name ~ocaml_name ~model_name ~loc ~arguments ~returns
+          ~register_name
       in
       Ir.add_translation (Ir.Projection projection) ir
   | None -> ir
@@ -696,11 +707,7 @@ let value ~pack ~ghost (vd : Tast.val_description) =
   let register_name = register_name () in
   let arguments = List.map (var_of_arg ~ir) vd.vd_args in
   let returns = List.map (var_of_arg ~ir) vd.vd_ret in
-  let ir =
-    if is_projection vd then
-      projection ~loc ir name arguments returns register_name
-    else ir
-  in
+  let ir = projection ~loc ir name arguments returns register_name vd in
   let pure = false in
   let value =
     Ir.value ~name ~loc ~register_name ~arguments ~returns ~pure ~ghost

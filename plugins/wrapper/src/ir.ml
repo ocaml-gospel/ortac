@@ -64,6 +64,7 @@ type xpost = {
 
 type projection = {
   name : string;
+  ocaml_name : string;
   model_name : string;
   loc : Location.t;
   arguments : ocaml_var list;
@@ -71,8 +72,9 @@ type projection = {
   register_name : string;
 }
 
-let projection ~name ~model_name ~loc ~arguments ~returns ~register_name =
-  { name; model_name; loc; arguments; returns; register_name }
+let projection ~name ~ocaml_name ~model_name ~loc ~arguments ~returns
+    ~register_name =
+  { name; ocaml_name; model_name; loc; arguments; returns; register_name }
 
 type value = {
   name : string;
