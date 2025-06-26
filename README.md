@@ -15,20 +15,20 @@ README][QCheck-STM README] for details.
 [QCheck-STM]: https://ocaml-multicore.github.io/multicoretests/
 [QCheck-STM README]: plugins/qcheck-stm/README.md
 
-This repository also contains two other _experimental_ plugins, that are not yet
-stable. Expect rough edges if you venture to try them out:
-
-- the _wrapper_ plugin generates _wrapper_ modules, _i.e._ modules
-  exposing the original interface but instrumenting all function calls
-  with assertions on arguments and on results, either normal or
-  exceptional; see the [dedicated README][wrapper README] for
-  details,
-- the _monolith_ plugin generates programs using [Monolith] that will
-  test a module by comparing it against an instrumented version of
-  that module; see the [dedicated README][monolith README] for
-  details.
+The _wrapper_ plugin generates _wrapper_ modules, _i.e._ modules exposing the
+original interface but instrumenting all function calls with assertions on
+arguments and on results, either normal or exceptional; see the [dedicated
+README][wrapper README] for details.
 
 [wrapper README]: plugins/wrapper/README.md
+
+This repository also contains one other _experimental_ plugin, that is not yet
+stable. Expect rough edges if you venture to try it out!
+
+The _monolith_ plugin generates programs using [Monolith] that will test a
+module by comparing it against an instrumented version of that module; see the
+[dedicated README][monolith README] for details.
+
 [monolith README]: plugins/monolith/README.md
 [Monolith]: https://gitlab.inria.fr/fpottier/monolith
 
