@@ -22,6 +22,12 @@ README][wrapper README] for details.
 
 [wrapper README]: plugins/wrapper/README.md
 
+In addition, the _dune_ plugin generates Dune rules that facilitates the use of
+the _QCheck-STM_ and the _wrapper_ ones; see the [dedicated README][Dune
+README] for details.
+
+[Dune README]: plugins/dune-rules/README.md
+
 This repository also contains one other _experimental_ plugin, that is not yet
 stable. Expect rough edges if you venture to try it out!
 
@@ -33,7 +39,8 @@ module by comparing it against an instrumented version of that module; see the
 [Monolith]: https://gitlab.inria.fr/fpottier/monolith
 
 At its core, Ortac provides a way to convert the executable fragment of Gospel
-into OCaml code. This core functionality is used by all plugins.
+into OCaml code. This core functionality is used by all plugins (except the
+_Dune_ one).
 
 
 ## Installation
