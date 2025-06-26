@@ -117,7 +117,6 @@ Usage: ortac [COMMAND] …
 Try 'ortac --help' for more information.
 ```
 
-
 ## Quick start
 
 or: How to use Ortac to test whether the specifications of a module
@@ -132,15 +131,6 @@ module and their model, as provided by the Gospel specifications. Look
 at the [dedicated README][QCheck-STM README] for the QCheck-STM plugin
 to see how it can be used.
 
-
-### Monolith plugin
-
-The Monolith plugin can generate a standalone executable that will try
-to falsify the Gospel specifications of a module by stress-testing the
-code. Look in the [dedicated README][monolith README] for the Monolith
-plugin to see how it can be used.
-
-
 ### Wrapper plugin
 
 The wrapper plugin can be used to generate a _wrapper_ module that
@@ -149,6 +139,12 @@ instrumenting all function calls with assertions corresponding to the
 Gospel specifications. Look in the [dedicated README][wrapper README]
 for the wrapper plugin to see how it can be used.
 
+### Monolith plugin
+
+The Monolith plugin can generate a standalone executable that will try
+to falsify the Gospel specifications of a module by stress-testing the
+code. Look in the [dedicated README][monolith README] for the Monolith
+plugin to see how it can be used.
 
 ## Supported Gospel
 
