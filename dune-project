@@ -3,7 +3,7 @@
 (using dune_site 0.1)
 (using mdx 0.4)
 
-(version 0.6.1~dev)
+(version 0.7.0)
 
 (name ortac)
 (license MIT)
@@ -84,7 +84,7 @@
   (gospel (= 0.3.0))
   (alcotest (and :with-test (>= 0.8.1)))
   (ortac-core (= :version))
-  (ortac-runtime (and :with-test (= :version)))))
+  (ortac-runtime (= :version))))
 
 ; Monolith plugin
 (package

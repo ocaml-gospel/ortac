@@ -1,8 +1,5 @@
 # Wrapper plugin for Ortac
 
-:warning: This project is still under heavy development, with no
-stable release yet. Expect rough edges!
-
 This directory contains a plugin for [Ortac] that can generate a _wrapper_
 module that will expose the same interface as the original module but
 instrumenting all function calls with assertions corresponding to the Gospel
@@ -78,15 +75,80 @@ very beginning:
 module Lib = LibAsserts
 ```
 
+## Advanced specification
+
+The wrapper plugin also supports advanced Gospel features, such as
+logical models and `old` statements,
+allowing more precise and expressive specifications for abstract types.
+Let's consider a toy example of a polymorphic container type with limited capacity:
+
+```ocaml
+type 'a t
+(*@ model capacity: int
+    mutable model contents: 'a list
+    with t
+    invariant t.capacity > 0
+    invariant List.length t.contents <= t.capacity *)
+```
+
+Here, we define two models attached to the type `a t`:
+`capacity` which is the fixed size of the container and
+`contents` which is the mutable list of elements currently stored.
+
+The invariants ensure that the capacity is strictly positive
+and the list of contents never exceeds the declared capacity.
+
+We can then specify the behavior of the functions manipulating this type:
+
+```ocaml
+val create: int -> 'a t
+(*@ t = create c
+    requires c > 0
+    ensures t.capacity = c
+    ensures t.contents = [] *)
+
+val add: 'a t -> 'a -> unit
+(*@ add t x
+    modifies t.contents
+    ensures t.contents = x :: (old t.contents) *)
+```
+
+To be able to translate models in OCaml,
+the user needs to provide a projection function for each gospel model.
+
+### Defining projection functions
+
+To validate these specifications at runtime
+you must provide projection functions that link OCaml values to their Gospel model.
+
+There are two ways to define projection functions:
+- Use the same name as the model (e.g., `capacity`).
+- Use a different name, annotated with the attribute `@@projection_for` and the name
+of its gospel model (e.g., `to_list`).
+
+For our example:
+
+```ocaml
+val capacity : 'a t -> int
+val to_list : 'a t -> 'a list [@@projection_for contents]
+```
+
+Here, there is no ambiguity that `capacity` corresponds to the model `capacity`,
+but `to_list` needs to be explicitly declared as the projection for the model `contents`.
+
+These projection functions are mandatory for the wrapper plugin
+to instrument the specifications.
+If one is not provided, nothing will be generated, and an error will be printed.
+
+[main README]: ../../README.md#supported-gospel
 
 ## Supported Gospel
 
-The wrapper plugin has currently some limitations on what Gospel
-specifications are supported. Apart from the general restriction to
-the executable fragment of Gospel (as mentioned in the [main README]),
-the wrapper plugin does not support yet:
+The Wrapper plugin has some limitations on what Gospel specifications
+are supported.
 
-- `model`s,
-- the `old` operator.
+It inherits the limitations of the translation from
+Gospel to OCaml provided by the core of Ortac, as listed in the
+[main README].
 
 [main README]: ../../README.md#supported-gospel
