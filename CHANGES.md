@@ -1,3 +1,8 @@
+# Unreleased
+
+- [Dune] Fix dependancies in `ortac-dune`
+  [\#340](https://github.com/ocaml-gospel/ortac/pull/340)
+
 # 0.7.0
 
 - [Wrapper] Add a better management of attribute for projection functions
