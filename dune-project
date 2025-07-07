@@ -177,7 +177,8 @@
   fmt
   (cmdliner (>= 1.1.0))
   (ortac-core (= :version))
-  (ortac-qcheck-stm (and :with-test (= :version)))))
+  (ortac-qcheck-stm (and :with-test (= :version)))
+  (ortac-wrapper (and :with-test (= :version)))))
 
 (package
  (name ortac-runtime-qcheck-stm)
