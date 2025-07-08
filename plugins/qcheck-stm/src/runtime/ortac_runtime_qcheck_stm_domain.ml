@@ -88,7 +88,8 @@ module MakeExt (Spec : SpecExt) = struct
       (seq_pref, cmds1, cmds2) =
     wrapped_init_state ();
     let pref_obs, obs1, obs2 = run_par seq_pref cmds1 cmds2 in
-    check_obs postcond pref_obs obs1 obs2 Spec.init_state
+    let res = check_obs postcond pref_obs obs1 obs2 Spec.init_state in
+    res
     || Test.fail_reportf "  Results incompatible with linearized model\n\n%s"
        @@ print_triple_vertical ~fig_indent:5 ~res_width:35
             (fun (c, r) ->
