@@ -46,7 +46,7 @@ let rec print_rules pos =
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime-qcheck-stm
+  ortac-runtime-qcheck-stm.sequential
   %s)
  (action
   (echo
