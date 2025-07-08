@@ -9,7 +9,34 @@ module SUT = Stores.SUT
 module MakeExt (Spec : SpecExt) = struct
   open Util
   open QCheck
+  open Report
   open Internal.Make (Spec) [@alert "-internal"]
+
+  type pos = Prefix | Dom1 | Dom2
+
+  type traces = {
+    where_it_failed : pos;
+    trace_prefix : trace list;
+    trace_dom1 : trace list;
+    trace_dom2 : trace list;
+  }
+
+  let empty where_it_failed =
+    { where_it_failed; trace_prefix = []; trace_dom1 = []; trace_dom2 = [] }
+
+  let start_traces pos call res =
+    let traces = empty pos in
+    match pos with
+    | Prefix -> { traces with trace_prefix = [ { call; res } ] }
+    | Dom1 -> { traces with trace_dom1 = [ { call; res } ] }
+    | Dom2 -> { traces with trace_dom2 = [ { call; res } ] }
+
+  let add_trace pos call res traces =
+    match pos with
+    | Prefix ->
+        { traces with trace_prefix = { call; res } :: traces.trace_prefix }
+    | Dom1 -> { traces with trace_dom1 = { call; res } :: traces.trace_dom1 }
+    | Dom2 -> { traces with trace_dom2 = { call; res } :: traces.trace_dom2 }
 
   let check_obs postcond =
     (* ignore the report for now *)
