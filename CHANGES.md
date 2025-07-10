@@ -1,5 +1,7 @@
 # Unreleased
 
+- [Dune] Fix dependencies in generated library declaration for Ortac/Wrapper
+  [\#342](https://github.com/ocaml-gospel/ortac/pull/342)
 - [Dune] Fix dependancies in `ortac-dune`
   [\#340](https://github.com/ocaml-gospel/ortac/pull/340)
 
