@@ -52,7 +52,10 @@ let gen_ortac_lib ppf config =
   let gen_name = get_name_output config in
   let modules ppf _ = pf ppf "(modules %s)" gen_name in
   let name ppf _ = pf ppf "(name %s)" gen_name in
-  let stanzas = [ name; modules ] @ package config in
+  let libraries ppf config =
+    pf ppf "(libraries ortac-runtime %s)" (get_name_output config)
+  in
+  let stanzas = [ name; modules; libraries ] @ package config in
   let library ppf = library ppf stanzas in
   stanza_rule library ppf config
 

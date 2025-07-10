@@ -168,6 +168,7 @@ Specifying a timeout causes ORTAC_QCHECK_STM_TIMEOUT to be set before running th
   (library
    (name my_lib_wrapped)
    (modules my_lib_wrapped)
+   (libraries ortac-runtime my_lib_wrapped)
    (package my_package))
 
   $ ortac dune wrapper my_lib.mli --package=my_package --output=named_wrapper.ml
@@ -204,4 +205,5 @@ Specifying a timeout causes ORTAC_QCHECK_STM_TIMEOUT to be set before running th
   (library
    (name named_wrapper)
    (modules named_wrapper)
+   (libraries ortac-runtime named_wrapper)
    (package my_package))
