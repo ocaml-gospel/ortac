@@ -9,13 +9,13 @@ type expected_result =
 type t = {
   mod_name : string;
   init_sut : string;
-  ret : expected_result;
+  exp_res : expected_result;
   cmd : string;
   terms : (string * Ortac_runtime.location) list;
 }
 
-let report mod_name init_sut ret cmd terms =
-  { mod_name; init_sut; ret; cmd; terms }
+let report mod_name init_sut exp_res cmd terms =
+  { mod_name; init_sut; exp_res; cmd; terms }
 
 let append a b =
   match (a, b) with
