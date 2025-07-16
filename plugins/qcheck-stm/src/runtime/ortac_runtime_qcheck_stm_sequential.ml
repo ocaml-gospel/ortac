@@ -13,26 +13,9 @@ module Make (Spec : Spec) = struct
 
   let pp_program max_suts ppf (trace, mod_name, init_sut, exp_res) =
     let open Fmt in
-    let pp_expected ppf = function
-      | Value res when not @@ is_dummy res ->
-          pf ppf "assert (r = %s)@\n" (show_res res)
-      | Protected_value res when not @@ is_dummy res ->
-          pf ppf "assert (r = Ok %s)@\n" (show_res res)
-      | Exception exn ->
-          pf ppf
-            "assert (@[match r with@\n\
-            \  @[| Error (%s _) -> true@\n\
-             | _ -> false@]@])@\n"
-            exn
-      | Out_of_domain ->
-          pf ppf
-            "(* @[Partial function called out of domain@\n\
-             in the computation of the expected value.@] *)@\n"
-      | _ -> ()
-    in
     let rec aux ppf = function
       | [ (c, r) ] ->
-          pf ppf "%s@\n%a(* returned %s *)@\n" c pp_expected exp_res
+          pf ppf "%s@\n%a(* returned %s *)@\n" c pp_expected_result exp_res
             (show_res r)
       | (c, r) :: xs ->
           pf ppf "%s@\n(* returned %s *)@\n" c (show_res r);

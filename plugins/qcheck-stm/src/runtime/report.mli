@@ -39,3 +39,4 @@ val dummy : 'a ty * ('b -> string)
 (** A dummy [STM.res] for unknown returned values *)
 
 val is_dummy : res -> bool
+val pp_expected_result : expected_result Fmt.t
