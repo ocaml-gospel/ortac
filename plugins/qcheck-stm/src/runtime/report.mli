@@ -22,6 +22,8 @@ type t = {
 }
 (** Information for the bug report in case of test failure *)
 
+type trace = { call : string; res : res }
+
 val report :
   string ->
   string ->
@@ -41,3 +43,4 @@ val dummy : 'a ty * ('b -> string)
 val is_dummy : res -> bool
 val pp_expected_result : expected_result Fmt.t
 val pp_terms : (string * Ortac_runtime.location) list Fmt.t
+val pp_traces : bool -> expected_result -> trace list Fmt.t
