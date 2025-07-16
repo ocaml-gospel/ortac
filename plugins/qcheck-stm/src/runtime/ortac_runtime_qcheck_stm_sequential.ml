@@ -29,16 +29,6 @@ module Make (Spec : Spec) = struct
       (pp_traces true report.exp_res)
       trace
 
-  let message max_suts trace report =
-    Test.fail_reportf
-      "Gospel specification violation in function %s\n\
-       @;\
-      \  @[%a@]@\n\
-       when executing the following sequence of operations:@\n\
-       @;\
-      \  @[%a@]@."
-      report.cmd pp_terms report.terms (pp_program max_suts) (trace, report)
-
   let rec check_disagree postcond ortac_show_cmd s sut cs =
     match cs with
     | [] -> None
@@ -69,7 +59,7 @@ module Make (Spec : Spec) = struct
     let res = match res with Ok res -> res | Error exn -> raise exn in
     match res with
     | None -> true
-    | Some (trace, report) -> message max_suts trace report
+    | Some (trace, report) -> message (pp_program max_suts) trace report
 
   let agree_test ~count ~name max_suts wrapped_init_state ortac_show_cmd
       postcond =

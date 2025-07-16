@@ -44,3 +44,4 @@ val is_dummy : res -> bool
 val pp_expected_result : expected_result Fmt.t
 val pp_terms : (string * Ortac_runtime.location) list Fmt.t
 val pp_traces : bool -> expected_result -> trace list Fmt.t
+val message : ('a * t) Fmt.t -> 'a -> t -> 'b
