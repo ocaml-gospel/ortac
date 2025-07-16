@@ -7,7 +7,6 @@ module SUT = Stores.SUT
 
 module Make (Spec : Spec) = struct
   open Report
-  open Ortac_runtime
   open QCheck
   module Internal = Internal.Make (Spec) [@alert "-internal"]
 
@@ -35,11 +34,6 @@ module Make (Spec : Spec) = struct
       Format.(
         pp_print_list ~pp_sep:(fun pf _ -> fprintf pf "@\n") pp_print_string)
       inits aux trace
-
-  let pp_terms ppf err =
-    let open Fmt in
-    let pp_aux ppf (term, l) = pf ppf "@[%a@\n  @[%s@]@]@\n" pp_loc l term in
-    pf ppf "%a" (list ~sep:(any "@\n") pp_aux) err
 
   let message max_suts trace report =
     Test.fail_reportf

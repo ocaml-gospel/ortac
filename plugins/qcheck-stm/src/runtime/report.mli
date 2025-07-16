@@ -40,3 +40,4 @@ val dummy : 'a ty * ('b -> string)
 
 val is_dummy : res -> bool
 val pp_expected_result : expected_result Fmt.t
+val pp_terms : (string * Ortac_runtime.location) list Fmt.t
