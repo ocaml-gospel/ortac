@@ -49,3 +49,10 @@ let pp_expected_result ppf = function
         "(* @[Partial function called out of domain@\n\
          in the computation of the expected value.@] *)@\n"
   | _ -> ()
+
+let pp_terms ppf err =
+  let open Fmt in
+  let pp_aux ppf (term, l) =
+    pf ppf "@[%a@\n  @[%s@]@]@\n" Ortac_runtime.pp_loc l term
+  in
+  pf ppf "%a" (list ~sep:(any "@\n") pp_aux) err
