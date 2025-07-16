@@ -11,13 +11,13 @@ module Make (Spec : Spec) = struct
   open QCheck
   module Internal = Internal.Make (Spec) [@alert "-internal"]
 
-  let pp_trace max_suts ppf (trace, mod_name, init_sut, ret) =
+  let pp_program max_suts ppf (trace, mod_name, init_sut, exp_res) =
     let open Fmt in
     let pp_expected ppf = function
-      | Value ret when not @@ is_dummy ret ->
-          pf ppf "assert (r = %s)@\n" (show_res ret)
-      | Protected_value ret when not @@ is_dummy ret ->
-          pf ppf "assert (r = Ok %s)@\n" (show_res ret)
+      | Value res when not @@ is_dummy res ->
+          pf ppf "assert (r = %s)@\n" (show_res res)
+      | Protected_value res when not @@ is_dummy res ->
+          pf ppf "assert (r = Ok %s)@\n" (show_res res)
       | Exception exn ->
           pf ppf
             "assert (@[match r with@\n\
@@ -32,7 +32,8 @@ module Make (Spec : Spec) = struct
     in
     let rec aux ppf = function
       | [ (c, r) ] ->
-          pf ppf "%s@\n%a(* returned %s *)@\n" c pp_expected ret (show_res r)
+          pf ppf "%s@\n%a(* returned %s *)@\n" c pp_expected exp_res
+            (show_res r)
       | (c, r) :: xs ->
           pf ppf "%s@\n(* returned %s *)@\n" c (show_res r);
           aux ppf xs
@@ -65,8 +66,8 @@ module Make (Spec : Spec) = struct
        when executing the following sequence of operations:@\n\
        @;\
       \  @[%a@]@."
-      report.cmd pp_terms report.terms (pp_trace max_suts)
-      (trace, report.mod_name, report.init_sut, report.ret)
+      report.cmd pp_terms report.terms (pp_program max_suts)
+      (trace, report.mod_name, report.init_sut, report.exp_res)
 
   let rec check_disagree postcond ortac_show_cmd s sut cs =
     match cs with

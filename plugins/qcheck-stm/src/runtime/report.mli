@@ -15,7 +15,7 @@ type expected_result =
 type t = {
   mod_name : string;  (** The name of the module under test *)
   init_sut : string;  (** String representation of the init_sut function *)
-  ret : expected_result;  (** The expected result of the call *)
+  exp_res : expected_result;  (** The expected result of the call *)
   cmd : string;  (** String representation of the call *)
   terms : (string * Ortac_runtime.location) list;
       (** String representation and location of the violated specifications *)
@@ -29,7 +29,7 @@ val report :
   string ->
   (string * Ortac_runtime.location) list ->
   t
-(** [report module_name init_sut ret cmd terms] *)
+(** [report module_name init_sut exp_res cmd terms] *)
 
 val append : t option -> t option -> t option
 (** [append a b] appends the violated terms of [a] and [b] if any in the
