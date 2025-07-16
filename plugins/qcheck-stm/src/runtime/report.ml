@@ -30,3 +30,22 @@ type _ ty += Dummy : _ ty
 
 let dummy = (Dummy, fun _ -> Printf.sprintf "unknown value")
 let is_dummy = function Res ((Dummy, _), _) -> true | _ -> false
+
+open Fmt
+
+let pp_expected_result ppf = function
+  | Value res when not @@ is_dummy res ->
+      pf ppf "assert (r = %s)@\n" (show_res res)
+  | Protected_value res when not @@ is_dummy res ->
+      pf ppf "assert (r = Ok %s)@\n" (show_res res)
+  | Exception exn ->
+      pf ppf
+        "assert (@[match r with@\n\
+        \  @[| Error (%s _) -> true@\n\
+         | _ -> false@]@])@\n"
+        exn
+  | Out_of_domain ->
+      pf ppf
+        "(* @[Partial function called out of domain@\n\
+         in the computation of the expected value.@] *)@\n"
+  | _ -> ()
