@@ -12,15 +12,6 @@ module Make (Spec : Spec) = struct
 
   let pp_program max_suts ppf (trace, mod_name, init_sut, exp_res) =
     let open Fmt in
-    let rec aux ppf = function
-      | [ (c, r) ] ->
-          pf ppf "%s@\n%a(* returned %s *)@\n" c pp_expected_result exp_res
-            (show_res r)
-      | (c, r) :: xs ->
-          pf ppf "%s@\n(* returned %s *)@\n" c (show_res r);
-          aux ppf xs
-      | _ -> assert false
-    in
     let inits =
       List.init max_suts (fun i -> Format.asprintf "let sut%d = %s" i init_sut)
     in
@@ -33,7 +24,7 @@ module Make (Spec : Spec) = struct
       "[@@@ocaml.warning \"-8\"]" mod_name
       Format.(
         pp_print_list ~pp_sep:(fun pf _ -> fprintf pf "@\n") pp_print_string)
-      inits aux trace
+      inits (pp_traces true exp_res) trace
 
   let message max_suts trace report =
     Test.fail_reportf
@@ -60,8 +51,8 @@ module Make (Spec : Spec) = struct
             let s' = Spec.next_state c s in
             match check_disagree postcond ortac_show_cmd s' sut cs with
             | None -> None
-            | Some (rest, report) -> Some ((call, res) :: rest, report))
-        | Some report -> Some ([ (call, res) ], report))
+            | Some (rest, report) -> Some ({ call; res } :: rest, report))
+        | Some report -> Some ([ { call; res } ], report))
 
   let agree_prop max_suts check_init_state ortac_show_cmd postcond cs =
     check_init_state ();
