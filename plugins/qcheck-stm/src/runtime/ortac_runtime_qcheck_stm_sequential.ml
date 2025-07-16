@@ -10,10 +10,11 @@ module Make (Spec : Spec) = struct
   open QCheck
   module Internal = Internal.Make (Spec) [@alert "-internal"]
 
-  let pp_program max_suts ppf (trace, mod_name, init_sut, exp_res) =
+  let pp_program max_suts ppf (trace, report) =
     let open Fmt in
     let inits =
-      List.init max_suts (fun i -> Format.asprintf "let sut%d = %s" i init_sut)
+      List.init max_suts (fun i ->
+          Format.asprintf "let sut%d = %s" i report.init_sut)
     in
     pf ppf
       "@[%s@\n\
@@ -21,10 +22,12 @@ module Make (Spec : Spec) = struct
        let protect f = try Ok (f ()) with e -> Error e@\n\
        %a@\n\
        %a@]"
-      "[@@@ocaml.warning \"-8\"]" mod_name
+      "[@@@ocaml.warning \"-8\"]" report.mod_name
       Format.(
         pp_print_list ~pp_sep:(fun pf _ -> fprintf pf "@\n") pp_print_string)
-      inits (pp_traces true exp_res) trace
+      inits
+      (pp_traces true report.exp_res)
+      trace
 
   let message max_suts trace report =
     Test.fail_reportf
@@ -34,8 +37,7 @@ module Make (Spec : Spec) = struct
        when executing the following sequence of operations:@\n\
        @;\
       \  @[%a@]@."
-      report.cmd pp_terms report.terms (pp_program max_suts)
-      (trace, report.mod_name, report.init_sut, report.exp_res)
+      report.cmd pp_terms report.terms (pp_program max_suts) (trace, report)
 
   let rec check_disagree postcond ortac_show_cmd s sut cs =
     match cs with
