@@ -38,6 +38,65 @@ module MakeExt (Spec : SpecExt) = struct
     | Dom1 -> { traces with trace_dom1 = { call; res } :: traces.trace_dom1 }
     | Dom2 -> { traces with trace_dom2 = { call; res } :: traces.trace_dom2 }
 
+  let get_traces pos traces =
+    match pos with
+    | Prefix -> traces.trace_prefix
+    | Dom1 -> traces.trace_dom1
+    | Dom2 -> traces.trace_dom2
+
+  let pp_prefix exp_res ppf traces =
+    let assert_flag = traces.where_it_failed = Prefix in
+    pp_traces assert_flag exp_res ppf @@ get_traces Prefix traces
+
+  let pp_spawned pos ppf traces =
+    let open Fmt in
+    let rec aux ppf = function
+      | [ { call; res } ] ->
+          pf ppf "%s@\n(* returned %s *)@\nin ()" call (show_res res)
+      | { call; res } :: xs ->
+          pf ppf "%s in@\n(* returned %s *)@\n" call (show_res res);
+          aux ppf xs
+      | _ -> ()
+    in
+    match get_traces pos traces with [] -> pf ppf " ()" | xs -> aux ppf xs
+
+  let pp_program max_suts ppf (traces, report) =
+    let open Fmt in
+    let inits =
+      List.init max_suts (fun i ->
+          Format.asprintf "let sut%d = %s" i report.init_sut)
+    in
+    let join1 =
+      match traces.where_it_failed with
+      | Dom1 -> "let r = Domain.join dom1"
+      | _ -> "let _ = Domain.join dom1"
+    and join2 =
+      match traces.where_it_failed with
+      | Dom2 -> "let r = Domain.join dom2"
+      | _ -> "let _ = Domain.join dom2"
+    in
+    pf ppf
+      "@[%s@\n\
+       open %s@\n\
+       let protect f = try Ok (f ()) with e -> Error e@\n\
+       %a@\n\
+       let main1 () =@\n\
+      \  @[%a@]@\n\
+       let main2 () =@\n\
+      \  @[%a@]@\n\
+       %a@\n\
+       let dom1 = Domain.spawn main1@\n\
+       let dom2 = Domain.spawn main2@\n\
+       %s@\n\
+       %s@\n\
+       %a@\n"
+      "[@@@ocaml.warning \"-8\"]" report.mod_name
+      Format.(
+        pp_print_list ~pp_sep:(fun pf _ -> fprintf pf "@\n") pp_print_string)
+      inits (pp_spawned Dom1) traces (pp_spawned Dom2) traces
+      (pp_prefix report.exp_res) traces join1 join2 pp_expected_result
+      report.exp_res
+
   (** [check_obs postcond ortac_show_cmd sut pref cs1 cs2 state]
 
       Returns [None] iff there is an interleaving of [cs1] and [cs2], after the
@@ -170,7 +229,7 @@ module MakeExt (Spec : SpecExt) = struct
     let obs2 = match obs2 with Ok v -> v | Error exn -> raise exn in
     (pref_obs, obs1, obs2)
 
-  let agree_prop _max_suts wrapped_init_state ortac_show_cmd postcond
+  let agree_prop max_suts wrapped_init_state ortac_show_cmd postcond
       (seq_pref, cmds1, cmds2) =
     wrapped_init_state ();
     let sut = Spec.init_sut () in
@@ -180,12 +239,7 @@ module MakeExt (Spec : SpecExt) = struct
     in
     match res with
     | None -> true
-    | Some _ ->
-        Test.fail_reportf "  Results incompatible with linearized model\n\n%s"
-        @@ print_triple_vertical ~fig_indent:5 ~res_width:35
-             (fun (c, r) ->
-               Printf.sprintf "%s : %s" (Spec.show_cmd c) (show_res r))
-             (pref_obs, obs1, obs2)
+    | Some (traces, report) -> message (pp_program max_suts) traces report
 
   let agree_test ~count ~name max_suts wrapped_init_state ortac_show_cmd
       postcond =
