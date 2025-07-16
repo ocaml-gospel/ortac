@@ -70,3 +70,13 @@ let pp_traces assert_flag exp_res =
     | _ -> ()
   in
   aux
+
+let message pp_program trace report =
+  QCheck.Test.fail_reportf
+    "Gospel specification violation in function %s\n\
+     @;\
+    \  @[%a@]@\n\
+     when executing the following sequence of operations:@\n\
+     @;\
+    \  @[%a@]@."
+    report.cmd pp_terms report.terms pp_program (trace, report)
