@@ -1,5 +1,7 @@
 # Unreleased
 
+- [QCheck-STM] Add domain bug report generation
+  [\#346](Https://github.com/ocaml-gospel/ortac/pull/346)
 - [QCheck-STM] Refactor bug report printing
   [\#345](Https://github.com/ocaml-gospel/ortac/pull/345)
 - [Dune] Add domain flag to ortac-dune qcheck-stm
