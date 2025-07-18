@@ -1,5 +1,7 @@
 # Unreleased
 
+- [QCheck-STM] Refactor bug report printing
+  [\#345](https://github.com/ocaml-gospel/ortac/pull/345)
 - [Dune] Add domain flag to ortac-dune qcheck-stm
   [\#329](https://github.com/ocaml-gospel/ortac/pull/329)
 - [QCheck-STM] Add basic runtime for domain testing
