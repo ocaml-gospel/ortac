@@ -18,6 +18,7 @@ let get_optional proj suffix config =
   Option.value (proj config) ~default
 
 let get_ocaml_output = get_optional (fun cfg -> cfg.ocaml_output) "wrapped.ml"
+let get_lib_name cfg = Filename.(basename cfg.interface_file |> chop_extension)
 
 let get_name_output =
   get_optional
@@ -53,7 +54,7 @@ let gen_ortac_lib ppf config =
   let modules ppf _ = pf ppf "(modules %s)" gen_name in
   let name ppf _ = pf ppf "(name %s)" gen_name in
   let libraries ppf config =
-    pf ppf "(libraries ortac-runtime %s)" (get_name_output config)
+    pf ppf "(libraries ortac-runtime %s)" (get_lib_name config)
   in
   let stanzas = [ name; modules; libraries ] @ package config in
   let library ppf = library ppf stanzas in
