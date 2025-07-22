@@ -1,3 +1,7 @@
+# Unreleased
+
+- Fix CI [\#351](https://github.com/ocaml-gospel/ortac/pull/351)
+
 # 0.7.1
 
 - [Dune] Fix dependencies in generated library declaration for Ortac/Wrapper
