@@ -2,14 +2,7 @@
 opam-version: "2.0"
 version: "0.7.1"
 synopsis: "Wrapper plugin for Ortac"
-description: """
-The Wrapper plugin for the Ortac command-line tool (provided by the
-ortac-core package) can generate a wrapper module, ie a module that
-will wrap all function calls with runtime assertion checks that
-their specifications hold.
-Ortac (OCaml Runtime Assertion Checking) is a tool to turn
-executable Gospel specifications into code to test they hold.
-"""
+description: ""
 maintainer: ["Nicolas Osborne <nicolas.osborne@tarides.com>"]
 authors: [
   "Clément Pascutto <clement@pascutto.fr>"

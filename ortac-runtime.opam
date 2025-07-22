@@ -2,12 +2,7 @@
 opam-version: "2.0"
 version: "0.7.1"
 synopsis: "Runtime support library for Ortac-generated code"
-description: """
-The ortac-runtime library provides support for the code generated
-by the various Ortac plugins.
-Ortac (OCaml Runtime Assertion Checking) is a tool to turn
-executable Gospel specifications into code to test they hold.
-"""
+description: ""
 maintainer: ["Nicolas Osborne <nicolas.osborne@tarides.com>"]
 authors: [
   "Clément Pascutto <clement@pascutto.fr>"

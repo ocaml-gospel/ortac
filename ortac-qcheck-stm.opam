@@ -2,16 +2,7 @@
 opam-version: "2.0"
 version: "0.7.1"
 synopsis: "QCheck-STM plugin for Ortac"
-description: """
-The QCheck-STM plugin for the Ortac command-line tool (provided by
-the ortac-core package) can generate model-based tests for a module
-with Gospel specifications. The generated code will test that the
-function specifications hold by using the QCheck-STM library to
-create random test cases.
-
-Ortac (OCaml Runtime Assertion Checking) is a tool to turn
-executable Gospel specifications into code to test they hold.
-"""
+description: ""
 maintainer: ["Nicolas Osborne <nicolas.osborne@tarides.com>"]
 authors: [
   "Nicolas Osborne <nicolas.osborne@tarides.com>"
@@ -24,13 +15,17 @@ doc: "https://ocaml-gospel.github.io/ortac/ortac-qcheck-stm/"
 bug-reports: "https://github.com/ocaml-gospel/ortac/issues"
 depends: [
   "dune" {>= "3.8"}
+  "qcheck-multicoretests-util" {>= "0.8" & with-test}
+  "qcheck-core" {>= "0.25" & with-test}
+  "qcheck-multicoretests-util" {>= "0.8" & with-test}
+  "qcheck-core" {>= "0.25" & with-test}
   "ocaml" {>= "4.12.0"}
   "cmdliner" {>= "1.1.0"}
   "fmt"
   "ppxlib" {>= "0.26.0"}
   "mdx" {with-test & >= "2.3.0"}
   "gospel" {= "0.3.0"}
-  "qcheck-stm" {>= "0.5"}
+  "qcheck-stm" {with-test & with-test & >= "0.5"}
   "ortac-core" {= version}
   "ortac-runtime-qcheck-stm" {= version}
   "odoc" {with-doc}

@@ -3,16 +3,7 @@ opam-version: "2.0"
 version: "0.7.1"
 synopsis:
   "Ortac (OCaml Runtime Assertion Checking) core tool and library based on Gospel"
-description: """
-Ortac (OCaml Runtime Assertion Checking) is a tool to turn
-executable Gospel specifications into code to test they hold.
-Ortac Core provides:
-- a library to turn Gospel terms and types into OCaml expressions
-  and types,
-- and a command-line tool.
-You will need at least one of the Ortac plugins to actually
-generate test code.
-"""
+description: ""
 maintainer: ["Nicolas Osborne <nicolas.osborne@tarides.com>"]
 authors: [
   "Clément Pascutto <clement@pascutto.fr>"
