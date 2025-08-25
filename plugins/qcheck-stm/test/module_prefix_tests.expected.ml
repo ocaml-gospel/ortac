@@ -2,7 +2,7 @@
    edit how you run the tool instead *)
 [@@@ocaml.warning "-26-27-69-32-34-38"]
 open Module_prefix_lib.Module_prefix
-module Ortac_runtime = Ortac_runtime_qcheck_stm
+module Ortac_runtime = Ortac_runtime_qcheck_stm_sequential
 module SUT =
   (Ortac_runtime.SUT.Make)(struct type sut = int t
                                   let init () = make 0 end)

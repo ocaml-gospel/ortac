@@ -1,8 +1,21 @@
+# Unreleased
+
+- [QCheck-STM] Add domain bug report generation
+  [\#346](Https://github.com/ocaml-gospel/ortac/pull/346)
+- [QCheck-STM] Refactor bug report printing
+  [\#345](Https://github.com/ocaml-gospel/ortac/pull/345)
+- [Dune] Add domain flag to ortac-dune qcheck-stm
+  [\#329](https://github.com/ocaml-gospel/ortac/pull/329)
+- [QCheck-STM] Add basic runtime for domain testing
+  [\#328](https://github.com/ocaml-gospel/ortac/pull/328)
+- [QCheck-STM] Refactor runtime to allow for OCaml5-only sub-library
+  [\#316](https://github.com/ocaml-gospel/ortac/pull/316)
+
 # 0.7.1
 
 - [Dune] Fix dependencies in generated library declaration for Ortac/Wrapper
   [\#342](https://github.com/ocaml-gospel/ortac/pull/342)
-- [Dune] Fix dependancies in `ortac-dune`
+- [Dune] Fix dependencies in `ortac-dune`
   [\#340](https://github.com/ocaml-gospel/ortac/pull/340)
 
 # 0.7.0

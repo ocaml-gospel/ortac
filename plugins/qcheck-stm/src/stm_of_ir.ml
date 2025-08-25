@@ -14,15 +14,20 @@ let pat_default = ppat_construct (lident "Char") None
 let exp_default_name = "char"
 let exp_default = evar exp_default_name
 let res_default = Ident.create ~loc:Location.none "res"
-let list_append = list_fold_expr (qualify [ "Ortac_runtime" ] "append") "None"
+
+let list_append =
+  list_fold_expr (qualify [ "Ortac_runtime"; "Report" ] "append") "None"
+
 let res = lident "Res"
 let fn_apply_name = Ident.create ~loc:Location.none "QCheck.Fn.apply"
 
 let eexpected_value case e =
   let x =
-    pexp_construct (noloc (Ldot (Lident "Ortac_runtime", case))) (Some e)
+    pexp_construct
+      (noloc (Ldot (Ldot (Lident "Ortac_runtime", "Report"), case)))
+      (Some e)
   in
-  [%expr try [%e x] with e -> Ortac_runtime.Out_of_domain]
+  [%expr try [%e x] with e -> Ortac_runtime.Report.Out_of_domain]
 
 let evalue = eexpected_value "Value"
 let eprotected = eexpected_value "Protected_value"
@@ -477,7 +482,8 @@ let run_case config sut_name value =
       List.fold_right aux suts body
     in
     let pushes =
-      if Cfg.does_return_sut config value.ty then
+      (* If concurrent, don't push *)
+      if Cfg.((not config.domain) && does_return_sut config value.ty) then
         (* We can only push a sut if there was no exception *)
         if may_raise_exception value then
           [
@@ -536,7 +542,9 @@ let next_state_case state config state_ident nb_models value =
     else
       let vbs, sut_map = pop_states state_ident value in
       let sut_map =
-        if Cfg.does_return_sut config value.ty then
+        (* Don't create a name for a new sut when testing in concurrent
+           context *)
+        if Cfg.((*not config.domain &&*) does_return_sut config value.ty) then
           let ret_id = List.hd value.ret in
           let ret_var = gen_symbol ~prefix:(str_of_ident ret_id) () in
           (ret_id, Ident.create ~loc:Location.none ret_var) :: sut_map
@@ -626,7 +634,8 @@ let next_state_case state config state_ident nb_models value =
           next_state_vars
       in
       let push_expr =
-        if Cfg.does_return_sut config value.ty then
+        (* If concurrent, don't push *)
+        if Cfg.((not config.domain) && does_return_sut config value.ty) then
           let ret_id = List.hd value.ret in
           let ret_var = List.assoc ret_id next_vars_assoc in
           eapply (qualify [ "Model" ] "push") [ push_expr; evar ret_var ]
@@ -793,7 +802,8 @@ let postcond_case config state invariants idx state_ident new_state_ident value
     let* ocaml_term = ocaml_of_term config subst_term in
     ocaml_term |> wrap |> ok
   and dummy =
-    let ty_show = qualify [ "Ortac_runtime" ] "dummy" and value = eunit in
+    let ty_show = qualify [ "Ortac_runtime"; "Report" ] "dummy"
+    and value = eunit in
     let args = pexp_tuple_opt [ ty_show; value ] in
     pexp_construct res args
   in
@@ -830,7 +840,7 @@ let postcond_case config state invariants idx state_ident new_state_ident value
       (Some
          (esome
          @@ pexp_apply
-              (qualify [ "Ortac_runtime" ] "report")
+              (qualify [ "Ortac_runtime"; "Report" ] "report")
               [
                 ( Nolabel,
                   estring @@ Ortac_core.Context.module_name config.context );
@@ -1610,16 +1620,19 @@ let pp_ortac_cmd_case config suts last value =
     let lhs =
       let pat = pvar "lhs" in
       let expr =
+        let ok_name =
+          if Cfg.(config.domain) then estring "Ok _"
+          else [%expr "Ok " ^ SUT.get_name [%e evar suts] 0]
+        in
         pexp_ifthenelse (evar last) (estring "r")
           (Some
              (if
                 Cfg.does_return_sut config value.ty && may_raise_exception value
-              then
-                res_match
-                  [%expr "Ok " ^ SUT.get_name [%e evar suts] 0]
-                  (estring "_")
-              else if Cfg.does_return_sut config value.ty then
-                eapply (qualify [ "SUT" ] "get_name") [ evar suts; eint 0 ]
+              then res_match ok_name (estring "_")
+                (* If concurrent, we wouldn't have pushed a new SUT *)
+              else if
+                Cfg.((not config.domain) && does_return_sut config value.ty)
+              then eapply (qualify [ "SUT" ] "get_name") [ evar suts; eint 0 ]
               else estring "_"))
       in
       value_binding ~pat ~expr
@@ -1627,8 +1640,10 @@ let pp_ortac_cmd_case config suts last value =
     let shift =
       let pat = pvar "shift" in
       let expr =
-        if Cfg.does_return_sut config value.ty && may_raise_exception value then
-          res_match (eint 1) (eint 0)
+        (* If concurrent, we wouldn't have pushed a new SUT *)
+        if Cfg.(config.domain) then eint 0
+        else if Cfg.does_return_sut config value.ty && may_raise_exception value
+        then res_match (eint 1) (eint 0)
         else if Cfg.does_return_sut config value.ty then eint 1
         else eint 0
       in
@@ -1736,12 +1751,10 @@ let stm config ir =
     pstr_module (module_binding ~name:(noloc (Some "Spec")) ~expr:spec_expr)
   in
   let tests =
+    let make = noloc (Ldot (Lident "Ortac_runtime", "Make")) in
     pstr_module
       (module_binding ~name:(noloc (Some "STMTests"))
-         ~expr:
-           (pmod_apply
-              (pmod_ident (Ldot (Lident "Ortac_runtime", "Make") |> noloc))
-              (pmod_ident (lident "Spec"))))
+         ~expr:(pmod_apply (pmod_ident make) (pmod_ident (lident "Spec"))))
   in
   let module_name = Ortac_core.Context.module_name config.context in
   let call_tests =
@@ -1767,11 +1780,13 @@ let stm config ir =
     let m, ms = split_list @@ prefix @ (module_name :: submodule) in
     noloc @@ List.fold_left (fun acc x -> Ldot (acc, x)) (Lident m) ms
   in
+  let ortac_runtime =
+    if config.domain then
+      [%stri module Ortac_runtime = Ortac_runtime_qcheck_stm_domain]
+    else [%stri module Ortac_runtime = Ortac_runtime_qcheck_stm_sequential]
+  in
   ok
-    (warn
-     :: open_mod opened_mod
-     :: [%stri module Ortac_runtime = Ortac_runtime_qcheck_stm]
-     :: ghost_types
+    ((warn :: open_mod opened_mod :: ortac_runtime :: ghost_types)
     @ ghost_functions
     @ sut_mod
     @ model_mod

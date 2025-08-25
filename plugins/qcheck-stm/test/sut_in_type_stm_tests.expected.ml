@@ -2,7 +2,7 @@
    edit how you run the tool instead *)
 [@@@ocaml.warning "-26-27-69-32-34-38"]
 open Sut_in_type
-module Ortac_runtime = Ortac_runtime_qcheck_stm
+module Ortac_runtime = Ortac_runtime_qcheck_stm_sequential
 module SUT =
   (Ortac_runtime.SUT.Make)(struct type sut = int t
                                   let init () = make 16 0 end)
@@ -166,9 +166,11 @@ let ortac_postcond cmd__006_ state__007_ res__008_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "Sut_in_type" "make 16 0"
-                        (try Ortac_runtime.Exception "Invalid_argument"
-                         with | e -> Ortac_runtime.Out_of_domain) "make"
+                     (Ortac_runtime.Report.report "Sut_in_type" "make 16 0"
+                        (try
+                           Ortac_runtime.Report.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Report.Out_of_domain)
+                        "make"
                         [("i >= 0",
                            {
                              Ortac_runtime.start =
@@ -201,9 +203,13 @@ let ortac_postcond cmd__006_ state__007_ res__008_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Sut_in_type" "make 16 0"
-                           (try Ortac_runtime.Exception "Invalid_argument"
-                            with | e -> Ortac_runtime.Out_of_domain) "make"
+                        (Ortac_runtime.Report.report "Sut_in_type"
+                           "make 16 0"
+                           (try
+                              Ortac_runtime.Report.Exception
+                                "Invalid_argument"
+                            with | e -> Ortac_runtime.Report.Out_of_domain)
+                           "make"
                            [("i >= 0",
                               {
                                 Ortac_runtime.start =

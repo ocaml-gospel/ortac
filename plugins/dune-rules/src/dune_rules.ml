@@ -85,6 +85,10 @@ end = struct
             ~doc:"Build the qcheck-stm tests for SUBMODULE inside FILE"
             ~docv:"SUBMODULE")
 
+    let domain =
+      Arg.(
+        value & flag & info [ "d"; "domain" ] ~doc:"Generate STM_domain tests.")
+
     let fork_timeout =
       Arg.(
         value
@@ -92,7 +96,7 @@ end = struct
         & info [ "t"; "timeout" ] ~doc:"Timeout for each test." ~docv:"TIMEOUT")
 
     let main interface_file config_file ocaml_output library package_name
-        dune_output module_prefix submodule fork_timeout =
+        dune_output module_prefix submodule domain fork_timeout =
       let open Qcheck_stm in
       let config =
         {
@@ -104,6 +108,7 @@ end = struct
           dune_output;
           module_prefix;
           submodule;
+          domain;
           fork_timeout;
         }
       in
@@ -121,6 +126,7 @@ end = struct
         $ with_stdout_to
         $ module_prefix
         $ submodule
+        $ domain
         $ fork_timeout)
 
     let cmd = Cmd.v info term
