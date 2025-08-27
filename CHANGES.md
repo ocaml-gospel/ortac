@@ -1,4 +1,4 @@
-# Unreleased
+# 0.7.2
 
 - [Dune] Fix cycle dependency in `Ortac/Dune-rules` for wrapper plugin
   [\#348](https://github.com/ocaml-gospel/ortac/pull/348)
@@ -7,7 +7,7 @@
 
 - [Dune] Fix dependencies in generated library declaration for Ortac/Wrapper
   [\#342](https://github.com/ocaml-gospel/ortac/pull/342)
-- [Dune] Fix dependancies in `ortac-dune`
+- [Dune] Fix dependencies in `ortac-dune`
   [\#340](https://github.com/ocaml-gospel/ortac/pull/340)
 
 # 0.7.0
