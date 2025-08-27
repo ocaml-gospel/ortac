@@ -2,7 +2,7 @@
    edit how you run the tool instead *)
 [@@@ocaml.warning "-26-27-69-32-34-38"]
 open Hashtbl
-module Ortac_runtime = Ortac_runtime_qcheck_stm
+module Ortac_runtime = Ortac_runtime_qcheck_stm_sequential
 let rec remove_first x xs =
   try
     if Ortac_runtime.Gospelstdlib.Sequence.empty = xs
@@ -617,11 +617,12 @@ let ortac_postcond cmd__032_ state__033_ res__034_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "Hashtbl" "create ~random:false 16"
+                   (Ortac_runtime.Report.report "Hashtbl"
+                      "create ~random:false 16"
                       (try
-                         Ortac_runtime.Protected_value
-                           (Res (Ortac_runtime.dummy, ()))
-                       with | e -> Ortac_runtime.Out_of_domain) "find"
+                         Ortac_runtime.Report.Protected_value
+                           (Res (Ortac_runtime.Report.dummy, ()))
+                       with | e -> Ortac_runtime.Report.Out_of_domain) "find"
                       [("Sequence.mem h.contents (a, b)",
                          {
                            Ortac_runtime.start =
@@ -654,9 +655,10 @@ let ortac_postcond cmd__032_ state__033_ res__034_ =
                then None
                else
                  Some
-                   (Ortac_runtime.report "Hashtbl" "create ~random:false 16"
-                      (try Ortac_runtime.Exception "Not_found"
-                       with | e -> Ortac_runtime.Out_of_domain) "find"
+                   (Ortac_runtime.Report.report "Hashtbl"
+                      "create ~random:false 16"
+                      (try Ortac_runtime.Report.Exception "Not_found"
+                       with | e -> Ortac_runtime.Report.Out_of_domain) "find"
                       [("not (Sequence.mem (Sequence.map fst h.contents) a)",
                          {
                            Ortac_runtime.start =
@@ -701,9 +703,12 @@ let ortac_postcond cmd__032_ state__033_ res__034_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Hashtbl" "create ~random:false 16"
-                 (try Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
-                  with | e -> Ortac_runtime.Out_of_domain) "find_opt"
+              (Ortac_runtime.Report.report "Hashtbl"
+                 "create ~random:false 16"
+                 (try
+                    Ortac_runtime.Report.Value
+                      (Res (Ortac_runtime.Report.dummy, ()))
+                  with | e -> Ortac_runtime.Report.Out_of_domain) "find_opt"
                  [("match o with\n      | None -> not (Sequence.mem (Sequence.map fst h.contents) a)\n      | Some b -> Sequence.mem h.contents (a, b)",
                     {
                       Ortac_runtime.start =
@@ -734,9 +739,12 @@ let ortac_postcond cmd__032_ state__033_ res__034_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Hashtbl" "create ~random:false 16"
-                 (try Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
-                  with | e -> Ortac_runtime.Out_of_domain) "find_all"
+              (Ortac_runtime.Report.report "Hashtbl"
+                 "create ~random:false 16"
+                 (try
+                    Ortac_runtime.Report.Value
+                      (Res (Ortac_runtime.Report.dummy, ()))
+                  with | e -> Ortac_runtime.Report.Out_of_domain) "find_all"
                  [("bs = Sequence.filter_map (fun (x, y) -> if x = a then Some y else None) h.contents",
                     {
                       Ortac_runtime.start =
@@ -768,9 +776,10 @@ let ortac_postcond cmd__032_ state__033_ res__034_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Hashtbl" "create ~random:false 16"
+              (Ortac_runtime.Report.report "Hashtbl"
+                 "create ~random:false 16"
                  (try
-                    Ortac_runtime.Value
+                    Ortac_runtime.Report.Value
                       (Res
                          (bool,
                            (let h_old__053_ = Model.get state__033_ 0
@@ -780,7 +789,7 @@ let ortac_postcond cmd__032_ state__033_ res__034_ =
                               (Ortac_runtime.Gospelstdlib.Sequence.map
                                  Ortac_runtime.Gospelstdlib.fst
                                  (Lazy.force h_new__054_).contents) a_5)))
-                  with | e -> Ortac_runtime.Out_of_domain) "mem"
+                  with | e -> Ortac_runtime.Report.Out_of_domain) "mem"
                  [("b = Sequence.mem (Sequence.map fst h.contents) a",
                     {
                       Ortac_runtime.start =
@@ -813,9 +822,10 @@ let ortac_postcond cmd__032_ state__033_ res__034_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Hashtbl" "create ~random:false 16"
+              (Ortac_runtime.Report.report "Hashtbl"
+                 "create ~random:false 16"
                  (try
-                    Ortac_runtime.Value
+                    Ortac_runtime.Report.Value
                       (Res
                          (integer,
                            (let h_old__061_ = Model.get state__033_ 0
@@ -823,7 +833,7 @@ let ortac_postcond cmd__032_ state__033_ res__034_ =
                               lazy (Model.get (Lazy.force new_state__035_) 0) in
                             Ortac_runtime.Gospelstdlib.Sequence.length
                               (Lazy.force h_new__062_).contents)))
-                  with | e -> Ortac_runtime.Out_of_domain) "length"
+                  with | e -> Ortac_runtime.Report.Out_of_domain) "length"
                  [("i = Sequence.length h.contents",
                     {
                       Ortac_runtime.start =

@@ -1,3 +1,8 @@
+# Unreleased
+
+- [QCheck-STM] Refactor runtime to allow for OCaml5-only sub-library
+  [\#316](https://github.com/ocaml-gospel/ortac/pull/316)
+
 # 0.7.2
 
 - [Dune] Fix cycle dependency in `Ortac/Dune-rules` for wrapper plugin

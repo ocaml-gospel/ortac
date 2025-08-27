@@ -2,7 +2,7 @@
    edit how you run the tool instead *)
 [@@@ocaml.warning "-26-27-69-32-34-38"]
 open Array
-module Ortac_runtime = Ortac_runtime_qcheck_stm
+module Ortac_runtime = Ortac_runtime_qcheck_stm_sequential
 module SUT =
   (Ortac_runtime.SUT.Make)(struct
                              type sut = char t
@@ -836,16 +836,16 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Array" "make 16 'a'"
+              (Ortac_runtime.Report.report "Array" "make 16 'a'"
                  (try
-                    Ortac_runtime.Value
+                    Ortac_runtime.Report.Value
                       (Res
                          (integer,
                            (let t_old__050_ = Model.get state__047_ 0
                             and t_new__051_ =
                               lazy (Model.get (Lazy.force new_state__049_) 0) in
                             (Lazy.force t_new__051_).size)))
-                  with | e -> Ortac_runtime.Out_of_domain) "length"
+                  with | e -> Ortac_runtime.Report.Out_of_domain) "length"
                  [("i = t.size",
                     {
                       Ortac_runtime.start =
@@ -880,9 +880,11 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "Array" "make 16 'a'"
-                        (try Ortac_runtime.Exception "Invalid_argument"
-                         with | e -> Ortac_runtime.Out_of_domain) "get"
+                     (Ortac_runtime.Report.report "Array" "make 16 'a'"
+                        (try
+                           Ortac_runtime.Report.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Report.Out_of_domain)
+                        "get"
                         [("0 <= i < t.size",
                            {
                              Ortac_runtime.start =
@@ -917,9 +919,9 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Array" "make 16 'a'"
+                        (Ortac_runtime.Report.report "Array" "make 16 'a'"
                            (try
-                              Ortac_runtime.Protected_value
+                              Ortac_runtime.Report.Protected_value
                                 (Res
                                    (char,
                                      (let t_old__055_ =
@@ -932,7 +934,8 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                                         (Lazy.force t_new__056_).contents
                                         (Ortac_runtime.Gospelstdlib.integer_of_int
                                            i))))
-                            with | e -> Ortac_runtime.Out_of_domain) "get"
+                            with | e -> Ortac_runtime.Report.Out_of_domain)
+                           "get"
                            [("a = t.contents[i]",
                               {
                                 Ortac_runtime.start =
@@ -971,9 +974,12 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Array" "make 16 'a'"
-                           (try Ortac_runtime.Exception "Invalid_argument"
-                            with | e -> Ortac_runtime.Out_of_domain) "get"
+                        (Ortac_runtime.Report.report "Array" "make 16 'a'"
+                           (try
+                              Ortac_runtime.Report.Exception
+                                "Invalid_argument"
+                            with | e -> Ortac_runtime.Report.Out_of_domain)
+                           "get"
                            [("0 <= i < t.size",
                               {
                                 Ortac_runtime.start =
@@ -1008,9 +1014,11 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "Array" "make 16 'a'"
-                        (try Ortac_runtime.Exception "Invalid_argument"
-                         with | e -> Ortac_runtime.Out_of_domain) "set"
+                     (Ortac_runtime.Report.report "Array" "make 16 'a'"
+                        (try
+                           Ortac_runtime.Report.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Report.Out_of_domain)
+                        "set"
                         [("0 <= i < t.size",
                            {
                              Ortac_runtime.start =
@@ -1050,9 +1058,12 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Array" "make 16 'a'"
-                           (try Ortac_runtime.Exception "Invalid_argument"
-                            with | e -> Ortac_runtime.Out_of_domain) "set"
+                        (Ortac_runtime.Report.report "Array" "make 16 'a'"
+                           (try
+                              Ortac_runtime.Report.Exception
+                                "Invalid_argument"
+                            with | e -> Ortac_runtime.Report.Out_of_domain)
+                           "set"
                            [("0 <= i < t.size",
                               {
                                 Ortac_runtime.start =
@@ -1080,9 +1091,11 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                  then None
                  else
                    Some
-                     (Ortac_runtime.report "Array" "make 16 'a'"
-                        (try Ortac_runtime.Exception "Invalid_argument"
-                         with | e -> Ortac_runtime.Out_of_domain) "make"
+                     (Ortac_runtime.Report.report "Array" "make 16 'a'"
+                        (try
+                           Ortac_runtime.Report.Exception "Invalid_argument"
+                         with | e -> Ortac_runtime.Report.Out_of_domain)
+                        "make"
                         [("i >= 0",
                            {
                              Ortac_runtime.start =
@@ -1115,9 +1128,12 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Array" "make 16 'a'"
-                           (try Ortac_runtime.Exception "Invalid_argument"
-                            with | e -> Ortac_runtime.Out_of_domain) "make"
+                        (Ortac_runtime.Report.report "Array" "make 16 'a'"
+                           (try
+                              Ortac_runtime.Report.Exception
+                                "Invalid_argument"
+                            with | e -> Ortac_runtime.Report.Out_of_domain)
+                           "make"
                            [("i >= 0",
                               {
                                 Ortac_runtime.start =
@@ -1137,7 +1153,7 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                               })])))
       | (Append, Res ((SUT, _), t_5)) -> None
       | (Sub (i_3, n), Res ((Result (SUT, Exn), _), r)) ->
-          (match Ortac_runtime.append
+          (match Ortac_runtime.Report.append
                    (if
                       let tmp__067_ = Model.get state__047_ 0 in
                       try
@@ -1155,9 +1171,12 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Array" "make 16 'a'"
-                           (try Ortac_runtime.Exception "Invalid_argument"
-                            with | e -> Ortac_runtime.Out_of_domain) "sub"
+                        (Ortac_runtime.Report.report "Array" "make 16 'a'"
+                           (try
+                              Ortac_runtime.Report.Exception
+                                "Invalid_argument"
+                            with | e -> Ortac_runtime.Report.Out_of_domain)
+                           "sub"
                            [("0 <= i <= Sequence.length t.contents",
                               {
                                 Ortac_runtime.start =
@@ -1196,9 +1215,12 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Array" "make 16 'a'"
-                           (try Ortac_runtime.Exception "Invalid_argument"
-                            with | e -> Ortac_runtime.Out_of_domain) "sub"
+                        (Ortac_runtime.Report.report "Array" "make 16 'a'"
+                           (try
+                              Ortac_runtime.Report.Exception
+                                "Invalid_argument"
+                            with | e -> Ortac_runtime.Report.Out_of_domain)
+                           "sub"
                            [("i <= i + n <= Sequence.length t.contents",
                               {
                                 Ortac_runtime.start =
@@ -1222,7 +1244,7 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                (match r with
                 | Error (Invalid_argument _) -> None
                 | _ ->
-                    Ortac_runtime.append
+                    Ortac_runtime.Report.append
                       (if
                          let tmp__067_ = Model.get state__047_ 0 in
                          try
@@ -1240,9 +1262,12 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                        then None
                        else
                          Some
-                           (Ortac_runtime.report "Array" "make 16 'a'"
-                              (try Ortac_runtime.Exception "Invalid_argument"
-                               with | e -> Ortac_runtime.Out_of_domain) "sub"
+                           (Ortac_runtime.Report.report "Array" "make 16 'a'"
+                              (try
+                                 Ortac_runtime.Report.Exception
+                                   "Invalid_argument"
+                               with | e -> Ortac_runtime.Report.Out_of_domain)
+                              "sub"
                               [("0 <= i <= Sequence.length t.contents",
                                  {
                                    Ortac_runtime.start =
@@ -1285,9 +1310,12 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                        then None
                        else
                          Some
-                           (Ortac_runtime.report "Array" "make 16 'a'"
-                              (try Ortac_runtime.Exception "Invalid_argument"
-                               with | e -> Ortac_runtime.Out_of_domain) "sub"
+                           (Ortac_runtime.Report.report "Array" "make 16 'a'"
+                              (try
+                                 Ortac_runtime.Report.Exception
+                                   "Invalid_argument"
+                               with | e -> Ortac_runtime.Report.Out_of_domain)
+                              "sub"
                               [("i <= i + n <= Sequence.length t.contents",
                                  {
                                    Ortac_runtime.start =
@@ -1307,7 +1335,7 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                                  })]))))
       | (Copy, Res ((SUT, _), r_1)) -> None
       | (Fill (pos, len, x), Res ((Result (Unit, Exn), _), res)) ->
-          (match Ortac_runtime.append
+          (match Ortac_runtime.Report.append
                    (if
                       let tmp__073_ = Model.get state__047_ 0 in
                       try
@@ -1318,9 +1346,12 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                     then None
                     else
                       Some
-                        (Ortac_runtime.report "Array" "make 16 'a'"
-                           (try Ortac_runtime.Exception "Invalid_argument"
-                            with | e -> Ortac_runtime.Out_of_domain) "fill"
+                        (Ortac_runtime.Report.report "Array" "make 16 'a'"
+                           (try
+                              Ortac_runtime.Report.Exception
+                                "Invalid_argument"
+                            with | e -> Ortac_runtime.Report.Out_of_domain)
+                           "fill"
                            [("0 <= pos",
                               {
                                 Ortac_runtime.start =
@@ -1338,7 +1369,7 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                                     pos_cnum = 1948
                                   }
                               })]))
-                   (Ortac_runtime.append
+                   (Ortac_runtime.Report.append
                       (if
                          let tmp__073_ = Model.get state__047_ 0 in
                          try
@@ -1349,9 +1380,11 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                        then None
                        else
                          Some
-                           (Ortac_runtime.report "Array" "make 16 'a'"
-                              (try Ortac_runtime.Exception "Invalid_argument"
-                               with | e -> Ortac_runtime.Out_of_domain)
+                           (Ortac_runtime.Report.report "Array" "make 16 'a'"
+                              (try
+                                 Ortac_runtime.Report.Exception
+                                   "Invalid_argument"
+                               with | e -> Ortac_runtime.Report.Out_of_domain)
                               "fill"
                               [("0 <= len",
                                  {
@@ -1383,9 +1416,11 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                        then None
                        else
                          Some
-                           (Ortac_runtime.report "Array" "make 16 'a'"
-                              (try Ortac_runtime.Exception "Invalid_argument"
-                               with | e -> Ortac_runtime.Out_of_domain)
+                           (Ortac_runtime.Report.report "Array" "make 16 'a'"
+                              (try
+                                 Ortac_runtime.Report.Exception
+                                   "Invalid_argument"
+                               with | e -> Ortac_runtime.Report.Out_of_domain)
                               "fill"
                               [("pos + len <= t.size",
                                  {
@@ -1410,7 +1445,7 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                (match res with
                 | Error (Invalid_argument _) -> None
                 | _ ->
-                    Ortac_runtime.append
+                    Ortac_runtime.Report.append
                       (if
                          let tmp__073_ = Model.get state__047_ 0 in
                          try
@@ -1421,9 +1456,11 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                        then None
                        else
                          Some
-                           (Ortac_runtime.report "Array" "make 16 'a'"
-                              (try Ortac_runtime.Exception "Invalid_argument"
-                               with | e -> Ortac_runtime.Out_of_domain)
+                           (Ortac_runtime.Report.report "Array" "make 16 'a'"
+                              (try
+                                 Ortac_runtime.Report.Exception
+                                   "Invalid_argument"
+                               with | e -> Ortac_runtime.Report.Out_of_domain)
                               "fill"
                               [("0 <= pos",
                                  {
@@ -1442,7 +1479,7 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                                        pos_cnum = 1948
                                      }
                                  })]))
-                      (Ortac_runtime.append
+                      (Ortac_runtime.Report.append
                          (if
                             let tmp__073_ = Model.get state__047_ 0 in
                             try
@@ -1454,11 +1491,13 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                           then None
                           else
                             Some
-                              (Ortac_runtime.report "Array" "make 16 'a'"
+                              (Ortac_runtime.Report.report "Array"
+                                 "make 16 'a'"
                                  (try
-                                    Ortac_runtime.Exception
+                                    Ortac_runtime.Report.Exception
                                       "Invalid_argument"
-                                  with | e -> Ortac_runtime.Out_of_domain)
+                                  with
+                                  | e -> Ortac_runtime.Report.Out_of_domain)
                                  "fill"
                                  [("0 <= len",
                                     {
@@ -1490,11 +1529,13 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                           then None
                           else
                             Some
-                              (Ortac_runtime.report "Array" "make 16 'a'"
+                              (Ortac_runtime.Report.report "Array"
+                                 "make 16 'a'"
                                  (try
-                                    Ortac_runtime.Exception
+                                    Ortac_runtime.Report.Exception
                                       "Invalid_argument"
-                                  with | e -> Ortac_runtime.Out_of_domain)
+                                  with
+                                  | e -> Ortac_runtime.Report.Out_of_domain)
                                  "fill"
                                  [("pos + len <= t.size",
                                     {
@@ -1525,9 +1566,9 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Array" "make 16 'a'"
+              (Ortac_runtime.Report.report "Array" "make 16 'a'"
                  (try
-                    Ortac_runtime.Value
+                    Ortac_runtime.Report.Value
                       (Res
                          ((list char),
                            (let t_old__074_ = Model.get state__047_ 0
@@ -1535,7 +1576,7 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                               lazy (Model.get (Lazy.force new_state__049_) 0) in
                             Ortac_runtime.Gospelstdlib.List.of_seq
                               (Lazy.force t_new__075_).contents)))
-                  with | e -> Ortac_runtime.Out_of_domain) "to_list"
+                  with | e -> Ortac_runtime.Report.Out_of_domain) "to_list"
                  [("l = List.of_seq t.contents",
                     {
                       Ortac_runtime.start =
@@ -1566,9 +1607,9 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Array" "make 16 'a'"
+              (Ortac_runtime.Report.report "Array" "make 16 'a'"
                  (try
-                    Ortac_runtime.Value
+                    Ortac_runtime.Report.Value
                       (Res
                          (bool,
                            (let t_old__079_ = Model.get state__047_ 0
@@ -1576,7 +1617,7 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                               lazy (Model.get (Lazy.force new_state__049_) 0) in
                             Ortac_runtime.Gospelstdlib.Sequence.mem
                               (Lazy.force t_new__080_).contents a_3)))
-                  with | e -> Ortac_runtime.Out_of_domain) "mem"
+                  with | e -> Ortac_runtime.Report.Out_of_domain) "mem"
                  [("b = Sequence.mem t.contents a",
                     {
                       Ortac_runtime.start =
@@ -1610,9 +1651,9 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
           then None
           else
             Some
-              (Ortac_runtime.report "Array" "make 16 'a'"
+              (Ortac_runtime.Report.report "Array" "make 16 'a'"
                  (try
-                    Ortac_runtime.Value
+                    Ortac_runtime.Report.Value
                       (Res
                          (bool,
                            (let t_old__084_ = Model.get state__047_ 0
@@ -1627,7 +1668,7 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                                    then true
                                    else false) true
                               (Lazy.force t_new__085_).contents)))
-                  with | e -> Ortac_runtime.Out_of_domain) "for_all"
+                  with | e -> Ortac_runtime.Report.Out_of_domain) "for_all"
                  [("b = Sequence.fold_left (fun acc a -> p a && acc) true t.contents",
                     {
                       Ortac_runtime.start =

@@ -1,10 +1,18 @@
 (library
- (name ortac_runtime_qcheck_stm)
- (public_name ortac-runtime-qcheck-stm)
+ (name ortac_runtime_qcheck_stm_util)
+ (package ortac-runtime-qcheck-stm)
+ (modules report stores)
+ (libraries qcheck-stm.stm ortac-runtime))
+
+(library
+ (name ortac_runtime_qcheck_stm_sequential)
+ (public_name ortac-runtime-qcheck-stm.sequential)
+ (modules ortac_runtime_qcheck_stm_sequential)
  (libraries
   qcheck-core
   qcheck-core.runner
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
+  ortac_runtime_qcheck_stm_util
   ortac-runtime))

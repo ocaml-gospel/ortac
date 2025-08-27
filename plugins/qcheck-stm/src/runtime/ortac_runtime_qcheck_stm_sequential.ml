@@ -1,76 +1,13 @@
+open Ortac_runtime_qcheck_stm_util
 open STM
 include Ortac_runtime
-
-type expected_result =
-  | Value of res
-  | Protected_value of res
-  | Exception of string
-  | Out_of_domain
-
-type report = {
-  mod_name : string;
-  init_sut : string;
-  ret : expected_result;
-  cmd : string;
-  terms : (string * location) list;
-}
-
-let report mod_name init_sut ret cmd terms =
-  { mod_name; init_sut; ret; cmd; terms }
-
-let append a b =
-  match (a, b) with
-  | None, None -> None
-  | Some _, None -> a
-  | None, Some _ -> b
-  | Some r0, Some r1 ->
-      assert (r0.cmd = r1.cmd);
-      Some { r0 with terms = r0.terms @ r1.terms }
-
-type _ ty += Dummy : _ ty
-
-let dummy = (Dummy, fun _ -> Printf.sprintf "unknown value")
-let is_dummy = function Res ((Dummy, _), _) -> true | _ -> false
-
-module Model = struct
-  module Make (M : sig
-    type elt
-
-    val init : elt
-  end) =
-  struct
-    type elt = M.elt
-    type t = elt list
-
-    let create n () : t = List.init n (fun _ -> M.init)
-    let size = List.length
-    let rec drop_n t n = if n = 0 then t else drop_n (List.tl t) (n - 1)
-    let push t e = e :: t
-
-    let get t n =
-      try List.nth t n with _ -> failwith ("nth: " ^ string_of_int n)
-  end
-end
-
-module SUT = struct
-  module Make (M : sig
-    type sut
-
-    val init : unit -> sut
-  end) =
-  struct
-    type elt = M.sut
-    type t = elt list ref
-
-    let create n () = ref @@ List.init n (fun _ -> M.init ())
-    let size t = List.length !t
-    let get t = List.nth !t
-    let push t e = t := e :: !t
-    let get_name t n = Format.asprintf "sut%d" (size t - n - 1)
-  end
-end
+module Report = Report
+module Model = Stores.Model
+module SUT = Stores.SUT
 
 module Make (Spec : Spec) = struct
+  open Report
+  open Ortac_runtime
   open QCheck
   module Internal = Internal.Make (Spec) [@alert "-internal"]
 

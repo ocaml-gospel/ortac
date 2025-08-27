@@ -32,7 +32,7 @@
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime-qcheck-stm
+  ortac-runtime-qcheck-stm.sequential
   array)
  (action
   (echo
@@ -85,7 +85,7 @@
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime-qcheck-stm
+  ortac-runtime-qcheck-stm.sequential
   hashtbl)
  (action
   (echo
@@ -138,7 +138,7 @@
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime-qcheck-stm
+  ortac-runtime-qcheck-stm.sequential
   record)
  (action
   (echo
@@ -191,7 +191,7 @@
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime-qcheck-stm
+  ortac-runtime-qcheck-stm.sequential
   ref)
  (action
   (echo
@@ -244,7 +244,7 @@
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime-qcheck-stm
+  ortac-runtime-qcheck-stm.sequential
   conjunctive_clauses)
  (action
   (echo
@@ -297,7 +297,7 @@
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime-qcheck-stm
+  ortac-runtime-qcheck-stm.sequential
   sequence_model)
  (action
   (echo
@@ -350,7 +350,7 @@
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime-qcheck-stm
+  ortac-runtime-qcheck-stm.sequential
   invariants)
  (action
   (echo
@@ -403,7 +403,7 @@
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime-qcheck-stm
+  ortac-runtime-qcheck-stm.sequential
   integer_in_model)
  (action
   (echo
@@ -456,7 +456,7 @@
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime-qcheck-stm
+  ortac-runtime-qcheck-stm.sequential
   ghost_as_model)
  (action
   (echo
@@ -509,7 +509,7 @@
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime-qcheck-stm
+  ortac-runtime-qcheck-stm.sequential
   custom_config)
  (action
   (echo
@@ -562,7 +562,7 @@
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime-qcheck-stm
+  ortac-runtime-qcheck-stm.sequential
   test_without_sut)
  (action
   (echo
@@ -615,7 +615,7 @@
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime-qcheck-stm
+  ortac-runtime-qcheck-stm.sequential
   tuples)
  (action
   (echo
@@ -668,7 +668,7 @@
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime-qcheck-stm
+  ortac-runtime-qcheck-stm.sequential
   functional_model)
  (action
   (echo
@@ -721,7 +721,7 @@
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime-qcheck-stm
+  ortac-runtime-qcheck-stm.sequential
   test_cleanup)
  (action
   (echo
@@ -774,7 +774,7 @@
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime-qcheck-stm
+  ortac-runtime-qcheck-stm.sequential
   sut_in_type)
  (action
   (echo
@@ -827,7 +827,7 @@
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime-qcheck-stm
+  ortac-runtime-qcheck-stm.sequential
   queue)
  (action
   (echo
@@ -880,7 +880,7 @@
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime-qcheck-stm
+  ortac-runtime-qcheck-stm.sequential
   stack)
  (action
   (echo
@@ -933,7 +933,7 @@
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime-qcheck-stm
+  ortac-runtime-qcheck-stm.sequential
   function_args)
  (action
   (echo

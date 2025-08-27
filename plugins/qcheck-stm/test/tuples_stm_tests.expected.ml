@@ -2,7 +2,7 @@
    edit how you run the tool instead *)
 [@@@ocaml.warning "-26-27-69-32-34-38"]
 open Tuples
-module Ortac_runtime = Ortac_runtime_qcheck_stm
+module Ortac_runtime = Ortac_runtime_qcheck_stm_sequential
 module SUT =
   (Ortac_runtime.SUT.Make)(struct
                              type sut = (char, int) t
@@ -395,7 +395,7 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
       | (Add' tup_1, Res ((Unit, _), _)) -> None
       | (Add'' tup_2, Res ((Unit, _), _)) -> None
       | (Size_tup, Res ((Tup2 (Int, Int), _), (x, y))) ->
-          Ortac_runtime.append
+          Ortac_runtime.Report.append
             (if
                let t_old__026_ = Model.get state__019_ 0
                and t_new__027_ =
@@ -408,9 +408,12 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
              then None
              else
                Some
-                 (Ortac_runtime.report "Tuples" "create ()"
-                    (try Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
-                     with | e -> Ortac_runtime.Out_of_domain) "size_tup"
+                 (Ortac_runtime.Report.report "Tuples" "create ()"
+                    (try
+                       Ortac_runtime.Report.Value
+                         (Res (Ortac_runtime.Report.dummy, ()))
+                     with | e -> Ortac_runtime.Report.Out_of_domain)
+                    "size_tup"
                     [("x = Sequence.length t.contents",
                        {
                          Ortac_runtime.start =
@@ -440,9 +443,12 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
              then None
              else
                Some
-                 (Ortac_runtime.report "Tuples" "create ()"
-                    (try Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
-                     with | e -> Ortac_runtime.Out_of_domain) "size_tup"
+                 (Ortac_runtime.Report.report "Tuples" "create ()"
+                    (try
+                       Ortac_runtime.Report.Value
+                         (Res (Ortac_runtime.Report.dummy, ()))
+                     with | e -> Ortac_runtime.Report.Out_of_domain)
+                    "size_tup"
                     [("y = Sequence.length t.contents",
                        {
                          Ortac_runtime.start =
@@ -461,7 +467,7 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                            }
                        })]))
       | (Size_tup', Res ((Tup3 (Int, Int, Int), _), (x_1, y_1, z))) ->
-          Ortac_runtime.append
+          Ortac_runtime.Report.append
             (if
                let t_old__031_ = Model.get state__019_ 0
                and t_new__032_ =
@@ -474,9 +480,12 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
              then None
              else
                Some
-                 (Ortac_runtime.report "Tuples" "create ()"
-                    (try Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
-                     with | e -> Ortac_runtime.Out_of_domain) "size_tup'"
+                 (Ortac_runtime.Report.report "Tuples" "create ()"
+                    (try
+                       Ortac_runtime.Report.Value
+                         (Res (Ortac_runtime.Report.dummy, ()))
+                     with | e -> Ortac_runtime.Report.Out_of_domain)
+                    "size_tup'"
                     [("x = Sequence.length t.contents",
                        {
                          Ortac_runtime.start =
@@ -494,7 +503,7 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                              pos_cnum = 1826
                            }
                        })]))
-            (Ortac_runtime.append
+            (Ortac_runtime.Report.append
                (if
                   let t_old__033_ = Model.get state__019_ 0
                   and t_new__034_ =
@@ -507,10 +516,12 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                 then None
                 else
                   Some
-                    (Ortac_runtime.report "Tuples" "create ()"
+                    (Ortac_runtime.Report.report "Tuples" "create ()"
                        (try
-                          Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
-                        with | e -> Ortac_runtime.Out_of_domain) "size_tup'"
+                          Ortac_runtime.Report.Value
+                            (Res (Ortac_runtime.Report.dummy, ()))
+                        with | e -> Ortac_runtime.Report.Out_of_domain)
+                       "size_tup'"
                        [("y = Sequence.length t.contents",
                           {
                             Ortac_runtime.start =
@@ -540,10 +551,12 @@ let ortac_postcond cmd__018_ state__019_ res__020_ =
                 then None
                 else
                   Some
-                    (Ortac_runtime.report "Tuples" "create ()"
+                    (Ortac_runtime.Report.report "Tuples" "create ()"
                        (try
-                          Ortac_runtime.Value (Res (Ortac_runtime.dummy, ()))
-                        with | e -> Ortac_runtime.Out_of_domain) "size_tup'"
+                          Ortac_runtime.Report.Value
+                            (Res (Ortac_runtime.Report.dummy, ()))
+                        with | e -> Ortac_runtime.Report.Out_of_domain)
+                       "size_tup'"
                        [("z = Sequence.length t.contents",
                           {
                             Ortac_runtime.start =
