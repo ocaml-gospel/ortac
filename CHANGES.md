@@ -1,5 +1,7 @@
 # Unreleased
 
+- [QCheck-STM] Add basic runtime for domain testing
+  [\#328](https://github.com/ocaml-gospel/ortac/pull/328)
 - [QCheck-STM] Refactor runtime to allow for OCaml5-only sub-library
   [\#316](https://github.com/ocaml-gospel/ortac/pull/316)
 

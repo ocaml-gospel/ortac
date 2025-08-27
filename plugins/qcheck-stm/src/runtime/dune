@@ -16,3 +16,18 @@
   qcheck-multicoretests-util
   ortac_runtime_qcheck_stm_util
   ortac-runtime))
+
+(library
+ (name ortac_runtime_qcheck_stm_domain)
+ (public_name ortac-runtime-qcheck-stm.domain)
+ (modules ortac_runtime_qcheck_stm_domain)
+ (enabled_if
+  (>= %{ocaml_version} 5))
+ (libraries
+  qcheck-core
+  qcheck-core.runner
+  qcheck-stm.stm
+  qcheck-stm.domain
+  qcheck-multicoretests-util
+  ortac_runtime_qcheck_stm_util
+  ortac-runtime))

@@ -4,12 +4,14 @@ module Ir_of_gospel = Ir_of_gospel
 module Reserr = Reserr
 module Stm_of_ir = Stm_of_ir
 
-let main path config output module_prefix submodule quiet () =
+let main path config output module_prefix submodule domain quiet () =
   let open Reserr in
   let fmt = Registration.get_out_formatter output in
   let pp = pp quiet Ppxlib_ast.Pprintast.structure fmt in
   pp
-    (let* sigs, config = Config.init path config module_prefix submodule in
+    (let* sigs, config =
+       Config.init path config module_prefix submodule domain
+     in
      let* ir = Ir_of_gospel.run sigs config in
      Stm_of_ir.stm config ir)
 
@@ -50,6 +52,10 @@ end = struct
              file."
           ~docv:"CONFIG")
 
+  let domain =
+    Arg.(
+      value & flag & info [ "d"; "domain" ] ~doc:"Generate STM_domain tests.")
+
   let term =
     let open Registration in
     Term.(
@@ -59,6 +65,7 @@ end = struct
       $ output_file
       $ module_prefix
       $ submodule
+      $ domain
       $ quiet
       $ setup_log)
 

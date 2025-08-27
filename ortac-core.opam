@@ -24,7 +24,7 @@ homepage: "https://github.com/ocaml-gospel/ortac"
 doc: "https://ocaml-gospel.github.io/ortac/ortac-core/"
 bug-reports: "https://github.com/ocaml-gospel/ortac/issues"
 depends: [
-  "dune" {>= "3.8"}
+  "dune" {>= "3.9"}
   "ocaml" {>= "4.12.0"}
   "dune-build-info"
   "dune-site"

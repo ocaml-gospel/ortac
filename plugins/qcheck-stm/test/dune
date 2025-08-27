@@ -180,6 +180,61 @@
   (echo
    "\n%{dep:submodule_and_prefix_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))
 
+(library
+ (name atomic)
+ (modules atomic))
+
+(rule
+ (target atomic_tests.ml)
+ (package ortac-qcheck-stm)
+ (enabled_if
+  (>= %{ocaml_version} 5))
+ (deps
+  (package ortac-core)
+  (package ortac-qcheck-stm))
+ (action
+  (setenv
+   ORTAC_ONLY_PLUGIN
+   qcheck-stm
+   (with-stderr-to
+    atomic_errors
+    (run
+     ortac
+     qcheck-stm
+     %{dep:atomic.mli}
+     %{dep:atomic_config.ml}
+     --domain
+     -o
+     %{target})))))
+
+(rule
+ (alias runtest)
+ (package ortac-qcheck-stm)
+ (enabled_if
+  (>= %{ocaml_version} 5))
+ (action
+  (progn
+   (diff atomic_errors.expected atomic_errors)
+   (diff atomic_tests.expected.ml atomic_tests.ml))))
+
+(test
+ (name atomic_tests)
+ (package ortac-qcheck-stm)
+ (build_if
+  (>= %{ocaml_version} 5))
+ (modules atomic_tests)
+ (libraries ortac-runtime-qcheck-stm.domain atomic)
+ (action
+  (echo
+   "\n%{dep:atomic_tests.exe} has been generated with the ortac-qcheck-stm plugin.\n")))
+
+(rule
+ (alias launchtests)
+ (enabled_if
+  (>= %{ocaml_version} 5))
+ (action
+  (run %{dep:atomic_tests.exe} -v)))
+
 (executable
  (name dune_gen)
  (modules dune_gen))
