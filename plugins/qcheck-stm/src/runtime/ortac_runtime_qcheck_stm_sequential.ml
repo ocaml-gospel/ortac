@@ -7,39 +7,14 @@ module SUT = Stores.SUT
 
 module Make (Spec : Spec) = struct
   open Report
-  open Ortac_runtime
   open QCheck
   module Internal = Internal.Make (Spec) [@alert "-internal"]
 
-  let pp_trace max_suts ppf (trace, mod_name, init_sut, ret) =
+  let pp_program max_suts ppf (trace, report) =
     let open Fmt in
-    let pp_expected ppf = function
-      | Value ret when not @@ is_dummy ret ->
-          pf ppf "assert (r = %s)@\n" (show_res ret)
-      | Protected_value ret when not @@ is_dummy ret ->
-          pf ppf "assert (r = Ok %s)@\n" (show_res ret)
-      | Exception exn ->
-          pf ppf
-            "assert (@[match r with@\n\
-            \  @[| Error (%s _) -> true@\n\
-             | _ -> false@]@])@\n"
-            exn
-      | Out_of_domain ->
-          pf ppf
-            "(* @[Partial function called out of domain@\n\
-             in the computation of the expected value.@] *)@\n"
-      | _ -> ()
-    in
-    let rec aux ppf = function
-      | [ (c, r) ] ->
-          pf ppf "%s@\n%a(* returned %s *)@\n" c pp_expected ret (show_res r)
-      | (c, r) :: xs ->
-          pf ppf "%s@\n(* returned %s *)@\n" c (show_res r);
-          aux ppf xs
-      | _ -> assert false
-    in
     let inits =
-      List.init max_suts (fun i -> Format.asprintf "let sut%d = %s" i init_sut)
+      List.init max_suts (fun i ->
+          Format.asprintf "let sut%d = %s" i report.init_sut)
     in
     pf ppf
       "@[%s@\n\
@@ -47,26 +22,12 @@ module Make (Spec : Spec) = struct
        let protect f = try Ok (f ()) with e -> Error e@\n\
        %a@\n\
        %a@]"
-      "[@@@ocaml.warning \"-8\"]" mod_name
+      "[@@@ocaml.warning \"-8\"]" report.mod_name
       Format.(
         pp_print_list ~pp_sep:(fun pf _ -> fprintf pf "@\n") pp_print_string)
-      inits aux trace
-
-  let pp_terms ppf err =
-    let open Fmt in
-    let pp_aux ppf (term, l) = pf ppf "@[%a@\n  @[%s@]@]@\n" pp_loc l term in
-    pf ppf "%a" (list ~sep:(any "@\n") pp_aux) err
-
-  let message max_suts trace report =
-    Test.fail_reportf
-      "Gospel specification violation in function %s\n\
-       @;\
-      \  @[%a@]@\n\
-       when executing the following sequence of operations:@\n\
-       @;\
-      \  @[%a@]@."
-      report.cmd pp_terms report.terms (pp_trace max_suts)
-      (trace, report.mod_name, report.init_sut, report.ret)
+      inits
+      (pp_traces true report.exp_res)
+      trace
 
   let rec check_disagree postcond ortac_show_cmd s sut cs =
     match cs with
@@ -82,8 +43,8 @@ module Make (Spec : Spec) = struct
             let s' = Spec.next_state c s in
             match check_disagree postcond ortac_show_cmd s' sut cs with
             | None -> None
-            | Some (rest, report) -> Some ((call, res) :: rest, report))
-        | Some report -> Some ([ (call, res) ], report))
+            | Some (rest, report) -> Some ({ call; res } :: rest, report))
+        | Some report -> Some ([ { call; res } ], report))
 
   let agree_prop max_suts check_init_state ortac_show_cmd postcond cs =
     check_init_state ();
@@ -98,7 +59,7 @@ module Make (Spec : Spec) = struct
     let res = match res with Ok res -> res | Error exn -> raise exn in
     match res with
     | None -> true
-    | Some (trace, report) -> message max_suts trace report
+    | Some (trace, report) -> message (pp_program max_suts) trace report
 
   let agree_test ~count ~name max_suts wrapped_init_state ortac_show_cmd
       postcond =

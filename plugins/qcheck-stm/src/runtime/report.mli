@@ -15,12 +15,14 @@ type expected_result =
 type t = {
   mod_name : string;  (** The name of the module under test *)
   init_sut : string;  (** String representation of the init_sut function *)
-  ret : expected_result;  (** The expected result of the call *)
+  exp_res : expected_result;  (** The expected result of the call *)
   cmd : string;  (** String representation of the call *)
   terms : (string * Ortac_runtime.location) list;
       (** String representation and location of the violated specifications *)
 }
 (** Information for the bug report in case of test failure *)
+
+type trace = { call : string; res : res }
 
 val report :
   string ->
@@ -29,7 +31,7 @@ val report :
   string ->
   (string * Ortac_runtime.location) list ->
   t
-(** [report module_name init_sut ret cmd terms] *)
+(** [report module_name init_sut exp_res cmd terms] *)
 
 val append : t option -> t option -> t option
 (** [append a b] appends the violated terms of [a] and [b] if any in the
@@ -39,3 +41,7 @@ val dummy : 'a ty * ('b -> string)
 (** A dummy [STM.res] for unknown returned values *)
 
 val is_dummy : res -> bool
+val pp_expected_result : expected_result Fmt.t
+val pp_terms : (string * Ortac_runtime.location) list Fmt.t
+val pp_traces : bool -> expected_result -> trace list Fmt.t
+val message : ('a * t) Fmt.t -> 'a -> t -> 'b
