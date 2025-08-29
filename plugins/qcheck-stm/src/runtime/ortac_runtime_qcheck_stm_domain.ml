@@ -11,29 +11,29 @@ module MakeExt (Spec : SpecExt) = struct
   open QCheck
   open Internal.Make (Spec) [@alert "-internal"]
 
+  let ( &&& ) o1 o2 = match o1 with None -> Lazy.force o2 | _ -> o1
+  let ( ||| ) o1 o2 = match o1 with None -> None | Some _ -> Lazy.force o2
+
   let check_obs postcond =
-    (* ignore the report for now *)
-    let postcond c s r = Option.is_none @@ postcond c s r in
     let rec aux pref cs1 cs2 s =
       match pref with
       | (c, res) :: pref' ->
-          let b = postcond c s res in
-          b && aux pref' cs1 cs2 (Spec.next_state c s)
+          postcond c s res &&& lazy (aux pref' cs1 cs2 (Spec.next_state c s))
       | [] -> (
           match (cs1, cs2) with
-          | [], [] -> true
+          | [], [] -> None
           | [], (c2, res2) :: cs2' ->
-              let b = postcond c2 s res2 in
-              b && aux pref cs1 cs2' (Spec.next_state c2 s)
+              postcond c2 s res2
+              &&& lazy (aux pref cs1 cs2' (Spec.next_state c2 s))
           | (c1, res1) :: cs1', [] ->
-              let b = postcond c1 s res1 in
-              b && aux pref cs1' cs2 (Spec.next_state c1 s)
+              postcond c1 s res1
+              &&& lazy (aux pref cs1' cs2 (Spec.next_state c1 s))
           | (c1, res1) :: cs1', (c2, res2) :: cs2' ->
-              (let b1 = postcond c1 s res1 in
-               b1 && aux pref cs1' cs2 (Spec.next_state c1 s))
-              ||
-              let b2 = postcond c2 s res2 in
-              b2 && aux pref cs1 cs2' (Spec.next_state c2 s))
+              postcond c1 s res1
+              &&& lazy (aux pref cs1' cs2 (Spec.next_state c1 s))
+              ||| lazy
+                    (postcond c2 s res2
+                    &&& lazy (aux pref cs1 cs2' (Spec.next_state c2 s))))
     in
     aux
 
@@ -88,7 +88,7 @@ module MakeExt (Spec : SpecExt) = struct
       (seq_pref, cmds1, cmds2) =
     wrapped_init_state ();
     let pref_obs, obs1, obs2 = run_par seq_pref cmds1 cmds2 in
-    check_obs postcond pref_obs obs1 obs2 Spec.init_state
+    (Option.is_none @@ check_obs postcond pref_obs obs1 obs2 Spec.init_state)
     || Test.fail_reportf "  Results incompatible with linearized model\n\n%s"
        @@ print_triple_vertical ~fig_indent:5 ~res_width:35
             (fun (c, r) ->
