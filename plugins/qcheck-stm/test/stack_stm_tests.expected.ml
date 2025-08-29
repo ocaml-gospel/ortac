@@ -370,12 +370,12 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__088_ state__089_ last__091_ res__090_ =
+let ortac_show_cmd cmd__088_ models__089_ last__091_ res__090_ =
   let open Spec in
     let open STM in
       match (cmd__088_, res__090_) with
       | (Create (), Res ((SUT, _), t_1)) ->
-          let lhs = if last__091_ then "r" else SUT.get_name state__089_ 0
+          let lhs = if last__091_ then "r" else Model.get_name models__089_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a" lhs "create"
             (Util.Pp.pp_unit true) ()
@@ -383,42 +383,43 @@ let ortac_show_cmd cmd__088_ state__089_ last__091_ res__090_ =
           let lhs = if last__091_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a %s" lhs "push"
-            (Util.Pp.pp_char true) v (SUT.get_name state__089_ (0 + shift))
+            (Util.Pp.pp_char true) v
+            (Model.get_name models__089_ (0 + shift))
       | (Pop, Res ((Result (Char, Exn), _), _)) ->
           let lhs = if last__091_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "pop"
-            (SUT.get_name state__089_ (0 + shift))
+            (Model.get_name models__089_ (0 + shift))
       | (Pop_opt, Res ((Option (Char), _), _)) ->
           let lhs = if last__091_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "pop_opt"
-            (SUT.get_name state__089_ (0 + shift))
+            (Model.get_name models__089_ (0 + shift))
       | (Top, Res ((Result (Char, Exn), _), _)) ->
           let lhs = if last__091_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "top"
-            (SUT.get_name state__089_ (0 + shift))
+            (Model.get_name models__089_ (0 + shift))
       | (Top_opt, Res ((Option (Char), _), _)) ->
           let lhs = if last__091_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "top_opt"
-            (SUT.get_name state__089_ (0 + shift))
+            (Model.get_name models__089_ (0 + shift))
       | (Clear, Res ((Unit, _), _)) ->
           let lhs = if last__091_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "clear"
-            (SUT.get_name state__089_ (0 + shift))
+            (Model.get_name models__089_ (0 + shift))
       | (Copy, Res ((SUT, _), r)) ->
-          let lhs = if last__091_ then "r" else SUT.get_name state__089_ 0
+          let lhs = if last__091_ then "r" else Model.get_name models__089_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %s" lhs "copy"
-            (SUT.get_name state__089_ (0 + shift))
+            (Model.get_name models__089_ (0 + shift))
       | (Is_empty, Res ((Bool, _), _)) ->
           let lhs = if last__091_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "is_empty"
-            (SUT.get_name state__089_ (0 + shift))
+            (Model.get_name models__089_ (0 + shift))
       | _ -> assert false
 let ortac_postcond cmd__024_ state__025_ res__026_ =
   let open Spec in

@@ -1,5 +1,7 @@
 # Unreleased
 
+- [QCheck-STM] Make `ortac_show_cmd` look at the models
+  [\#353](https://github.com/ocaml-gospel/ortac/pull/353)
 - [QCheck-STM] Refactor bug report printing
   [\#345](https://github.com/ocaml-gospel/ortac/pull/345)
 - [Dune] Add domain flag to ortac-dune qcheck-stm

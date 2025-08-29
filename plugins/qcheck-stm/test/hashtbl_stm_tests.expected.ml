@@ -521,12 +521,12 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__096_ state__097_ last__099_ res__098_ =
+let ortac_show_cmd cmd__096_ models__097_ last__099_ res__098_ =
   let open Spec in
     let open STM in
       match (cmd__096_, res__098_) with
       | (Create (random, size), Res ((SUT, _), h)) ->
-          let lhs = if last__099_ then "r" else SUT.get_name state__097_ 0
+          let lhs = if last__099_ then "r" else Model.get_name models__097_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s ~random:%a %a" lhs "create"
             (Util.Pp.pp_bool true) random (Util.Pp.pp_int true) size
@@ -534,64 +534,70 @@ let ortac_show_cmd cmd__096_ state__097_ last__099_ res__098_ =
           let lhs = if last__099_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "clear"
-            (SUT.get_name state__097_ (0 + shift))
+            (Model.get_name models__097_ (0 + shift))
       | (Reset, Res ((Unit, _), _)) ->
           let lhs = if last__099_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "reset"
-            (SUT.get_name state__097_ (0 + shift))
+            (Model.get_name models__097_ (0 + shift))
       | (Copy, Res ((SUT, _), h2)) ->
-          let lhs = if last__099_ then "r" else SUT.get_name state__097_ 0
+          let lhs = if last__099_ then "r" else Model.get_name models__097_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %s" lhs "copy"
-            (SUT.get_name state__097_ (0 + shift))
+            (Model.get_name models__097_ (0 + shift))
       | (Add (a_1, b_1), Res ((Unit, _), _)) ->
           let lhs = if last__099_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a %a" lhs "add"
-            (SUT.get_name state__097_ (0 + shift)) (Util.Pp.pp_char true) a_1
-            (Util.Pp.pp_int true) b_1
+            (Model.get_name models__097_ (0 + shift)) (Util.Pp.pp_char true)
+            a_1 (Util.Pp.pp_int true) b_1
       | (Find a_2, Res ((Result (Int, Exn), _), _)) ->
           let lhs = if last__099_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s %a)" lhs "find"
-            (SUT.get_name state__097_ (0 + shift)) (Util.Pp.pp_char true) a_2
+            (Model.get_name models__097_ (0 + shift)) (Util.Pp.pp_char true)
+            a_2
       | (Find_opt a_3, Res ((Option (Int), _), _)) ->
           let lhs = if last__099_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "find_opt"
-            (SUT.get_name state__097_ (0 + shift)) (Util.Pp.pp_char true) a_3
+            (Model.get_name models__097_ (0 + shift)) (Util.Pp.pp_char true)
+            a_3
       | (Find_all a_4, Res ((List (Int), _), _)) ->
           let lhs = if last__099_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "find_all"
-            (SUT.get_name state__097_ (0 + shift)) (Util.Pp.pp_char true) a_4
+            (Model.get_name models__097_ (0 + shift)) (Util.Pp.pp_char true)
+            a_4
       | (Mem a_5, Res ((Bool, _), _)) ->
           let lhs = if last__099_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "mem"
-            (SUT.get_name state__097_ (0 + shift)) (Util.Pp.pp_char true) a_5
+            (Model.get_name models__097_ (0 + shift)) (Util.Pp.pp_char true)
+            a_5
       | (Remove a_6, Res ((Unit, _), _)) ->
           let lhs = if last__099_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "remove"
-            (SUT.get_name state__097_ (0 + shift)) (Util.Pp.pp_char true) a_6
+            (Model.get_name models__097_ (0 + shift)) (Util.Pp.pp_char true)
+            a_6
       | (Replace (a_7, b_2), Res ((Unit, _), _)) ->
           let lhs = if last__099_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a %a" lhs "replace"
-            (SUT.get_name state__097_ (0 + shift)) (Util.Pp.pp_char true) a_7
-            (Util.Pp.pp_int true) b_2
+            (Model.get_name models__097_ (0 + shift)) (Util.Pp.pp_char true)
+            a_7 (Util.Pp.pp_int true) b_2
       | (Filter_map_inplace f, Res ((Unit, _), _)) ->
           let lhs = if last__099_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a %s" lhs "filter_map_inplace"
-            (Util.Pp.pp_fun_ true) f (SUT.get_name state__097_ (0 + shift))
+            (Util.Pp.pp_fun_ true) f
+            (Model.get_name models__097_ (0 + shift))
       | (Length, Res ((Int, _), _)) ->
           let lhs = if last__099_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "length"
-            (SUT.get_name state__097_ (0 + shift))
+            (Model.get_name models__097_ (0 + shift))
       | _ -> assert false
 let ortac_postcond cmd__032_ state__033_ res__034_ =
   let open Spec in

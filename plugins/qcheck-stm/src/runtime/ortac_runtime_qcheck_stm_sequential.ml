@@ -34,13 +34,13 @@ module Make (Spec : Spec) = struct
     | [] -> None
     | c :: cs -> (
         let res = Spec.run c sut in
-        let call = ortac_show_cmd c sut (cs = []) res in
+        let s' = Spec.next_state c s in
+        let call = ortac_show_cmd c s' (cs = []) res in
         (* This functor will be called after a modified postcond has been
            defined, returning a list of 3-plets containing the command, the
            term and the location *)
         match postcond c s res with
         | None -> (
-            let s' = Spec.next_state c s in
             match check_disagree postcond ortac_show_cmd s' sut cs with
             | None -> None
             | Some (rest, report) -> Some ({ call; res } :: rest, report))

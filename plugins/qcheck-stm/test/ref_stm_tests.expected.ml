@@ -205,29 +205,30 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__035_ state__036_ last__038_ res__037_ =
+let ortac_show_cmd cmd__035_ models__036_ last__038_ res__037_ =
   let open Spec in
     let open STM in
       match (cmd__035_, res__037_) with
       | (Make v, Res ((SUT, _), r)) ->
-          let lhs = if last__038_ then "r" else SUT.get_name state__036_ 0
+          let lhs = if last__038_ then "r" else Model.get_name models__036_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a" lhs "make" (Util.Pp.pp_int true) v
       | (Get, Res ((Int, _), _)) ->
           let lhs = if last__038_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "get"
-            (SUT.get_name state__036_ (0 + shift))
+            (Model.get_name models__036_ (0 + shift))
       | (Set v_1, Res ((Unit, _), _)) ->
           let lhs = if last__038_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "set"
-            (SUT.get_name state__036_ (0 + shift)) (Util.Pp.pp_int true) v_1
+            (Model.get_name models__036_ (0 + shift)) (Util.Pp.pp_int true)
+            v_1
       | (Incr, Res ((Unit, _), _)) ->
           let lhs = if last__038_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "incr"
-            (SUT.get_name state__036_ (0 + shift))
+            (Model.get_name models__036_ (0 + shift))
       | _ -> assert false
 let ortac_postcond cmd__012_ state__013_ res__014_ =
   let open Spec in

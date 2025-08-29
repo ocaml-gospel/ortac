@@ -107,12 +107,12 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__016_ state__017_ last__019_ res__018_ =
+let ortac_show_cmd cmd__016_ models__017_ last__019_ res__018_ =
   let open Spec in
     let open STM in
       match (cmd__016_, res__018_) with
       | (Make a_1, Res ((SUT, _), t_1)) ->
-          let lhs = if last__019_ then "r" else SUT.get_name state__017_ 0
+          let lhs = if last__019_ then "r" else Model.get_name models__017_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a" lhs "make" (Util.Pp.pp_int true)
             a_1

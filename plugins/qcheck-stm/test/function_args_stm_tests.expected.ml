@@ -254,7 +254,7 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__023_ state__024_ last__026_ res__025_ =
+let ortac_show_cmd cmd__023_ models__024_ last__026_ res__025_ =
   let open Spec in
     let open STM in
       match (cmd__023_, res__025_) with
@@ -264,16 +264,17 @@ let ortac_show_cmd cmd__023_ state__024_ last__026_ res__025_ =
             then "r"
             else
               (match t_1 with
-               | Ok _ -> "Ok " ^ (SUT.get_name state__024_ 0)
+               | Ok _ -> "Ok " ^ (Model.get_name models__024_ 0)
                | Error _ -> "_")
           and shift = match t_1 with | Ok _ -> 1 | Error _ -> 0 in
           Format.asprintf "let %s = protect (fun () -> %s %a %a)" lhs "make"
             (Util.Pp.pp_int true) len (Util.Pp.pp_char true) c
       | (Map f, Res ((SUT, _), output)) ->
-          let lhs = if last__026_ then "r" else SUT.get_name state__024_ 0
+          let lhs = if last__026_ then "r" else Model.get_name models__024_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a %s" lhs "map"
-            (Util.Pp.pp_fun_ true) f (SUT.get_name state__024_ (0 + shift))
+            (Util.Pp.pp_fun_ true) f
+            (Model.get_name models__024_ (0 + shift))
       | _ -> assert false
 let ortac_postcond cmd__010_ state__011_ res__012_ =
   let open Spec in

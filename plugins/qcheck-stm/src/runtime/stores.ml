@@ -15,6 +15,8 @@ module Model = struct
 
     let get t n =
       try List.nth t n with _ -> failwith ("nth: " ^ string_of_int n)
+
+    let get_name t n = Format.asprintf "sut%d" (size t - n - 1)
   end
 end
 

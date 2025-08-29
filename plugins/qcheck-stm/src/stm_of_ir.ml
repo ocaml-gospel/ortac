@@ -1504,7 +1504,7 @@ let integer_ty_ext =
     [%stri let integer = (Integer, Ortac_runtime.string_of_integer)];
   ]
 
-let pp_ortac_cmd_case config suts last value =
+let pp_ortac_cmd_case config models last value =
   let open Reserr in
   let lhs0 = mk_cmd_pattern value in
   let* lhs1 =
@@ -1573,8 +1573,8 @@ let pp_ortac_cmd_case config suts last value =
           let* fmt, pps = aux r (n + 1) xs in
           let get_sut =
             eapply
-              (qualify [ "SUT" ] "get_name")
-              [ evar suts; eapply (evar "+") [ eint n; evar "shift" ] ]
+              (qualify [ "Model" ] "get_name")
+              [ evar models; eapply (evar "+") [ eint n; evar "shift" ] ]
           in
           ok (label arg_label "%s" :: fmt, get_sut :: pps)
       | Ptyp_arrow (arg_label, _, r), (ty, id) :: xs ->
@@ -1622,7 +1622,7 @@ let pp_ortac_cmd_case config suts last value =
       let expr =
         let ok_name =
           if Cfg.(config.domain) then estring "Ok _"
-          else [%expr "Ok " ^ SUT.get_name [%e evar suts] 0]
+          else [%expr "Ok " ^ Model.get_name [%e evar models] 0]
         in
         pexp_ifthenelse (evar last) (estring "r")
           (Some
@@ -1632,7 +1632,8 @@ let pp_ortac_cmd_case config suts last value =
                 (* If concurrent, we wouldn't have pushed a new SUT *)
               else if
                 Cfg.((not config.domain) && does_return_sut config value.ty)
-              then eapply (qualify [ "SUT" ] "get_name") [ evar suts; eint 0 ]
+              then
+                eapply (qualify [ "Model" ] "get_name") [ evar models; eint 0 ]
               else estring "_"))
       in
       value_binding ~pat ~expr
@@ -1657,12 +1658,12 @@ let pp_ortac_cmd_case config suts last value =
 
 let ortac_cmd_show config ir =
   let cmd_name = gen_symbol ~prefix:"cmd" () in
-  let suts_name = gen_symbol ~prefix:"state" () in
+  let states_name = gen_symbol ~prefix:"models" () in
   let res_name = gen_symbol ~prefix:"res" () in
   let last_name = gen_symbol ~prefix:"last" () in
   let open Reserr in
   let* cases =
-    promote_map (pp_ortac_cmd_case config suts_name last_name) ir.values
+    promote_map (pp_ortac_cmd_case config states_name last_name) ir.values
   in
   let default_case =
     case ~lhs:ppat_any ~guard:None ~rhs:(eapply (evar "assert") [ ebool false ])
@@ -1681,7 +1682,7 @@ let ortac_cmd_show config ir =
     efun
       [
         (Nolabel, pvar cmd_name);
-        (Nolabel, pvar suts_name);
+        (Nolabel, pvar states_name);
         (Nolabel, pvar last_name);
         (Nolabel, pvar res_name);
       ]
