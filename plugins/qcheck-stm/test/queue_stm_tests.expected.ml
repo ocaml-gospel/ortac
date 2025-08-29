@@ -565,12 +565,12 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__141_ state__142_ last__144_ res__143_ =
+let ortac_show_cmd cmd__141_ models__142_ last__144_ res__143_ =
   let open Spec in
     let open STM in
       match (cmd__141_, res__143_) with
       | (Create (), Res ((SUT, _), t_1)) ->
-          let lhs = if last__144_ then "r" else SUT.get_name state__142_ 0
+          let lhs = if last__144_ then "r" else Model.get_name models__142_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a" lhs "create"
             (Util.Pp.pp_unit true) ()
@@ -578,68 +578,69 @@ let ortac_show_cmd cmd__141_ state__142_ last__144_ res__143_ =
           let lhs = if last__144_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a %s" lhs "add" (Util.Pp.pp_int true)
-            v (SUT.get_name state__142_ (0 + shift))
+            v (Model.get_name models__142_ (0 + shift))
       | (Push v_1, Res ((Unit, _), _)) ->
           let lhs = if last__144_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a %s" lhs "push"
-            (Util.Pp.pp_int true) v_1 (SUT.get_name state__142_ (0 + shift))
+            (Util.Pp.pp_int true) v_1
+            (Model.get_name models__142_ (0 + shift))
       | (Take, Res ((Result (Int, Exn), _), _)) ->
           let lhs = if last__144_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "take"
-            (SUT.get_name state__142_ (0 + shift))
+            (Model.get_name models__142_ (0 + shift))
       | (Take_opt, Res ((Option (Int), _), _)) ->
           let lhs = if last__144_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "take_opt"
-            (SUT.get_name state__142_ (0 + shift))
+            (Model.get_name models__142_ (0 + shift))
       | (Pop, Res ((Result (Int, Exn), _), _)) ->
           let lhs = if last__144_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "pop"
-            (SUT.get_name state__142_ (0 + shift))
+            (Model.get_name models__142_ (0 + shift))
       | (Peek, Res ((Result (Int, Exn), _), _)) ->
           let lhs = if last__144_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "peek"
-            (SUT.get_name state__142_ (0 + shift))
+            (Model.get_name models__142_ (0 + shift))
       | (Top, Res ((Result (Int, Exn), _), _)) ->
           let lhs = if last__144_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "top"
-            (SUT.get_name state__142_ (0 + shift))
+            (Model.get_name models__142_ (0 + shift))
       | (Peek_opt, Res ((Option (Int), _), _)) ->
           let lhs = if last__144_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "peek_opt"
-            (SUT.get_name state__142_ (0 + shift))
+            (Model.get_name models__142_ (0 + shift))
       | (Clear, Res ((Unit, _), _)) ->
           let lhs = if last__144_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "clear"
-            (SUT.get_name state__142_ (0 + shift))
+            (Model.get_name models__142_ (0 + shift))
       | (Copy, Res ((SUT, _), r)) ->
-          let lhs = if last__144_ then "r" else SUT.get_name state__142_ 0
+          let lhs = if last__144_ then "r" else Model.get_name models__142_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %s" lhs "copy"
-            (SUT.get_name state__142_ (0 + shift))
+            (Model.get_name models__142_ (0 + shift))
       | (Is_empty, Res ((Bool, _), _)) ->
           let lhs = if last__144_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "is_empty"
-            (SUT.get_name state__142_ (0 + shift))
+            (Model.get_name models__142_ (0 + shift))
       | (Length, Res ((Int, _), _)) ->
           let lhs = if last__144_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "length"
-            (SUT.get_name state__142_ (0 + shift))
+            (Model.get_name models__142_ (0 + shift))
       | (Transfer, Res ((Unit, _), _)) ->
           let lhs = if last__144_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %s" lhs "transfer"
-            (SUT.get_name state__142_ (0 + shift))
-            (SUT.get_name state__142_ (1 + shift))
+            (Model.get_name models__142_ (0 + shift))
+            (Model.get_name models__142_ (1 + shift))
       | _ -> assert false
 let ortac_postcond cmd__038_ state__039_ res__040_ =
   let open Spec in

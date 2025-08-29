@@ -394,12 +394,12 @@ let check_init_state () =
                       }
                   })))
   then QCheck.Test.fail_report "INIT_SUT violates type invariants for SUT"
-let ortac_show_cmd cmd__060_ state__061_ last__063_ res__062_ =
+let ortac_show_cmd cmd__060_ models__061_ last__063_ res__062_ =
   let open Spec in
     let open STM in
       match (cmd__060_, res__062_) with
       | (Create a_1, Res ((SUT, _), t_1)) ->
-          let lhs = if last__063_ then "r" else SUT.get_name state__061_ 0
+          let lhs = if last__063_ then "r" else Model.get_name models__061_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a" lhs "create" (Util.Pp.pp_int true)
             a_1
@@ -407,29 +407,30 @@ let ortac_show_cmd cmd__060_ state__061_ last__063_ res__062_ =
           let lhs = if last__063_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a %s" lhs "push"
-            (Util.Pp.pp_int true) a_2 (SUT.get_name state__061_ (0 + shift))
+            (Util.Pp.pp_int true) a_2
+            (Model.get_name models__061_ (0 + shift))
       | (Transfer, Res ((Unit, _), _)) ->
           let lhs = if last__063_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %s" lhs "transfer"
-            (SUT.get_name state__061_ (0 + shift))
-            (SUT.get_name state__061_ (1 + shift))
+            (Model.get_name models__061_ (0 + shift))
+            (Model.get_name models__061_ (1 + shift))
       | (Copy, Res ((SUT, _), r)) ->
-          let lhs = if last__063_ then "r" else SUT.get_name state__061_ 0
+          let lhs = if last__063_ then "r" else Model.get_name models__061_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %s" lhs "copy"
-            (SUT.get_name state__061_ (0 + shift))
+            (Model.get_name models__061_ (0 + shift))
       | (Sub (i, n), Res ((Result (SUT, Exn), _), r_1)) ->
           let lhs =
             if last__063_
             then "r"
             else
               (match r_1 with
-               | Ok _ -> "Ok " ^ (SUT.get_name state__061_ 0)
+               | Ok _ -> "Ok " ^ (Model.get_name models__061_ 0)
                | Error _ -> "_")
           and shift = match r_1 with | Ok _ -> 1 | Error _ -> 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s %a %a)" lhs
-            "sub" (SUT.get_name state__061_ (0 + shift))
+            "sub" (Model.get_name models__061_ (0 + shift))
             (Util.Pp.pp_int true) i (Util.Pp.pp_int true) n
       | _ -> assert false
 let ortac_postcond cmd__024_ state__025_ res__026_ =
