@@ -26,6 +26,10 @@ module Model : sig
 
     val get : t -> int -> elt
     (** [get t n] returns the [n]th element of the model [t] *)
+
+    val get_name : t -> int -> string
+    (** [get_name t n] returns the name for the [n]th element of the stack [t]
+        of SUTs *)
   end
   with type elt := M.elt
 end

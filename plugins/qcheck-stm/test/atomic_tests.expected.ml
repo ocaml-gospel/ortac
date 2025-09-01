@@ -385,7 +385,7 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__067_ state__068_ last__070_ res__069_ =
+let ortac_show_cmd cmd__067_ models__068_ last__070_ res__069_ =
   let open Spec in
     let open STM in
       match (cmd__067_, res__069_) with
@@ -397,38 +397,40 @@ let ortac_show_cmd cmd__067_ state__068_ last__070_ res__069_ =
           let lhs = if last__070_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "get"
-            (SUT.get_name state__068_ (0 + shift))
+            (Model.get_name models__068_ (0 + shift))
       | (Set v_1, Res ((Unit, _), _)) ->
           let lhs = if last__070_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "set"
-            (SUT.get_name state__068_ (0 + shift)) (Util.Pp.pp_int true) v_1
+            (Model.get_name models__068_ (0 + shift)) (Util.Pp.pp_int true)
+            v_1
       | (Exchange v_2, Res ((Int, _), _)) ->
           let lhs = if last__070_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "exchange"
-            (SUT.get_name state__068_ (0 + shift)) (Util.Pp.pp_int true) v_2
+            (Model.get_name models__068_ (0 + shift)) (Util.Pp.pp_int true)
+            v_2
       | (Compare_and_set (seen, v_3), Res ((Bool, _), _)) ->
           let lhs = if last__070_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a %a" lhs "compare_and_set"
-            (SUT.get_name state__068_ (0 + shift)) (Util.Pp.pp_int true) seen
-            (Util.Pp.pp_int true) v_3
+            (Model.get_name models__068_ (0 + shift)) (Util.Pp.pp_int true)
+            seen (Util.Pp.pp_int true) v_3
       | (Fetch_and_add n, Res ((Int, _), _)) ->
           let lhs = if last__070_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "fetch_and_add"
-            (SUT.get_name state__068_ (0 + shift)) (Util.Pp.pp_int true) n
+            (Model.get_name models__068_ (0 + shift)) (Util.Pp.pp_int true) n
       | (Incr, Res ((Unit, _), _)) ->
           let lhs = if last__070_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "incr"
-            (SUT.get_name state__068_ (0 + shift))
+            (Model.get_name models__068_ (0 + shift))
       | (Decr, Res ((Unit, _), _)) ->
           let lhs = if last__070_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "decr"
-            (SUT.get_name state__068_ (0 + shift))
+            (Model.get_name models__068_ (0 + shift))
       | _ -> assert false
 let ortac_postcond cmd__020_ state__021_ res__022_ =
   let open Spec in
