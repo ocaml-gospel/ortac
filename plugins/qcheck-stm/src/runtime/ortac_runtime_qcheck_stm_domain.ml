@@ -9,7 +9,53 @@ module SUT = Stores.SUT
 module MakeExt (Spec : SpecExt) = struct
   open Util
   open QCheck
+  open Report
   open Internal.Make (Spec) [@alert "-internal"]
+
+  type pos = Prefix | Tail1 | Tail2
+
+  type traces = {
+    where_it_failed : pos;
+    trace_prefix : trace list;
+    trace_tail_1 : trace list;
+    trace_tail_2 : trace list;
+  }
+
+  let empty where_it_failed =
+    { where_it_failed; trace_prefix = []; trace_tail_1 = []; trace_tail_2 = [] }
+
+  let start_traces pos call res =
+    let traces = empty pos in
+    match pos with
+    | Prefix -> { traces with trace_prefix = [ { call; res } ] }
+    | Tail1 -> { traces with trace_tail_1 = [ { call; res } ] }
+    | Tail2 -> { traces with trace_tail_2 = [ { call; res } ] }
+
+  let add_trace (pos, trace) traces =
+    match pos with
+    | Prefix -> { traces with trace_prefix = trace :: traces.trace_prefix }
+    | Tail1 -> { traces with trace_tail_1 = trace :: traces.trace_tail_1 }
+    | Tail2 -> { traces with trace_tail_2 = trace :: traces.trace_tail_2 }
+
+  let append_traces traces (pos, xs) =
+    match pos with
+    | Prefix -> { traces with trace_prefix = traces.trace_prefix @ xs }
+    | Tail1 -> { traces with trace_tail_1 = traces.trace_tail_1 @ xs }
+    | Tail2 -> { traces with trace_tail_2 = traces.trace_tail_2 @ xs }
+
+  let get_traces pos traces =
+    match pos with
+    | Prefix -> traces.trace_prefix
+    | Tail1 -> traces.trace_tail_1
+    | Tail2 -> traces.trace_tail_2
+
+  let ( <+> ) marked_trace =
+    Option.map (fun (traces, report) -> (add_trace marked_trace traces, report))
+
+  let ( <++> ) o marked_traces =
+    Option.map
+      (fun (traces, report) -> (append_traces traces marked_traces, report))
+      o
 
   let ( &&& ) o1 o2 = match o1 with None -> Lazy.force o2 | _ -> o1
   let ( ||| ) o1 o2 = match o1 with None -> None | Some _ -> Lazy.force o2
