@@ -60,26 +60,64 @@ module MakeExt (Spec : SpecExt) = struct
   let ( &&& ) o1 o2 = match o1 with None -> Lazy.force o2 | _ -> o1
   let ( ||| ) o1 o2 = match o1 with None -> None | Some _ -> Lazy.force o2
 
-  let check_obs postcond =
+  let check_obs ortac_show_cmd postcond =
+    let postcond pos cmd state res =
+      let f report =
+        let call = ortac_show_cmd cmd (Spec.next_state cmd state) true res in
+        (start_traces pos call res, report)
+      in
+      Option.map f @@ postcond cmd state res
+    in
+    let mk_trace pos last cmd state res =
+      let call = ortac_show_cmd cmd state last res in
+      (pos, { call; res })
+    in
+    let trace_suffix pos state cs =
+      let rec aux state = function
+        | [] -> []
+        | (cmd, res) :: tail ->
+            let state' = Spec.next_state cmd state in
+            let call = ortac_show_cmd cmd state' (tail = []) res in
+            { call; res } :: aux state' tail
+      in
+      (pos, aux state cs)
+    in
     let rec aux pref cs1 cs2 s =
       match pref with
       | (c, res) :: pref' ->
-          postcond c s res &&& lazy (aux pref' cs1 cs2 (Spec.next_state c s))
+          postcond Prefix c s res
+          &&& lazy
+                (let s' = Spec.next_state c s in
+                 mk_trace Prefix (pref' = []) c s' res <+> aux pref' cs1 cs2 s')
       | [] -> (
           match (cs1, cs2) with
           | [], [] -> None
           | [], (c2, res2) :: cs2' ->
-              postcond c2 s res2
-              &&& lazy (aux pref cs1 cs2' (Spec.next_state c2 s))
+              postcond Tail2 c2 s res2
+              &&& lazy
+                    (let s' = Spec.next_state c2 s in
+                     mk_trace Tail2 (cs2' = []) c2 s' res2
+                     <+> aux pref cs1 cs2' s')
           | (c1, res1) :: cs1', [] ->
-              postcond c1 s res1
-              &&& lazy (aux pref cs1' cs2 (Spec.next_state c1 s))
+              postcond Tail1 c1 s res1
+              &&& lazy
+                    (let s' = Spec.next_state c1 s in
+                     mk_trace Tail1 (cs1' = []) c1 s' res1
+                     <+> aux pref cs1' cs2 s')
           | (c1, res1) :: cs1', (c2, res2) :: cs2' ->
-              postcond c1 s res1
-              &&& lazy (aux pref cs1' cs2 (Spec.next_state c1 s))
+              postcond Tail1 c1 s res1
+              <++> trace_suffix Tail2 s cs2
+              &&& lazy
+                    (let s' = Spec.next_state c1 s in
+                     mk_trace Tail1 (cs1' = []) c1 s' res1
+                     <+> aux pref cs1' cs2 s')
               ||| lazy
-                    (postcond c2 s res2
-                    &&& lazy (aux pref cs1 cs2' (Spec.next_state c2 s))))
+                    (postcond Tail2 c2 s res2
+                    <++> trace_suffix Tail1 s cs1
+                    &&& lazy
+                          (let s' = Spec.next_state c2 s in
+                           mk_trace Tail2 (cs2' = []) c2 s' res2
+                           <+> aux pref cs1 cs2' (Spec.next_state c2 s))))
     in
     aux
 
@@ -130,11 +168,12 @@ module MakeExt (Spec : SpecExt) = struct
     let obs2 = match obs2 with Ok v -> v | Error exn -> raise exn in
     (pref_obs, obs1, obs2)
 
-  let agree_prop _max_suts wrapped_init_state _ortac_show_cmd postcond
+  let agree_prop _max_suts wrapped_init_state ortac_show_cmd postcond
       (seq_pref, cmds1, cmds2) =
     wrapped_init_state ();
     let pref_obs, obs1, obs2 = run_par seq_pref cmds1 cmds2 in
-    (Option.is_none @@ check_obs postcond pref_obs obs1 obs2 Spec.init_state)
+    Option.is_none
+    @@ check_obs ortac_show_cmd postcond pref_obs obs1 obs2 Spec.init_state
     || Test.fail_reportf "  Results incompatible with linearized model\n\n%s"
        @@ print_triple_vertical ~fig_indent:5 ~res_width:35
             (fun (c, r) ->
