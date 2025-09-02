@@ -108,6 +108,27 @@ let gen_test_exe ppf config =
   in
   stanza_rule test ppf config
 
+let gen_test_run ppf config =
+  let run ppf =
+    run ppf
+      [
+        (fun ppf _ ->
+          pf ppf "%%{dep:%s.exe}"
+            (Filename.chop_extension @@ get_ocaml_output config));
+        (fun ppf _ -> pf ppf "--verbose");
+      ]
+  in
+  let action ppf =
+    match config.fork_timeout with
+    | None -> action ppf (stanza run)
+    | Some timeout ->
+        action_with_env "ORTAC_QCHECK_STM_TIMEOUT" (string_of_int timeout) ppf
+          (stanza run)
+  in
+  let stanzas = (runtest :: package config) @ [ action ] in
+  let rule ppf = rule ppf stanzas in
+  stanza_rule rule ppf config
+
 let gen_dune_rules ppf config =
-  let rules = [ msg; gen_ortac_rule; gen_test_exe ] in
+  let rules = [ msg; gen_ortac_rule; gen_test_exe; gen_test_run ] in
   concat ~sep:cut rules ppf config
