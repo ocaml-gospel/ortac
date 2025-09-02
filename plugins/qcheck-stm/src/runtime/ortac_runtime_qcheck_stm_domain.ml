@@ -9,31 +9,115 @@ module SUT = Stores.SUT
 module MakeExt (Spec : SpecExt) = struct
   open Util
   open QCheck
+  open Report
   open Internal.Make (Spec) [@alert "-internal"]
 
-  let check_obs postcond =
-    (* ignore the report for now *)
-    let postcond c s r = Option.is_none @@ postcond c s r in
+  type pos = Prefix | Tail1 | Tail2
+
+  type traces = {
+    where_it_failed : pos;
+    trace_prefix : trace list;
+    trace_tail_1 : trace list;
+    trace_tail_2 : trace list;
+  }
+
+  let empty where_it_failed =
+    { where_it_failed; trace_prefix = []; trace_tail_1 = []; trace_tail_2 = [] }
+
+  let start_traces pos call res =
+    let traces = empty pos in
+    match pos with
+    | Prefix -> { traces with trace_prefix = [ { call; res } ] }
+    | Tail1 -> { traces with trace_tail_1 = [ { call; res } ] }
+    | Tail2 -> { traces with trace_tail_2 = [ { call; res } ] }
+
+  let add_trace (pos, trace) traces =
+    match pos with
+    | Prefix -> { traces with trace_prefix = trace :: traces.trace_prefix }
+    | Tail1 -> { traces with trace_tail_1 = trace :: traces.trace_tail_1 }
+    | Tail2 -> { traces with trace_tail_2 = trace :: traces.trace_tail_2 }
+
+  let append_traces traces (pos, xs) =
+    match pos with
+    | Prefix -> { traces with trace_prefix = traces.trace_prefix @ xs }
+    | Tail1 -> { traces with trace_tail_1 = traces.trace_tail_1 @ xs }
+    | Tail2 -> { traces with trace_tail_2 = traces.trace_tail_2 @ xs }
+
+  let get_traces pos traces =
+    match pos with
+    | Prefix -> traces.trace_prefix
+    | Tail1 -> traces.trace_tail_1
+    | Tail2 -> traces.trace_tail_2
+
+  let ( <+> ) marked_trace =
+    Option.map (fun (traces, report) -> (add_trace marked_trace traces, report))
+
+  let ( <++> ) o marked_traces =
+    Option.map
+      (fun (traces, report) -> (append_traces traces marked_traces, report))
+      o
+
+  let ( &&& ) o1 o2 = match o1 with None -> Lazy.force o2 | _ -> o1
+  let ( ||| ) o1 o2 = match o1 with None -> None | Some _ -> Lazy.force o2
+
+  let check_obs ortac_show_cmd postcond =
+    let postcond pos cmd state res =
+      let f report =
+        let call = ortac_show_cmd cmd (Spec.next_state cmd state) true res in
+        (start_traces pos call res, report)
+      in
+      Option.map f @@ postcond cmd state res
+    in
+    let mk_trace pos last cmd state res =
+      let call = ortac_show_cmd cmd state last res in
+      (pos, { call; res })
+    in
+    let trace_suffix pos state cs =
+      let rec aux state = function
+        | [] -> []
+        | (cmd, res) :: tail ->
+            let state' = Spec.next_state cmd state in
+            let call = ortac_show_cmd cmd state' (tail = []) res in
+            { call; res } :: aux state' tail
+      in
+      (pos, aux state cs)
+    in
     let rec aux pref cs1 cs2 s =
       match pref with
       | (c, res) :: pref' ->
-          let b = postcond c s res in
-          b && aux pref' cs1 cs2 (Spec.next_state c s)
+          postcond Prefix c s res
+          &&& lazy
+                (let s' = Spec.next_state c s in
+                 mk_trace Prefix (pref' = []) c s' res <+> aux pref' cs1 cs2 s')
       | [] -> (
           match (cs1, cs2) with
-          | [], [] -> true
+          | [], [] -> None
           | [], (c2, res2) :: cs2' ->
-              let b = postcond c2 s res2 in
-              b && aux pref cs1 cs2' (Spec.next_state c2 s)
+              postcond Tail2 c2 s res2
+              &&& lazy
+                    (let s' = Spec.next_state c2 s in
+                     mk_trace Tail2 (cs2' = []) c2 s' res2
+                     <+> aux pref cs1 cs2' s')
           | (c1, res1) :: cs1', [] ->
-              let b = postcond c1 s res1 in
-              b && aux pref cs1' cs2 (Spec.next_state c1 s)
+              postcond Tail1 c1 s res1
+              &&& lazy
+                    (let s' = Spec.next_state c1 s in
+                     mk_trace Tail1 (cs1' = []) c1 s' res1
+                     <+> aux pref cs1' cs2 s')
           | (c1, res1) :: cs1', (c2, res2) :: cs2' ->
-              (let b1 = postcond c1 s res1 in
-               b1 && aux pref cs1' cs2 (Spec.next_state c1 s))
-              ||
-              let b2 = postcond c2 s res2 in
-              b2 && aux pref cs1 cs2' (Spec.next_state c2 s))
+              postcond Tail1 c1 s res1
+              <++> trace_suffix Tail2 s cs2
+              &&& lazy
+                    (let s' = Spec.next_state c1 s in
+                     mk_trace Tail1 (cs1' = []) c1 s' res1
+                     <+> aux pref cs1' cs2 s')
+              ||| lazy
+                    (postcond Tail2 c2 s res2
+                    <++> trace_suffix Tail1 s cs1
+                    &&& lazy
+                          (let s' = Spec.next_state c2 s in
+                           mk_trace Tail2 (cs2' = []) c2 s' res2
+                           <+> aux pref cs1 cs2' (Spec.next_state c2 s))))
     in
     aux
 
@@ -84,16 +168,69 @@ module MakeExt (Spec : SpecExt) = struct
     let obs2 = match obs2 with Ok v -> v | Error exn -> raise exn in
     (pref_obs, obs1, obs2)
 
-  let agree_prop _max_suts wrapped_init_state _ortac_show_cmd postcond
+  let pp_prefix exp_res ppf traces =
+    let assert_flag = traces.where_it_failed = Prefix in
+    pp_traces assert_flag exp_res ppf @@ get_traces Prefix traces
+
+  let pp_spawned pos ppf traces =
+    let open Fmt in
+    let rec aux ppf = function
+      | [ { call; res } ] ->
+          pf ppf "%s in@\n(* returned %s *)@\n r" call (show_res res)
+      | { call; res } :: xs ->
+          pf ppf "%s in@\n(* returned %s *)@\n" call (show_res res);
+          aux ppf xs
+      | _ -> ()
+    in
+    match get_traces pos traces with [] -> pf ppf " ()" | xs -> aux ppf xs
+
+  let pp_program max_suts ppf (traces, report) =
+    let open Fmt in
+    let inits =
+      List.init max_suts (fun i ->
+          Format.asprintf "let sut%d = %s" i report.init_sut)
+    in
+    let join1 =
+      match traces.where_it_failed with
+      | Tail1 -> "let r = Domain.join dom1"
+      | _ -> "let _ = Domain.join dom1"
+    and join2 =
+      match traces.where_it_failed with
+      | Tail2 -> "let r = Domain.join dom2"
+      | _ -> "let _ = Domain.join dom2"
+    in
+    pf ppf
+      "@[%s@\n\
+       open %s@\n\
+       let protect f = try Ok (f ()) with e -> Error e@\n\
+       %a@\n\
+       %a@\n\
+       let main1 () =@\n\
+      \  @[%a@]@\n\
+       let main2 () =@\n\
+      \  @[%a@]@\n\
+       @\n\
+       let dom1 = Domain.spawn main1@\n\
+       let dom2 = Domain.spawn main2@\n\
+       %s@\n\
+       %s@\n\
+       %a@\n"
+      "[@@@ocaml.warning \"-8\"]" report.mod_name
+      Format.(
+        pp_print_list ~pp_sep:(fun pf _ -> fprintf pf "@\n") pp_print_string)
+      inits (pp_prefix report.exp_res) traces (pp_spawned Tail1) traces
+      (pp_spawned Tail2) traces join1 join2 pp_expected_result report.exp_res
+
+  let agree_prop max_suts wrapped_init_state ortac_show_cmd postcond
       (seq_pref, cmds1, cmds2) =
     wrapped_init_state ();
     let pref_obs, obs1, obs2 = run_par seq_pref cmds1 cmds2 in
-    check_obs postcond pref_obs obs1 obs2 Spec.init_state
-    || Test.fail_reportf "  Results incompatible with linearized model\n\n%s"
-       @@ print_triple_vertical ~fig_indent:5 ~res_width:35
-            (fun (c, r) ->
-              Printf.sprintf "%s : %s" (Spec.show_cmd c) (show_res r))
-            (pref_obs, obs1, obs2)
+    match
+      check_obs ortac_show_cmd postcond pref_obs obs1 obs2 Spec.init_state
+    with
+    | None -> true
+    | Some (traces, report) ->
+        Report.message (pp_program max_suts) traces report
 
   let agree_test ~count ~name max_suts wrapped_init_state ortac_show_cmd
       postcond =
