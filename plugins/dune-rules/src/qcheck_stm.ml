@@ -12,6 +12,7 @@ type config = {
   domain : bool;
   fork_timeout : int option;
   gen_alias : string option;
+  run_alias : string option;
 }
 
 open Fmt
@@ -75,6 +76,10 @@ let gen_alias config =
   let alias = Option.value config.gen_alias ~default:"runtest" in
   fun ppf _ -> pf ppf "(alias %s)" alias
 
+let run_alias config =
+  let alias = Option.value config.run_alias ~default:"runtest" in
+  fun ppf _ -> pf ppf "(alias %s)" alias
+
 let gen_ortac_rule ppf config =
   let args =
     ortac
@@ -125,7 +130,7 @@ let gen_test_run ppf config =
         action_with_env "ORTAC_QCHECK_STM_TIMEOUT" (string_of_int timeout) ppf
           (stanza run)
   in
-  let stanzas = (runtest :: package config) @ [ action ] in
+  let stanzas = (run_alias config :: package config) @ [ action ] in
   let rule ppf = rule ppf stanzas in
   stanza_rule rule ppf config
 

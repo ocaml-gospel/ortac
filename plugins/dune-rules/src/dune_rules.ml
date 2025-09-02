@@ -43,6 +43,16 @@ let gen_alias =
         ~doc:"Alias to which the OCaml code generation will be attached."
         ~docv:"GEN_ALIAS")
 
+let run_alias =
+  Arg.(
+    value
+    & opt (some string) None
+    & info [ "run-alias" ]
+        ~doc:
+          "Alias to which the execution of the generated OCaml code will be \
+           attached."
+        ~docv:"RUN_ALIAS")
+
 module Plugin : sig
   val cmd : unit Cmd.t
 end = struct
@@ -103,7 +113,8 @@ end = struct
         & info [ "t"; "timeout" ] ~doc:"Timeout for each test." ~docv:"TIMEOUT")
 
     let main interface_file config_file ocaml_output library package_name
-        dune_output module_prefix submodule domain fork_timeout gen_alias =
+        dune_output module_prefix submodule domain fork_timeout gen_alias
+        run_alias =
       let open Qcheck_stm in
       let config =
         {
@@ -118,6 +129,7 @@ end = struct
           domain;
           fork_timeout;
           gen_alias;
+          run_alias;
         }
       in
       let ppf = Registration.get_out_formatter dune_output in
@@ -136,7 +148,8 @@ end = struct
         $ submodule
         $ domain
         $ fork_timeout
-        $ gen_alias)
+        $ gen_alias
+        $ run_alias)
 
     let cmd = Cmd.v info term
   end
