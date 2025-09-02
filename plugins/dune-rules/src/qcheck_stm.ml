@@ -40,6 +40,9 @@ let config_file ppf config = pf ppf "%s" (get_config_file config)
 let name ppf config =
   pf ppf "(name %s)" (Filename.chop_extension @@ get_ocaml_output config)
 
+let public_name ppf config =
+  pf ppf "(public_name %s)" (Filename.chop_extension @@ get_ocaml_output config)
+
 let libraries =
   let library ppf config =
     pf ppf "%s@;"
@@ -96,28 +99,15 @@ let gen_ortac_rule ppf config =
   let rule ppf = rule ppf stanzas in
   stanza_rule rule ppf config
 
-let gen_test_rule ppf config =
+let gen_test_exe ppf config =
   let modules ppf config =
     pf ppf "(modules %s)" (Filename.chop_extension @@ get_ocaml_output config)
   in
-  let run ppf =
-    run ppf
-      [
-        (fun ppf _ -> pf ppf "%s" "%{test}"); (fun ppf _ -> pf ppf "--verbose");
-      ]
-  in
-  let action ppf =
-    match config.fork_timeout with
-    | None -> action ppf (stanza run)
-    | Some timeout ->
-        action_with_env "ORTAC_QCHECK_STM_TIMEOUT" (string_of_int timeout) ppf
-          (stanza run)
-  in
   let test ppf =
-    test ppf @@ [ name; modules; libraries ] @ package config @ [ action ]
+    exe ppf @@ (name :: public_name :: package config) @ [ modules; libraries ]
   in
   stanza_rule test ppf config
 
 let gen_dune_rules ppf config =
-  let rules = [ msg; gen_ortac_rule; gen_test_rule ] in
+  let rules = [ msg; gen_ortac_rule; gen_test_exe ] in
   concat ~sep:cut rules ppf config

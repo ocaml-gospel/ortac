@@ -21,17 +21,22 @@
      %{dep:varray_circular_spec_config.ml}
      --quiet)))))
 
-(test
+(executable
  (name varray_circular_spec_tests)
+ (public_name varray_circular_spec_tests)
+ (package ortac-examples)
  (modules varray_circular_spec_tests)
  (libraries
   varray_circular_spec
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime-qcheck-stm.sequential)
+  ortac-runtime-qcheck-stm.sequential))
+
+(rule
+ (alias runtest)
  (package ortac-examples)
  (action
   (run
-   %{test}
+   %{dep:varray_circular_spec_tests.exe}
    --verbose)))
