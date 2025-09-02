@@ -35,6 +35,14 @@ let with_stdout_to =
           "Filename for the generated dune rules. For use on the command line."
         ~docv:"DUNE_OUTPUT")
 
+let gen_alias =
+  Arg.(
+    value
+    & opt (some string) None
+    & info [ "gen-alias" ]
+        ~doc:"Alias to which the OCaml code generation will be attached."
+        ~docv:"GEN_ALIAS")
+
 module Plugin : sig
   val cmd : unit Cmd.t
 end = struct
@@ -95,7 +103,7 @@ end = struct
         & info [ "t"; "timeout" ] ~doc:"Timeout for each test." ~docv:"TIMEOUT")
 
     let main interface_file config_file ocaml_output library package_name
-        dune_output module_prefix submodule domain fork_timeout =
+        dune_output module_prefix submodule domain fork_timeout gen_alias =
       let open Qcheck_stm in
       let config =
         {
@@ -109,6 +117,7 @@ end = struct
           submodule;
           domain;
           fork_timeout;
+          gen_alias;
         }
       in
       let ppf = Registration.get_out_formatter dune_output in
@@ -126,7 +135,8 @@ end = struct
         $ module_prefix
         $ submodule
         $ domain
-        $ fork_timeout)
+        $ fork_timeout
+        $ gen_alias)
 
     let cmd = Cmd.v info term
   end

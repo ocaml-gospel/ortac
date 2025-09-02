@@ -11,6 +11,7 @@ type config = {
   submodule : string option;
   domain : bool;
   fork_timeout : int option;
+  gen_alias : string option;
 }
 
 open Fmt
@@ -67,6 +68,10 @@ let module_prefix =
 let submodule = optional_argument "--submodule" (fun cfg -> cfg.submodule)
 let domain cfg = if cfg.domain then [ (fun ppf _ -> pf ppf "--domain") ] else []
 
+let gen_alias config =
+  let alias = Option.value config.gen_alias ~default:"runtest" in
+  fun ppf _ -> pf ppf "(alias %s)" alias
+
 let gen_ortac_rule ppf config =
   let args =
     ortac
@@ -84,7 +89,7 @@ let gen_ortac_rule ppf config =
     action_with_env "ORTAC_ONLY_PLUGIN" "qcheck-stm" ppf (with_target run)
   in
   let stanzas =
-    [ runtest; promote ]
+    [ gen_alias config; promote ]
     @ package config
     @ [ deps_pkg; targets get_ocaml_output; action ]
   in
