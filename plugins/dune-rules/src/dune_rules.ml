@@ -1,5 +1,58 @@
 open Cmdliner
 
+let ocaml_output =
+  Arg.(
+    value
+    & opt (some string) None
+    & info [ "o"; "output" ]
+        ~doc:
+          "Filename for the generated tests. Useful for generating multiple \
+           test files per module under test."
+        ~absent:
+          "concatenation of INTERFACE without the file extension and \
+           \"_tests.ml\""
+        ~docv:"OCAML_OUTPUT")
+
+let interface_file =
+  Arg.(
+    required
+    & pos 0 (some string) None
+    & info [] ~doc:"Interface file containing Gospel specifications."
+        ~docv:"INTERFACE")
+
+let package_name =
+  Arg.(
+    value
+    & opt (some string) None
+    & info [ "p"; "package" ] ~doc:"Package name." ~docv:"PACKAGE")
+
+let with_stdout_to =
+  Arg.(
+    value
+    & opt (some string) None
+    & info [ "w"; "with-stdout-to" ]
+        ~doc:
+          "Filename for the generated dune rules. For use on the command line."
+        ~docv:"DUNE_OUTPUT")
+
+let gen_alias =
+  Arg.(
+    value
+    & opt (some string) None
+    & info [ "gen-alias" ]
+        ~doc:"Alias to which the OCaml code generation will be attached."
+        ~docv:"GEN_ALIAS")
+
+let run_alias =
+  Arg.(
+    value
+    & opt (some string) None
+    & info [ "run-alias" ]
+        ~doc:
+          "Alias to which the execution of the generated OCaml code will be \
+           attached."
+        ~docv:"RUN_ALIAS")
+
 module Plugin : sig
   val cmd : unit Cmd.t
 end = struct
@@ -9,13 +62,6 @@ end = struct
     let info =
       Cmd.info "qcheck-stm"
         ~doc:"Generate Dune rules for the qcheck-stm plugin."
-
-    let interface_file =
-      Arg.(
-        required
-        & pos 0 (some string) None
-        & info [] ~doc:"Interface file containing Gospel specifications."
-            ~docv:"INTERFACE")
 
     let config_file =
       Arg.(
@@ -30,19 +76,6 @@ end = struct
                \"_config.ml\""
             ~docv:"CONFIG")
 
-    let ocaml_output =
-      Arg.(
-        value
-        & opt (some string) None
-        & info [ "o"; "output" ]
-            ~doc:
-              "Filename for the generated tests. Useful for generating \
-               multiple test files per module under test."
-            ~absent:
-              "concatenation of INTERFACE without the file extension and \
-               \"_tests.ml\""
-            ~docv:"OCAML_OUTPUT")
-
     let library =
       Arg.(
         value
@@ -50,22 +83,6 @@ end = struct
         & info [ "l"; "library" ]
             ~doc:"Name of the library the module under test belongs to."
             ~absent:"INTERFACE without the file extension" ~docv:"LIBRARY")
-
-    let package_name =
-      Arg.(
-        value
-        & opt (some string) None
-        & info [ "p"; "package" ] ~doc:"Package name." ~docv:"PACKAGE")
-
-    let with_stdout_to =
-      Arg.(
-        value
-        & opt (some string) None
-        & info [ "w"; "with-stdout-to" ]
-            ~doc:
-              "Filename for the generated dune rules. For use on the command \
-               line."
-            ~docv:"DUNE_OUTPUT")
 
     let module_prefix =
       Arg.(
@@ -96,7 +113,8 @@ end = struct
         & info [ "t"; "timeout" ] ~doc:"Timeout for each test." ~docv:"TIMEOUT")
 
     let main interface_file config_file ocaml_output library package_name
-        dune_output module_prefix submodule domain fork_timeout =
+        dune_output module_prefix submodule domain fork_timeout gen_alias
+        run_alias =
       let open Qcheck_stm in
       let config =
         {
@@ -110,6 +128,8 @@ end = struct
           submodule;
           domain;
           fork_timeout;
+          gen_alias;
+          run_alias;
         }
       in
       let ppf = Registration.get_out_formatter dune_output in
@@ -127,7 +147,9 @@ end = struct
         $ module_prefix
         $ submodule
         $ domain
-        $ fork_timeout)
+        $ fork_timeout
+        $ gen_alias
+        $ run_alias)
 
     let cmd = Cmd.v info term
   end
@@ -137,42 +159,6 @@ end = struct
   end = struct
     let info =
       Cmd.info "wrapper" ~doc:"Generate Dune rules for the wrapper plugin."
-
-    let interface_file =
-      Arg.(
-        required
-        & pos 0 (some string) None
-        & info [] ~doc:"Interface file containing Gospel specifications."
-            ~docv:"INTERFACE")
-
-    let ocaml_output =
-      Arg.(
-        value
-        & opt (some string) None
-        & info [ "o"; "output" ]
-            ~doc:
-              "Filename for the generated tests. Useful for generating \
-               multiple test files per module under test."
-            ~absent:
-              "concatenation of INTERFACE without the file extension and \
-               \"_tests.ml\""
-            ~docv:"OCAML_OUTPUT")
-
-    let package_name =
-      Arg.(
-        value
-        & opt (some string) None
-        & info [ "p"; "package" ] ~doc:"Package name." ~docv:"PACKAGE")
-
-    let with_stdout_to =
-      Arg.(
-        value
-        & opt (some string) None
-        & info [ "w"; "with-stdout-to" ]
-            ~doc:
-              "Filename for the generated dune rules. For use on the command \
-               line."
-            ~docv:"DUNE_OUTPUT")
 
     let main interface_file package_name ocaml_output dune_output =
       let open Wrapper in
@@ -198,5 +184,4 @@ end = struct
     Cmd.group info [ Qcheck_stm.cmd; Wrapper.cmd ]
 end
 
-(* let () = Stdlib.exit (Cmd.eval Plugin.cmd) *)
 let () = Registration.register Plugin.cmd

@@ -10,6 +10,7 @@
 
 (rule
  (alias runtest)
+ (package ortac-examples)
  (mode promote)
  (action
   (with-stdout-to
@@ -23,6 +24,7 @@
 
 (rule
  (enabled_if %{bin-available:awk})
+ (package ortac-examples)
  (deps
   (:sig varray_sig.ml))
  (targets varray_spec.mli)
@@ -64,6 +66,7 @@
 
 (rule
  (alias runtest)
+ (package ortac-examples)
  (mode promote)
  (action
   (with-stdout-to

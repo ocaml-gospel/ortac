@@ -11,6 +11,8 @@ type config = {
   submodule : string option;
   domain : bool;
   fork_timeout : int option;
+  gen_alias : string option;
+  run_alias : string option;
 }
 
 open Fmt
@@ -38,6 +40,9 @@ let config_file ppf config = pf ppf "%s" (get_config_file config)
 
 let name ppf config =
   pf ppf "(name %s)" (Filename.chop_extension @@ get_ocaml_output config)
+
+let public_name ppf config =
+  pf ppf "(public_name %s)" (Filename.chop_extension @@ get_ocaml_output config)
 
 let libraries =
   let library ppf config =
@@ -67,6 +72,14 @@ let module_prefix =
 let submodule = optional_argument "--submodule" (fun cfg -> cfg.submodule)
 let domain cfg = if cfg.domain then [ (fun ppf _ -> pf ppf "--domain") ] else []
 
+let gen_alias config =
+  let alias = Option.value config.gen_alias ~default:"runtest" in
+  fun ppf _ -> pf ppf "(alias %s)" alias
+
+let run_alias config =
+  let alias = Option.value config.run_alias ~default:"runtest" in
+  fun ppf _ -> pf ppf "(alias %s)" alias
+
 let gen_ortac_rule ppf config =
   let args =
     ortac
@@ -84,21 +97,30 @@ let gen_ortac_rule ppf config =
     action_with_env "ORTAC_ONLY_PLUGIN" "qcheck-stm" ppf (with_target run)
   in
   let stanzas =
-    [ runtest; promote ]
+    [ gen_alias config; promote ]
     @ package config
     @ [ deps_pkg; targets get_ocaml_output; action ]
   in
   let rule ppf = rule ppf stanzas in
   stanza_rule rule ppf config
 
-let gen_test_rule ppf config =
+let gen_test_exe ppf config =
   let modules ppf config =
     pf ppf "(modules %s)" (Filename.chop_extension @@ get_ocaml_output config)
   in
+  let test ppf =
+    exe ppf @@ (name :: public_name :: package config) @ [ modules; libraries ]
+  in
+  stanza_rule test ppf config
+
+let gen_test_run ppf config =
   let run ppf =
     run ppf
       [
-        (fun ppf _ -> pf ppf "%s" "%{test}"); (fun ppf _ -> pf ppf "--verbose");
+        (fun ppf _ ->
+          pf ppf "%%{dep:%s.exe}"
+            (Filename.chop_extension @@ get_ocaml_output config));
+        (fun ppf _ -> pf ppf "--verbose");
       ]
   in
   let action ppf =
@@ -108,11 +130,10 @@ let gen_test_rule ppf config =
         action_with_env "ORTAC_QCHECK_STM_TIMEOUT" (string_of_int timeout) ppf
           (stanza run)
   in
-  let test ppf =
-    test ppf @@ [ name; modules; libraries ] @ package config @ [ action ]
-  in
-  stanza_rule test ppf config
+  let stanzas = (run_alias config :: package config) @ [ action ] in
+  let rule ppf = rule ppf stanzas in
+  stanza_rule rule ppf config
 
 let gen_dune_rules ppf config =
-  let rules = [ msg; gen_ortac_rule; gen_test_rule ] in
+  let rules = [ msg; gen_ortac_rule; gen_test_exe; gen_test_run ] in
   concat ~sep:cut rules ppf config

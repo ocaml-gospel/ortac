@@ -21,17 +21,22 @@
      %{dep:lwt_dllist_spec_config.ml}
      --quiet)))))
 
-(test
+(executable
  (name lwt_dllist_spec_tests)
+ (public_name lwt_dllist_spec_tests)
+ (package ortac-examples)
  (modules lwt_dllist_spec_tests)
  (libraries
   lwt_dllist_spec
   qcheck-stm.stm
   qcheck-stm.sequential
   qcheck-multicoretests-util
-  ortac-runtime-qcheck-stm.sequential)
+  ortac-runtime-qcheck-stm.sequential))
+
+(rule
+ (alias runtest)
  (package ortac-examples)
  (action
   (run
-   %{test}
+   %{dep:lwt_dllist_spec_tests.exe}
    --verbose)))

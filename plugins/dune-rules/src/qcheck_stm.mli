@@ -9,6 +9,8 @@ type config = {
   submodule : string option;
   domain : bool;
   fork_timeout : int option;
+  gen_alias : string option;
+  run_alias : string option;
 }
 
 val gen_dune_rules : config Fmt.t

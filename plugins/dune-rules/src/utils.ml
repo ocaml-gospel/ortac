@@ -31,6 +31,7 @@ let quiet ppf _ = pf ppf "--quiet"
 let rule ppf stanzas = pf ppf "rule@;%a" (concat stanzas)
 let library ppf stanzas = pf ppf "library@;%a" (concat stanzas)
 let test ppf stanzas = pf ppf "test@;%a" (concat stanzas)
+let exe ppf stanzas = pf ppf "executable@;%a" (concat stanzas)
 let run ppf args = pf ppf "run@;%a" (concat args)
 let copy ppf args = pf ppf "copy@;%a" (concat args)
 let with_deps ppf _ = pf ppf "%%{deps}"

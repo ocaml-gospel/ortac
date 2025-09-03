@@ -33,19 +33,24 @@ generated.
        --module-prefix=PrefixLib
        --submodule=M)))))
   
-  (test
+  (executable
    (name intf_spec_tests)
+   (public_name intf_spec_tests)
+   (package my_package)
    (modules intf_spec_tests)
    (libraries
     lib
     qcheck-stm.stm
     qcheck-stm.sequential
     qcheck-multicoretests-util
-    ortac-runtime-qcheck-stm.sequential)
+    ortac-runtime-qcheck-stm.sequential))
+  
+  (rule
+   (alias runtest)
    (package my_package)
    (action
     (run
-     %{test}
+     %{dep:intf_spec_tests.exe}
      --verbose)))
 
 When the optional output argument is set, rules will be written in the file.
@@ -75,19 +80,24 @@ When the optional output argument is set, rules will be written in the file.
        %{dep:intf_spec_config.ml}
        --quiet)))))
   
-  (test
+  (executable
    (name intf_spec_tests)
+   (public_name intf_spec_tests)
+   (package my_package)
    (modules intf_spec_tests)
    (libraries
     lib
     qcheck-stm.stm
     qcheck-stm.sequential
     qcheck-multicoretests-util
-    ortac-runtime-qcheck-stm.sequential)
+    ortac-runtime-qcheck-stm.sequential))
+  
+  (rule
+   (alias runtest)
    (package my_package)
    (action
     (run
-     %{test}
+     %{dep:intf_spec_tests.exe}
      --verbose)))
 
 Specifying a timeout causes ORTAC_QCHECK_STM_TIMEOUT to be set before running the test
@@ -116,22 +126,27 @@ Specifying a timeout causes ORTAC_QCHECK_STM_TIMEOUT to be set before running th
        %{dep:intf_spec_config.ml}
        --quiet)))))
   
-  (test
+  (executable
    (name intf_spec_tests)
+   (public_name intf_spec_tests)
+   (package my_package)
    (modules intf_spec_tests)
    (libraries
     lib
     qcheck-stm.stm
     qcheck-stm.sequential
     qcheck-multicoretests-util
-    ortac-runtime-qcheck-stm.sequential)
+    ortac-runtime-qcheck-stm.sequential))
+  
+  (rule
+   (alias runtest)
    (package my_package)
    (action
     (setenv
      ORTAC_QCHECK_STM_TIMEOUT
      10
      (run
-      %{test}
+      %{dep:intf_spec_tests.exe}
       --verbose))))
 
   $ ortac dune qcheck-stm intf_spec.mli --domain
@@ -158,18 +173,22 @@ Specifying a timeout causes ORTAC_QCHECK_STM_TIMEOUT to be set before running th
        --quiet
        --domain)))))
   
-  (test
+  (executable
    (name intf_spec_tests)
+   (public_name intf_spec_tests)
    (modules intf_spec_tests)
    (libraries
     intf_spec
     qcheck-stm.stm
     qcheck-stm.domain
     qcheck-multicoretests-util
-    ortac-runtime-qcheck-stm.domain)
+    ortac-runtime-qcheck-stm.domain))
+  
+  (rule
+   (alias runtest)
    (action
     (run
-     %{test}
+     %{dep:intf_spec_tests.exe}
      --verbose)))
 
 The following Dune files are tested to ensure it produces correct files.
@@ -242,18 +261,22 @@ The following Dune files are tested to ensure it produces correct files.
        --quiet
        --domain)))))
   
-  (test
+  (executable
    (name intf_spec_tests)
+   (public_name intf_spec_tests)
    (modules intf_spec_tests)
    (libraries
     intf_spec
     qcheck-stm.stm
     qcheck-stm.domain
     qcheck-multicoretests-util
-    ortac-runtime-qcheck-stm.domain)
+    ortac-runtime-qcheck-stm.domain))
+  
+  (rule
+   (alias runtest)
    (action
     (run
-     %{test}
+     %{dep:intf_spec_tests.exe}
      --verbose)))
 
 
