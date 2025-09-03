@@ -207,10 +207,11 @@
   "Nicolas Osborne <nicolas.osborne@tarides.com>"
   "Samuel Hym <samuel@tarides.com>")
  (depends
-  (ocaml (>= 4.12.0))
+  (ocaml (>= 5.0.0))
   (ortac-core (= :version))
   (ortac-qcheck-stm (= :version))
   (ortac-dune (= :version))
   (lwt-dllist (>= 1.1.0))
-  (varray (>= 0.2))))
+  (varray (>= 0.2))
+  (saturn (= 1.0.0))))
 
