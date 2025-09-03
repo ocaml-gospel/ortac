@@ -89,3 +89,29 @@
      --run-alias=launchtests)))))
 
 (include dune.varray_circular.inc)
+
+(library
+ (name treiber_stack_spec)
+ (modules treiber_stack_spec)
+ (libraries saturn)
+ (package ortac-examples))
+
+(rule
+ (alias runtest)
+ (mode promote)
+ (action
+  (with-stdout-to
+   dune.treiber_stack.inc
+   (setenv
+    ORTAC_ONLY_PLUGIN
+    dune-rules
+    (run
+     ortac
+     dune
+     qcheck-stm
+     treiber_stack_spec.mli
+     --package=ortac-examples
+     --domain
+     --run-alias=launchtests)))))
+
+(include dune.treiber_stack.inc)
