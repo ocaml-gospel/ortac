@@ -34,7 +34,7 @@
   ortac-runtime-qcheck-stm.sequential))
 
 (rule
- (alias runtest)
+ (alias launchtests)
  (package ortac-examples)
  (action
   (run
