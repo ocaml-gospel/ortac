@@ -1,5 +1,7 @@
 # Unreleased
 
+- [QCheck-STM+Dune] Add count optional argument
+  [\#357](https://github.com/ocaml-gospel/ortac/pull/354)
 - [Dune] Add optional arguments to control aliases
   [\#354](https://github.com/ocaml-gospel/ortac/pull/354)
 - [QCheck-STM] Add domain bug report generation
