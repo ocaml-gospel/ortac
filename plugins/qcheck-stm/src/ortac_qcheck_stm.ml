@@ -4,13 +4,13 @@ module Ir_of_gospel = Ir_of_gospel
 module Reserr = Reserr
 module Stm_of_ir = Stm_of_ir
 
-let main path config output module_prefix submodule domain quiet () =
+let main path config output module_prefix submodule domain quiet count () =
   let open Reserr in
   let fmt = Registration.get_out_formatter output in
   let pp = pp quiet Ppxlib_ast.Pprintast.structure fmt in
   pp
     (let* sigs, config =
-       Config.init path config module_prefix submodule domain
+       Config.init path config module_prefix submodule domain count
      in
      let* ir = Ir_of_gospel.run sigs config in
      Stm_of_ir.stm config ir)
@@ -56,6 +56,14 @@ end = struct
     Arg.(
       value & flag & info [ "d"; "domain" ] ~doc:"Generate STM_domain tests.")
 
+  let count =
+    let parse i = Ok (int_of_string i) and docv = "COUNT" in
+    Arg.(
+      value
+      & opt (conv ~docv (parse, Fmt.(int))) 1000
+      & info [ "count" ] ~absent:"1000"
+          ~doc:"Build STM tests with COUNT test iterations.")
+
   let term =
     let open Registration in
     Term.(
@@ -67,6 +75,7 @@ end = struct
       $ submodule
       $ domain
       $ quiet
+      $ count
       $ setup_log)
 
   let cmd = Cmd.v info term
