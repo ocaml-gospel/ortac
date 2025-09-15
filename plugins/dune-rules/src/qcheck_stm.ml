@@ -72,6 +72,7 @@ let module_prefix =
 
 let submodule = optional_argument "--submodule" (fun cfg -> cfg.submodule)
 let domain cfg = if cfg.domain then [ (fun ppf _ -> pf ppf "--domain") ] else []
+let count cfg ppf _ = pf ppf "--count=%i" cfg.count
 
 let gen_alias config =
   let alias = Option.value config.gen_alias ~default:"runtest" in
@@ -88,6 +89,7 @@ let gen_ortac_rule ppf config =
     :: dep interface
     :: dep config_file
     :: quiet
+    :: count config
     :: module_prefix config
     @ domain config
     @ submodule config

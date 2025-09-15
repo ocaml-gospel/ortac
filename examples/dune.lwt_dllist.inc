@@ -19,7 +19,8 @@
      qcheck-stm
      %{dep:lwt_dllist_spec.mli}
      %{dep:lwt_dllist_spec_config.ml}
-     --quiet)))))
+     --quiet
+     --count=1000)))))
 
 (executable
  (name lwt_dllist_spec_tests)
