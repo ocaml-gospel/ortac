@@ -33,6 +33,7 @@ type t = {
   module_prefix : string option;
   submodule : string option;
   domain : bool;
+  count : int;
 }
 
 let mk_config context module_prefix submodule domain cfg_uc =
@@ -64,6 +65,7 @@ let mk_config context module_prefix submodule domain cfg_uc =
       module_prefix;
       submodule;
       domain;
+      count = 1000;
     }
 
 let get_sut_type_name config =
