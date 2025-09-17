@@ -8,6 +8,7 @@ type config = {
   module_prefix : string option;
   submodule : string option;
   domain : bool;
+  count : int;
   fork_timeout : int option;
   gen_alias : string option;
   run_alias : string option;

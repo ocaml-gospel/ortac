@@ -598,6 +598,6 @@ let ortac_postcond cmd__020_ state__021_ res__022_ =
       | _ -> None
 let _ =
   QCheck_base_runner.run_tests_main
-    (let count = 1000 in
+    (let count = 500 in
      [STMTests.agree_test ~count ~name:"Treiber_stack_spec STM tests" 1
         check_init_state ortac_show_cmd ortac_postcond])

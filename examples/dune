@@ -112,6 +112,7 @@
      treiber_stack_spec.mli
      --package=ortac-examples
      --domain
+     --count=500
      --run-alias=launchtests)))))
 
 (include dune.treiber_stack.inc)

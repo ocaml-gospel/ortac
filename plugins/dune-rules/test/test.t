@@ -30,6 +30,7 @@ generated.
        %{dep:intf_spec.mli}
        %{dep:intf_spec_config.ml}
        --quiet
+       --count=1000
        --module-prefix=PrefixLib
        --submodule=M)))))
   
@@ -78,7 +79,8 @@ When the optional output argument is set, rules will be written in the file.
        qcheck-stm
        %{dep:intf_spec.mli}
        %{dep:intf_spec_config.ml}
-       --quiet)))))
+       --quiet
+       --count=1000)))))
   
   (executable
    (name intf_spec_tests)
@@ -124,7 +126,8 @@ Specifying a timeout causes ORTAC_QCHECK_STM_TIMEOUT to be set before running th
        qcheck-stm
        %{dep:intf_spec.mli}
        %{dep:intf_spec_config.ml}
-       --quiet)))))
+       --quiet
+       --count=1000)))))
   
   (executable
    (name intf_spec_tests)
@@ -171,6 +174,7 @@ Specifying a timeout causes ORTAC_QCHECK_STM_TIMEOUT to be set before running th
        %{dep:intf_spec.mli}
        %{dep:intf_spec_config.ml}
        --quiet
+       --count=1000
        --domain)))))
   
   (executable
@@ -259,6 +263,7 @@ The following Dune files are tested to ensure it produces correct files.
        %{dep:intf_spec.mli}
        %{dep:intf_spec_config.ml}
        --quiet
+       --count=1000
        --domain)))))
   
   (executable

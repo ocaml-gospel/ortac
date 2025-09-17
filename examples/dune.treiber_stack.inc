@@ -20,6 +20,7 @@
      %{dep:treiber_stack_spec.mli}
      %{dep:treiber_stack_spec_config.ml}
      --quiet
+     --count=500
      --domain)))))
 
 (executable

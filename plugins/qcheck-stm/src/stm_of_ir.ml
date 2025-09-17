@@ -1765,7 +1765,7 @@ let stm config ir =
     [%stri
       let _ =
         QCheck_base_runner.run_tests_main
-          (let count = 1000 in
+          (let count = [%e eint config.count] in
            [
              STMTests.agree_test ~count ~name:[%e descr] [%e eint max_suts]
                check_init_state ortac_show_cmd ortac_postcond;

@@ -106,6 +106,14 @@ end = struct
       Arg.(
         value & flag & info [ "d"; "domain" ] ~doc:"Generate STM_domain tests.")
 
+    let count =
+      let parse i = Ok (int_of_string i) and docv = "COUNT" in
+      Arg.(
+        value
+        & opt (conv ~docv (parse, Fmt.(int))) 1000
+        & info [ "count" ] ~absent:"1000"
+            ~doc:"Build STM tests with COUNT test iterations.")
+
     let fork_timeout =
       Arg.(
         value
@@ -113,7 +121,7 @@ end = struct
         & info [ "t"; "timeout" ] ~doc:"Timeout for each test." ~docv:"TIMEOUT")
 
     let main interface_file config_file ocaml_output library package_name
-        dune_output module_prefix submodule domain fork_timeout gen_alias
+        dune_output module_prefix submodule domain count fork_timeout gen_alias
         run_alias =
       let open Qcheck_stm in
       let config =
@@ -127,6 +135,7 @@ end = struct
           module_prefix;
           submodule;
           domain;
+          count;
           fork_timeout;
           gen_alias;
           run_alias;
@@ -147,6 +156,7 @@ end = struct
         $ module_prefix
         $ submodule
         $ domain
+        $ count
         $ fork_timeout
         $ gen_alias
         $ run_alias)

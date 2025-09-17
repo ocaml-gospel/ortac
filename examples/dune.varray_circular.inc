@@ -19,7 +19,8 @@
      qcheck-stm
      %{dep:varray_circular_spec.mli}
      %{dep:varray_circular_spec_config.ml}
-     --quiet)))))
+     --quiet
+     --count=1000)))))
 
 (executable
  (name varray_circular_spec_tests)
