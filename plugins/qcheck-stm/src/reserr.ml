@@ -245,6 +245,8 @@ let ( let* ) x f =
   | (Error _, _) as x -> x
 
 let ( >>= ) = ( let* )
+let ( =<< ) f x = x >>= f
+let ( >> ) x f = x >>= Fun.const f
 
 let ( and* ) (a, aw) (b, bw) =
   let r =
@@ -344,6 +346,14 @@ let rec fold_left f acc = function
       | Error errs, ws ->
           let* _ = warns ws and* _ = filter_errs errs in
           fold_left f acc xs)
+
+let rec fold_right f xs acc =
+  match xs with
+  | [] -> ok acc
+  | x :: xs -> (
+      match fold_right f xs acc with
+      | (Ok _, _) as acc -> f x =<< acc
+      | Error errs, ws -> warns ws >> filter_errs errs >> f x acc)
 
 let of_option ~default = Option.fold ~none:(error default) ~some:ok
 let to_option = function Ok x, _ -> Some x | _ -> None
