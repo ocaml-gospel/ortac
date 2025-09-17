@@ -1,7 +1,24 @@
 open Gospel
 open Ortac_core
 open Ppxlib
-module FrequenciesMap = Map.Make (String)
+
+module FrequenciesMap = struct
+  module M = Map.Make (String)
+
+  type t = (int * location) M.t
+
+  let empty = M.empty
+
+  let add label_loc v =
+    let k = label_loc.txt and loc = label_loc.loc in
+    M.add k (v, loc)
+
+  let pop k m =
+    let res = Option.value ~default:1 @@ Option.map fst @@ M.find_opt k m in
+    (res, M.remove k m)
+
+  let unused m = List.map (fun (k, (_freq, loc)) -> (k, loc)) @@ M.bindings m
+end
 
 type config_under_construction = {
   sut_core_type' : Ppxlib.core_type option;
@@ -10,7 +27,7 @@ type config_under_construction = {
   pp_mod' : Ppxlib.structure option;
   ty_mod' : Ppxlib.structure option;
   cleanup' : Ppxlib.structure_item option;
-  frequencies' : int FrequenciesMap.t;
+  frequencies' : FrequenciesMap.t;
 }
 
 let config_under_construction =
@@ -33,7 +50,7 @@ type t = {
   pp_mod : Ppxlib.structure option; (* Containing custom pretty printers *)
   ty_mod : Ppxlib.structure option; (* Containing custom STM.ty extensions *)
   cleanup : Ppxlib.structure_item option;
-  frequencies : int FrequenciesMap.t;
+  frequencies : FrequenciesMap.t;
   module_prefix : string option;
   submodule : string option;
   domain : bool;
@@ -202,7 +219,7 @@ let module_binding cfg_uc (mb : Ppxlib.module_binding) =
       let open Ast_pattern in
       let destruct =
         pstr_value drop
-          (value_binding ~pat:(ppat_var __) ~expr:(eint __) ^:: nil)
+          (value_binding ~pat:(ppat_var __') ~expr:(eint __) ^:: nil)
       in
       let aux acc stri =
         parse destruct Location.none ~on_error:(Fun.const acc) stri

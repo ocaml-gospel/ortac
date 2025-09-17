@@ -411,16 +411,15 @@ let arb_cmd config ir =
   let open Ppxlib in
   let aux value (freq_map, acc) =
     let* gen = arb_cmd_case config value in
-    let freq =
-      eint
-      @@ Option.value ~default:1
-      @@ Cfg.FrequenciesMap.find_opt (str_of_ident value.id) freq_map
+    let freq, freq_map =
+      Cfg.FrequenciesMap.pop (str_of_ident value.id) freq_map
     in
-    ok @@ (freq_map, pexp_tuple [ freq; gen ] :: acc)
+    ok @@ (freq_map, pexp_tuple [ eint freq; gen ] :: acc)
   in
-  let* cmds =
-    elist <$> (snd <$> fold_right aux ir.values (config.frequencies, []))
+  let* _unused_freq, generators =
+    fold_right aux ir.values (config.frequencies, [])
   in
+  let cmds = elist generators in
   let let_open str e =
     pexp_open Ast_helper.(Opn.mk (Mod.ident (lident str |> noloc))) e
   in
