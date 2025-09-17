@@ -84,7 +84,13 @@ val promote_opt : 'a reserr -> 'a option reserr
 (** [promote_opt r] is [promote] for a unique value *)
 
 val fold_left : ('a -> 'b -> 'a reserr) -> 'a -> 'b list -> 'a reserr
+(** [fold_left f acc xs] is the monadic fold left. It works in a similar way
+    than [promote] wrt errors and warnins. *)
+
 val fold_right : ('b -> 'a -> 'a reserr) -> 'b list -> 'a -> 'a reserr
+(** [fold_right f xs acc] is the monadic fold right. It works in a similar way
+    than [promote] wrt errors and warnins. *)
+
 val of_option : default:W.t -> 'a option -> 'a reserr
 val to_option : 'a reserr -> 'a option
 val fmap : ('a -> 'b) -> 'a reserr -> 'b reserr

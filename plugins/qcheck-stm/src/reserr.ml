@@ -343,9 +343,7 @@ let rec fold_left f acc = function
       | (Ok _, _) as acc ->
           let* acc = acc in
           fold_left f acc xs
-      | Error errs, ws ->
-          let* _ = warns ws and* _ = filter_errs errs in
-          fold_left f acc xs)
+      | Error errs, ws -> warns ws >> filter_errs errs >> fold_left f acc xs)
 
 let rec fold_right f xs acc =
   match xs with
