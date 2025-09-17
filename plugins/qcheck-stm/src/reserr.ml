@@ -313,6 +313,16 @@ let promote_map f =
   in
   aux
 
+let promote_map_ f =
+  let rec aux = function
+    | [] -> ok ()
+    | x :: xs -> (
+        match f x with
+        | Ok _, _ -> aux xs
+        | Error errs, ws -> warns ws >> filter_errs errs >> aux xs)
+  in
+  aux
+
 let promote_mapi f =
   let rec aux i = function
     | [] -> ok []
