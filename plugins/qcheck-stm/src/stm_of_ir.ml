@@ -409,16 +409,18 @@ let arb_cmd_case config value =
 let arb_cmd config ir =
   let open Reserr in
   let open Ppxlib in
-  let aux value =
+  let aux value (freq_map, acc) =
     let* gen = arb_cmd_case config value in
     let freq =
       eint
       @@ Option.value ~default:1
-      @@ Cfg.FrequenciesMap.find_opt (str_of_ident value.id) config.frequencies
+      @@ Cfg.FrequenciesMap.find_opt (str_of_ident value.id) freq_map
     in
-    ok @@ pexp_tuple [ freq; gen ]
+    ok @@ (freq_map, pexp_tuple [ freq; gen ] :: acc)
   in
-  let* cmds = elist <$> promote_map aux ir.values in
+  let* cmds =
+    elist <$> (snd <$> fold_right aux ir.values (config.frequencies, []))
+  in
   let let_open str e =
     pexp_open Ast_helper.(Opn.mk (Mod.ident (lident str |> noloc))) e
   in
