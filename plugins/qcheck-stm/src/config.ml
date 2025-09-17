@@ -1,6 +1,7 @@
 open Gospel
 open Ortac_core
 open Ppxlib
+module FrequenciesMap = Map.Make (String)
 
 type config_under_construction = {
   sut_core_type' : Ppxlib.core_type option;
@@ -9,6 +10,7 @@ type config_under_construction = {
   pp_mod' : Ppxlib.structure option;
   ty_mod' : Ppxlib.structure option;
   cleanup' : Ppxlib.structure_item option;
+  frequencies' : int FrequenciesMap.t;
 }
 
 let config_under_construction =
@@ -18,6 +20,7 @@ let config_under_construction =
     gen_mod' = None;
     pp_mod' = None;
     ty_mod' = None;
+    frequencies' = FrequenciesMap.empty;
     cleanup' = None;
   }
 
@@ -30,6 +33,7 @@ type t = {
   pp_mod : Ppxlib.structure option; (* Containing custom pretty printers *)
   ty_mod : Ppxlib.structure option; (* Containing custom STM.ty extensions *)
   cleanup : Ppxlib.structure_item option;
+  frequencies : int FrequenciesMap.t;
   module_prefix : string option;
   submodule : string option;
   domain : bool;
@@ -51,6 +55,7 @@ let mk_config context module_prefix submodule domain count cfg_uc =
   and gen_mod = cfg_uc.gen_mod'
   and pp_mod = cfg_uc.pp_mod'
   and ty_mod = cfg_uc.ty_mod'
+  and frequencies = cfg_uc.frequencies'
   and cleanup = cfg_uc.cleanup' in
   ok
     {
@@ -61,6 +66,7 @@ let mk_config context module_prefix submodule domain count cfg_uc =
       gen_mod;
       pp_mod;
       ty_mod;
+      frequencies;
       cleanup;
       module_prefix;
       submodule;
