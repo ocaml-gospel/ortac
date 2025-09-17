@@ -416,8 +416,12 @@ let arb_cmd config ir =
     in
     ok @@ (freq_map, pexp_tuple [ eint freq; gen ] :: acc)
   in
-  let* _unused_freq, generators =
+  let* unused_freq, generators =
     fold_right aux ir.values (config.frequencies, [])
+  in
+  let* _ =
+    promote_map (fun (name, loc) -> error (Unused_frequency name, loc))
+    @@ Cfg.FrequenciesMap.unused unused_freq
   in
   let cmds = elist generators in
   let let_open str e =
