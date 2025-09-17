@@ -41,6 +41,7 @@ type W.kind +=
   | Type_not_supported of string
   | Type_not_supported_for_sut_parameter of string
   | Type_parameter_not_instantiated of string
+  | Unused_frequency of string
 
 type 'a reserr
 
