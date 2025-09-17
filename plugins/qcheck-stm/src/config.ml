@@ -197,6 +197,22 @@ let module_binding cfg_uc (mb : Ppxlib.module_binding) =
   | Some name when String.equal "Ty" name ->
       let* content = get_structure name mb in
       ok { cfg_uc with ty_mod' = Some content }
+  | Some name when String.equal "Frequencies" name ->
+      let* content = get_structure name mb in
+      let open Ast_pattern in
+      let destruct =
+        pstr_value drop
+          (value_binding ~pat:(ppat_var __) ~expr:(eint __) ^:: nil)
+      in
+      let aux acc stri =
+        parse destruct Location.none ~on_error:(Fun.const acc) stri
+          (fun name freq ->
+            {
+              acc with
+              frequencies' = FrequenciesMap.add name freq acc.frequencies';
+            })
+      in
+      ok @@ List.fold_left aux cfg_uc content
   | _ -> ok cfg_uc
 
 let scan_config cfg_uc config_mod =
