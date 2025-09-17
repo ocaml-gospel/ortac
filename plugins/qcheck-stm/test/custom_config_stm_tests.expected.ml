@@ -96,11 +96,11 @@ module Spec =
       let open QCheck in
         make ~print:show_cmd
           (let open Gen in
-             oneof
-               [(pure (fun __arg0 -> Proj __arg0)) <*> (elt char);
-               (pure (fun () -> Empty ())) <*> unit;
-               (pure (fun e -> Push e)) <*> (elt int);
-               pure Top])
+             frequency
+               [(1, ((pure (fun __arg0 -> Proj __arg0)) <*> (elt char)));
+               (1, ((pure (fun () -> Empty ())) <*> unit));
+               (1, ((pure (fun e -> Push e)) <*> (elt int)));
+               (1, (pure Top))])
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
       | Proj __arg0 -> state__003_

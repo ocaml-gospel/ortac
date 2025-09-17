@@ -103,15 +103,17 @@ module Spec =
       let open QCheck in
         make ~print:show_cmd
           (let open Gen in
-             oneof
-               [(pure (fun () -> Create ())) <*> unit;
-               pure Clear;
-               (pure (fun tup -> Add tup)) <*> (tup2 char int);
-               (pure (fun tup_1 -> Add' tup_1)) <*> (tup3 bool char int);
-               (pure (fun tup_2 -> Add'' tup_2)) <*>
-                 (tup2 bool (tup2 char int));
-               pure Size_tup;
-               pure Size_tup'])
+             frequency
+               [(1, ((pure (fun () -> Create ())) <*> unit));
+               (1, (pure Clear));
+               (1, ((pure (fun tup -> Add tup)) <*> (tup2 char int)));
+               (1,
+                 ((pure (fun tup_1 -> Add' tup_1)) <*> (tup3 bool char int)));
+               (1,
+                 ((pure (fun tup_2 -> Add'' tup_2)) <*>
+                    (tup2 bool (tup2 char int))));
+               (1, (pure Size_tup));
+               (1, (pure Size_tup'))])
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
       | Create () ->

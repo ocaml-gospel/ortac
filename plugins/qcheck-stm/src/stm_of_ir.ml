@@ -408,16 +408,27 @@ let arb_cmd_case config value =
    [arb_cmd_case] outputs *)
 let arb_cmd config ir =
   let open Reserr in
-  let* cmds = elist <$> promote_map (arb_cmd_case config) ir.values in
   let open Ppxlib in
+  let aux value =
+    let* gen = arb_cmd_case config value in
+    let freq =
+      eint
+      @@ Option.value ~default:1
+      @@ Cfg.FrequenciesMap.find_opt (str_of_ident value.id) config.frequencies
+    in
+    ok @@ pexp_tuple [ freq; gen ]
+  in
+  let* cmds = elist <$> promote_map aux ir.values in
   let let_open str e =
     pexp_open Ast_helper.(Opn.mk (Mod.ident (lident str |> noloc))) e
   in
-  let oneof = let_open "Gen" (pexp_apply (evar "oneof") [ (Nolabel, cmds) ]) in
+  let frequency =
+    let_open "Gen" (pexp_apply (evar "frequency") [ (Nolabel, cmds) ])
+  in
   let body =
     let_open "QCheck"
       (pexp_apply (evar "make")
-         [ (Labelled "print", evar "show_cmd"); (Nolabel, oneof) ])
+         [ (Labelled "print", evar "show_cmd"); (Nolabel, frequency) ])
   in
   let pat = pvar "arb_cmd" in
   let expr = efun [ (Nolabel, ppat_any (* for now we don't use it *)) ] body in

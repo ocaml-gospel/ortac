@@ -77,11 +77,13 @@ module Spec =
       let open QCheck in
         make ~print:show_cmd
           (let open Gen in
-             oneof
-               [((pure (fun i -> fun a_1 -> Make (i, a_1))) <*>
-                   small_signed_int)
-                  <*> small_signed_int;
-               ((pure (fun a_2 -> fun b -> Add (a_2, b))) <*> int) <*> int])
+             frequency
+               [(1,
+                  (((pure (fun i -> fun a_1 -> Make (i, a_1))) <*>
+                      small_signed_int)
+                     <*> small_signed_int));
+               (1,
+                 (((pure (fun a_2 -> fun b -> Add (a_2, b))) <*> int) <*> int))])
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
       | Make (i, a_1) ->
