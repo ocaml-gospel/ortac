@@ -135,26 +135,31 @@ module Spec =
       let open QCheck in
         make ~print:show_cmd
           (let open Gen in
-             oneof
-               [pure Length;
-               (pure (fun i -> Get i)) <*> int;
-               ((pure (fun i_1 -> fun a_1 -> Set (i_1, a_1))) <*> int) <*>
-                 char;
-               ((pure (fun i_2 -> fun a_2 -> Make (i_2, a_2))) <*>
-                  small_signed_int)
-                 <*> char;
-               pure Append;
-               ((pure (fun i_3 -> fun n -> Sub (i_3, n))) <*> int) <*> int;
-               pure Copy;
-               (((pure (fun pos -> fun len -> fun x -> Fill (pos, len, x)))
-                   <*> int)
-                  <*> int)
-                 <*> char;
-               pure To_list;
-               (pure (fun l -> Of_list l)) <*> (list char);
-               (pure (fun a_3 -> Mem a_3)) <*> char;
-               (pure (fun p -> For_all p)) <*>
-                 (fun1 Observable.char QCheck.bool).gen])
+             frequency
+               [(1, (pure Length));
+               (1, ((pure (fun i -> Get i)) <*> int));
+               (1,
+                 (((pure (fun i_1 -> fun a_1 -> Set (i_1, a_1))) <*> int) <*>
+                    char));
+               (0,
+                 (((pure (fun i_2 -> fun a_2 -> Make (i_2, a_2))) <*>
+                     small_signed_int)
+                    <*> char));
+               (1, (pure Append));
+               (1,
+                 (((pure (fun i_3 -> fun n -> Sub (i_3, n))) <*> int) <*> int));
+               (1, (pure Copy));
+               (1,
+                 ((((pure (fun pos -> fun len -> fun x -> Fill (pos, len, x)))
+                      <*> int)
+                     <*> int)
+                    <*> char));
+               (1, (pure To_list));
+               (1, ((pure (fun l -> Of_list l)) <*> (list char)));
+               (1, ((pure (fun a_3 -> Mem a_3)) <*> char));
+               (1,
+                 ((pure (fun p -> For_all p)) <*>
+                    (fun1 Observable.char QCheck.bool).gen))])
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
       | Length ->

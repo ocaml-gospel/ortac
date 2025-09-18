@@ -16,6 +16,7 @@ type W.kind +=
   | Function_arity of string
   | Functional_argument of string
   | Ghost_values of (string * [ `Arg | `Ret ])
+  | Ill_formed_frequency
   | Impossible_init_state_generation of init_state_error
   | Impossible_term_substitution of
       [ `Never | `New | `Old | `NotModel | `OutOfScope ]
@@ -41,6 +42,7 @@ type W.kind +=
   | Type_not_supported of string
   | Type_not_supported_for_sut_parameter of string
   | Type_parameter_not_instantiated of string
+  | Unused_frequency of string
 
 type 'a reserr
 
@@ -76,6 +78,9 @@ val promote : 'a reserr list -> 'a list reserr
 val promote_map : ('a -> 'b reserr) -> 'a list -> 'b list reserr
 (** [promote_map f xs] is [List.map f xs |> promote] with only one traversal *)
 
+val promote_map_ : ('a -> 'b reserr) -> 'a list -> unit reserr
+(** [promote_map_ f xs] is [promote_map f xs] ignoring its result. *)
+
 val promote_mapi : (int -> 'a -> 'b reserr) -> 'a list -> 'b list reserr
 (** [promote_mapi f xs] is [List.mapi f xs |> promote] with only one traversal
 *)
@@ -84,6 +89,13 @@ val promote_opt : 'a reserr -> 'a option reserr
 (** [promote_opt r] is [promote] for a unique value *)
 
 val fold_left : ('a -> 'b -> 'a reserr) -> 'a -> 'b list -> 'a reserr
+(** [fold_left f acc xs] is the monadic fold left. It works in a similar way
+    than [promote] wrt errors and warnins. *)
+
+val fold_right : ('b -> 'a -> 'a reserr) -> 'b list -> 'a -> 'a reserr
+(** [fold_right f xs acc] is the monadic fold right. It works in a similar way
+    than [promote] wrt errors and warnins. *)
+
 val of_option : default:W.t -> 'a option -> 'a reserr
 val to_option : 'a reserr -> 'a option
 val fmap : ('a -> 'b) -> 'a reserr -> 'b reserr

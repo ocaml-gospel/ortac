@@ -173,7 +173,8 @@ The other information we can put in the configuration file are:
 {ul {li custom [QCheck] generators in a [Gen] module}
     {li custom [STM] printers in a [Pp] module}
     {li custom [STM.ty] extensions and its functional constructors in a [Ty]
-    module}}
+    module}
+    {li custom frequencies to be used by [QCheck] in a [Frequencies] module}}
 
 These additional information are mostly necessary when the tested library
 exposes other types than the one used as SUT.
@@ -196,6 +197,10 @@ https://ocaml-multicore.github.io/multicoretests/dev/qcheck-multicoretests-util/
 The [Ty] module should contain an [STM.ty] extension and a corresponding
 [STM.ty_show] smart constructor for each of these types. An ['a STM.ty_show] is
 a pair of an ['a ty] value and an ['a -> string] function.
+
+The [Frequencies] module should contain value declarations of the form [let
+<value_name> = <int literal>] where [<value_name>] is the name of a function
+from the interface file we want to test.
 
 Apart from the OCaml file, the configuration file and the output file, the other
 cli arguments available are:

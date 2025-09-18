@@ -100,12 +100,14 @@ module Spec =
       let open QCheck in
         make ~print:show_cmd
           (let open Gen in
-             oneof
-               [((pure (fun len -> fun c -> Make (len, c))) <*>
-                   small_signed_int)
-                  <*> char;
-               (pure (fun f -> Map f)) <*>
-                 (fun1 Observable.char QCheck.char).gen])
+             frequency
+               [(1,
+                  (((pure (fun len -> fun c -> Make (len, c))) <*>
+                      small_signed_int)
+                     <*> char));
+               (1,
+                 ((pure (fun f -> Map f)) <*>
+                    (fun1 Observable.char QCheck.char).gen))])
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
       | Make (len, c) ->

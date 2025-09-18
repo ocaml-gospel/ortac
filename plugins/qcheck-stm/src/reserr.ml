@@ -16,6 +16,7 @@ type W.kind +=
   | Function_arity of string
   | Functional_argument of string
   | Ghost_values of (string * [ `Arg | `Ret ])
+  | Ill_formed_frequency
   | Impossible_init_state_generation of init_state_error
   | Impossible_term_substitution of
       [ `Never | `New | `Old | `NotModel | `OutOfScope ]
@@ -41,15 +42,17 @@ type W.kind +=
   | Type_not_supported of string
   | Type_not_supported_for_sut_parameter of string
   | Type_parameter_not_instantiated of string
+  | Unused_frequency of string
 
 let level kind =
   match kind with
   | Constant_value _ | Ensures_not_found_for_next_state _
   | Ensures_not_found_for_ret_sut _ | Function_arity _ | Functional_argument _
-  | Ghost_values _ | Impossible_term_substitution _ | Incompatible_type _
-  | Incomplete_ret_val_computation _ | No_spec _ | Returning_nested_sut _
-  | Sut_as_type_inst _ | Sut_in_tuple _ | Third_order_function_argument _
-  | Tuple_arity _ | Type_not_supported _ ->
+  | Ghost_values _ | Ill_formed_frequency | Impossible_term_substitution _
+  | Incompatible_type _ | Incomplete_ret_val_computation _ | No_spec _
+  | Returning_nested_sut _ | Sut_as_type_inst _ | Sut_in_tuple _
+  | Third_order_function_argument _ | Tuple_arity _ | Type_not_supported _
+  | Unused_frequency _ ->
       W.Warning
   | Impossible_init_state_generation _ | Incompatible_sut _
   | Incomplete_configuration_module _ | No_configuration_file _
@@ -92,6 +95,11 @@ let pp_kind ppf kind =
       pf ppf "Skipping %s:@ %a%a%a" id text "functions with a ghost " text
         (match k with `Arg -> "argument" | `Ret -> "returned value")
         text " are not supported"
+  | Ill_formed_frequency ->
+      pf ppf
+        "Ill formed frequency configuration is ignored.@\n\
+         Frequencies should be configured as follow:@\n\
+         @ @ let <function_name> = int litteral>"
   | Incompatible_type (v, t) ->
       pf ppf "Skipping %s:@ %a%s" v text
         "the type of its SUT-type argument is incompatible with the configured \
@@ -134,6 +142,8 @@ let pp_kind ppf kind =
      but in fact we support all the types that the Gospel type-checker supports,
      so that error message should never get reported to the end user *)
   | Type_not_supported ty -> pf ppf "Type %s not supported" ty
+  | Unused_frequency frequency ->
+      pf ppf "Unused frequency from configuration file: %s" frequency
   (* Errors *)
   | Impossible_init_state_generation (Mismatch_number_of_arguments fct) ->
       pf ppf "Error in INIT expression %s:@ %a" fct text
@@ -245,6 +255,8 @@ let ( let* ) x f =
   | (Error _, _) as x -> x
 
 let ( >>= ) = ( let* )
+let ( =<< ) f x = x >>= f
+let ( >> ) x f = x >>= Fun.const f
 
 let ( and* ) (a, aw) (b, bw) =
   let r =
@@ -311,6 +323,16 @@ let promote_map f =
   in
   aux
 
+let promote_map_ f =
+  let rec aux = function
+    | [] -> ok ()
+    | x :: xs -> (
+        match f x with
+        | Ok _, _ -> aux xs
+        | Error errs, ws -> warns ws >> filter_errs errs >> aux xs)
+  in
+  aux
+
 let promote_mapi f =
   let rec aux i = function
     | [] -> ok []
@@ -341,9 +363,15 @@ let rec fold_left f acc = function
       | (Ok _, _) as acc ->
           let* acc = acc in
           fold_left f acc xs
-      | Error errs, ws ->
-          let* _ = warns ws and* _ = filter_errs errs in
-          fold_left f acc xs)
+      | Error errs, ws -> warns ws >> filter_errs errs >> fold_left f acc xs)
+
+let rec fold_right f xs acc =
+  match xs with
+  | [] -> ok acc
+  | x :: xs -> (
+      match fold_right f xs acc with
+      | (Ok _, _) as acc -> f x =<< acc
+      | Error errs, ws -> warns ws >> filter_errs errs >> f x acc)
 
 let of_option ~default = Option.fold ~none:(error default) ~some:ok
 let to_option = function Ok x, _ -> Some x | _ -> None

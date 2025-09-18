@@ -112,15 +112,16 @@ module Spec =
       let open QCheck in
         make ~print:show_cmd
           (let open Gen in
-             oneof
-               [(pure (fun () -> Create ())) <*> unit;
-               (pure (fun xs -> Of_list xs)) <*> (list small_signed_int);
-               pure Is_empty;
-               pure Peek_opt;
-               pure Pop_opt;
-               pure Pop_all;
-               (pure (fun x -> Push x)) <*> int;
-               (pure (fun xs_1 -> Push_all xs_1)) <*> (list int)])
+             frequency
+               [(1, ((pure (fun () -> Create ())) <*> unit));
+               (1,
+                 ((pure (fun xs -> Of_list xs)) <*> (list small_signed_int)));
+               (1, (pure Is_empty));
+               (1, (pure Peek_opt));
+               (1, (pure Pop_opt));
+               (1, (pure Pop_all));
+               (1, ((pure (fun x -> Push x)) <*> int));
+               (1, ((pure (fun xs_1 -> Push_all xs_1)) <*> (list int)))])
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
       | Create () ->

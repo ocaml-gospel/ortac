@@ -1,3 +1,9 @@
+File "all_warnings_config.ml", line 9, characters 2-18:
+9 |   let lenght = bob
+      ^^^^^^^^^^^^^^^^
+Warning: Ill formed frequency configuration is ignored.
+         Frequencies should be configured as follow:
+           let <function_name> = int litteral>.
 File "all_warnings.mli", line 12, characters 0-52:
 12 | val constant : unit
 13 | (*@ constant
@@ -94,3 +100,11 @@ File "all_warnings.mli", line 59, characters 26-29:
                                ^^^
 Warning: Skipping clause: occurrences of the SUT in clauses are only
          supported to access its model fields.
+File "all_warnings_config.ml", line 8, characters 6-9:
+8 |   let bob = 42
+          ^^^
+Warning: Unused frequency from configuration file: bob.
+File "all_warnings_config.ml", line 10, characters 6-14:
+10 |   let constant = 42
+           ^^^^^^^^
+Warning: Unused frequency from configuration file: constant.

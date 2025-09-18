@@ -1,7 +1,9 @@
 # Unreleased
 
+- [QCheck-STM] Allow for user defined frequencies in generated `arb_cmd`
+  [\#358](https://github.com/ocaml-gospel/ortac/pull/358)
 - [QCheck-STM+Dune] Add count optional argument
-  [\#357](https://github.com/ocaml-gospel/ortac/pull/354)
+  [\#357](https://github.com/ocaml-gospel/ortac/pull/357)
 - [Dune] Add optional arguments to control aliases
   [\#354](https://github.com/ocaml-gospel/ortac/pull/354)
 - [QCheck-STM] Add domain bug report generation
