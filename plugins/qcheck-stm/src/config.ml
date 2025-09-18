@@ -220,16 +220,22 @@ let module_binding cfg_uc (mb : Ppxlib.module_binding) =
       let destruct =
         pstr_value drop
           (value_binding ~pat:(ppat_var __') ~expr:(eint __) ^:: nil)
+      and error stri =
+        let loc = stri.pstr_loc in
+        error (Ill_formed_frequency, loc)
       in
       let aux acc stri =
-        parse destruct Location.none ~on_error:(Fun.const acc) stri
+        parse destruct Location.none
+          ~on_error:(Fun.const @@ error stri)
+          stri
           (fun name freq ->
-            {
-              acc with
-              frequencies' = FrequenciesMap.add name freq acc.frequencies';
-            })
+            ok
+              {
+                acc with
+                frequencies' = FrequenciesMap.add name freq acc.frequencies';
+              })
       in
-      ok @@ List.fold_left aux cfg_uc content
+      fold_left aux cfg_uc content
   | _ -> ok cfg_uc
 
 let scan_config cfg_uc config_mod =
