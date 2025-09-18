@@ -141,7 +141,7 @@ module Spec =
                (1,
                  (((pure (fun i_1 -> fun a_1 -> Set (i_1, a_1))) <*> int) <*>
                     char));
-               (1,
+               (0,
                  (((pure (fun i_2 -> fun a_2 -> Make (i_2, a_2))) <*>
                      small_signed_int)
                     <*> char));
