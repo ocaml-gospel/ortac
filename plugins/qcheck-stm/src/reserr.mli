@@ -16,6 +16,7 @@ type W.kind +=
   | Function_arity of string
   | Functional_argument of string
   | Ghost_values of (string * [ `Arg | `Ret ])
+  | Ill_formed_frequency
   | Impossible_init_state_generation of init_state_error
   | Impossible_term_substitution of
       [ `Never | `New | `Old | `NotModel | `OutOfScope ]
