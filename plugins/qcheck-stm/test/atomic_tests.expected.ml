@@ -100,6 +100,9 @@ module Spec =
                (1, ((pure (fun n -> Fetch_and_add n)) <*> int));
                (1, (pure Incr));
                (1, (pure Decr))])
+    let arb_cmd_seq = arb_cmd
+    let arb_cmd_dom0 = arb_cmd
+    let arb_cmd_dom1 = arb_cmd
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
       | Make v ->

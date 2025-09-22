@@ -122,6 +122,9 @@ module Spec =
                (1, (pure Pop_all));
                (1, ((pure (fun x -> Push x)) <*> int));
                (1, ((pure (fun xs_1 -> Push_all xs_1)) <*> (list int)))])
+    let arb_cmd_seq = arb_cmd
+    let arb_cmd_dom0 = arb_cmd
+    let arb_cmd_dom1 = arb_cmd
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
       | Create () ->

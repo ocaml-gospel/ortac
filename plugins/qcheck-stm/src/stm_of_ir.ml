@@ -439,6 +439,18 @@ let arb_cmd config ir =
   let expr = efun [ (Nolabel, ppat_any (* for now we don't use it *)) ] body in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
+let arb_cmd_seq =
+  let pat = pvar "arb_cmd_seq" and expr = evar "arb_cmd" in
+  pstr_value Nonrecursive [ value_binding ~pat ~expr ]
+
+let arb_cmd_dom0 =
+  let pat = pvar "arb_cmd_dom0" and expr = evar "arb_cmd" in
+  pstr_value Nonrecursive [ value_binding ~pat ~expr ]
+
+let arb_cmd_dom1 =
+  let pat = pvar "arb_cmd_dom1" and expr = evar "arb_cmd" in
+  pstr_value Nonrecursive [ value_binding ~pat ~expr ]
+
 let run_case config sut_name value =
   let lhs = mk_cmd_pattern value in
   let open Reserr in
@@ -1743,6 +1755,9 @@ let stm config ir =
   in
   let sut_defs = sut_defs ir in
   let state_defs = state_defs ir in
+  let arb_cmds =
+    if config.domain then [ arb_cmd_seq; arb_cmd_dom0; arb_cmd_dom1 ] else []
+  in
   let spec_expr =
     pmod_structure
       ((open_mod (lident "STM") :: qcheck config)
@@ -1753,16 +1768,9 @@ let stm config ir =
       @ tuple_types ir
       @ sut_defs
       @ state_defs
-      @ [
-          cmd;
-          cmd_show;
-          cleanup;
-          arb_cmd;
-          next_state;
-          precond;
-          dummy_postcond;
-          run;
-        ])
+      @ [ cmd; cmd_show; cleanup; arb_cmd ]
+      @ arb_cmds
+      @ [ next_state; precond; dummy_postcond; run ])
   in
   let stm_spec =
     pstr_module (module_binding ~name:(noloc (Some "Spec")) ~expr:spec_expr)
