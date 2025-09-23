@@ -439,17 +439,25 @@ let arb_cmd config ir =
   let expr = efun [ (Nolabel, ppat_any (* for now we don't use it *)) ] body in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
-let arb_cmd_seq =
+let arb_cmd config =
+  match config.Cfg.arb_cmd with
+  | None -> arb_cmd config
+  | Some stri -> Fun.const @@ Reserr.ok stri
+
+let arb_cmd_seq config =
   let pat = pvar "arb_cmd_seq" and expr = evar "arb_cmd" in
-  pstr_value Nonrecursive [ value_binding ~pat ~expr ]
+  let default = pstr_value Nonrecursive [ value_binding ~pat ~expr ] in
+  Option.value ~default config.Cfg.arb_cmd_seq
 
-let arb_cmd_dom0 =
+let arb_cmd_dom0 config =
   let pat = pvar "arb_cmd_dom0" and expr = evar "arb_cmd" in
-  pstr_value Nonrecursive [ value_binding ~pat ~expr ]
+  let default = pstr_value Nonrecursive [ value_binding ~pat ~expr ] in
+  Option.value ~default config.Cfg.arb_cmd_dom0
 
-let arb_cmd_dom1 =
+let arb_cmd_dom1 config =
   let pat = pvar "arb_cmd_dom1" and expr = evar "arb_cmd" in
-  pstr_value Nonrecursive [ value_binding ~pat ~expr ]
+  let default = pstr_value Nonrecursive [ value_binding ~pat ~expr ] in
+  Option.value ~default config.Cfg.arb_cmd_dom1
 
 let run_case config sut_name value =
   let lhs = mk_cmd_pattern value in
@@ -1756,7 +1764,9 @@ let stm config ir =
   let sut_defs = sut_defs ir in
   let state_defs = state_defs ir in
   let arb_cmds =
-    if config.domain then [ arb_cmd_seq; arb_cmd_dom0; arb_cmd_dom1 ] else []
+    if config.domain then
+      List.map (fun f -> f config) [ arb_cmd_seq; arb_cmd_dom0; arb_cmd_dom1 ]
+    else []
   in
   let spec_expr =
     pmod_structure
