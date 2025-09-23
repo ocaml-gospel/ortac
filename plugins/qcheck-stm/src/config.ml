@@ -183,6 +183,26 @@ let value_bindings cfg_uc =
           Option.some @@ Ortac_core.Builder.pstr_value Nonrecursive [ vb ]
         in
         ok { cfg_uc with cleanup' }
+    | Ppat_var s when String.equal "arb_cmd" s.txt ->
+        let arb_cmd' =
+          Option.some @@ Ortac_core.Builder.pstr_value Nonrecursive [ vb ]
+        in
+        ok { cfg_uc with arb_cmd' }
+    | Ppat_var s when String.equal "arb_cmd" s.txt ->
+        let arb_cmd_seq' =
+          Option.some @@ Ortac_core.Builder.pstr_value Nonrecursive [ vb ]
+        in
+        ok { cfg_uc with arb_cmd_seq' }
+    | Ppat_var s when String.equal "arb_cmd_dom0" s.txt ->
+        let arb_cmd_dom0' =
+          Option.some @@ Ortac_core.Builder.pstr_value Nonrecursive [ vb ]
+        in
+        ok { cfg_uc with arb_cmd_dom0' }
+    | Ppat_var s when String.equal "arb_cmd_dom1" s.txt ->
+        let arb_cmd_dom1' =
+          Option.some @@ Ortac_core.Builder.pstr_value Nonrecursive [ vb ]
+        in
+        ok { cfg_uc with arb_cmd_dom1' }
     | _ -> ok cfg_uc
   in
   fold_left aux cfg_uc
