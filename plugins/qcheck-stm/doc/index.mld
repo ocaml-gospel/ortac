@@ -174,7 +174,9 @@ The other information we can put in the configuration file are:
     {li custom [STM] printers in a [Pp] module}
     {li custom [STM.ty] extensions and its functional constructors in a [Ty]
     module}
-    {li custom frequencies to be used by [QCheck] in a [Frequencies] module}}
+    {li custom frequencies to be used by [QCheck] in a [Frequencies] module}
+    {li custom [arb_cmd], [arb_cmd_seq], [arb_cmd_dom0] and [arb_cmd_dom1]
+    definition }}
 
 These additional information are mostly necessary when the tested library
 exposes other types than the one used as SUT.
@@ -201,6 +203,59 @@ a pair of an ['a ty] value and an ['a -> string] function.
 The [Frequencies] module should contain value declarations of the form [let
 <value_name> = <int literal>] where [<value_name>] is the name of a function
 from the interface file we want to test.
+
+Custom command generators are a bit trickier to write. A good starting point is
+to copy-paste the generated one into the configuration file and modify it.
+
+Firstly, when some command generators are provided in the configuration file,
+two rules of overwritting the generated generic ones are applied in the
+following order:
+
+{ol
+ {li a provided [arb_cmd] will overwrite all the generated ones}
+ {li when in domain mode, the provided [arb_cmd_seq], [arb_cmd_dom0] and
+ [arb_cmd_dom1] will respectively overwrite the generated generic ones}}
+
+The main reason to want to write a custom command generator is to take
+advantage of the fact that the command generator in QCheck-STM is parameterized
+by the model of the SUT, {e aka} the state. Now, in order to manipulate the
+state we need to know a bit of the internals of how it is represented by
+Ortac/QCheck-STM.
+
+In the generated code, a [state] is of type [Model.t]. A value of type
+[Model.t] is a container of [ModelElt.elt]. This last one represents the model
+of a SUT. To access one of these elements, we need to use [Model.get], which
+takes the state and the index of the model we want to access as arguments. This
+index is the index of the SUT argument we want to access in the function
+signature. Reading the signature from left to right, the index of the first SUT
+argument is [0], the index of the second SUT argument is [1] and so on.
+
+Once we have the [ModelElt.elt], we will want to inspect it.
+
+The type [ModelElt.elt] is defined in the generated code as a record which
+fields are the name of the Gospel models provided in the module's interface.
+
+For example, provided a type ['a t] with a Gospel model [contents: 'a
+sequence] and a type [sut] defined in the configuration file as [int t],
+Ortac/QCheck-STM will generate:
+
+{@ocaml skip[
+type elt = { contents : int Ortac_runtime.Gospelstdlib.sequence }
+]}
+
+Knowing that, we just have to open [ModelElt] to have access to the element's
+fields.
+
+To summarize, in order to access the [contents] of the first SUT argument, we
+have to write:
+
+{@ocaml skip[
+let contents = (Model.get state 0).ModelElt.contents
+]}
+
+We'll get an OCaml value worresponding to the Gospel logical model. To inspect
+it further, we need to use the functions provided in
+[Ortac_runtime.Gospelstdlib].
 
 Apart from the OCaml file, the configuration file and the output file, the other
 cli arguments available are:
