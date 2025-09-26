@@ -5,8 +5,24 @@ module Report = Report
 module Model = Stores.Model
 module SUT = Stores.SUT
 
+module type SpecExtOrtac = sig
+  include SpecExt
+
+  val arb_cmd_seq : state -> cmd QCheck.arbitrary
+  val arb_cmd_dom0 : state -> cmd QCheck.arbitrary
+  val arb_cmd_dom1 : state -> cmd QCheck.arbitrary
+end
+
+module type SpecOrtac = sig
+  include Spec
+
+  val arb_cmd_seq : state -> cmd QCheck.arbitrary
+  val arb_cmd_dom0 : state -> cmd QCheck.arbitrary
+  val arb_cmd_dom1 : state -> cmd QCheck.arbitrary
+end
+
 (* This is a modified version of STM_domain.MakeExt *)
-module MakeExt (Spec : SpecExt) = struct
+module MakeExt (Spec : SpecExtOrtac) = struct
   open Util
   open QCheck
   open Report
@@ -239,14 +255,15 @@ module MakeExt (Spec : SpecExt) = struct
     let test_prop =
       agree_prop max_suts wrapped_init_state ortac_show_cmd postcond
     in
-    Test.make ~retries ~max_gen ~count ~name (arb_cmds_triple seq_len par_len)
-      (fun triple ->
+    Test.make ~retries ~max_gen ~count ~name
+      (arb_triple seq_len par_len Spec.arb_cmd_seq Spec.arb_cmd_dom0
+         Spec.arb_cmd_dom1) (fun triple ->
         assume (all_interleavings_ok triple);
         repeat rep_count test_prop triple)
   (* 25 times each, then 25 * 10 times when shrinking *)
 end
 
-module Make (Spec : Spec) = MakeExt (struct
+module Make (Spec : SpecOrtac) = MakeExt (struct
   include SpecDefaults
   include Spec
 end)

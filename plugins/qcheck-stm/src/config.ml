@@ -23,6 +23,10 @@ end
 type config_under_construction = {
   sut_core_type' : Ppxlib.core_type option;
   init_sut' : Ppxlib.expression option;
+  arb_cmd' : Ppxlib.structure_item option;
+  arb_cmd_seq' : Ppxlib.structure_item option;
+  arb_cmd_dom0' : Ppxlib.structure_item option;
+  arb_cmd_dom1' : Ppxlib.structure_item option;
   gen_mod' : Ppxlib.structure option;
   pp_mod' : Ppxlib.structure option;
   ty_mod' : Ppxlib.structure option;
@@ -34,6 +38,10 @@ let config_under_construction =
   {
     sut_core_type' = None;
     init_sut' = None;
+    arb_cmd' = None;
+    arb_cmd_seq' = None;
+    arb_cmd_dom0' = None;
+    arb_cmd_dom1' = None;
     gen_mod' = None;
     pp_mod' = None;
     ty_mod' = None;
@@ -46,6 +54,10 @@ type t = {
   sut_core_type : Ppxlib.core_type;
   init_sut : Ppxlib.expression;
   init_sut_txt : string;
+  arb_cmd : Ppxlib.structure_item option;
+  arb_cmd_seq : Ppxlib.structure_item option;
+  arb_cmd_dom0 : Ppxlib.structure_item option;
+  arb_cmd_dom1 : Ppxlib.structure_item option;
   gen_mod : Ppxlib.structure option; (* Containing custom QCheck generators *)
   pp_mod : Ppxlib.structure option; (* Containing custom pretty printers *)
   ty_mod : Ppxlib.structure option; (* Containing custom STM.ty extensions *)
@@ -69,6 +81,10 @@ let mk_config context module_prefix submodule domain count cfg_uc =
       cfg_uc.init_sut'
   in
   let init_sut_txt = Fmt.str "%a" Pprintast.expression init_sut
+  and arb_cmd = cfg_uc.arb_cmd'
+  and arb_cmd_seq = cfg_uc.arb_cmd_seq'
+  and arb_cmd_dom0 = cfg_uc.arb_cmd_dom0'
+  and arb_cmd_dom1 = cfg_uc.arb_cmd_dom1'
   and gen_mod = cfg_uc.gen_mod'
   and pp_mod = cfg_uc.pp_mod'
   and ty_mod = cfg_uc.ty_mod'
@@ -80,6 +96,10 @@ let mk_config context module_prefix submodule domain count cfg_uc =
       sut_core_type;
       init_sut;
       init_sut_txt;
+      arb_cmd;
+      arb_cmd_seq;
+      arb_cmd_dom0;
+      arb_cmd_dom1;
       gen_mod;
       pp_mod;
       ty_mod;
@@ -163,6 +183,26 @@ let value_bindings cfg_uc =
           Option.some @@ Ortac_core.Builder.pstr_value Nonrecursive [ vb ]
         in
         ok { cfg_uc with cleanup' }
+    | Ppat_var s when String.equal "arb_cmd" s.txt ->
+        let arb_cmd' =
+          Option.some @@ Ortac_core.Builder.pstr_value Nonrecursive [ vb ]
+        in
+        ok { cfg_uc with arb_cmd' }
+    | Ppat_var s when String.equal "arb_cmd" s.txt ->
+        let arb_cmd_seq' =
+          Option.some @@ Ortac_core.Builder.pstr_value Nonrecursive [ vb ]
+        in
+        ok { cfg_uc with arb_cmd_seq' }
+    | Ppat_var s when String.equal "arb_cmd_dom0" s.txt ->
+        let arb_cmd_dom0' =
+          Option.some @@ Ortac_core.Builder.pstr_value Nonrecursive [ vb ]
+        in
+        ok { cfg_uc with arb_cmd_dom0' }
+    | Ppat_var s when String.equal "arb_cmd_dom1" s.txt ->
+        let arb_cmd_dom1' =
+          Option.some @@ Ortac_core.Builder.pstr_value Nonrecursive [ vb ]
+        in
+        ok { cfg_uc with arb_cmd_dom1' }
     | _ -> ok cfg_uc
   in
   fold_left aux cfg_uc
