@@ -148,19 +148,14 @@ module Spec =
                match keys with | [] -> char | xs -> oneof [char; oneofl xs] in
              frequency
                [(1,
-                  (((pure
-                       (fun random -> ((fun size -> Create (random, size))
-                          [@ppxlib.migration.stop_taking ])))
+                  (((pure (fun random -> fun size -> Create (random, size)))
                       <*> bool)
                      <*> small_signed_int));
                (1, (pure Clear));
                (1, (pure Reset));
                (1, (pure Copy));
                (1,
-                 (((pure
-                      (fun a_1 -> ((fun b_1 -> Add (a_1, b_1))
-                         [@ppxlib.migration.stop_taking ])))
-                     <*> char)
+                 (((pure (fun a_1 -> fun b_1 -> Add (a_1, b_1))) <*> char)
                     <*> int));
                (1, ((pure (fun a_2 -> Find a_2)) <*> char));
                (1, ((pure (fun a_3 -> Find_opt a_3)) <*> char));
@@ -168,10 +163,7 @@ module Spec =
                (1, ((pure (fun a_5 -> Mem a_5)) <*> char));
                (1, ((pure (fun a_6 -> Remove a_6)) <*> char));
                (1,
-                 (((pure
-                      (fun a_7 -> ((fun b_2 -> Replace (a_7, b_2))
-                         [@ppxlib.migration.stop_taking ])))
-                     <*> char)
+                 (((pure (fun a_7 -> fun b_2 -> Replace (a_7, b_2))) <*> char)
                     <*> int));
                (1,
                  ((pure (fun f -> Filter_map_inplace f)) <*>
