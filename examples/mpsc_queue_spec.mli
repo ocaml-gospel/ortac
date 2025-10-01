@@ -10,6 +10,19 @@
 
 (** {1 API} *)
 
+(*@ open Sequence *)
+
+(*@ predicate is_empty (q : 'a sequence) = q = empty *)
+
+(*@ function apply_if_not (cond : bool) (f : 'a -> 'a) (a : 'a) : 'a =
+      if cond then a else f a *)
+
+(*@ function tail_safe (q : 'a sequence) : 'a sequence =
+      if is_empty q then q else tl q *)
+
+(*@ function head_safe (q : 'a sequence) : 'a option =
+      if is_empty q then None else Some (hd q) *)
+
 type 'a t
 (** Represents a single-consumer queue of items of type ['a]. *)
 (*@ mutable model contents : 'a sequence
@@ -19,6 +32,9 @@ exception Closed
 
 val create : unit -> 'a t
 (** [create ()] returns a new empty single-consumer queue. *)
+(*@ q = create ()
+    ensures q.contents = empty
+    ensures q.closed = false *)
 
 val of_list : 'a list -> 'a t
 (** [of_list l] creates a new single-consumer queue from list [l].
@@ -38,6 +54,9 @@ val of_list : 'a list -> 'a t
       # pop_opt t
       - : int option = Some 3
     ]} *)
+(*@ q = of_list xs
+    ensures q.contents = List.to_seq xs
+    ensures q.closed = false *)
 
 (** {2 Producer-only functions} *)
 
@@ -47,6 +66,14 @@ val push : 'a t -> 'a -> unit
     operations.
 
     @raise Closed if [q] is closed. *)
+(*@ push q a
+    modifies q.contents
+    ensures q.contents =
+      apply_if_not
+        q.closed
+        (fun seq -> snoc seq a)
+        (old q.contents)
+    raises Closed -> q.closed *)
 
 val push_all : 'a t -> 'a list -> unit
 (** [push_all q vs] adds all the elements [vs] at the end of the queue [q]. This
@@ -74,6 +101,14 @@ val push_all : 'a t -> 'a list -> unit
       # pop_exn t
       Exception: Saturn__Mpsc_queue.Empty.
     ]} *)
+(*@ push_all q xs
+    modifies q.contents
+    ensures q.contents =
+      apply_if_not
+        q.closed
+        (fun seq -> seq ++ (List.to_seq xs))
+        (old q.contents)
+    raises Closed -> q.closed *)
 
 (** {2 Consumer-only functions} *)
 
@@ -85,6 +120,9 @@ val is_empty : 'a t -> bool
     only be used by the consumer.
 
     @raise Closed if [q] is closed and empty. *)
+(*@ b = is_empty q
+    ensures b = is_empty q.contents
+    raises Closed -> q.closed && is_empty q.contents *)
 
 val close : 'a t -> unit
 (** [close q] marks [q] as closed, preventing any further items from being
@@ -92,6 +130,10 @@ val close : 'a t -> unit
     consumer.
 
     @raise Closed if [q] has already been closed. *)
+(*@ close q
+    modifies q.closed
+    ensures q.closed = true
+    raises Closed -> old q.closed *)
 
 val pop_exn : 'a t -> 'a
 (** [pop_exn q] removes and returns the first element in queue [q]. This can
@@ -100,12 +142,31 @@ val pop_exn : 'a t -> 'a
     @raise Empty if [q] is empty.
 
     @raise Closed if [q] is closed and empty. *)
+(*@ a = pop_exn q
+    modifies q.contents
+    ensures q.contents =
+      apply_if_not
+        (q.closed && is_empty (old q.contents))
+        tail_safe
+        (old q.contents)
+    ensures a = hd (old q.contents)
+    raises Empty -> is_empty (old q.contents)
+    raises Closed -> q.closed && is_empty (old q.contents) *)
 
 val pop_opt : 'a t -> 'a option
 (** [pop_opt q] removes and returns the first element in queue [q] or returns
     [None] if the queue is empty. This can only be used by the consumer.
 
     @raise Closed if [q] is closed and empty. *)
+(*@ o = pop_opt q
+    modifies q.contents
+    ensures q.contents =
+      apply_if_not
+      (q.closed && is_empty (old q.contents))
+      tail_safe
+      (old q.contents)
+    ensures o = head_safe (old q.contents)
+    raises Closed -> q.closed && is_empty (old q.contents) *)
 
 val drop_exn : 'a t -> unit
 (** [drop_exn q] removes the first element in queue [q]. This can only be used
@@ -114,6 +175,15 @@ val drop_exn : 'a t -> unit
     @raise Empty if [q] is empty.
 
     @raise Closed if [q] is closed and empty. *)
+(*@ drop_exn q
+    modifies q.contents
+    ensures q.contents =
+      apply_if_not
+      (q.closed && is_empty (old q.contents))
+      tail_safe
+      (old q.contents)
+    raises Empty -> is_empty (old q.contents)
+    raises Closed -> q.closed && is_empty (old q.contents) *)
 
 val peek_exn : 'a t -> 'a
 (** [peek_exn q] returns the first element in queue [q]. This can only be used
@@ -122,12 +192,19 @@ val peek_exn : 'a t -> 'a
     @raise Empty if [q] is empty.
 
     @raise Closed if [q] is closed and empty. *)
+(*@ a = peek_exn q
+    ensures a = hd q.contents
+    raises Empty -> is_empty q.contents
+    raises Closed -> q.closed && is_empty (old q.contents) *)
 
 val peek_opt : 'a t -> 'a option
 (** [peek_opt q] returns the first element in queue [q] or returns [None] if the
     queue is empty. This can only be used by the consumer.
 
     @raise Closed if [q] is closed and empty. *)
+(*@ o = peek_opt q
+    ensures o = head_safe q.contents
+    raises Closed -> q.closed && is_empty q.contents *)
 
 val push_head : 'a t -> 'a -> unit
 (** [push_head q v] adds the element [v] at the head of the queue [q]. This can
@@ -135,6 +212,14 @@ val push_head : 'a t -> 'a -> unit
     might be skipped).
 
     @raise Closed if [q] is closed and empty. *)
+(*@ push_head q a
+    modifies q.contents
+    ensures q.contents =
+      apply_if_not
+      (q.closed && is_empty (old q.contents))
+      (cons a)
+      (old q.contents)
+    raises Closed -> q.closed && is_empty (old q.contents) *)
 
 (** {1 Examples} *)
 
