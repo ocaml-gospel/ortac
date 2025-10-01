@@ -122,3 +122,25 @@
  (modules mpsc_queue_spec)
  (libraries saturn)
  (package ortac-examples))
+
+(rule
+ (alias runtest)
+ (mode promote)
+ (action
+  (with-stdout-to
+   dune.mpsc_queue.inc
+   (setenv
+    ORTAC_ONLY_PLUGIN
+    dune-rules
+    (run
+     ortac
+     dune
+     qcheck-stm
+     mpsc_queue_spec.mli
+     --package=ortac-examples
+     --domain
+     --count=500
+     --run-alias=launchtests)))))
+
+(include dune.mpsc_queue.inc)
+
