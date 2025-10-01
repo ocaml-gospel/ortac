@@ -116,3 +116,9 @@
      --run-alias=launchtests)))))
 
 (include dune.treiber_stack.inc)
+
+(library
+ (name mpsc_queue_spec)
+ (modules mpsc_queue_spec)
+ (libraries saturn)
+ (package ortac-examples))
