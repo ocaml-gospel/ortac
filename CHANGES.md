@@ -1,5 +1,7 @@
 # Unreleased
 
+- [Examples] Add Saturn mpsc examples
+  [\#360](https://github.com/ocaml-gospel/ortac/pull/360)
 - [QCheck-STM] Allow for user defined `arb_cmd`s
   [\#359](https://github.com/ocaml-gospel/ortac/pull/359)
 - [QCheck-STM] Allow for user defined frequencies in generated `arb_cmd`
