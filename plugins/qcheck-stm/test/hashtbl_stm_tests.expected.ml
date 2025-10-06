@@ -135,10 +135,17 @@ module Spec =
             (Util.Pp.pp_fun_ true) f
       | Length -> Format.asprintf "%s <sut>" "length"
     let cleanup _ = ()
-    let arb_cmd _ =
+    let arb_cmd state =
       let open QCheck in
         make ~print:show_cmd
           (let open Gen in
+             let keys =
+               let open Ortac_runtime.Gospelstdlib in
+                 List.of_seq @@
+                   ((Sequence.map fst) @@
+                      (Model.get state 0).ModelElt.contents) in
+             let char =
+               match keys with | [] -> char | xs -> oneof [char; oneofl xs] in
              frequency
                [(1,
                   (((pure (fun random -> fun size -> Create (random, size)))

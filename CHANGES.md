@@ -1,5 +1,7 @@
 # Unreleased
 
+- [QCheck-STM] Allow for user defined `arb_cmd`s
+  [\#359](https://github.com/ocaml-gospel/ortac/pull/359)
 - [QCheck-STM] Allow for user defined frequencies in generated `arb_cmd`
   [\#358](https://github.com/ocaml-gospel/ortac/pull/358)
 - [QCheck-STM+Dune] Add count optional argument

@@ -4,6 +4,36 @@ module Ir_of_gospel = Ir_of_gospel
 module Reserr = Reserr
 module Stm_of_ir = Stm_of_ir
 
+let remove_ppxlib_attributes =
+  let open Ppxlib in
+  object
+    inherit Ast_traverse.map as super
+
+    method! expression (expr : expression) =
+      match expr.pexp_desc with
+      | Pexp_fun _ ->
+          let pexp_attributes =
+            List.filter
+              (fun a ->
+                not
+                @@ String.starts_with ~prefix:"ppxlib.migration" a.attr_name.txt)
+              expr.pexp_attributes
+          in
+          super#expression { expr with pexp_attributes }
+      | Pexp_function _ ->
+          let pexp_attributes =
+            List.filter
+              (fun a ->
+                not
+                @@ String.starts_with ~prefix:"ppxlib.migration" a.attr_name.txt)
+              expr.pexp_attributes
+          in
+          super#expression { expr with pexp_attributes }
+      | _ -> super#expression expr
+  end
+
+let remove_attrs = remove_ppxlib_attributes#structure
+
 let main path config output module_prefix submodule domain quiet count () =
   let open Reserr in
   let fmt = Registration.get_out_formatter output in
@@ -13,7 +43,7 @@ let main path config output module_prefix submodule domain quiet count () =
        Config.init path config module_prefix submodule domain count
      in
      let* ir = Ir_of_gospel.run sigs config in
-     Stm_of_ir.stm config ir)
+     remove_attrs <$> Stm_of_ir.stm config ir)
 
 open Cmdliner
 
