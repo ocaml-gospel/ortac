@@ -1,5 +1,7 @@
 # Unreleased
 
+- [Examples] Add Saturn mpsc examples
+  [\#367](https://github.com/ocaml-gospel/ortac/pull/367)
 - [QCheck-STM] Allow for user to defined frequencies per domain
   [\#365](https://github.com/ocaml-gospel/ortac/pull/365)
 - Pin Gospel version 0.3.1.dev
