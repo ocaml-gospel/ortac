@@ -30,6 +30,7 @@ val clear : 'a t -> unit
 
 val add : 'a t -> 'a -> unit
 (*@ add t x
+    checks List.length t.view < t.capacity
     modifies t.view
     ensures t.view = x :: (old t.view) *)
 
