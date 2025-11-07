@@ -262,7 +262,7 @@ let with_pres ~context ~term_printer ir pres (value : value) =
   let preconditions = conditions ~context ~term_printer violated nonexec pres in
   { value with preconditions }
 
-let with_checks ~context ~term_printer checks (value : value) =
+let with_checks ~context ~term_printer ir checks (value : value) =
   let register_name = evar value.register_name in
   let nonexec term exn = F.spec_failure `Check ~term ~exn ~register_name in
   let checks =
@@ -270,7 +270,7 @@ let with_checks ~context ~term_printer checks (value : value) =
       (fun t ->
         let txt = term_printer t in
         let loc = t.Tterm.t_loc in
-        let term = term ~context (nonexec txt) t in
+        let term = term ~context (nonexec txt) @@ collect_model ir t in
         let check_id = gen_symbol ~prefix:"__check" () in
         let translations =
           Result.map
@@ -716,7 +716,7 @@ let value ~pack ~ghost (vd : Tast.val_description) =
     let term_printer = term_printer spec.sp_text spec.sp_loc in
     let value =
       value
-      |> with_checks ~context ~term_printer spec.sp_checks
+      |> with_checks ~context ~term_printer ir spec.sp_checks
       |> with_pres ~context ~term_printer ir spec.sp_pre
       |> with_posts ~context ~term_printer ir spec.sp_post
       |> with_xposts ~context ~term_printer spec.sp_xpost
