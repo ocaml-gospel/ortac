@@ -1,5 +1,7 @@
 # Unreleased
 
+- [Wrapper] Fixes field access in checks clauses
+  [\#362](https://github.com/ocaml-gospel/ortac/pull/362)
 - [QCheck-STM] Allow for user defined `arb_cmd`s
   [\#359](https://github.com/ocaml-gospel/ortac/pull/359)
 - [QCheck-STM] Allow for user defined frequencies in generated `arb_cmd`
