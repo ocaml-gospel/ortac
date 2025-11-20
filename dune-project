@@ -30,7 +30,7 @@
   )
  (documentation "https://ocaml-gospel.github.io/ortac/ortac-core/")
  (depends
-  (ocaml (>= 4.12.0))
+  (ocaml (and (>= 4.12.0) (<= 5.3.0)))
   dune-build-info
   dune-site
   (cmdliner (>= 1.1.0))
