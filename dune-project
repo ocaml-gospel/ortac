@@ -33,7 +33,7 @@
   (ocaml (and (>= 4.12.0) (<= 5.3.0)))
   dune-build-info
   dune-site
-  (cmdliner (>= 1.1.0))
+  (cmdliner (and (>= 1.1.0) (< 2.0.0)))
   fmt
   (ppxlib (and (>= 0.26.0) (<= 0.35.0)))
   (gospel (= 0.3.0))
