@@ -35,7 +35,7 @@
   dune-site
   (cmdliner (>= 1.1.0))
   fmt
-  (ppxlib (>= 0.26.0))
+  (ppxlib (and (>= 0.26.0) (<= 0.35.0)))
   (gospel (= 0.3.0))
   (alcotest (and :with-test (>= 0.8.1)))
   (ortac-runtime (and :with-test (= :version))))
