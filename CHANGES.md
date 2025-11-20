@@ -1,5 +1,7 @@
 # Unreleased
 
+- Add 0.35.0 as an upper bound for ppxlib
+  [\#363](https://github.com/ocaml-gospel/ortac/pull/363)
 - [QCheck-STM] Allow for user defined `arb_cmd`s
   [\#359](https://github.com/ocaml-gospel/ortac/pull/359)
 - [QCheck-STM] Allow for user defined frequencies in generated `arb_cmd`
