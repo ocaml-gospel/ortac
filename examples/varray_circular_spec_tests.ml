@@ -206,38 +206,31 @@ module Spec =
                (1, ((pure (fun x_1 -> Push_front x_1)) <*> (elt char)));
                (1, (pure Pop_front));
                (1,
-                 (((pure (fun i_1 -> fun x_2 -> Insert_at (i_1, x_2))) <*>
-                     int)
-                    <*> (elt char)));
+                 (((pure (fun i_1 x_2 -> Insert_at (i_1, x_2))) <*> int) <*>
+                    (elt char)));
                (1, ((pure (fun i_2 -> Pop_at i_2)) <*> int));
                (1, ((pure (fun i_3 -> Delete_at i_3)) <*> int));
                (1, ((pure (fun i_4 -> Get i_4)) <*> int));
                (1,
-                 (((pure (fun i_5 -> fun v -> Set (i_5, v))) <*> int) <*>
-                    (elt char)));
+                 (((pure (fun i_5 v -> Set (i_5, v))) <*> int) <*> (elt char)));
                (1, (pure Length));
                (1,
-                 (((pure (fun n -> fun x_3 -> Make (n, x_3))) <*>
-                     small_signed_int)
+                 (((pure (fun n x_3 -> Make (n, x_3))) <*> small_signed_int)
                     <*> (elt char)));
                (1, ((pure (fun () -> Empty ())) <*> unit));
                (1, (pure Is_empty));
                (1, (pure Append));
                (1,
-                 (((pure (fun i_6 -> fun n_1 -> Sub (i_6, n_1))) <*> int) <*>
-                    int));
+                 (((pure (fun i_6 n_1 -> Sub (i_6, n_1))) <*> int) <*> int));
                (1, (pure Copy));
                (1,
-                 ((((pure
-                       (fun pos -> fun len -> fun x_4 -> Fill (pos, len, x_4)))
-                      <*> int)
+                 ((((pure (fun pos len x_4 -> Fill (pos, len, x_4))) <*> int)
                      <*> int)
                     <*> (elt char)));
                (1,
                  ((((pure
-                       (fun src_pos ->
-                          fun dst_pos ->
-                            fun len_1 -> Blit (src_pos, dst_pos, len_1)))
+                       (fun src_pos dst_pos len_1 ->
+                          Blit (src_pos, dst_pos, len_1)))
                       <*> int)
                      <*> int)
                     <*> int))])

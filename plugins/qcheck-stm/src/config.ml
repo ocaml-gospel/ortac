@@ -259,7 +259,8 @@ let module_binding cfg_uc (mb : Ppxlib.module_binding) =
       let open Ast_pattern in
       let destruct =
         pstr_value drop
-          (value_binding ~pat:(ppat_var __') ~expr:(eint __) ^:: nil)
+          (value_binding ~constraint_:drop ~pat:(ppat_var __') ~expr:(eint __)
+          ^:: nil)
       and error stri =
         let loc = stri.pstr_loc in
         error (Ill_formed_frequency, loc)

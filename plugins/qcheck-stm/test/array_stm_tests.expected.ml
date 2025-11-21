@@ -139,20 +139,17 @@ module Spec =
                [(1, (pure Length));
                (1, ((pure (fun i -> Get i)) <*> int));
                (1,
-                 (((pure (fun i_1 -> fun a_1 -> Set (i_1, a_1))) <*> int) <*>
-                    char));
+                 (((pure (fun i_1 a_1 -> Set (i_1, a_1))) <*> int) <*> char));
                (0,
-                 (((pure (fun i_2 -> fun a_2 -> Make (i_2, a_2))) <*>
+                 (((pure (fun i_2 a_2 -> Make (i_2, a_2))) <*>
                      small_signed_int)
                     <*> char));
                (1, (pure Append));
-               (1,
-                 (((pure (fun i_3 -> fun n -> Sub (i_3, n))) <*> int) <*> int));
+               (1, (((pure (fun i_3 n -> Sub (i_3, n))) <*> int) <*> int));
                (1, (pure Copy));
                (1,
-                 ((((pure (fun pos -> fun len -> fun x -> Fill (pos, len, x)))
-                      <*> int)
-                     <*> int)
+                 ((((pure (fun pos len x -> Fill (pos, len, x))) <*> int) <*>
+                     int)
                     <*> char));
                (1, (pure To_list));
                (1, ((pure (fun l -> Of_list l)) <*> (list char)));
@@ -1649,11 +1646,10 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
             (try
                b_2 =
                  (Ortac_runtime.Gospelstdlib.Sequence.fold_left
-                    (fun acc ->
-                       fun a_6 ->
-                         if ((QCheck.Fn.apply p a_6) = true) && (acc = true)
-                         then true
-                         else false) true (Lazy.force t_new__087_).contents)
+                    (fun acc a_6 ->
+                       if ((QCheck.Fn.apply p a_6) = true) && (acc = true)
+                       then true
+                       else false) true (Lazy.force t_new__087_).contents)
              with | e -> false)
           then None
           else
@@ -1667,13 +1663,12 @@ let ortac_postcond cmd__046_ state__047_ res__048_ =
                             and t_new__085_ =
                               lazy (Model.get (Lazy.force new_state__049_) 0) in
                             Ortac_runtime.Gospelstdlib.Sequence.fold_left
-                              (fun acc ->
-                                 fun a_6 ->
-                                   if
-                                     ((QCheck.Fn.apply p a_6) = true) &&
-                                       (acc = true)
-                                   then true
-                                   else false) true
+                              (fun acc a_6 ->
+                                 if
+                                   ((QCheck.Fn.apply p a_6) = true) &&
+                                     (acc = true)
+                                 then true
+                                 else false) true
                               (Lazy.force t_new__085_).contents)))
                   with | e -> Ortac_runtime.Report.Out_of_domain) "for_all"
                  [("b = Sequence.fold_left (fun acc a -> p a && acc) true t.contents",

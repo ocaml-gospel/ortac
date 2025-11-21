@@ -102,8 +102,7 @@ module Spec =
           (let open Gen in
              frequency
                [(1,
-                  (((pure (fun len -> fun c -> Make (len, c))) <*>
-                      small_signed_int)
+                  (((pure (fun len c -> Make (len, c))) <*> small_signed_int)
                      <*> char));
                (1,
                  ((pure (fun f -> Map f)) <*>

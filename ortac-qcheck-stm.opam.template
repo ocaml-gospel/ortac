@@ -1,1 +1,4 @@
 x-maintenance-intent: ["(latest)"]
+pin-depends: [
+  ["gospel.dev" "git+https://github.com/ocaml-gospel/gospel#c17ae6b808f11192f42009e2837f9c3c9e829eb3"]
+]

@@ -33,10 +33,10 @@
   (ocaml (>= 4.12.0))
   dune-build-info
   dune-site
-  (cmdliner (>= 1.1.0))
+  (cmdliner (>= 1.3.0))
   fmt
-  (ppxlib (>= 0.26.0))
-  (gospel (= 0.3.0))
+  (ppxlib (>= 0.36.0))
+  gospel
   (alcotest (and :with-test (>= 0.8.1)))
   (ortac-runtime (and :with-test (= :version))))
  (sites
@@ -78,10 +78,10 @@
   "Charlène Gros <charlène@tarides.com>")
  (depends
   (ocaml (>= 4.12.0))
-  (cmdliner (>= 1.1.0))
+  (cmdliner (>= 1.3.0))
   fmt
-  (ppxlib (>= 0.26.0))
-  (gospel (= 0.3.0))
+  (ppxlib (>= 0.36.0))
+  gospel
   (alcotest (and :with-test (>= 0.8.1)))
   (ortac-core (= :version))
   (ortac-runtime (= :version))))
@@ -103,10 +103,10 @@
  (authors "Nicolas Osborne <nicolas.osborne@tarides.com>")
  (depends
   (ocaml (>= 4.12.0))
-  (cmdliner (>= 1.1.0))
+  (cmdliner (>= 1.3.0))
   fmt
-  (ppxlib (>= 0.26.0))
-  (gospel (= 0.3.0))
+  (ppxlib (>= 0.36.0))
+  gospel
   (monolith (and :with-test (>= 20201026)))
   (pprint :with-test)
   (ortac-core (= :version))
@@ -153,11 +153,11 @@
  (documentation "https://ocaml-gospel.github.io/ortac/ortac-qcheck-stm/")
  (depends
   (ocaml (>= 4.12.0))
-  (cmdliner (>= 1.1.0))
+  (cmdliner (>= 1.3.0))
   fmt
-  (ppxlib (>= 0.26.0))
+  (ppxlib (>= 0.36.0))
   (mdx (and :with-test (>= 2.3.0)))
-  (gospel (= 0.3.0))
+  gospel
   (qcheck-stm (>= 0.5))
   (ortac-core (= :version))
   (ortac-runtime-qcheck-stm (= :version)))
@@ -175,7 +175,7 @@
  (depends
   (ocaml (>= 4.12.0))
   fmt
-  (cmdliner (>= 1.1.0))
+  (cmdliner (>= 1.3.0))
   (ortac-core (= :version))
   (ortac-qcheck-stm (and :with-test (= :version)))
   (ortac-wrapper (and :with-test (= :version)))))

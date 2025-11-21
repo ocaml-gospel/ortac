@@ -66,9 +66,9 @@ let type_ context ppf (t : type_) =
   let missing_projections =
     t.models
     |> List.filter (fun (gospel_model, _, _) ->
-           not (mem_projection context.structure gospel_model))
+        not (mem_projection context.structure gospel_model))
     |> List.map (fun (gospel_model, _, _) ->
-           (Missing_projection gospel_model, t.loc))
+        (Missing_projection gospel_model, t.loc))
   in
   missing_proj ppf missing_projections;
   match t.ghost with

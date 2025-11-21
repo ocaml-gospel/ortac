@@ -79,11 +79,9 @@ module Spec =
           (let open Gen in
              frequency
                [(1,
-                  (((pure (fun i -> fun a_1 -> Make (i, a_1))) <*>
-                      small_signed_int)
+                  (((pure (fun i a_1 -> Make (i, a_1))) <*> small_signed_int)
                      <*> small_signed_int));
-               (1,
-                 (((pure (fun a_2 -> fun b -> Add (a_2, b))) <*> int) <*> int))])
+               (1, (((pure (fun a_2 b -> Add (a_2, b))) <*> int) <*> int))])
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
       | Make (i, a_1) ->

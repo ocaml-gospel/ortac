@@ -25,11 +25,11 @@ bug-reports: "https://github.com/ocaml-gospel/ortac/issues"
 depends: [
   "dune" {>= "3.9"}
   "ocaml" {>= "4.12.0"}
-  "cmdliner" {>= "1.1.0"}
+  "cmdliner" {>= "1.3.0"}
   "fmt"
-  "ppxlib" {>= "0.26.0"}
+  "ppxlib" {>= "0.36.0"}
   "mdx" {with-test & >= "2.3.0"}
-  "gospel" {= "0.3.0"}
+  "gospel"
   "qcheck-stm" {>= "0.5"}
   "ortac-core" {= version}
   "ortac-runtime-qcheck-stm" {= version}
@@ -56,3 +56,6 @@ build: [
 ]
 dev-repo: "git+https://github.com/ocaml-gospel/ortac.git"
 x-maintenance-intent: ["(latest)"]
+pin-depends: [
+  ["gospel.dev" "git+https://github.com/ocaml-gospel/gospel#c17ae6b808f11192f42009e2837f9c3c9e829eb3"]
+]

@@ -5,11 +5,11 @@ let eterm t = estring t
 
 let term_kind kind =
   (match kind with
-  | `Check -> "Check"
-  | `Pre -> "Pre"
-  | `Post -> "Post"
-  | `XPost -> "XPost"
-  | `Invariant -> "Invariant")
+    | `Check -> "Check"
+    | `Pre -> "Pre"
+    | `Post -> "Post"
+    | `XPost -> "XPost"
+    | `Invariant -> "Invariant")
   |> lident
   |> fun c -> pexp_construct c None
 

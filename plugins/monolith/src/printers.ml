@@ -85,7 +85,7 @@ let variant_printer drv (constructors : Tast.constructor_decl list) =
     A.case ~guard:None ~lhs ~rhs
   in
   let cases = List.map variant constructors in
-  A.pexp_function ~loc cases
+  A.pexp_function_cases ~loc cases
 
 let printer_expr drv (ty_kind : Tast.type_kind) =
   match ty_kind with
