@@ -1,5 +1,7 @@
 # Unreleased
 
+- Pin Gospel version 0.3.1.dev
+  [\#364](https://github.com/ocaml-gospel/ortac/pull/364)
 - [Wrapper] Fixes field access in checks clauses
   [\#362](https://github.com/ocaml-gospel/ortac/pull/362)
 - [QCheck-STM] Allow for user defined `arb_cmd`s
