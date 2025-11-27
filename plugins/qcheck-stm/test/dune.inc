@@ -41,6 +41,8 @@
 (rule
  (alias runtest)
  (package ortac-qcheck-stm)
+ (enabled_if
+  (>= %{ocaml_version} 5.2))
  (action
   (progn
    (diff array_errors.expected array_errors)
@@ -94,6 +96,8 @@
 (rule
  (alias runtest)
  (package ortac-qcheck-stm)
+ (enabled_if
+  (>= %{ocaml_version} 5.2))
  (action
   (progn
    (diff hashtbl_errors.expected hashtbl_errors)
@@ -147,6 +151,8 @@
 (rule
  (alias runtest)
  (package ortac-qcheck-stm)
+ (enabled_if
+  (>= %{ocaml_version} 5.2))
  (action
   (progn
    (diff record_errors.expected record_errors)
@@ -200,6 +206,8 @@
 (rule
  (alias runtest)
  (package ortac-qcheck-stm)
+ (enabled_if
+  (>= %{ocaml_version} 5.2))
  (action
   (progn
    (diff ref_errors.expected ref_errors)
@@ -253,6 +261,8 @@
 (rule
  (alias runtest)
  (package ortac-qcheck-stm)
+ (enabled_if
+  (>= %{ocaml_version} 5.2))
  (action
   (progn
    (diff conjunctive_clauses_errors.expected conjunctive_clauses_errors)
@@ -306,6 +316,8 @@
 (rule
  (alias runtest)
  (package ortac-qcheck-stm)
+ (enabled_if
+  (>= %{ocaml_version} 5.2))
  (action
   (progn
    (diff sequence_model_errors.expected sequence_model_errors)
@@ -359,6 +371,8 @@
 (rule
  (alias runtest)
  (package ortac-qcheck-stm)
+ (enabled_if
+  (>= %{ocaml_version} 5.2))
  (action
   (progn
    (diff invariants_errors.expected invariants_errors)
@@ -412,6 +426,8 @@
 (rule
  (alias runtest)
  (package ortac-qcheck-stm)
+ (enabled_if
+  (>= %{ocaml_version} 5.2))
  (action
   (progn
    (diff integer_in_model_errors.expected integer_in_model_errors)
@@ -465,6 +481,8 @@
 (rule
  (alias runtest)
  (package ortac-qcheck-stm)
+ (enabled_if
+  (>= %{ocaml_version} 5.2))
  (action
   (progn
    (diff ghost_as_model_errors.expected ghost_as_model_errors)
@@ -518,6 +536,8 @@
 (rule
  (alias runtest)
  (package ortac-qcheck-stm)
+ (enabled_if
+  (>= %{ocaml_version} 5.2))
  (action
   (progn
    (diff custom_config_errors.expected custom_config_errors)
@@ -571,6 +591,8 @@
 (rule
  (alias runtest)
  (package ortac-qcheck-stm)
+ (enabled_if
+  (>= %{ocaml_version} 5.2))
  (action
   (progn
    (diff test_without_sut_errors.expected test_without_sut_errors)
@@ -624,6 +646,8 @@
 (rule
  (alias runtest)
  (package ortac-qcheck-stm)
+ (enabled_if
+  (>= %{ocaml_version} 5.2))
  (action
   (progn
    (diff tuples_errors.expected tuples_errors)
@@ -677,6 +701,8 @@
 (rule
  (alias runtest)
  (package ortac-qcheck-stm)
+ (enabled_if
+  (>= %{ocaml_version} 5.2))
  (action
   (progn
    (diff functional_model_errors.expected functional_model_errors)
@@ -730,6 +756,8 @@
 (rule
  (alias runtest)
  (package ortac-qcheck-stm)
+ (enabled_if
+  (>= %{ocaml_version} 5.2))
  (action
   (progn
    (diff test_cleanup_errors.expected test_cleanup_errors)
@@ -783,6 +811,8 @@
 (rule
  (alias runtest)
  (package ortac-qcheck-stm)
+ (enabled_if
+  (>= %{ocaml_version} 5.2))
  (action
   (progn
    (diff sut_in_type_errors.expected sut_in_type_errors)
@@ -836,6 +866,8 @@
 (rule
  (alias runtest)
  (package ortac-qcheck-stm)
+ (enabled_if
+  (>= %{ocaml_version} 5.2))
  (action
   (progn
    (diff queue_errors.expected queue_errors)
@@ -889,6 +921,8 @@
 (rule
  (alias runtest)
  (package ortac-qcheck-stm)
+ (enabled_if
+  (>= %{ocaml_version} 5.2))
  (action
   (progn
    (diff stack_errors.expected stack_errors)
@@ -942,6 +976,8 @@
 (rule
  (alias runtest)
  (package ortac-qcheck-stm)
+ (enabled_if
+  (>= %{ocaml_version} 5.2))
  (action
   (progn
    (diff function_args_errors.expected function_args_errors)

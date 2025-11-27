@@ -55,6 +55,8 @@ let rec print_rules pos =
 (rule
  (alias runtest)
  (package ortac-qcheck-stm)
+ (enabled_if
+  (>= %%{ocaml_version} 5.2))
  (action
   (progn
    (diff %s_errors.expected %s_errors)
