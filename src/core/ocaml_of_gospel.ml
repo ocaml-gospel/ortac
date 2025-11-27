@@ -227,8 +227,8 @@ let core_type_of_ty_aux ~context f =
   let open Ttypes in
   let lident_of_tysymbol ts =
     (match Context.translate_tystdlib ts context with
-    | Some ty -> ty
-    | None -> str_of_ident ts.ts_ident)
+      | Some ty -> ty
+      | None -> str_of_ident ts.ts_ident)
     |> Builder.lident
   in
   let rec arrow = function
@@ -256,8 +256,8 @@ let core_type_of_ty_with_subst ~context subst =
 let core_type_of_tysymbol ~context ts =
   let lid =
     (match Context.translate_tystdlib ts context with
-    | Some ty -> ty
-    | None -> str_of_ident ts.Ttypes.ts_ident)
+      | Some ty -> ty
+      | None -> str_of_ident ts.Ttypes.ts_ident)
     |> Builder.lident
   in
   let args =

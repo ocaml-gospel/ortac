@@ -157,7 +157,7 @@ let ty_var_substitution config (vd : val_description) =
     | Ptyp_alias (_, _)
     | Ptyp_variant (_, _, _)
     | Ptyp_poly (_, _)
-    | Ptyp_package _ | Ptyp_extension _ ->
+    | Ptyp_package _ | Ptyp_extension _ | Ptyp_open _ ->
         failwith "not supported"
   in
   aux [] value_type

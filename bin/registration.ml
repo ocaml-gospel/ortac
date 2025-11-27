@@ -36,15 +36,15 @@ let quiet =
   Arg.(value & flag & info [ "q"; "quiet" ] ~doc:"Don't print any warnings.")
 
 let ocaml_file =
-  let parse s =
+  let parser s =
     match Sys.file_exists s with
     | true ->
         if Sys.is_directory s || Filename.extension s <> ".mli" then
-          `Error (Fmt.str "Error: `%s' is not an OCaml interface file" s)
-        else `Ok s
-    | false -> `Error (Fmt.str "Error: `%s' not found" s)
+          Error (Fmt.str "Error: `%s' is not an OCaml interface file" s)
+        else Ok s
+    | false -> Error (Fmt.str "Error: `%s' not found" s)
   in
   Arg.(
     required
-    & pos 0 (some (parse, Fmt.string)) None
+    & pos 0 (some (Conv.make ~docv:"FILE" ~parser ~pp:Fmt.string ())) None
     & info [] ~docv:"FILE" ~doc:"Read Gospel specifications in FILE.")

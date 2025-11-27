@@ -79,7 +79,7 @@ module Spec =
                (1, ((pure (fun a_2 -> Push a_2)) <*> int));
                (1, (pure Transfer));
                (1, (pure Copy));
-               (1, (((pure (fun i -> fun n -> Sub (i, n))) <*> int) <*> int))])
+               (1, (((pure (fun i n -> Sub (i, n))) <*> int) <*> int))])
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
       | Create a_1 ->

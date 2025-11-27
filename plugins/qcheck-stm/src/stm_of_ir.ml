@@ -73,7 +73,7 @@ let subst_core_type inst ty =
         | Ptyp_alias (_, _)
         | Ptyp_variant (_, _, _)
         | Ptyp_poly (_, _)
-        | Ptyp_package _ | Ptyp_extension _ ->
+        | Ptyp_package _ | Ptyp_extension _ | Ptyp_open _ ->
             failwith "Case should not happen in `subst_core_type'");
     }
   in
@@ -1702,7 +1702,7 @@ let ortac_cmd_show config ir =
     promote_map (pp_ortac_cmd_case config states_name last_name) ir.values
   in
   let default_case =
-    case ~lhs:ppat_any ~guard:None ~rhs:(eapply (evar "assert") [ ebool false ])
+    case ~lhs:ppat_any ~guard:None ~rhs:(pexp_assert @@ ebool false)
   in
   let cases = cases @ [ default_case ] in
   let match_expr =

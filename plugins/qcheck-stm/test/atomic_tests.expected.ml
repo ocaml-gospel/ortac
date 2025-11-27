@@ -94,8 +94,8 @@ module Spec =
                (1, ((pure (fun v_1 -> Set v_1)) <*> int));
                (1, ((pure (fun v_2 -> Exchange v_2)) <*> int));
                (1,
-                 (((pure (fun seen -> fun v_3 -> Compare_and_set (seen, v_3)))
-                     <*> int)
+                 (((pure (fun seen v_3 -> Compare_and_set (seen, v_3))) <*>
+                     int)
                     <*> int));
                (1, ((pure (fun n -> Fetch_and_add n)) <*> int));
                (1, (pure Incr));

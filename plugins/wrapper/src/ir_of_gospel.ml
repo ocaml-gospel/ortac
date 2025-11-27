@@ -27,7 +27,7 @@ let conditions ~context ~term_printer fail_violated fail_nonexec terms =
       let translation =
         term ~context (fail_nonexec txt) t
         |> Result.map (fun t ->
-               [%expr if not [%e t] then [%e fail_violated txt]])
+            [%expr if not [%e t] then [%e fail_violated txt]])
       in
       ({ txt; loc; translation } : term))
     terms
@@ -207,7 +207,7 @@ let invariant ~context ~term_printer self ir (invariant : Tterm.term) =
     |> Result.map (fun e -> [%expr if not [%e e] then [%e violated txt]])
     |> Result.map (efun [ register_name_arg; position_arg; instance_arg ])
     |> Result.map (fun e ->
-           (function_name, [%stri let [%p pvar function_name] = [%e e]]))
+        (function_name, [%stri let [%p pvar function_name] = [%e e]]))
   in
   { txt; loc; translation }
 
@@ -552,12 +552,12 @@ let with_xposts ~context ~term_printer xposts (value : value) =
           let nonexec exn = F.spec_failure `XPost ~term:s ~exn ~register_name in
           term ~context nonexec t
           |> Result.map (fun t ->
-                 case ~guard:None
-                   ~lhs:(xpost_pattern ~context name p)
-                   ~rhs:
-                     [%expr
-                       if not [%e t] then
-                         [%e F.violated_condition `XPost ~term:s ~register_name]]))
+              case ~guard:None
+                ~lhs:(xpost_pattern ~context name p)
+                ~rhs:
+                  [%expr
+                    if not [%e t] then
+                      [%e F.violated_condition `XPost ~term:s ~register_name]]))
         (* XXX ptlist must be rev because the cases are given in the
            reverse order by gospel *)
         (List.rev ptlist)
@@ -602,9 +602,9 @@ let axiom_definition ~context ~register_name t : term =
   let translation =
     term ~context fail_nonexec t
     |> Result.map (fun check ->
-           [%expr
-             if not [%e check] then [%e fail_violated];
-             [%e F.report ~register_name]])
+        [%expr
+          if not [%e check] then [%e fail_violated];
+          [%e F.report ~register_name]])
   in
   { txt; loc; translation }
 
