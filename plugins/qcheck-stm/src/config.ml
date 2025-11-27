@@ -8,6 +8,7 @@ module FrequenciesMap = struct
   type t = (int * location) M.t
 
   let empty = M.empty
+  let is_empty = M.is_empty
 
   let add label_loc v =
     let k = label_loc.txt and loc = label_loc.loc in
@@ -18,6 +19,53 @@ module FrequenciesMap = struct
     (res, M.remove k m)
 
   let unused m = List.map (fun (k, (_freq, loc)) -> (k, loc)) @@ M.bindings m
+end
+
+module Frequencies = struct
+  type t = {
+    arb_cmd_seq : FrequenciesMap.t;
+    arb_cmd_dom0 : FrequenciesMap.t;
+    arb_cmd_dom1 : FrequenciesMap.t;
+  }
+
+  let empty =
+    let open FrequenciesMap in
+    { arb_cmd_seq = empty; arb_cmd_dom0 = empty; arb_cmd_dom1 = empty }
+
+  type ('record, 'field) lens = {
+    get : 'record -> 'field;
+    set : 'field -> 'record -> 'record;
+  }
+
+  let seq =
+    let get record = record.arb_cmd_seq
+    and set field record = { record with arb_cmd_seq = field } in
+    { get; set }
+
+  let dom0 =
+    let get record = record.arb_cmd_dom0
+    and set field record = { record with arb_cmd_dom0 = field } in
+    { get; set }
+
+  let dom1 =
+    let get record = record.arb_cmd_dom1
+    and set field record = { record with arb_cmd_dom1 = field } in
+    { get; set }
+
+  let is_empty lens t = FrequenciesMap.is_empty @@ lens.get t
+
+  let over lens f t =
+    let old = lens.get t in
+    lens.set (f old) t
+
+  let add lens key value t = over lens (FrequenciesMap.add key value) t
+
+  let pop lens key t =
+    let map = lens.get t in
+    let res, map = FrequenciesMap.pop key map in
+    (res, lens.set map t)
+
+  let unused lens t = FrequenciesMap.unused @@ lens.get t
 end
 
 type config_under_construction = {
@@ -31,7 +79,7 @@ type config_under_construction = {
   pp_mod' : Ppxlib.structure option;
   ty_mod' : Ppxlib.structure option;
   cleanup' : Ppxlib.structure_item option;
-  frequencies' : FrequenciesMap.t;
+  frequencies' : Frequencies.t;
 }
 
 let config_under_construction =
@@ -45,7 +93,7 @@ let config_under_construction =
     gen_mod' = None;
     pp_mod' = None;
     ty_mod' = None;
-    frequencies' = FrequenciesMap.empty;
+    frequencies' = Frequencies.empty;
     cleanup' = None;
   }
 
@@ -62,7 +110,7 @@ type t = {
   pp_mod : Ppxlib.structure option; (* Containing custom pretty printers *)
   ty_mod : Ppxlib.structure option; (* Containing custom STM.ty extensions *)
   cleanup : Ppxlib.structure_item option;
-  frequencies : FrequenciesMap.t;
+  frequencies : Frequencies.t;
   module_prefix : string option;
   submodule : string option;
   domain : bool;
@@ -273,7 +321,7 @@ let module_binding cfg_uc (mb : Ppxlib.module_binding) =
             ok
               {
                 acc with
-                frequencies' = FrequenciesMap.add name freq acc.frequencies';
+                frequencies' = Frequencies.(add seq name freq acc.frequencies');
               })
       in
       fold_left aux cfg_uc content
