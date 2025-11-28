@@ -330,6 +330,12 @@ let module_binding cfg_uc (mb : Ppxlib.module_binding) =
       ok { cfg_uc with ty_mod' = Some content }
   | Some name when String.equal "Frequencies" name ->
       get_frequencies cfg_uc Frequencies.seq name mb
+  | Some name when String.equal "Frequencies_seq" name ->
+      get_frequencies cfg_uc Frequencies.seq name mb
+  | Some name when String.equal "Frequencies_dom0" name ->
+      get_frequencies cfg_uc Frequencies.dom0 name mb
+  | Some name when String.equal "Frequencies_dom1" name ->
+      get_frequencies cfg_uc Frequencies.dom1 name mb
   | _ -> ok cfg_uc
 
 let scan_config cfg_uc config_mod =
