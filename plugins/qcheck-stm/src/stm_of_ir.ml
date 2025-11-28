@@ -3,6 +3,7 @@ open Ir
 open Ppxlib
 open Ortac_core.Builder
 module Ident = Gospel.Identifier.Ident
+module F = Cfg.Frequencies
 
 let is_a_function ty =
   let open Ppxlib in
@@ -404,24 +405,37 @@ let arb_cmd_case config value =
   let app l r = pexp_apply (evar "( <*> )") [ (Nolabel, l); (Nolabel, r) ] in
   List.fold_left app fun_cstr <$> gen_args
 
+type which = Gen | Seq | Dom0 | Dom1
+
+let lens_from_which = function
+  | Gen -> F.seq
+  | Seq -> F.seq
+  | Dom0 -> F.dom0
+  | Dom1 -> F.dom1
+
+let pat_from_which = function
+  | Gen -> pvar "arb_cmd"
+  | Seq -> pvar "arb_cmd_seq"
+  | Dom0 -> pvar "arb_cmd_dom0"
+  | Dom1 -> pvar "arb_cmd_dom1"
+
 (* Generate the [arb_cmd] definition as a uniform choice between the
    [arb_cmd_case] outputs *)
-let arb_cmd config ir =
+let arb_cmd_gen which config ir =
   let open Reserr in
   let open Ppxlib in
+  let lens = lens_from_which which and pat = pat_from_which which in
   let aux value (freq_map, acc) =
     let* gen = arb_cmd_case config value in
-    let freq, freq_map =
-      Cfg.FrequenciesMap.pop (str_of_ident value.id) freq_map
-    in
+    let freq, freq_map = F.pop lens (str_of_ident value.id) freq_map in
     ok @@ (freq_map, pexp_tuple [ eint freq; gen ] :: acc)
   in
   let* unused_freq, generators =
-    fold_right aux ir.values (config.frequencies.arb_cmd_seq, [])
+    fold_right aux ir.values (config.frequencies, [])
   in
   let* _ =
     promote_map (fun (name, loc) -> error (Unused_frequency name, loc))
-    @@ Cfg.FrequenciesMap.unused unused_freq
+    @@ F.unused lens unused_freq
   in
   let cmds = elist generators in
   let let_open str e =
@@ -435,13 +449,12 @@ let arb_cmd config ir =
       (pexp_apply (evar "make")
          [ (Labelled "print", evar "show_cmd"); (Nolabel, frequency) ])
   in
-  let pat = pvar "arb_cmd" in
   let expr = efun [ (Nolabel, ppat_any (* for now we don't use it *)) ] body in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
 let arb_cmd config =
   match config.Cfg.arb_cmd with
-  | None -> arb_cmd config
+  | None -> arb_cmd_gen Gen config
   | Some stri -> Fun.const @@ Reserr.ok stri
 
 let arb_cmd_seq config =
