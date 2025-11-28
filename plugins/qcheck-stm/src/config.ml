@@ -276,6 +276,41 @@ let type_declarations cfg_uc =
   in
   fold_left aux cfg_uc
 
+let get_structure name mb =
+  let open Reserr in
+  match mb.pmb_expr.pmod_desc with
+  | Pmod_structure structure
+  (* there is no need to go further, module constraints of module
+       constraints doesn't make sense *)
+  | Pmod_constraint ({ pmod_desc = Pmod_structure structure; _ }, _) ->
+      ok structure
+  | _ -> error (Not_a_structure name, Location.none)
+
+let get_frequencies cfg_uc lens name mb =
+  let open Reserr in
+  let* content = get_structure name mb in
+  let open Ast_pattern in
+  let destruct =
+    pstr_value drop
+      (value_binding ~constraint_:drop ~pat:(ppat_var __') ~expr:(eint __)
+      ^:: nil)
+  and error stri =
+    let loc = stri.pstr_loc in
+    error (Ill_formed_frequency, loc)
+  in
+  let aux acc stri =
+    parse destruct Location.none
+      ~on_error:(Fun.const @@ error stri)
+      stri
+      (fun name freq ->
+        ok
+          {
+            acc with
+            frequencies' = Frequencies.(add lens name freq acc.frequencies');
+          })
+  in
+  fold_left aux cfg_uc content
+
 (* Inspect module definition in config module in order to collect information
    about:
      - the custom [QCheck] generators
@@ -283,15 +318,6 @@ let type_declarations cfg_uc =
      - the custom [STM.ty] extensions and function constructors *)
 let module_binding cfg_uc (mb : Ppxlib.module_binding) =
   let open Reserr in
-  let get_structure name mb =
-    match mb.pmb_expr.pmod_desc with
-    | Pmod_structure structure
-    (* there is no need to go further, module constraints of module
-       constraints doesn't make sense *)
-    | Pmod_constraint ({ pmod_desc = Pmod_structure structure; _ }, _) ->
-        ok structure
-    | _ -> error (Not_a_structure name, Location.none)
-  in
   match mb.pmb_name.txt with
   | Some name when String.equal "Gen" name ->
       let* content = get_structure name mb in
@@ -303,28 +329,7 @@ let module_binding cfg_uc (mb : Ppxlib.module_binding) =
       let* content = get_structure name mb in
       ok { cfg_uc with ty_mod' = Some content }
   | Some name when String.equal "Frequencies" name ->
-      let* content = get_structure name mb in
-      let open Ast_pattern in
-      let destruct =
-        pstr_value drop
-          (value_binding ~constraint_:drop ~pat:(ppat_var __') ~expr:(eint __)
-          ^:: nil)
-      and error stri =
-        let loc = stri.pstr_loc in
-        error (Ill_formed_frequency, loc)
-      in
-      let aux acc stri =
-        parse destruct Location.none
-          ~on_error:(Fun.const @@ error stri)
-          stri
-          (fun name freq ->
-            ok
-              {
-                acc with
-                frequencies' = Frequencies.(add seq name freq acc.frequencies');
-              })
-      in
-      fold_left aux cfg_uc content
+      get_frequencies cfg_uc Frequencies.seq name mb
   | _ -> ok cfg_uc
 
 let scan_config cfg_uc config_mod =
