@@ -457,20 +457,29 @@ let arb_cmd config =
   | None -> arb_cmd_gen Gen config
   | Some stri -> Fun.const @@ Reserr.ok stri
 
-let arb_cmd_seq config =
-  let pat = pvar "arb_cmd_seq" and expr = evar "arb_cmd" in
-  let default = pstr_value Nonrecursive [ value_binding ~pat ~expr ] in
-  Option.value ~default config.Cfg.arb_cmd_seq
+let arb_cmd_domain_mode which config =
+  let lens = lens_from_which which
+  and pat = pat_from_which which
+  and expr = evar "arb_cmd"
+  and opt_stri =
+    match which with
+    | Gen -> assert false
+    | Seq -> config.Cfg.arb_cmd_seq
+    | Dom0 -> config.Cfg.arb_cmd_dom0
+    | Dom1 -> config.Cfg.arb_cmd_dom1
+  in
+  match opt_stri with
+  | None ->
+      if F.(is_empty lens config.Cfg.frequencies) then
+        Fun.const
+        @@ Reserr.ok
+        @@ pstr_value Nonrecursive [ value_binding ~pat ~expr ]
+      else arb_cmd_gen which config
+  | Some stri -> Fun.const @@ Reserr.ok stri
 
-let arb_cmd_dom0 config =
-  let pat = pvar "arb_cmd_dom0" and expr = evar "arb_cmd" in
-  let default = pstr_value Nonrecursive [ value_binding ~pat ~expr ] in
-  Option.value ~default config.Cfg.arb_cmd_dom0
-
-let arb_cmd_dom1 config =
-  let pat = pvar "arb_cmd_dom1" and expr = evar "arb_cmd" in
-  let default = pstr_value Nonrecursive [ value_binding ~pat ~expr ] in
-  Option.value ~default config.Cfg.arb_cmd_dom1
+let arb_cmd_seq = arb_cmd_domain_mode Seq
+let arb_cmd_dom0 = arb_cmd_domain_mode Dom0
+let arb_cmd_dom1 = arb_cmd_domain_mode Dom1
 
 let run_case config sut_name value =
   let lhs = mk_cmd_pattern value in
@@ -1776,10 +1785,12 @@ let stm config ir =
   in
   let sut_defs = sut_defs ir in
   let state_defs = state_defs ir in
-  let arb_cmds =
+  let* arb_cmds =
     if config.domain then
-      List.map (fun f -> f config) [ arb_cmd_seq; arb_cmd_dom0; arb_cmd_dom1 ]
-    else []
+      traverse
+        (fun f -> f config ir)
+        [ arb_cmd_seq; arb_cmd_dom0; arb_cmd_dom1 ]
+    else ok []
   in
   let spec_expr =
     pmod_structure
