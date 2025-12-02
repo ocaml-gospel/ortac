@@ -1,5 +1,7 @@
 # Unreleased
 
+- [QCheck-STM] Allow for user to defined frequencies per domain
+  [\#365](https://github.com/ocaml-gospel/ortac/pull/365)
 - Pin Gospel version 0.3.1.dev
   [\#364](https://github.com/ocaml-gospel/ortac/pull/364)
 - [Wrapper] Fixes field access in checks clauses
