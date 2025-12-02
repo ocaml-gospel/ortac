@@ -12,10 +12,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set-up OCaml 5.0
+      - name: Install OCaml compiler
         uses: ocaml/setup-ocaml@v3
         with:
-          ocaml-compiler: "5.0"
+          ocaml-compiler: 5.3
           dune-cache: true
 
       - name: Install dependencies
@@ -28,7 +28,7 @@ jobs:
         uses: actions/configure-pages@v4
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: _build/default/_doc/_html
 
