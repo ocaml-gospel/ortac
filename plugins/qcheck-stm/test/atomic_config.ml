@@ -7,6 +7,10 @@ module Gen = struct
   let int = small_int
 end
 
+module Frequencies_dom1 = struct
+  let get = 2
+end
+
 let arb_cmd_dom0 _ =
   let open QCheck in
   make ~print:show_cmd
@@ -24,5 +28,3 @@ let arb_cmd_dom0 _ =
          (1, pure Incr);
          (1, pure Decr);
        ])
-
-let arb_cmd_dom1 = arb_cmd_dom0
