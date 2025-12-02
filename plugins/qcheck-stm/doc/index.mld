@@ -6,7 +6,7 @@ The [qcheck-stm] plugin for [ortac] (called Ortac/QCheck-STM in order to avoid
 ambiguities) generates a standalone executable using
 {{:https://ocaml-multicore.github.io/multicoretests/ }QCheck-STM} to perform
 model-based state-machine testing of a module, building up the model from its
-{{: https://ocaml-gospel.github.io/gospel/ }Gospel} specifications.
+{{:https://ocaml-gospel.github.io/gospel/ }Gospel} specifications.
 
 In order to be able to generate the STM module, the plugin will need five
 pieces of information:
@@ -48,7 +48,7 @@ type 'a t
 we can see the Gospel specifications under the type declaration, in the
 special Gospel comments. These specifications give two models to the type, one
 non mutable and one mutable. These models are necessary (or at least some
-models) in order to give enough information to the [qcheck-stm] plugin to build
+model) in order to give enough information to the [qcheck-stm] plugin to build
 the functional {e state} that QCheck-STM will be using. This item is then
 bringing two needed pieces of information: what are the type of the [SUT] and
 the type of the [state].
@@ -175,6 +175,9 @@ The other information we can put in the configuration file are:
     {li custom [STM.ty] extensions and its functional constructors in a [Ty]
     module}
     {li custom frequencies to be used by [QCheck] in a [Frequencies] module}
+    {li {b or}, if we use the Domain mode, custom frequencies to be used by
+    [QCheck] in a [Frequencies_seq], a [Frequencies_dom0] and a
+    [Frequencies_dom1] modules}
     {li custom [arb_cmd], [arb_cmd_seq], [arb_cmd_dom0] and [arb_cmd_dom1]
     definition }}
 
@@ -200,7 +203,7 @@ The [Ty] module should contain an [STM.ty] extension and a corresponding
 [STM.ty_show] smart constructor for each of these types. An ['a STM.ty_show] is
 a pair of an ['a ty] value and an ['a -> string] function.
 
-The [Frequencies] module should contain value declarations of the form [let
+The [Frequencies*] modules should contain value declarations of the form [let
 <value_name> = <int literal>] where [<value_name>] is the name of a function
 from the interface file we want to test.
 
