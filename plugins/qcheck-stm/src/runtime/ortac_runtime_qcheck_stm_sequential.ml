@@ -35,7 +35,7 @@ module Make (Spec : Spec) = struct
     | c :: cs -> (
         let res = Spec.run c sut in
         let s' = Spec.next_state c s in
-        let call = ortac_show_cmd c s' (cs = []) res in
+        let call = lazy (ortac_show_cmd c s' (cs = []) res) in
         (* This functor will be called after a modified postcond has been
            defined, returning a list of 3-plets containing the command, the
            term and the location *)

@@ -22,7 +22,7 @@ type t = {
 }
 (** Information for the bug report in case of test failure *)
 
-type trace = { call : string; res : res }
+type trace = { call : string lazy_t; res : res }
 
 val report :
   string ->

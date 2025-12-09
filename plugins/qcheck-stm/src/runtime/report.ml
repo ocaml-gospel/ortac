@@ -14,7 +14,7 @@ type t = {
   terms : (string * Ortac_runtime.location) list;
 }
 
-type trace = { call : string; res : res }
+type trace = { call : string lazy_t; res : res }
 
 let report mod_name init_sut exp_res cmd terms =
   { mod_name; init_sut; exp_res; cmd; terms }
@@ -62,10 +62,10 @@ let pp_terms ppf err =
 let pp_traces assert_flag exp_res =
   let rec aux ppf = function
     | [ { call; res } ] when assert_flag ->
-        pf ppf "%s@\n%a(* returned %s *)@\n" call pp_expected_result exp_res
-          (show_res res)
+        pf ppf "%s@\n%a(* returned %s *)@\n" (Lazy.force call)
+          pp_expected_result exp_res (show_res res)
     | { call; res } :: xs ->
-        pf ppf "%s@\n(* returned %s *)@\n" call (show_res res);
+        pf ppf "%s@\n(* returned %s *)@\n" (Lazy.force call) (show_res res);
         aux ppf xs
     | _ -> ()
   in

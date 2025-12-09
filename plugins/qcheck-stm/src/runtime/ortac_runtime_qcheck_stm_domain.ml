@@ -79,13 +79,15 @@ module MakeExt (Spec : SpecExtOrtac) = struct
   let check_obs ortac_show_cmd postcond =
     let postcond pos cmd state res =
       let f report =
-        let call = ortac_show_cmd cmd (Spec.next_state cmd state) true res in
+        let call =
+          lazy (ortac_show_cmd cmd (Spec.next_state cmd state) true res)
+        in
         (start_traces pos call res, report)
       in
       Option.map f @@ postcond cmd state res
     in
     let mk_trace pos last cmd state res =
-      let call = ortac_show_cmd cmd state last res in
+      let call = lazy (ortac_show_cmd cmd state last res) in
       (pos, { call; res })
     in
     let trace_suffix pos state cs =
@@ -93,7 +95,7 @@ module MakeExt (Spec : SpecExtOrtac) = struct
         | [] -> []
         | (cmd, res) :: tail ->
             let state' = Spec.next_state cmd state in
-            let call = ortac_show_cmd cmd state' (tail = []) res in
+            let call = lazy (ortac_show_cmd cmd state' (tail = []) res) in
             { call; res } :: aux state' tail
       in
       (pos, aux state cs)
@@ -192,9 +194,10 @@ module MakeExt (Spec : SpecExtOrtac) = struct
     let open Fmt in
     let rec aux ppf = function
       | [ { call; res } ] ->
-          pf ppf "%s in@\n(* returned %s *)@\n r" call (show_res res)
+          pf ppf "%s in@\n(* returned %s *)@\n r" (Lazy.force call)
+            (show_res res)
       | { call; res } :: xs ->
-          pf ppf "%s in@\n(* returned %s *)@\n" call (show_res res);
+          pf ppf "%s in@\n(* returned %s *)@\n" (Lazy.force call) (show_res res);
           aux ppf xs
       | _ -> ()
     in
