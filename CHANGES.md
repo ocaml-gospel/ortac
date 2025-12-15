@@ -1,5 +1,7 @@
 # Unreleased
 
+- [QCheck-STM] Make traces lazy in bug report
+  [\#369](https://github.com/ocaml-gospel/ortac/pull/369)
 - [Examples] Add Saturn mpsc examples
   [\#367](https://github.com/ocaml-gospel/ortac/pull/367)
 - [QCheck-STM] Allow for user to defined frequencies per domain
