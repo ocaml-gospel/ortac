@@ -514,7 +514,7 @@ let arb_cmd_seq = arb_cmd_gen Seq
 let arb_cmd_dom0 = arb_cmd_gen Dom0
 let arb_cmd_dom1 = arb_cmd_gen Dom1
 
-let run_case config sut_name value =
+let run_case config cmd_name sut_name value =
   let lhs = mk_cmd_pattern value in
   let open Reserr in
   let* rhs =
@@ -573,17 +573,26 @@ let run_case config sut_name value =
       List.fold_right aux suts body
     in
     let pushes =
-      (* If concurrent, don't push *)
-      if Cfg.((not config.domain) && does_return_sut config value.ty) then
-        (* We can only push a sut if there was no exception *)
+      if Cfg.(does_return_sut config value.ty) then
+        (* We can only push a sut if in sequential prefix and there was no
+           exception *)
         if may_raise_exception value then
           [
             [%expr
               match [%e evar call_res] with
-              | Ok res -> SUT.push [%e evar sut_name] res
+              | Ok res ->
+                  if [%e pexp_field (evar cmd_name) (lident "flag")] = Seq then
+                    SUT.push [%e evar sut_name] res
+                  else ()
               | Error _ -> ()];
           ]
-        else [ [%expr SUT.push [%e evar sut_name] [%e evar call_res]] ]
+        else
+          [
+            [%expr
+              if [%e pexp_field (evar cmd_name) (lident "flag")] = Seq then
+                SUT.push [%e evar sut_name] [%e evar call_res]
+              else ()];
+          ]
       else []
     in
     let tail = List.fold_right pexp_sequence pushes (evar call_res) in
@@ -602,7 +611,7 @@ let run config ir =
   let cmd_name = gen_symbol ~prefix:"cmd" () in
   let sut_name = gen_symbol ~prefix:"sut" () in
   let open Reserr in
-  let* cases = promote_map (run_case config sut_name) ir.values in
+  let* cases = promote_map (run_case config cmd_name sut_name) ir.values in
   let body = pexp_match (eaccess_raw_cmd @@ evar cmd_name) cases in
   let pat = pvar "run" in
   let expr = efun [ (Nolabel, pvar cmd_name); (Nolabel, pvar sut_name) ] body in
@@ -623,7 +632,7 @@ let pop_states state_ident value =
     value.sut_vars
   |> List.split
 
-let next_state_case state config state_ident nb_models value =
+let next_state_case state config cmd_name state_ident nb_models value =
   let state_var = str_of_ident state_ident |> evar in
   let lhs = mk_cmd_pattern value in
   let open Reserr in
@@ -725,11 +734,15 @@ let next_state_case state config state_ident nb_models value =
           next_state_vars
       in
       let push_expr =
-        (* If concurrent, don't push *)
-        if Cfg.((not config.domain) && does_return_sut config value.ty) then
+        (* If concurrent, don't push the new SUT*)
+        if Cfg.(does_return_sut config value.ty) then
           let ret_id = List.hd value.ret in
           let ret_var = List.assoc ret_id next_vars_assoc in
-          eapply (qualify [ "Model" ] "push") [ push_expr; evar ret_var ]
+          pexp_ifthenelse
+            (eapply (evar "=")
+               [ pexp_field (evar cmd_name) (lident "flag"); evar "Seq" ])
+            (eapply (qualify [ "Model" ] "push") [ push_expr; evar ret_var ])
+            (Some push_expr)
         else push_expr
       in
       let new_state = pexp_let Nonrecursive vbs_next_states push_expr in
@@ -756,7 +769,9 @@ let next_state config ir =
   let* idx_cases =
     promote_map
       (fun v ->
-        let* i, c = next_state_case ir.state config state_ident nb_models v in
+        let* i, c =
+          next_state_case ir.state config cmd_name state_ident nb_models v
+        in
         ok ((v.id, i), c))
       ir.values
   in
@@ -1856,14 +1871,12 @@ let stm config ir =
   let* config, ghost_functions = ghost_functions config ir.ghost_functions in
   let warn = [%stri [@@@ocaml.warning "-26-27-69-32-34-37-38"]] in
   let raw_cmd_type = raw_cmd_type ir in
-  (* let cmd = cmd_type ir in *)
   let* cmd_show = cmd_show config ir in
   let* idx, next_state = next_state config ir in
   let* postcond = postcond config idx ir in
   let* precond = precond config ir in
   let* run = run config ir in
   let* gen_cmd = gen_cmd config ir in
-  (* let* gen_raw_cmd = gen_raw_cmd_from_which Gen config ir in *)
   let* arb_cmd = arb_cmd in
   let* check_init_state = check_init_state config ir in
   let* ortac_show = ortac_cmd_show config ir in

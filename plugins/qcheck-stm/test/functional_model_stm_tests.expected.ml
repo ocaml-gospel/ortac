@@ -112,7 +112,9 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__007_ 0) t_1__009_
+          if cmd__006_.flag = Seq
+          then Model.push (Model.drop_n state__007_ 0) t_1__009_
+          else Model.drop_n state__007_ 0
       | Add (a_1, b_1) ->
           let t_2__010_ = Model.get state__007_ 0 in
           let t_2__011_ =
@@ -154,7 +156,10 @@ module Spec =
           Res
             (sut,
               (let res__021_ = empty () in
-               (SUT.push sut__020_ res__021_; res__021_)))
+               (if cmd__019_.flag = Seq
+                then SUT.push sut__020_ res__021_
+                else ();
+                res__021_)))
       | Add (a_1, b_1) ->
           Res
             (unit,

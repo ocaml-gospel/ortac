@@ -196,7 +196,9 @@ module Spec =
                                   }
                               })))
               } in
-          Model.drop_n state__007_ 0
+          if cmd__006_.flag = Seq
+          then Model.push (Model.drop_n state__007_ 0) r__009_
+          else Model.drop_n state__007_ 0
       | Get ->
           let r_1__010_ = Model.get state__007_ 0 in
           let r_1__011_ = r_1__010_ in
@@ -412,7 +414,14 @@ module Spec =
     let postcond _ _ _ = true
     let run cmd__053_ sut__054_ =
       match cmd__053_.raw_cmd with
-      | Make v -> Res (sut, (let res__055_ = make v in res__055_))
+      | Make v ->
+          Res
+            (sut,
+              (let res__055_ = make v in
+               (if cmd__053_.flag = Seq
+                then SUT.push sut__054_ res__055_
+                else ();
+                res__055_)))
       | Get ->
           Res
             (int,

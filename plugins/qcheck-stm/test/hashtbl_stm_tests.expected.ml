@@ -202,7 +202,9 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__007_ 0) h__009_
+          if cmd__006_.flag = Seq
+          then Model.push (Model.drop_n state__007_ 0) h__009_
+          else Model.drop_n state__007_ 0
       | Clear ->
           let h_1__010_ = Model.get state__007_ 0 in
           let h_1__011_ =
@@ -293,8 +295,11 @@ module Spec =
                               })))
               }
           and h1__016_ = h1__014_ in
-          Model.push (Model.push (Model.drop_n state__007_ 1) h1__016_)
-            h2__017_
+          if cmd__006_.flag = Seq
+          then
+            Model.push (Model.push (Model.drop_n state__007_ 1) h1__016_)
+              h2__017_
+          else Model.push (Model.drop_n state__007_ 1) h1__016_
       | Add (a_1, b_1) ->
           let h_3__018_ = Model.get state__007_ 0 in
           let h_3__019_ =
@@ -466,7 +471,10 @@ module Spec =
           Res
             (sut,
               (let res__074_ = create ~random size in
-               (SUT.push sut__073_ res__074_; res__074_)))
+               (if cmd__072_.flag = Seq
+                then SUT.push sut__073_ res__074_
+                else ();
+                res__074_)))
       | Clear ->
           Res
             (unit,
@@ -482,7 +490,10 @@ module Spec =
             (sut,
               (let h1__079_ = SUT.get sut__073_ 0 in
                let res__080_ = copy h1__079_ in
-               (SUT.push sut__073_ res__080_; res__080_)))
+               (if cmd__072_.flag = Seq
+                then SUT.push sut__073_ res__080_
+                else ();
+                res__080_)))
       | Add (a_1, b_1) ->
           Res
             (unit,

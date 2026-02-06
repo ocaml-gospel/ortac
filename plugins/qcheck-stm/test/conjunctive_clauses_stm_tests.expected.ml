@@ -128,7 +128,9 @@ module Spec =
                                     }
                                 })))
                 } in
-            Model.push (Model.drop_n state__007_ 0) t_1__009_
+            (if cmd__006_.flag = Seq
+             then Model.push (Model.drop_n state__007_ 0) t_1__009_
+             else Model.drop_n state__007_ 0)
           else state__007_
       | Set (i_1, a_2) ->
           let t_2__010_ = Model.get state__007_ 0 in
@@ -190,7 +192,10 @@ module Spec =
             ((result sut exn),
               (let res__025_ = protect (fun () -> make i a_1) () in
                ((match res__025_ with
-                 | Ok res -> SUT.push sut__024_ res
+                 | Ok res ->
+                     if cmd__023_.flag = Seq
+                     then SUT.push sut__024_ res
+                     else ()
                  | Error _ -> ());
                 res__025_)))
       | Set (i_1, a_2) ->

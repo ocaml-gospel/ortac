@@ -152,7 +152,9 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__007_ 0) t_1__009_
+          if cmd__006_.flag = Seq
+          then Model.push (Model.drop_n state__007_ 0) t_1__009_
+          else Model.drop_n state__007_ 0
       | Add v ->
           let t_2__010_ = Model.get state__007_ 0 in
           let t_2__011_ =
@@ -407,8 +409,11 @@ module Spec =
                               })))
               }
           and t_11__032_ = t_11__030_ in
-          Model.push (Model.push (Model.drop_n state__007_ 1) t_11__032_)
-            r__033_
+          if cmd__006_.flag = Seq
+          then
+            Model.push (Model.push (Model.drop_n state__007_ 1) t_11__032_)
+              r__033_
+          else Model.push (Model.drop_n state__007_ 1) t_11__032_
       | Is_empty ->
           let t_12__034_ = Model.get state__007_ 0 in
           let t_12__035_ = t_12__034_ in
@@ -501,7 +506,10 @@ module Spec =
           Res
             (sut,
               (let res__116_ = create () in
-               (SUT.push sut__115_ res__116_; res__116_)))
+               (if cmd__114_.flag = Seq
+                then SUT.push sut__115_ res__116_
+                else ();
+                res__116_)))
       | Add v ->
           Res
             (unit,
@@ -556,7 +564,10 @@ module Spec =
             (sut,
               (let t_11__135_ = SUT.get sut__115_ 0 in
                let res__136_ = copy t_11__135_ in
-               (SUT.push sut__115_ res__136_; res__136_)))
+               (if cmd__114_.flag = Seq
+                then SUT.push sut__115_ res__136_
+                else ();
+                res__136_)))
       | Is_empty ->
           Res
             (bool,

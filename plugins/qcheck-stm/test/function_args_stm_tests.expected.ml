@@ -180,7 +180,9 @@ module Spec =
                                     }
                                 })))
                 } in
-            Model.push (Model.drop_n state__007_ 0) t_1__009_
+            (if cmd__006_.flag = Seq
+             then Model.push (Model.drop_n state__007_ 0) t_1__009_
+             else Model.drop_n state__007_ 0)
           else state__007_
       | Map f ->
           let input__010_ = Model.get state__007_ 0 in
@@ -241,8 +243,11 @@ module Spec =
                               })))
               }
           and input__012_ = input__010_ in
-          Model.push (Model.push (Model.drop_n state__007_ 1) input__012_)
-            output__013_
+          if cmd__006_.flag = Seq
+          then
+            Model.push (Model.push (Model.drop_n state__007_ 1) input__012_)
+              output__013_
+          else Model.push (Model.drop_n state__007_ 1) input__012_
     let precond cmd__019_ state__020_ =
       match cmd__019_.raw_cmd with | Make (len, c) -> true | Map f -> true
     let postcond _ _ _ = true
@@ -253,7 +258,10 @@ module Spec =
             ((result sut exn),
               (let res__023_ = protect (fun () -> make len c) () in
                ((match res__023_ with
-                 | Ok res -> SUT.push sut__022_ res
+                 | Ok res ->
+                     if cmd__021_.flag = Seq
+                     then SUT.push sut__022_ res
+                     else ()
                  | Error _ -> ());
                 res__023_)))
       | Map f ->
@@ -261,7 +269,10 @@ module Spec =
             (sut,
               (let input__024_ = SUT.get sut__022_ 0 in
                let res__025_ = map (QCheck.Fn.apply f) input__024_ in
-               (SUT.push sut__022_ res__025_; res__025_)))
+               (if cmd__021_.flag = Seq
+                then SUT.push sut__022_ res__025_
+                else ();
+                res__025_)))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()

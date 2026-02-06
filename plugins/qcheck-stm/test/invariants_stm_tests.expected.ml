@@ -121,7 +121,9 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__007_ 0) t_1__009_
+          if cmd__006_.flag = Seq
+          then Model.push (Model.drop_n state__007_ 0) t_1__009_
+          else Model.drop_n state__007_ 0
       | Push a_2 ->
           let t_2__010_ = Model.get state__007_ 0 in
           let t_2__011_ =
@@ -249,8 +251,11 @@ module Spec =
                               })))
               }
           and t_3__018_ = t_3__016_ in
-          Model.push (Model.push (Model.drop_n state__007_ 1) t_3__018_)
-            r__019_
+          if cmd__006_.flag = Seq
+          then
+            Model.push (Model.push (Model.drop_n state__007_ 1) t_3__018_)
+              r__019_
+          else Model.push (Model.drop_n state__007_ 1) t_3__018_
       | Sub (i, n) ->
           let t_4__020_ = Model.get state__007_ 0 in
           if
@@ -329,8 +334,11 @@ module Spec =
                                 })))
                 }
             and t_4__022_ = t_4__020_ in
-            Model.push (Model.push (Model.drop_n state__007_ 1) t_4__022_)
-              r_1__023_
+            (if cmd__006_.flag = Seq
+             then
+               Model.push (Model.push (Model.drop_n state__007_ 1) t_4__022_)
+                 r_1__023_
+             else Model.push (Model.drop_n state__007_ 1) t_4__022_)
           else state__007_
     let precond cmd__049_ state__050_ =
       match cmd__049_.raw_cmd with
@@ -346,7 +354,10 @@ module Spec =
           Res
             (sut,
               (let res__053_ = create a_1 in
-               (SUT.push sut__052_ res__053_; res__053_)))
+               (if cmd__051_.flag = Seq
+                then SUT.push sut__052_ res__053_
+                else ();
+                res__053_)))
       | Push a_2 ->
           Res
             (unit,
@@ -363,14 +374,20 @@ module Spec =
             (sut,
               (let t_3__059_ = SUT.get sut__052_ 0 in
                let res__060_ = copy t_3__059_ in
-               (SUT.push sut__052_ res__060_; res__060_)))
+               (if cmd__051_.flag = Seq
+                then SUT.push sut__052_ res__060_
+                else ();
+                res__060_)))
       | Sub (i, n) ->
           Res
             ((result sut exn),
               (let t_4__061_ = SUT.get sut__052_ 0 in
                let res__062_ = protect (fun () -> sub t_4__061_ i n) () in
                ((match res__062_ with
-                 | Ok res -> SUT.push sut__052_ res
+                 | Ok res ->
+                     if cmd__051_.flag = Seq
+                     then SUT.push sut__052_ res
+                     else ()
                  | Error _ -> ());
                 res__062_)))
   end
