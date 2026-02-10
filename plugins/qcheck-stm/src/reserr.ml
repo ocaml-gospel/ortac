@@ -16,7 +16,7 @@ type W.kind +=
   | Function_arity of string
   | Functional_argument of string
   | Ghost_values of (string * [ `Arg | `Ret ])
-  | Ill_formed_frequency
+  | Ill_formed_weight
   | Impossible_init_state_generation of init_state_error
   | Impossible_term_substitution of
       [ `Never | `New | `Old | `NotModel | `OutOfScope ]
@@ -48,7 +48,7 @@ let level kind =
   match kind with
   | Constant_value _ | Ensures_not_found_for_next_state _
   | Ensures_not_found_for_ret_sut _ | Function_arity _ | Functional_argument _
-  | Ghost_values _ | Ill_formed_frequency | Impossible_term_substitution _
+  | Ghost_values _ | Ill_formed_weight | Impossible_term_substitution _
   | Incompatible_type _ | Incomplete_ret_val_computation _ | No_spec _
   | Returning_nested_sut _ | Sut_as_type_inst _ | Sut_in_tuple _
   | Third_order_function_argument _ | Tuple_arity _ | Type_not_supported _
@@ -95,10 +95,10 @@ let pp_kind ppf kind =
       pf ppf "Skipping %s:@ %a%a%a" id text "functions with a ghost " text
         (match k with `Arg -> "argument" | `Ret -> "returned value")
         text " are not supported"
-  | Ill_formed_frequency ->
+  | Ill_formed_weight ->
       pf ppf
-        "Ill formed frequency configuration is ignored.@\n\
-         Frequencies should be configured as follow:@\n\
+        "Ill formed weight configuration is ignored.@\n\
+         Weight should be configured as follow:@\n\
          @ @ let <function_name> = int litteral>"
   | Incompatible_type (v, t) ->
       pf ppf "Skipping %s:@ %a%s" v text

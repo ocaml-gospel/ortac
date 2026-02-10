@@ -3,7 +3,7 @@ type sut = int t
 let init_sut = empty ()
 
 module Gen = struct
-  let int = small_signed_int
+  let int = nat_small
   let elt gen = elt <$> gen
 end
 

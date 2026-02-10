@@ -1,8 +1,8 @@
 File "all_warnings_config.ml", line 9, characters 2-18:
 9 |   let lenght = bob
       ^^^^^^^^^^^^^^^^
-Warning: Ill formed frequency configuration is ignored.
-         Frequencies should be configured as follow:
+Warning: Ill formed weight configuration is ignored.
+         Weight should be configured as follow:
            let <function_name> = int litteral>.
 File "all_warnings.mli", line 12, characters 0-52:
 12 | val constant : unit

@@ -4,10 +4,10 @@ let init_sut = create ()
 
 module Gen = struct
   let int = nat
-  let list = small_list
+  let list = list_small
 end
 
-module Frequencies_dom1 = struct
+module Weights_dom1 = struct
   let create = 0
   let of_list = 0
   let is_empty = 0

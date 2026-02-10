@@ -46,11 +46,9 @@ module Spec =
       struct
         include QCheck
         module Gen =
-          struct
-            include Gen
-            let int = small_signed_int
-            let elt gen = elt <$> gen
-          end
+          struct include Gen
+                 let int = nat_small
+                 let elt gen = elt <$> gen end
       end
     module Util =
       struct
@@ -96,7 +94,7 @@ module Spec =
       let open QCheck in
         make ~print:show_cmd
           (let open Gen in
-             frequency
+             oneof_weighted
                [(1, ((pure (fun __arg0 -> Proj __arg0)) <*> (elt char)));
                (1, ((pure (fun () -> Empty ())) <*> unit));
                (1, ((pure (fun e -> Push e)) <*> (elt int)));

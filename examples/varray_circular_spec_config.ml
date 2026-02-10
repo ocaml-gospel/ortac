@@ -9,7 +9,7 @@ module Pp = struct
 end
 
 module Gen = struct
-  let int = small_signed_int
+  let int = int_small
   let elt gen = gen
 end
 

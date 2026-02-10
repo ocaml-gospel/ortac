@@ -74,7 +74,7 @@ module Spec =
       struct
         include QCheck
         module Gen = struct include Gen
-                            let int = small_signed_int end
+                            let int = nat_small end
       end
     type _ ty +=  
       | Integer: Ortac_runtime.integer ty 
@@ -100,10 +100,10 @@ module Spec =
       let open QCheck in
         make ~print:show_cmd
           (let open Gen in
-             frequency
+             oneof_weighted
                [(1,
-                  (((pure (fun len c -> Make (len, c))) <*> small_signed_int)
-                     <*> char));
+                  (((pure (fun len c -> Make (len, c))) <*> nat_small) <*>
+                     char));
                (1,
                  ((pure (fun f -> Map f)) <*>
                     (fun1 Observable.char QCheck.char).gen))])

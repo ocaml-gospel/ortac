@@ -73,10 +73,10 @@ module Spec =
       let open QCheck in
         make ~print:show_cmd
           (let open Gen in
-             frequency
+             oneof_weighted
                [(1,
-                  (((pure (fun i a_1 -> Make (i, a_1))) <*> small_signed_int)
-                     <*> char));
+                  (((pure (fun i a_1 -> Make (i, a_1))) <*> nat_small) <*>
+                     char));
                (1,
                  (((pure (fun i_1 a_2 -> Set (i_1, a_2))) <*> int) <*> char))])
     let next_state cmd__002_ state__003_ =
