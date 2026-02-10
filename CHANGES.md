@@ -1,5 +1,7 @@
 # Unreleased
 
+- [QCheck-STM] Update to QCheck 0.90 great renaming
+  [\#370](https://github.com/ocaml-gospel/ortac/pull/370)
 - [QCheck-STM] Make traces lazy in bug report
   [\#369](https://github.com/ocaml-gospel/ortac/pull/369)
 - [Examples] Add Saturn mpsc examples
