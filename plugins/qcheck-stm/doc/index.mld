@@ -174,10 +174,10 @@ The other information we can put in the configuration file are:
     {li custom [STM] printers in a [Pp] module}
     {li custom [STM.ty] extensions and its functional constructors in a [Ty]
     module}
-    {li custom frequencies to be used by [QCheck] in a [Frequencies] module}
-    {li {b or}, if we use the Domain mode, custom frequencies to be used by
-    [QCheck] in a [Frequencies_seq], a [Frequencies_dom0] and a
-    [Frequencies_dom1] modules}
+    {li custom weights to be used by [QCheck] in a [Weights] module}
+    {li {b or}, if we use the Domain mode, custom weights to be used by
+    [QCheck] in a [Weights_seq], a [Weights_dom0] and a
+    [Weights_dom1] modules}
     {li custom [arb_cmd], [arb_cmd_seq], [arb_cmd_dom0] and [arb_cmd_dom1]
     definition }}
 
@@ -203,7 +203,7 @@ The [Ty] module should contain an [STM.ty] extension and a corresponding
 [STM.ty_show] smart constructor for each of these types. An ['a STM.ty_show] is
 a pair of an ['a ty] value and an ['a -> string] function.
 
-The [Frequencies*] modules should contain value declarations of the form [let
+The [Weights*] modules should contain value declarations of the form [let
 <value_name> = <int literal>] where [<value_name>] is the name of a function
 from the interface file we want to test.
 
