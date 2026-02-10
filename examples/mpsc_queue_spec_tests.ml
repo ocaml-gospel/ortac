@@ -170,7 +170,7 @@ module Spec =
         include QCheck
         module Gen = struct include Gen
                             let int = nat
-                            let list = small_list end
+                            let list = list_small end
       end
     type _ ty +=  
       | Integer: Ortac_runtime.integer ty 
@@ -223,10 +223,9 @@ module Spec =
       let open QCheck in
         make ~print:show_cmd
           (let open Gen in
-             frequency
+             oneof_weighted
                [(1, ((pure (fun () -> Create ())) <*> unit));
-               (1,
-                 ((pure (fun xs -> Of_list xs)) <*> (list small_signed_int)));
+               (1, ((pure (fun xs -> Of_list xs)) <*> (list nat_small)));
                (1, ((pure (fun a_2 -> Push a_2)) <*> int));
                (1, ((pure (fun xs_1 -> Push_all xs_1)) <*> (list int)));
                (1, (pure Is_empty));
@@ -243,10 +242,9 @@ module Spec =
       let open QCheck in
         make ~print:show_cmd
           (let open Gen in
-             frequency
+             oneof_weighted
                [(0, ((pure (fun () -> Create ())) <*> unit));
-               (0,
-                 ((pure (fun xs -> Of_list xs)) <*> (list small_signed_int)));
+               (0, ((pure (fun xs -> Of_list xs)) <*> (list nat_small)));
                (1, ((pure (fun a_2 -> Push a_2)) <*> int));
                (1, ((pure (fun xs_1 -> Push_all xs_1)) <*> (list int)));
                (0, (pure Is_empty));

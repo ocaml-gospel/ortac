@@ -4,7 +4,7 @@ let init_sut = make 42
 
 module Gen = struct
   (* to avoid overflow *)
-  let int = small_int
+  let int = nat_small
 end
 
 module Frequencies_dom1 = struct
@@ -15,7 +15,7 @@ let arb_cmd_dom0 _ =
   let open QCheck in
   make ~print:show_cmd
     (let open Gen in
-     frequency
+     oneof_weighted
        [
          (1, pure Get);
          (1, pure (fun v_1 -> Set v_1) <*> int);

@@ -69,8 +69,8 @@ module Spec =
       let open QCheck in
         make ~print:show_cmd
           (let open Gen in
-             frequency
-               [(1, ((pure (fun v -> Make v)) <*> small_signed_int));
+             oneof_weighted
+               [(1, ((pure (fun v -> Make v)) <*> nat_small));
                (1, (pure Get));
                (1, ((pure (fun v_1 -> Set v_1)) <*> int));
                (1, (pure Incr))])

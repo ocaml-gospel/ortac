@@ -4,5 +4,5 @@ let init_sut = create ()
 
 module Gen = struct
   let int = nat
-  let list = small_list
+  let list = list_small
 end

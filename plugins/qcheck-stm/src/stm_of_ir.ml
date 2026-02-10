@@ -283,7 +283,7 @@ let exp_of_core_type ?(use_small = false) inst typ =
         let constr_str = evar constr_id in
         match xs with
         | [] ->
-            if constr_id = "int" && use_small then evar "small_signed_int" |> ok
+            if constr_id = "int" && use_small then evar "nat_small" |> ok
             else constr_str |> ok
         | xs ->
             pexp_apply constr_str
@@ -441,13 +441,13 @@ let arb_cmd_gen which config ir =
   let let_open str e =
     pexp_open Ast_helper.(Opn.mk (Mod.ident (lident str |> noloc))) e
   in
-  let frequency =
-    let_open "Gen" (pexp_apply (evar "frequency") [ (Nolabel, cmds) ])
+  let oneof_weighted =
+    let_open "Gen" (pexp_apply (evar "oneof_weighted") [ (Nolabel, cmds) ])
   in
   let body =
     let_open "QCheck"
       (pexp_apply (evar "make")
-         [ (Labelled "print", evar "show_cmd"); (Nolabel, frequency) ])
+         [ (Labelled "print", evar "show_cmd"); (Nolabel, oneof_weighted) ])
   in
   let expr = efun [ (Nolabel, ppat_any (* for now we don't use it *)) ] body in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok

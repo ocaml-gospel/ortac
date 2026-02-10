@@ -46,7 +46,7 @@ module Spec =
       struct
         include QCheck
         module Gen = struct include Gen
-                            let int = small_int end
+                            let int = nat_small end
       end
     type _ ty +=  
       | Integer: Ortac_runtime.integer ty 
@@ -88,8 +88,8 @@ module Spec =
       let open QCheck in
         make ~print:show_cmd
           (let open Gen in
-             frequency
-               [(1, ((pure (fun v -> Make v)) <*> small_signed_int));
+             oneof_weighted
+               [(1, ((pure (fun v -> Make v)) <*> nat_small));
                (1, (pure Get));
                (1, ((pure (fun v_1 -> Set v_1)) <*> int));
                (1, ((pure (fun v_2 -> Exchange v_2)) <*> int));
@@ -105,7 +105,7 @@ module Spec =
       let open QCheck in
         make ~print:show_cmd
           (let open Gen in
-             frequency
+             oneof_weighted
                [(1, (pure Get));
                (1, ((pure (fun v_1 -> Set v_1)) <*> int));
                (1, ((pure (fun v_2 -> Exchange v_2)) <*> int));
@@ -120,8 +120,8 @@ module Spec =
       let open QCheck in
         make ~print:show_cmd
           (let open Gen in
-             frequency
-               [(1, ((pure (fun v -> Make v)) <*> small_signed_int));
+             oneof_weighted
+               [(1, ((pure (fun v -> Make v)) <*> nat_small));
                (2, (pure Get));
                (1, ((pure (fun v_1 -> Set v_1)) <*> int));
                (1, ((pure (fun v_2 -> Exchange v_2)) <*> int));

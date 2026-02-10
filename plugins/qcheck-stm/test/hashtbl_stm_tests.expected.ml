@@ -145,12 +145,14 @@ module Spec =
                    ((Sequence.map fst) @@
                       (Model.get state 0).ModelElt.contents) in
              let char =
-               match keys with | [] -> char | xs -> oneof [char; oneofl xs] in
-             frequency
+               match keys with
+               | [] -> char
+               | xs -> oneof [char; oneof_list xs] in
+             oneof_weighted
                [(1,
                   (((pure (fun random -> fun size -> Create (random, size)))
                       <*> bool)
-                     <*> small_signed_int));
+                     <*> nat_small));
                (1, (pure Clear));
                (1, (pure Reset));
                (1, (pure Copy));

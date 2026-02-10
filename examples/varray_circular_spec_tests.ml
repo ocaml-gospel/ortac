@@ -109,7 +109,7 @@ module Spec =
         include QCheck
         module Gen =
           struct include Gen
-                 let int = small_signed_int
+                 let int = int_small
                  let elt gen = gen end
       end
     module Util =
@@ -200,7 +200,7 @@ module Spec =
       let open QCheck in
         make ~print:show_cmd
           (let open Gen in
-             frequency
+             oneof_weighted
                [(1, ((pure (fun x -> Push_back x)) <*> (elt char)));
                (1, (pure Pop_back));
                (1, ((pure (fun x_1 -> Push_front x_1)) <*> (elt char)));
@@ -215,8 +215,8 @@ module Spec =
                  (((pure (fun i_5 v -> Set (i_5, v))) <*> int) <*> (elt char)));
                (1, (pure Length));
                (1,
-                 (((pure (fun n x_3 -> Make (n, x_3))) <*> small_signed_int)
-                    <*> (elt char)));
+                 (((pure (fun n x_3 -> Make (n, x_3))) <*> nat_small) <*>
+                    (elt char)));
                (1, ((pure (fun () -> Empty ())) <*> unit));
                (1, (pure Is_empty));
                (1, (pure Append));
