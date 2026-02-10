@@ -2,7 +2,7 @@ open Gospel
 open Ortac_core
 open Ppxlib
 
-module FrequenciesMap = struct
+module WeightsMap = struct
   module M = Map.Make (String)
 
   type t = (int * location) M.t
@@ -18,18 +18,18 @@ module FrequenciesMap = struct
     let res = Option.value ~default:1 @@ Option.map fst @@ M.find_opt k m in
     (res, M.remove k m)
 
-  let unused m = List.map (fun (k, (_freq, loc)) -> (k, loc)) @@ M.bindings m
+  let unused m = List.map (fun (k, (_weight, loc)) -> (k, loc)) @@ M.bindings m
 end
 
-module Frequencies = struct
+module Weights = struct
   type t = {
-    arb_cmd_seq : FrequenciesMap.t;
-    arb_cmd_dom0 : FrequenciesMap.t;
-    arb_cmd_dom1 : FrequenciesMap.t;
+    arb_cmd_seq : WeightsMap.t;
+    arb_cmd_dom0 : WeightsMap.t;
+    arb_cmd_dom1 : WeightsMap.t;
   }
 
   let empty =
-    let open FrequenciesMap in
+    let open WeightsMap in
     { arb_cmd_seq = empty; arb_cmd_dom0 = empty; arb_cmd_dom1 = empty }
 
   type ('record, 'field) lens = {
@@ -52,20 +52,20 @@ module Frequencies = struct
     and set field record = { record with arb_cmd_dom1 = field } in
     { get; set }
 
-  let is_empty lens t = FrequenciesMap.is_empty @@ lens.get t
+  let is_empty lens t = WeightsMap.is_empty @@ lens.get t
 
   let over lens f t =
     let old = lens.get t in
     lens.set (f old) t
 
-  let add lens key value t = over lens (FrequenciesMap.add key value) t
+  let add lens key value t = over lens (WeightsMap.add key value) t
 
   let pop lens key t =
     let map = lens.get t in
-    let res, map = FrequenciesMap.pop key map in
+    let res, map = WeightsMap.pop key map in
     (res, lens.set map t)
 
-  let unused lens t = FrequenciesMap.unused @@ lens.get t
+  let unused lens t = WeightsMap.unused @@ lens.get t
 end
 
 type config_under_construction = {
@@ -79,7 +79,7 @@ type config_under_construction = {
   pp_mod' : Ppxlib.structure option;
   ty_mod' : Ppxlib.structure option;
   cleanup' : Ppxlib.structure_item option;
-  frequencies' : Frequencies.t;
+  weights' : Weights.t;
 }
 
 let config_under_construction =
@@ -93,7 +93,7 @@ let config_under_construction =
     gen_mod' = None;
     pp_mod' = None;
     ty_mod' = None;
-    frequencies' = Frequencies.empty;
+    weights' = Weights.empty;
     cleanup' = None;
   }
 
@@ -110,7 +110,7 @@ type t = {
   pp_mod : Ppxlib.structure option; (* Containing custom pretty printers *)
   ty_mod : Ppxlib.structure option; (* Containing custom STM.ty extensions *)
   cleanup : Ppxlib.structure_item option;
-  frequencies : Frequencies.t;
+  weights : Weights.t;
   module_prefix : string option;
   submodule : string option;
   domain : bool;
@@ -136,7 +136,7 @@ let mk_config context module_prefix submodule domain count cfg_uc =
   and gen_mod = cfg_uc.gen_mod'
   and pp_mod = cfg_uc.pp_mod'
   and ty_mod = cfg_uc.ty_mod'
-  and frequencies = cfg_uc.frequencies'
+  and weights = cfg_uc.weights'
   and cleanup = cfg_uc.cleanup' in
   ok
     {
@@ -151,7 +151,7 @@ let mk_config context module_prefix submodule domain count cfg_uc =
       gen_mod;
       pp_mod;
       ty_mod;
-      frequencies;
+      weights;
       cleanup;
       module_prefix;
       submodule;
@@ -286,7 +286,7 @@ let get_structure name mb =
       ok structure
   | _ -> error (Not_a_structure name, Location.none)
 
-let get_frequencies cfg_uc lens name mb =
+let get_weights cfg_uc lens name mb =
   let open Reserr in
   let* content = get_structure name mb in
   let open Ast_pattern in
@@ -296,18 +296,14 @@ let get_frequencies cfg_uc lens name mb =
       ^:: nil)
   and error stri =
     let loc = stri.pstr_loc in
-    error (Ill_formed_frequency, loc)
+    error (Ill_formed_weight, loc)
   in
   let aux acc stri =
     parse destruct Location.none
       ~on_error:(Fun.const @@ error stri)
       stri
-      (fun name freq ->
-        ok
-          {
-            acc with
-            frequencies' = Frequencies.(add lens name freq acc.frequencies');
-          })
+      (fun name weight ->
+        ok { acc with weights' = Weights.(add lens name weight acc.weights') })
   in
   fold_left aux cfg_uc content
 
@@ -328,14 +324,14 @@ let module_binding cfg_uc (mb : Ppxlib.module_binding) =
   | Some name when String.equal "Ty" name ->
       let* content = get_structure name mb in
       ok { cfg_uc with ty_mod' = Some content }
-  | Some name when String.equal "Frequencies" name ->
-      get_frequencies cfg_uc Frequencies.seq name mb
-  | Some name when String.equal "Frequencies_seq" name ->
-      get_frequencies cfg_uc Frequencies.seq name mb
-  | Some name when String.equal "Frequencies_dom0" name ->
-      get_frequencies cfg_uc Frequencies.dom0 name mb
-  | Some name when String.equal "Frequencies_dom1" name ->
-      get_frequencies cfg_uc Frequencies.dom1 name mb
+  | Some name when String.equal "Weights" name ->
+      get_weights cfg_uc Weights.seq name mb
+  | Some name when String.equal "Weights_seq" name ->
+      get_weights cfg_uc Weights.seq name mb
+  | Some name when String.equal "Weights_dom0" name ->
+      get_weights cfg_uc Weights.dom0 name mb
+  | Some name when String.equal "Weights_dom1" name ->
+      get_weights cfg_uc Weights.dom1 name mb
   | _ -> ok cfg_uc
 
 let scan_config cfg_uc config_mod =

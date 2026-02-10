@@ -3,7 +3,7 @@ open Ir
 open Ppxlib
 open Ortac_core.Builder
 module Ident = Gospel.Identifier.Ident
-module F = Cfg.Frequencies
+module Weight = Cfg.Weights
 
 let is_a_function ty =
   let open Ppxlib in
@@ -408,10 +408,10 @@ let arb_cmd_case config value =
 type which = Gen | Seq | Dom0 | Dom1
 
 let lens_from_which = function
-  | Gen -> F.seq
-  | Seq -> F.seq
-  | Dom0 -> F.dom0
-  | Dom1 -> F.dom1
+  | Gen -> Weight.seq
+  | Seq -> Weight.seq
+  | Dom0 -> Weight.dom0
+  | Dom1 -> Weight.dom1
 
 let pat_from_which = function
   | Gen -> pvar "arb_cmd"
@@ -427,15 +427,15 @@ let arb_cmd_gen which config ir =
   let lens = lens_from_which which and pat = pat_from_which which in
   let aux value (freq_map, acc) =
     let* gen = arb_cmd_case config value in
-    let freq, freq_map = F.pop lens (str_of_ident value.id) freq_map in
+    let freq, freq_map = Weight.pop lens (str_of_ident value.id) freq_map in
     ok @@ (freq_map, pexp_tuple [ eint freq; gen ] :: acc)
   in
   let* unused_freq, generators =
-    fold_right aux ir.values (config.frequencies, [])
+    fold_right aux ir.values (config.weights, [])
   in
   let* _ =
     promote_map (fun (name, loc) -> error (Unused_frequency name, loc))
-    @@ F.unused lens unused_freq
+    @@ Weight.unused lens unused_freq
   in
   let cmds = elist generators in
   let let_open str e =
@@ -470,7 +470,7 @@ let arb_cmd_domain_mode which config =
   in
   match opt_stri with
   | None ->
-      if F.(is_empty lens config.Cfg.frequencies) then
+      if Weight.(is_empty lens config.Cfg.weights) then
         Fun.const
         @@ Reserr.ok
         @@ pstr_value Nonrecursive [ value_binding ~pat ~expr ]

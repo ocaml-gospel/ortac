@@ -8,6 +8,6 @@ module Gen = struct
   let int = nat_small
 end
 
-module Frequencies = struct
+module Weights = struct
   let make = 0
 end

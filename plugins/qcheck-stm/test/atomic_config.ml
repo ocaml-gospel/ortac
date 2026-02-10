@@ -7,7 +7,7 @@ module Gen = struct
   let int = nat_small
 end
 
-module Frequencies_dom1 = struct
+module Weights_dom1 = struct
   let get = 2
 end
 
