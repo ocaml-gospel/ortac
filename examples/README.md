@@ -116,7 +116,7 @@ function is safe to be called from every body or only from the consumer is
 enforced by the QCheck-STM test framework.
 
 In order to inform the said test framework about how to use the functions, we
-provide the command generator some frequencies for the domain 1 which will not
+provide the command generator some weight for the domain 1 which will not
 be the consumer. This is done in the configuration file.
 
 The rest of the workflow is exactly the same as for the Treiber stack.
