@@ -65,6 +65,14 @@ module Spec =
           Format.asprintf "%s <sut> %a" "set" (Util.Pp.pp_int true) v_1
       | Incr -> Format.asprintf "%s <sut>" "incr"
     let cleanup _ = ()
+    let gen_cmd _ =
+      let open QCheck in
+        let open Gen in
+          oneof_weighted
+            [(1, ((pure (fun v -> Make v)) <*> nat_small));
+            (1, (pure Get));
+            (1, ((pure (fun v_1 -> Set v_1)) <*> int));
+            (1, (pure Incr))]
     let arb_cmd _ =
       let open QCheck in
         make ~print:show_cmd

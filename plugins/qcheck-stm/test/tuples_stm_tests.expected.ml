@@ -99,6 +99,19 @@ module Spec =
       | Size_tup -> Format.asprintf "%s <sut>" "size_tup"
       | Size_tup' -> Format.asprintf "%s <sut>" "size_tup'"
     let cleanup _ = ()
+    let gen_cmd _ =
+      let open QCheck in
+        let open Gen in
+          oneof_weighted
+            [(1, ((pure (fun () -> Create ())) <*> unit));
+            (1, (pure Clear));
+            (1, ((pure (fun tup -> Add tup)) <*> (tup2 char int)));
+            (1, ((pure (fun tup_1 -> Add' tup_1)) <*> (tup3 bool char int)));
+            (1,
+              ((pure (fun tup_2 -> Add'' tup_2)) <*>
+                 (tup2 bool (tup2 char int))));
+            (1, (pure Size_tup));
+            (1, (pure Size_tup'))]
     let arb_cmd _ =
       let open QCheck in
         make ~print:show_cmd

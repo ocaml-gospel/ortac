@@ -219,6 +219,22 @@ module Spec =
           Format.asprintf "protect (fun () -> %s <sut> %a)" "push_head"
             (Util.Pp.pp_int true) a_3
     let cleanup _ = ()
+    let gen_cmd _ =
+      let open QCheck in
+        let open Gen in
+          oneof_weighted
+            [(1, ((pure (fun () -> Create ())) <*> unit));
+            (1, ((pure (fun xs -> Of_list xs)) <*> (list nat_small)));
+            (1, ((pure (fun a_2 -> Push a_2)) <*> int));
+            (1, ((pure (fun xs_1 -> Push_all xs_1)) <*> (list int)));
+            (1, (pure Is_empty));
+            (1, (pure Close));
+            (1, (pure Pop_exn));
+            (1, (pure Pop_opt));
+            (1, (pure Drop_exn));
+            (1, (pure Peek_exn));
+            (1, (pure Peek_opt));
+            (1, ((pure (fun a_3 -> Push_head a_3)) <*> int))]
     let arb_cmd _ =
       let open QCheck in
         make ~print:show_cmd

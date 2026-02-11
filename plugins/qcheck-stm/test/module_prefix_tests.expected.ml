@@ -58,6 +58,10 @@ module Spec =
       match cmd__001_ with
       | Make a_1 -> Format.asprintf "%s %a" "make" (Util.Pp.pp_int true) a_1
     let cleanup _ = ()
+    let gen_cmd _ =
+      let open QCheck in
+        let open Gen in
+          oneof_weighted [(1, ((pure (fun a_1 -> Make a_1)) <*> nat_small))]
     let arb_cmd _ =
       let open QCheck in
         make ~print:show_cmd

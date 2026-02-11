@@ -84,6 +84,20 @@ module Spec =
       | Take_opt_l -> Format.asprintf "%s <sut>" "take_opt_l"
       | Take_opt_r -> Format.asprintf "%s <sut>" "take_opt_r"
     let cleanup _ = ()
+    let gen_cmd _ =
+      let open QCheck in
+        let open Gen in
+          oneof_weighted
+            [(1, ((pure (fun () -> Create ())) <*> unit));
+            (1, (pure Clear));
+            (1, (pure Is_empty));
+            (1, (pure Length));
+            (1, ((pure (fun a_1 -> Add_l a_1)) <*> int));
+            (1, ((pure (fun a_2 -> Add_r a_2)) <*> int));
+            (1, (pure Take_l));
+            (1, (pure Take_r));
+            (1, (pure Take_opt_l));
+            (1, (pure Take_opt_r))]
     let arb_cmd _ =
       let open QCheck in
         make ~print:show_cmd

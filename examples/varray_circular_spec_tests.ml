@@ -196,6 +196,42 @@ module Spec =
             "blit" (Util.Pp.pp_int true) src_pos (Util.Pp.pp_int true)
             dst_pos (Util.Pp.pp_int true) len_1
     let cleanup _ = ()
+    let gen_cmd _ =
+      let open QCheck in
+        let open Gen in
+          oneof_weighted
+            [(1, ((pure (fun x -> Push_back x)) <*> (elt char)));
+            (1, (pure Pop_back));
+            (1, ((pure (fun x_1 -> Push_front x_1)) <*> (elt char)));
+            (1, (pure Pop_front));
+            (1,
+              (((pure (fun i_1 x_2 -> Insert_at (i_1, x_2))) <*> int) <*>
+                 (elt char)));
+            (1, ((pure (fun i_2 -> Pop_at i_2)) <*> int));
+            (1, ((pure (fun i_3 -> Delete_at i_3)) <*> int));
+            (1, ((pure (fun i_4 -> Get i_4)) <*> int));
+            (1,
+              (((pure (fun i_5 v -> Set (i_5, v))) <*> int) <*> (elt char)));
+            (1, (pure Length));
+            (1,
+              (((pure (fun n x_3 -> Make (n, x_3))) <*> nat_small) <*>
+                 (elt char)));
+            (1, ((pure (fun () -> Empty ())) <*> unit));
+            (1, (pure Is_empty));
+            (1, (pure Append));
+            (1, (((pure (fun i_6 n_1 -> Sub (i_6, n_1))) <*> int) <*> int));
+            (1, (pure Copy));
+            (1,
+              ((((pure (fun pos len x_4 -> Fill (pos, len, x_4))) <*> int)
+                  <*> int)
+                 <*> (elt char)));
+            (1,
+              ((((pure
+                    (fun src_pos dst_pos len_1 ->
+                       Blit (src_pos, dst_pos, len_1)))
+                   <*> int)
+                  <*> int)
+                 <*> int))]
     let arb_cmd _ =
       let open QCheck in
         make ~print:show_cmd

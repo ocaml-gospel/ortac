@@ -108,3 +108,11 @@ File "all_warnings_config.ml", line 10, characters 6-14:
 10 |   let constant = 42
            ^^^^^^^^
 Warning: Unused weight from configuration file: constant.
+File "all_warnings_config.ml", line 8, characters 6-9:
+8 |   let bob = 42
+          ^^^
+Warning: Unused weight from configuration file: bob.
+File "all_warnings_config.ml", line 10, characters 6-14:
+10 |   let constant = 42
+           ^^^^^^^^
+Warning: Unused weight from configuration file: constant.

@@ -78,6 +78,19 @@ module Spec =
       | Copy -> Format.asprintf "%s <sut>" "copy"
       | Is_empty -> Format.asprintf "%s <sut>" "is_empty"
     let cleanup _ = ()
+    let gen_cmd _ =
+      let open QCheck in
+        let open Gen in
+          oneof_weighted
+            [(1, ((pure (fun () -> Create ())) <*> unit));
+            (1, ((pure (fun v -> Push v)) <*> char));
+            (1, (pure Pop));
+            (1, (pure Pop_opt));
+            (1, (pure Top));
+            (1, (pure Top_opt));
+            (1, (pure Clear));
+            (1, (pure Copy));
+            (1, (pure Is_empty))]
     let arb_cmd _ =
       let open QCheck in
         make ~print:show_cmd

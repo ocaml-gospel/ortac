@@ -90,6 +90,14 @@ module Spec =
             (Util.Pp.pp_elt Util.Pp.pp_int true) e
       | Top -> Format.asprintf "protect (fun () -> %s <sut>)" "top"
     let cleanup _ = ()
+    let gen_cmd _ =
+      let open QCheck in
+        let open Gen in
+          oneof_weighted
+            [(1, ((pure (fun __arg0 -> Proj __arg0)) <*> (elt char)));
+            (1, ((pure (fun () -> Empty ())) <*> unit));
+            (1, ((pure (fun e -> Push e)) <*> (elt int)));
+            (1, (pure Top))]
     let arb_cmd _ =
       let open QCheck in
         make ~print:show_cmd

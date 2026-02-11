@@ -70,6 +70,15 @@ module Spec =
           Format.asprintf "protect (fun () -> %s <sut> %a %a)" "sub"
             (Util.Pp.pp_int true) i (Util.Pp.pp_int true) n
     let cleanup _ = ()
+    let gen_cmd _ =
+      let open QCheck in
+        let open Gen in
+          oneof_weighted
+            [(1, ((pure (fun a_1 -> Create a_1)) <*> nat_small));
+            (1, ((pure (fun a_2 -> Push a_2)) <*> int));
+            (1, (pure Transfer));
+            (1, (pure Copy));
+            (1, (((pure (fun i n -> Sub (i, n))) <*> int) <*> int))]
     let arb_cmd _ =
       let open QCheck in
         make ~print:show_cmd

@@ -413,18 +413,50 @@ let lens_from_which = function
   | Dom0 -> Weight.dom0
   | Dom1 -> Weight.dom1
 
-let pat_from_which = function
-  | Gen -> pvar "arb_cmd"
-  | Seq -> pvar "arb_cmd_seq"
-  | Dom0 -> pvar "arb_cmd_dom0"
-  | Dom1 -> pvar "arb_cmd_dom1"
+let label_from_which prefix = function
+  | Gen -> prefix
+  | Seq -> prefix ^ "_seq"
+  | Dom0 -> prefix ^ "_dom0"
+  | Dom1 -> prefix ^ "_dom1"
+
+let gen_from_which = label_from_which "gen_cmd"
+let arb_from_which = label_from_which "arb_cmd"
+
+let gen_cmd_from_which which config ir =
+  let open Reserr in
+  let open Ppxlib in
+  let lens = lens_from_which which and pat = pvar @@ gen_from_which which in
+  let aux value (freq_map, acc) =
+    let* gen = arb_cmd_case config value in
+    let freq, freq_map = Weight.pop lens (str_of_ident value.id) freq_map in
+    ok @@ (freq_map, pexp_tuple [ eint freq; gen ] :: acc)
+  in
+  let* unused_freq, generators =
+    fold_right aux ir.values (config.weights, [])
+  in
+  let* _ =
+    promote_map (fun (name, loc) -> error (Unused_weight name, loc))
+    @@ Weight.unused lens unused_freq
+  in
+  let cmds = elist generators in
+  let let_open str e =
+    pexp_open Ast_helper.(Opn.mk (Mod.ident (lident str |> noloc))) e
+  in
+  let body =
+    let_open "QCheck"
+    @@ let_open "Gen" (pexp_apply (evar "oneof_weighted") [ (Nolabel, cmds) ])
+  in
+  let expr = efun [ (Nolabel, ppat_any (* for now we don't use it *)) ] body in
+  pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
+
+let gen_cmd = gen_cmd_from_which Gen
 
 (* Generate the [arb_cmd] definition as a uniform choice between the
    [arb_cmd_case] outputs *)
 let arb_cmd_gen which config ir =
   let open Reserr in
   let open Ppxlib in
-  let lens = lens_from_which which and pat = pat_from_which which in
+  let lens = lens_from_which which and pat = pvar @@ arb_from_which which in
   let aux value (freq_map, acc) =
     let* gen = arb_cmd_case config value in
     let freq, freq_map = Weight.pop lens (str_of_ident value.id) freq_map in
@@ -459,7 +491,7 @@ let arb_cmd config =
 
 let arb_cmd_domain_mode which config =
   let lens = lens_from_which which
-  and pat = pat_from_which which
+  and pat = pvar @@ arb_from_which which
   and expr = evar "arb_cmd"
   and opt_stri =
     match which with
@@ -1769,6 +1801,7 @@ let stm config ir =
   let* postcond = postcond config idx ir in
   let* precond = precond config ir in
   let* run = run config ir in
+  let* gen_cmd = gen_cmd config ir in
   let* arb_cmd = arb_cmd config ir in
   let* check_init_state = check_init_state config ir in
   let* ortac_show = ortac_cmd_show config ir in
@@ -1802,7 +1835,7 @@ let stm config ir =
       @ tuple_types ir
       @ sut_defs
       @ state_defs
-      @ [ cmd; cmd_show; cleanup; arb_cmd ]
+      @ [ cmd; cmd_show; cleanup; gen_cmd; arb_cmd ]
       @ arb_cmds
       @ [ next_state; precond; dummy_postcond; run ])
   in

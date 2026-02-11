@@ -61,6 +61,11 @@ module Spec =
           Format.asprintf "%s %a" "create" (Util.Pp.pp_unit true) ()
       | Use -> Format.asprintf "%s <sut>" "use"
     let cleanup _ = ()
+    let gen_cmd _ =
+      let open QCheck in
+        let open Gen in
+          oneof_weighted
+            [(1, ((pure (fun () -> Create ())) <*> unit)); (1, (pure Use))]
     let arb_cmd _ =
       let open QCheck in
         make ~print:show_cmd

@@ -96,6 +96,15 @@ module Spec =
             (Util.Pp.pp_int true) len (Util.Pp.pp_char true) c
       | Map f -> Format.asprintf "%s %a <sut>" "map" (Util.Pp.pp_fun_ true) f
     let cleanup _ = ()
+    let gen_cmd _ =
+      let open QCheck in
+        let open Gen in
+          oneof_weighted
+            [(1,
+               (((pure (fun len c -> Make (len, c))) <*> nat_small) <*> char));
+            (1,
+              ((pure (fun f -> Map f)) <*>
+                 (fun1 Observable.char QCheck.char).gen))]
     let arb_cmd _ =
       let open QCheck in
         make ~print:show_cmd

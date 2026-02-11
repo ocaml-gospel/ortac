@@ -108,6 +108,18 @@ module Spec =
           Format.asprintf "%s <sut> %a" "push_all"
             (Util.Pp.pp_list Util.Pp.pp_int true) xs_1
     let cleanup _ = ()
+    let gen_cmd _ =
+      let open QCheck in
+        let open Gen in
+          oneof_weighted
+            [(1, ((pure (fun () -> Create ())) <*> unit));
+            (1, ((pure (fun xs -> Of_list xs)) <*> (list nat_small)));
+            (1, (pure Is_empty));
+            (1, (pure Peek_opt));
+            (1, (pure Pop_opt));
+            (1, (pure Pop_all));
+            (1, ((pure (fun x -> Push x)) <*> int));
+            (1, ((pure (fun xs_1 -> Push_all xs_1)) <*> (list int)))]
     let arb_cmd _ =
       let open QCheck in
         make ~print:show_cmd

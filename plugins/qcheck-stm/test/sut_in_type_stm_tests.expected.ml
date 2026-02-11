@@ -69,6 +69,13 @@ module Spec =
           Format.asprintf "protect (fun () -> %s %a %a)" "make"
             (Util.Pp.pp_int true) i (Util.Pp.pp_int true) a_1
     let cleanup _ = ()
+    let gen_cmd _ =
+      let open QCheck in
+        let open Gen in
+          oneof_weighted
+            [(1,
+               (((pure (fun i a_1 -> Make (i, a_1))) <*> nat_small) <*>
+                  nat_small))]
     let arb_cmd _ =
       let open QCheck in
         make ~print:show_cmd

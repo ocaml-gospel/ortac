@@ -91,6 +91,14 @@ module Spec =
           Format.asprintf "%s %a" "plus2" (Util.Pp.pp_int true) i_3
       | Get -> Format.asprintf "%s <sut>" "get"
     let cleanup _ = ()
+    let gen_cmd _ =
+      let open QCheck in
+        let open Gen in
+          oneof_weighted
+            [(1, ((pure (fun i_1 -> Make i_1)) <*> nat_small));
+            (1, ((pure (fun i_2 -> Plus1 i_2)) <*> int));
+            (1, ((pure (fun i_3 -> Plus2 i_3)) <*> int));
+            (1, (pure Get))]
     let arb_cmd _ =
       let open QCheck in
         make ~print:show_cmd
