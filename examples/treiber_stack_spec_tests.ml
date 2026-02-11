@@ -133,6 +133,42 @@ module Spec =
                (1, (pure Pop_all));
                (1, ((pure (fun x -> Push x)) <*> int));
                (1, ((pure (fun xs_1 -> Push_all xs_1)) <*> (list int)))])
+    let gen_cmd_seq _ =
+      let open QCheck in
+        let open Gen in
+          oneof_weighted
+            [(1, ((pure (fun () -> Create ())) <*> unit));
+            (1, ((pure (fun xs -> Of_list xs)) <*> (list nat_small)));
+            (1, (pure Is_empty));
+            (1, (pure Peek_opt));
+            (1, (pure Pop_opt));
+            (1, (pure Pop_all));
+            (1, ((pure (fun x -> Push x)) <*> int));
+            (1, ((pure (fun xs_1 -> Push_all xs_1)) <*> (list int)))]
+    let gen_cmd_dom0 _ =
+      let open QCheck in
+        let open Gen in
+          oneof_weighted
+            [(1, ((pure (fun () -> Create ())) <*> unit));
+            (1, ((pure (fun xs -> Of_list xs)) <*> (list nat_small)));
+            (1, (pure Is_empty));
+            (1, (pure Peek_opt));
+            (1, (pure Pop_opt));
+            (1, (pure Pop_all));
+            (1, ((pure (fun x -> Push x)) <*> int));
+            (1, ((pure (fun xs_1 -> Push_all xs_1)) <*> (list int)))]
+    let gen_cmd_dom1 _ =
+      let open QCheck in
+        let open Gen in
+          oneof_weighted
+            [(1, ((pure (fun () -> Create ())) <*> unit));
+            (1, ((pure (fun xs -> Of_list xs)) <*> (list nat_small)));
+            (1, (pure Is_empty));
+            (1, (pure Peek_opt));
+            (1, (pure Pop_opt));
+            (1, (pure Pop_all));
+            (1, ((pure (fun x -> Push x)) <*> int));
+            (1, ((pure (fun xs_1 -> Push_all xs_1)) <*> (list int)))]
     let arb_cmd_seq = arb_cmd
     let arb_cmd_dom0 = arb_cmd
     let arb_cmd_dom1 = arb_cmd

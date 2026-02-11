@@ -450,6 +450,9 @@ let gen_cmd_from_which which config ir =
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
 let gen_cmd = gen_cmd_from_which Gen
+let gen_cmd_seq = gen_cmd_from_which Seq
+let gen_cmd_dom0 = gen_cmd_from_which Dom0
+let gen_cmd_dom1 = gen_cmd_from_which Dom1
 
 (* Generate the [arb_cmd] definition as a uniform choice between the
    [arb_cmd_case] outputs *)
@@ -1822,7 +1825,14 @@ let stm config ir =
     if config.domain then
       traverse
         (fun f -> f config ir)
-        [ arb_cmd_seq; arb_cmd_dom0; arb_cmd_dom1 ]
+        [
+          gen_cmd_seq;
+          gen_cmd_dom0;
+          gen_cmd_dom1;
+          arb_cmd_seq;
+          arb_cmd_dom0;
+          arb_cmd_dom1;
+        ]
     else ok []
   in
   let spec_expr =
