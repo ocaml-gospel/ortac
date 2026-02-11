@@ -456,35 +456,24 @@ let gen_cmd_dom1 = gen_cmd_from_which Dom1
 
 (* Generate the [arb_cmd] definition as a uniform choice between the
    [arb_cmd_case] outputs *)
-let arb_cmd_gen which config ir =
+let arb_cmd_gen which _config _ir =
   let open Reserr in
   let open Ppxlib in
-  let lens = lens_from_which which and pat = pvar @@ arb_from_which which in
-  let aux value (freq_map, acc) =
-    let* gen = arb_cmd_case config value in
-    let freq, freq_map = Weight.pop lens (str_of_ident value.id) freq_map in
-    ok @@ (freq_map, pexp_tuple [ eint freq; gen ] :: acc)
-  in
-  let* unused_freq, generators =
-    fold_right aux ir.values (config.weights, [])
-  in
-  let* _ =
-    promote_map (fun (name, loc) -> error (Unused_weight name, loc))
-    @@ Weight.unused lens unused_freq
-  in
-  let cmds = elist generators in
+  let pat = pvar @@ arb_from_which which in
   let let_open str e =
     pexp_open Ast_helper.(Opn.mk (Mod.ident (lident str |> noloc))) e
   in
-  let oneof_weighted =
-    let_open "Gen" (pexp_apply (evar "oneof_weighted") [ (Nolabel, cmds) ])
-  in
+  let gen_fun = evar @@ gen_from_which which
+  and state_arg = gen_symbol ~prefix:"state" () in
   let body =
     let_open "QCheck"
       (pexp_apply (evar "make")
-         [ (Labelled "print", evar "show_cmd"); (Nolabel, oneof_weighted) ])
+         [
+           (Labelled "print", evar "show_cmd");
+           (Nolabel, pexp_apply gen_fun [ (Nolabel, evar state_arg) ]);
+         ])
   in
-  let expr = efun [ (Nolabel, ppat_any (* for now we don't use it *)) ] body in
+  let expr = efun [ (Nolabel, pvar state_arg) ] body in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
 let arb_cmd config =

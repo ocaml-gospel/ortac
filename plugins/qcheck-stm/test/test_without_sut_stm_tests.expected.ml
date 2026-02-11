@@ -81,15 +81,8 @@ module Spec =
                (((pure (fun i a_1 -> Make (i, a_1))) <*> nat_small) <*>
                   nat_small));
             (1, (((pure (fun a_2 b -> Add (a_2, b))) <*> int) <*> int))]
-    let arb_cmd _ =
-      let open QCheck in
-        make ~print:show_cmd
-          (let open Gen in
-             oneof_weighted
-               [(1,
-                  (((pure (fun i a_1 -> Make (i, a_1))) <*> nat_small) <*>
-                     nat_small));
-               (1, (((pure (fun a_2 b -> Add (a_2, b))) <*> int) <*> int))])
+    let arb_cmd state__016_ =
+      let open QCheck in make ~print:show_cmd (gen_cmd state__016_)
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
       | Make (i, a_1) ->
@@ -150,23 +143,23 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__017_ models__018_ last__020_ res__019_ =
+let ortac_show_cmd cmd__018_ models__019_ last__021_ res__020_ =
   let open Spec in
     let open STM in
-      match (cmd__017_, res__019_) with
+      match (cmd__018_, res__020_) with
       | (Make (i, a_1), Res ((Result (SUT, Exn), _), t_1)) ->
           let lhs =
-            if last__020_
+            if last__021_
             then "r"
             else
               (match t_1 with
-               | Ok _ -> "Ok " ^ (Model.get_name models__018_ 0)
+               | Ok _ -> "Ok " ^ (Model.get_name models__019_ 0)
                | Error _ -> "_")
           and shift = match t_1 with | Ok _ -> 1 | Error _ -> 0 in
           Format.asprintf "let %s = protect (fun () -> %s %a %a)" lhs "make"
             (Util.Pp.pp_int true) i (Util.Pp.pp_int true) a_1
       | (Add (a_2, b), Res ((Int, _), _)) ->
-          let lhs = if last__020_ then "r" else "_"
+          let lhs = if last__021_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a %a" lhs "add" (Util.Pp.pp_int true)
             a_2 (Util.Pp.pp_int true) b

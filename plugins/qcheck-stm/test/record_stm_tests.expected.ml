@@ -99,15 +99,8 @@ module Spec =
             (1, ((pure (fun i_2 -> Plus1 i_2)) <*> int));
             (1, ((pure (fun i_3 -> Plus2 i_3)) <*> int));
             (1, (pure Get))]
-    let arb_cmd _ =
-      let open QCheck in
-        make ~print:show_cmd
-          (let open Gen in
-             oneof_weighted
-               [(1, ((pure (fun i_1 -> Make i_1)) <*> nat_small));
-               (1, ((pure (fun i_2 -> Plus1 i_2)) <*> int));
-               (1, ((pure (fun i_3 -> Plus2 i_3)) <*> int));
-               (1, (pure Get))])
+    let arb_cmd state__036_ =
+      let open QCheck in make ~print:show_cmd (gen_cmd state__036_)
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
       | Make i_1 ->
@@ -169,30 +162,30 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__037_ models__038_ last__040_ res__039_ =
+let ortac_show_cmd cmd__038_ models__039_ last__041_ res__040_ =
   let open Spec in
     let open STM in
-      match (cmd__037_, res__039_) with
+      match (cmd__038_, res__040_) with
       | (Make i_1, Res ((SUT, _), r)) ->
-          let lhs = if last__040_ then "r" else Model.get_name models__038_ 0
+          let lhs = if last__041_ then "r" else Model.get_name models__039_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a" lhs "make" (Util.Pp.pp_int true)
             i_1
       | (Plus1 i_2, Res ((Int, _), _)) ->
-          let lhs = if last__040_ then "r" else "_"
+          let lhs = if last__041_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a" lhs "plus1" (Util.Pp.pp_int true)
             i_2
       | (Plus2 i_3, Res ((Int, _), _)) ->
-          let lhs = if last__040_ then "r" else "_"
+          let lhs = if last__041_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a" lhs "plus2" (Util.Pp.pp_int true)
             i_3
       | (Get, Res ((Int, _), _)) ->
-          let lhs = if last__040_ then "r" else "_"
+          let lhs = if last__041_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "get"
-            (Model.get_name models__038_ (0 + shift))
+            (Model.get_name models__039_ (0 + shift))
       | _ -> assert false
 let ortac_postcond cmd__008_ state__009_ res__010_ =
   let open Spec in

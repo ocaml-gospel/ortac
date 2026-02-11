@@ -235,23 +235,8 @@ module Spec =
             (1, (pure Peek_exn));
             (1, (pure Peek_opt));
             (1, ((pure (fun a_3 -> Push_head a_3)) <*> int))]
-    let arb_cmd _ =
-      let open QCheck in
-        make ~print:show_cmd
-          (let open Gen in
-             oneof_weighted
-               [(1, ((pure (fun () -> Create ())) <*> unit));
-               (1, ((pure (fun xs -> Of_list xs)) <*> (list nat_small)));
-               (1, ((pure (fun a_2 -> Push a_2)) <*> int));
-               (1, ((pure (fun xs_1 -> Push_all xs_1)) <*> (list int)));
-               (1, (pure Is_empty));
-               (1, (pure Close));
-               (1, (pure Pop_exn));
-               (1, (pure Pop_opt));
-               (1, (pure Drop_exn));
-               (1, (pure Peek_exn));
-               (1, (pure Peek_opt));
-               (1, ((pure (fun a_3 -> Push_head a_3)) <*> int))])
+    let arb_cmd state__114_ =
+      let open QCheck in make ~print:show_cmd (gen_cmd state__114_)
     let gen_cmd_seq _ =
       let open QCheck in
         let open Gen in
@@ -302,23 +287,8 @@ module Spec =
             (0, ((pure (fun a_3 -> Push_head a_3)) <*> int))]
     let arb_cmd_seq = arb_cmd
     let arb_cmd_dom0 = arb_cmd
-    let arb_cmd_dom1 _ =
-      let open QCheck in
-        make ~print:show_cmd
-          (let open Gen in
-             oneof_weighted
-               [(0, ((pure (fun () -> Create ())) <*> unit));
-               (0, ((pure (fun xs -> Of_list xs)) <*> (list nat_small)));
-               (1, ((pure (fun a_2 -> Push a_2)) <*> int));
-               (1, ((pure (fun xs_1 -> Push_all xs_1)) <*> (list int)));
-               (0, (pure Is_empty));
-               (0, (pure Close));
-               (0, (pure Pop_exn));
-               (0, (pure Pop_opt));
-               (0, (pure Drop_exn));
-               (0, (pure Peek_exn));
-               (0, (pure Peek_opt));
-               (0, ((pure (fun a_3 -> Push_head a_3)) <*> int))])
+    let arb_cmd_dom1 state__120_ =
+      let open QCheck in make ~print:show_cmd (gen_cmd_dom1 state__120_)
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
       | Create () ->
@@ -772,72 +742,72 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__115_ models__116_ last__118_ res__117_ =
+let ortac_show_cmd cmd__116_ models__117_ last__119_ res__118_ =
   let open Spec in
     let open STM in
-      match (cmd__115_, res__117_) with
+      match (cmd__116_, res__118_) with
       | (Create (), Res ((SUT, _), q_3)) ->
-          let lhs = if last__118_ then "r" else "_"
+          let lhs = if last__119_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a" lhs "create"
             (Util.Pp.pp_unit true) ()
       | (Of_list xs, Res ((SUT, _), q_4)) ->
-          let lhs = if last__118_ then "r" else "_"
+          let lhs = if last__119_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a" lhs "of_list"
             (Util.Pp.pp_list Util.Pp.pp_int true) xs
       | (Push a_2, Res ((Result (Unit, Exn), _), _)) ->
-          let lhs = if last__118_ then "r" else "_"
+          let lhs = if last__119_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s %a)" lhs "push"
-            (Model.get_name models__116_ (0 + shift)) (Util.Pp.pp_int true)
+            (Model.get_name models__117_ (0 + shift)) (Util.Pp.pp_int true)
             a_2
       | (Push_all xs_1, Res ((Result (Unit, Exn), _), _)) ->
-          let lhs = if last__118_ then "r" else "_"
+          let lhs = if last__119_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s %a)" lhs
-            "push_all" (Model.get_name models__116_ (0 + shift))
+            "push_all" (Model.get_name models__117_ (0 + shift))
             (Util.Pp.pp_list Util.Pp.pp_int true) xs_1
       | (Is_empty, Res ((Result (Bool, Exn), _), _)) ->
-          let lhs = if last__118_ then "r" else "_"
+          let lhs = if last__119_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "is_empty"
-            (Model.get_name models__116_ (0 + shift))
+            (Model.get_name models__117_ (0 + shift))
       | (Close, Res ((Result (Unit, Exn), _), _)) ->
-          let lhs = if last__118_ then "r" else "_"
+          let lhs = if last__119_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "close"
-            (Model.get_name models__116_ (0 + shift))
+            (Model.get_name models__117_ (0 + shift))
       | (Pop_exn, Res ((Result (Int, Exn), _), _)) ->
-          let lhs = if last__118_ then "r" else "_"
+          let lhs = if last__119_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "pop_exn"
-            (Model.get_name models__116_ (0 + shift))
+            (Model.get_name models__117_ (0 + shift))
       | (Pop_opt, Res ((Result (Option (Int), Exn), _), _)) ->
-          let lhs = if last__118_ then "r" else "_"
+          let lhs = if last__119_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "pop_opt"
-            (Model.get_name models__116_ (0 + shift))
+            (Model.get_name models__117_ (0 + shift))
       | (Drop_exn, Res ((Result (Unit, Exn), _), _)) ->
-          let lhs = if last__118_ then "r" else "_"
+          let lhs = if last__119_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "drop_exn"
-            (Model.get_name models__116_ (0 + shift))
+            (Model.get_name models__117_ (0 + shift))
       | (Peek_exn, Res ((Result (Int, Exn), _), _)) ->
-          let lhs = if last__118_ then "r" else "_"
+          let lhs = if last__119_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "peek_exn"
-            (Model.get_name models__116_ (0 + shift))
+            (Model.get_name models__117_ (0 + shift))
       | (Peek_opt, Res ((Result (Option (Int), Exn), _), _)) ->
-          let lhs = if last__118_ then "r" else "_"
+          let lhs = if last__119_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "peek_opt"
-            (Model.get_name models__116_ (0 + shift))
+            (Model.get_name models__117_ (0 + shift))
       | (Push_head a_3, Res ((Result (Unit, Exn), _), _)) ->
-          let lhs = if last__118_ then "r" else "_"
+          let lhs = if last__119_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s %a)" lhs
-            "push_head" (Model.get_name models__116_ (0 + shift))
+            "push_head" (Model.get_name models__117_ (0 + shift))
             (Util.Pp.pp_int true) a_3
       | _ -> assert false
 let ortac_postcond cmd__028_ state__029_ res__030_ =

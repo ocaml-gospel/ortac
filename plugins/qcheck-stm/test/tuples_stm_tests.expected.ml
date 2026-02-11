@@ -112,21 +112,8 @@ module Spec =
                  (tup2 bool (tup2 char int))));
             (1, (pure Size_tup));
             (1, (pure Size_tup'))]
-    let arb_cmd _ =
-      let open QCheck in
-        make ~print:show_cmd
-          (let open Gen in
-             oneof_weighted
-               [(1, ((pure (fun () -> Create ())) <*> unit));
-               (1, (pure Clear));
-               (1, ((pure (fun tup -> Add tup)) <*> (tup2 char int)));
-               (1,
-                 ((pure (fun tup_1 -> Add' tup_1)) <*> (tup3 bool char int)));
-               (1,
-                 ((pure (fun tup_2 -> Add'' tup_2)) <*>
-                    (tup2 bool (tup2 char int))));
-               (1, (pure Size_tup));
-               (1, (pure Size_tup'))])
+    let arb_cmd state__055_ =
+      let open QCheck in make ~print:show_cmd (gen_cmd state__055_)
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
       | Create () ->
@@ -354,50 +341,50 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__056_ models__057_ last__059_ res__058_ =
+let ortac_show_cmd cmd__057_ models__058_ last__060_ res__059_ =
   let open Spec in
     let open STM in
-      match (cmd__056_, res__058_) with
+      match (cmd__057_, res__059_) with
       | (Create (), Res ((SUT, _), h)) ->
-          let lhs = if last__059_ then "r" else Model.get_name models__057_ 0
+          let lhs = if last__060_ then "r" else Model.get_name models__058_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a" lhs "create"
             (Util.Pp.pp_unit true) ()
       | (Clear, Res ((Unit, _), _)) ->
-          let lhs = if last__059_ then "r" else "_"
+          let lhs = if last__060_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "clear"
-            (Model.get_name models__057_ (0 + shift))
+            (Model.get_name models__058_ (0 + shift))
       | (Add tup, Res ((Unit, _), _)) ->
-          let lhs = if last__059_ then "r" else "_"
+          let lhs = if last__060_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "add"
-            (Model.get_name models__057_ (0 + shift))
+            (Model.get_name models__058_ (0 + shift))
             (Util.Pp.pp_tuple2 Util.Pp.pp_char Util.Pp.pp_int true) tup
       | (Add' tup_1, Res ((Unit, _), _)) ->
-          let lhs = if last__059_ then "r" else "_"
+          let lhs = if last__060_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "add'"
-            (Model.get_name models__057_ (0 + shift))
+            (Model.get_name models__058_ (0 + shift))
             (Util.Pp.pp_tuple3 Util.Pp.pp_bool Util.Pp.pp_char Util.Pp.pp_int
                true) tup_1
       | (Add'' tup_2, Res ((Unit, _), _)) ->
-          let lhs = if last__059_ then "r" else "_"
+          let lhs = if last__060_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "add''"
-            (Model.get_name models__057_ (0 + shift))
+            (Model.get_name models__058_ (0 + shift))
             (Util.Pp.pp_tuple2 Util.Pp.pp_bool
                (Util.Pp.pp_tuple2 Util.Pp.pp_char Util.Pp.pp_int) true) tup_2
       | (Size_tup, Res ((Tup2 (Int, Int), _), _)) ->
-          let lhs = if last__059_ then "r" else "_"
+          let lhs = if last__060_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "size_tup"
-            (Model.get_name models__057_ (0 + shift))
+            (Model.get_name models__058_ (0 + shift))
       | (Size_tup', Res ((Tup3 (Int, Int, Int), _), _)) ->
-          let lhs = if last__059_ then "r" else "_"
+          let lhs = if last__060_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "size_tup'"
-            (Model.get_name models__057_ (0 + shift))
+            (Model.get_name models__058_ (0 + shift))
       | _ -> assert false
 let ortac_postcond cmd__018_ state__019_ res__020_ =
   let open Spec in

@@ -62,12 +62,8 @@ module Spec =
       let open QCheck in
         let open Gen in
           oneof_weighted [(1, ((pure (fun a_1 -> Make a_1)) <*> nat_small))]
-    let arb_cmd _ =
-      let open QCheck in
-        make ~print:show_cmd
-          (let open Gen in
-             oneof_weighted
-               [(1, ((pure (fun a_1 -> Make a_1)) <*> nat_small))])
+    let arb_cmd state__015_ =
+      let open QCheck in make ~print:show_cmd (gen_cmd state__015_)
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
       | Make a_1 ->
@@ -112,12 +108,12 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__016_ models__017_ last__019_ res__018_ =
+let ortac_show_cmd cmd__017_ models__018_ last__020_ res__019_ =
   let open Spec in
     let open STM in
-      match (cmd__016_, res__018_) with
+      match (cmd__017_, res__019_) with
       | (Make a_1, Res ((SUT, _), t_1)) ->
-          let lhs = if last__019_ then "r" else Model.get_name models__017_ 0
+          let lhs = if last__020_ then "r" else Model.get_name models__018_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a" lhs "make" (Util.Pp.pp_int true)
             a_1

@@ -105,17 +105,8 @@ module Spec =
             (1,
               ((pure (fun f -> Map f)) <*>
                  (fun1 Observable.char QCheck.char).gen))]
-    let arb_cmd _ =
-      let open QCheck in
-        make ~print:show_cmd
-          (let open Gen in
-             oneof_weighted
-               [(1,
-                  (((pure (fun len c -> Make (len, c))) <*> nat_small) <*>
-                     char));
-               (1,
-                 ((pure (fun f -> Map f)) <*>
-                    (fun1 Observable.char QCheck.char).gen))])
+    let arb_cmd state__022_ =
+      let open QCheck in make ~print:show_cmd (gen_cmd state__022_)
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
       | Make (len, c) ->
@@ -264,27 +255,27 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__023_ models__024_ last__026_ res__025_ =
+let ortac_show_cmd cmd__024_ models__025_ last__027_ res__026_ =
   let open Spec in
     let open STM in
-      match (cmd__023_, res__025_) with
+      match (cmd__024_, res__026_) with
       | (Make (len, c), Res ((Result (SUT, Exn), _), t_1)) ->
           let lhs =
-            if last__026_
+            if last__027_
             then "r"
             else
               (match t_1 with
-               | Ok _ -> "Ok " ^ (Model.get_name models__024_ 0)
+               | Ok _ -> "Ok " ^ (Model.get_name models__025_ 0)
                | Error _ -> "_")
           and shift = match t_1 with | Ok _ -> 1 | Error _ -> 0 in
           Format.asprintf "let %s = protect (fun () -> %s %a %a)" lhs "make"
             (Util.Pp.pp_int true) len (Util.Pp.pp_char true) c
       | (Map f, Res ((SUT, _), output)) ->
-          let lhs = if last__026_ then "r" else Model.get_name models__024_ 0
+          let lhs = if last__027_ then "r" else Model.get_name models__025_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a %s" lhs "map"
             (Util.Pp.pp_fun_ true) f
-            (Model.get_name models__024_ (0 + shift))
+            (Model.get_name models__025_ (0 + shift))
       | _ -> assert false
 let ortac_postcond cmd__010_ state__011_ res__012_ =
   let open Spec in

@@ -91,20 +91,8 @@ module Spec =
             (1, (pure Clear));
             (1, (pure Copy));
             (1, (pure Is_empty))]
-    let arb_cmd _ =
-      let open QCheck in
-        make ~print:show_cmd
-          (let open Gen in
-             oneof_weighted
-               [(1, ((pure (fun () -> Create ())) <*> unit));
-               (1, ((pure (fun v -> Push v)) <*> char));
-               (1, (pure Pop));
-               (1, (pure Pop_opt));
-               (1, (pure Top));
-               (1, (pure Top_opt));
-               (1, (pure Clear));
-               (1, (pure Copy));
-               (1, (pure Is_empty))])
+    let arb_cmd state__087_ =
+      let open QCheck in make ~print:show_cmd (gen_cmd state__087_)
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
       | Create () ->
@@ -383,56 +371,56 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__088_ models__089_ last__091_ res__090_ =
+let ortac_show_cmd cmd__089_ models__090_ last__092_ res__091_ =
   let open Spec in
     let open STM in
-      match (cmd__088_, res__090_) with
+      match (cmd__089_, res__091_) with
       | (Create (), Res ((SUT, _), t_1)) ->
-          let lhs = if last__091_ then "r" else Model.get_name models__089_ 0
+          let lhs = if last__092_ then "r" else Model.get_name models__090_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a" lhs "create"
             (Util.Pp.pp_unit true) ()
       | (Push v, Res ((Unit, _), _)) ->
-          let lhs = if last__091_ then "r" else "_"
+          let lhs = if last__092_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a %s" lhs "push"
             (Util.Pp.pp_char true) v
-            (Model.get_name models__089_ (0 + shift))
+            (Model.get_name models__090_ (0 + shift))
       | (Pop, Res ((Result (Char, Exn), _), _)) ->
-          let lhs = if last__091_ then "r" else "_"
+          let lhs = if last__092_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "pop"
-            (Model.get_name models__089_ (0 + shift))
+            (Model.get_name models__090_ (0 + shift))
       | (Pop_opt, Res ((Option (Char), _), _)) ->
-          let lhs = if last__091_ then "r" else "_"
+          let lhs = if last__092_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "pop_opt"
-            (Model.get_name models__089_ (0 + shift))
+            (Model.get_name models__090_ (0 + shift))
       | (Top, Res ((Result (Char, Exn), _), _)) ->
-          let lhs = if last__091_ then "r" else "_"
+          let lhs = if last__092_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "top"
-            (Model.get_name models__089_ (0 + shift))
+            (Model.get_name models__090_ (0 + shift))
       | (Top_opt, Res ((Option (Char), _), _)) ->
-          let lhs = if last__091_ then "r" else "_"
+          let lhs = if last__092_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "top_opt"
-            (Model.get_name models__089_ (0 + shift))
+            (Model.get_name models__090_ (0 + shift))
       | (Clear, Res ((Unit, _), _)) ->
-          let lhs = if last__091_ then "r" else "_"
+          let lhs = if last__092_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "clear"
-            (Model.get_name models__089_ (0 + shift))
+            (Model.get_name models__090_ (0 + shift))
       | (Copy, Res ((SUT, _), r)) ->
-          let lhs = if last__091_ then "r" else Model.get_name models__089_ 0
+          let lhs = if last__092_ then "r" else Model.get_name models__090_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %s" lhs "copy"
-            (Model.get_name models__089_ (0 + shift))
+            (Model.get_name models__090_ (0 + shift))
       | (Is_empty, Res ((Bool, _), _)) ->
-          let lhs = if last__091_ then "r" else "_"
+          let lhs = if last__092_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "is_empty"
-            (Model.get_name models__089_ (0 + shift))
+            (Model.get_name models__090_ (0 + shift))
       | _ -> assert false
 let ortac_postcond cmd__024_ state__025_ res__026_ =
   let open Spec in

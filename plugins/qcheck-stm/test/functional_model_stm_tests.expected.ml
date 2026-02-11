@@ -70,14 +70,8 @@ module Spec =
           oneof_weighted
             [(1, ((pure (fun () -> Empty ())) <*> unit));
             (1, (((pure (fun a_1 b_1 -> Add (a_1, b_1))) <*> char) <*> int))]
-    let arb_cmd _ =
-      let open QCheck in
-        make ~print:show_cmd
-          (let open Gen in
-             oneof_weighted
-               [(1, ((pure (fun () -> Empty ())) <*> unit));
-               (1,
-                 (((pure (fun a_1 b_1 -> Add (a_1, b_1))) <*> char) <*> int))])
+    let arb_cmd state__020_ =
+      let open QCheck in make ~print:show_cmd (gen_cmd state__020_)
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
       | Empty () ->
@@ -157,20 +151,20 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__021_ models__022_ last__024_ res__023_ =
+let ortac_show_cmd cmd__022_ models__023_ last__025_ res__024_ =
   let open Spec in
     let open STM in
-      match (cmd__021_, res__023_) with
+      match (cmd__022_, res__024_) with
       | (Empty (), Res ((SUT, _), t_1)) ->
-          let lhs = if last__024_ then "r" else Model.get_name models__022_ 0
+          let lhs = if last__025_ then "r" else Model.get_name models__023_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a" lhs "empty" (Util.Pp.pp_unit true)
             ()
       | (Add (a_1, b_1), Res ((Unit, _), _)) ->
-          let lhs = if last__024_ then "r" else "_"
+          let lhs = if last__025_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a %a" lhs "add"
-            (Model.get_name models__022_ (0 + shift)) (Util.Pp.pp_char true)
+            (Model.get_name models__023_ (0 + shift)) (Util.Pp.pp_char true)
             a_1 (Util.Pp.pp_int true) b_1
       | _ -> assert false
 let ortac_postcond cmd__008_ state__009_ res__010_ =

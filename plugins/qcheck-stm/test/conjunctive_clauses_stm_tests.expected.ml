@@ -76,16 +76,8 @@ module Spec =
             [(1,
                (((pure (fun i a_1 -> Make (i, a_1))) <*> nat_small) <*> char));
             (1, (((pure (fun i_1 a_2 -> Set (i_1, a_2))) <*> int) <*> char))]
-    let arb_cmd _ =
-      let open QCheck in
-        make ~print:show_cmd
-          (let open Gen in
-             oneof_weighted
-               [(1,
-                  (((pure (fun i a_1 -> Make (i, a_1))) <*> nat_small) <*>
-                     char));
-               (1,
-                 (((pure (fun i_1 a_2 -> Set (i_1, a_2))) <*> int) <*> char))])
+    let arb_cmd state__024_ =
+      let open QCheck in make ~print:show_cmd (gen_cmd state__024_)
     let next_state cmd__002_ state__003_ =
       match cmd__002_ with
       | Make (i, a_1) ->
@@ -198,26 +190,26 @@ module Spec =
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__025_ models__026_ last__028_ res__027_ =
+let ortac_show_cmd cmd__026_ models__027_ last__029_ res__028_ =
   let open Spec in
     let open STM in
-      match (cmd__025_, res__027_) with
+      match (cmd__026_, res__028_) with
       | (Make (i, a_1), Res ((Result (SUT, Exn), _), t_1)) ->
           let lhs =
-            if last__028_
+            if last__029_
             then "r"
             else
               (match t_1 with
-               | Ok _ -> "Ok " ^ (Model.get_name models__026_ 0)
+               | Ok _ -> "Ok " ^ (Model.get_name models__027_ 0)
                | Error _ -> "_")
           and shift = match t_1 with | Ok _ -> 1 | Error _ -> 0 in
           Format.asprintf "let %s = protect (fun () -> %s %a %a)" lhs "make"
             (Util.Pp.pp_int true) i (Util.Pp.pp_char true) a_1
       | (Set (i_1, a_2), Res ((Result (Unit, Exn), _), _)) ->
-          let lhs = if last__028_ then "r" else "_"
+          let lhs = if last__029_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s %a %a)" lhs
-            "set" (Model.get_name models__026_ (0 + shift))
+            "set" (Model.get_name models__027_ (0 + shift))
             (Util.Pp.pp_int true) i_1 (Util.Pp.pp_char true) a_2
       | _ -> assert false
 let ortac_postcond cmd__010_ state__011_ res__012_ =
