@@ -434,7 +434,7 @@ let arb_cmd_gen which config ir =
     fold_right aux ir.values (config.weights, [])
   in
   let* _ =
-    promote_map (fun (name, loc) -> error (Unused_frequency name, loc))
+    promote_map (fun (name, loc) -> error (Unused_weight name, loc))
     @@ Weight.unused lens unused_freq
   in
   let cmds = elist generators in
