@@ -23,14 +23,14 @@ end
 
 module Weights = struct
   type t = {
-    arb_cmd_seq : WeightsMap.t;
-    arb_cmd_dom0 : WeightsMap.t;
-    arb_cmd_dom1 : WeightsMap.t;
+    gen_cmd_seq : WeightsMap.t;
+    gen_cmd_dom0 : WeightsMap.t;
+    gen_cmd_dom1 : WeightsMap.t;
   }
 
   let empty =
     let open WeightsMap in
-    { arb_cmd_seq = empty; arb_cmd_dom0 = empty; arb_cmd_dom1 = empty }
+    { gen_cmd_seq = empty; gen_cmd_dom0 = empty; gen_cmd_dom1 = empty }
 
   type ('record, 'field) lens = {
     get : 'record -> 'field;
@@ -38,18 +38,18 @@ module Weights = struct
   }
 
   let seq =
-    let get record = record.arb_cmd_seq
-    and set field record = { record with arb_cmd_seq = field } in
+    let get record = record.gen_cmd_seq
+    and set field record = { record with gen_cmd_seq = field } in
     { get; set }
 
   let dom0 =
-    let get record = record.arb_cmd_dom0
-    and set field record = { record with arb_cmd_dom0 = field } in
+    let get record = record.gen_cmd_dom0
+    and set field record = { record with gen_cmd_dom0 = field } in
     { get; set }
 
   let dom1 =
-    let get record = record.arb_cmd_dom1
-    and set field record = { record with arb_cmd_dom1 = field } in
+    let get record = record.gen_cmd_dom1
+    and set field record = { record with gen_cmd_dom1 = field } in
     { get; set }
 
   let is_empty lens t = WeightsMap.is_empty @@ lens.get t

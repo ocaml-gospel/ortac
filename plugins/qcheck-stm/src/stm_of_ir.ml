@@ -372,7 +372,7 @@ let exp_of_ident id = pexp_ident (lident (str_of_ident id))
 (* Output a generator for one particular cmd by
    - a capitalized function constructor, e.g., [show] to [fun x y z -> Show (x,y,z)]
    - a list of generated arguments, strung together with [<*>], aka Gen.combine *)
-let arb_cmd_case config value =
+let gen_cmd_case config value =
   let open Reserr in
   let is_create = value.sut_vars = [] && Cfg.does_return_sut config value.ty in
   let epure = pexp_ident (lident "pure") in
@@ -427,7 +427,7 @@ let gen_cmd_from_which which config ir =
   let open Ppxlib in
   let lens = lens_from_which which and pat = pvar @@ gen_from_which which in
   let aux value (freq_map, acc) =
-    let* gen = arb_cmd_case config value in
+    let* gen = gen_cmd_case config value in
     let freq, freq_map = Weight.pop lens (str_of_ident value.id) freq_map in
     ok @@ (freq_map, pexp_tuple [ eint freq; gen ] :: acc)
   in
