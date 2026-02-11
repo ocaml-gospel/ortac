@@ -1,5 +1,7 @@
 # Unreleased
 
+- [QCheck-STM] Fix last error name wich mentioned frequency
+  [\#371](https://github.com/ocaml-gospel/ortac/pull/371)
 - [QCheck-STM] Update to QCheck 0.90 great renaming
   [\#370](https://github.com/ocaml-gospel/ortac/pull/370)
 - [QCheck-STM] Make traces lazy in bug report
