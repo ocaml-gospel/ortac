@@ -66,6 +66,9 @@ module Spec =
     type flag =
       | Seq 
       | Dom 
+    type flagged_cmd = {
+      flag: flag ;
+      raw_cmd: raw_cmd }
     type cmd =
       | Make of int * int 
     let show_cmd cmd__005_ =

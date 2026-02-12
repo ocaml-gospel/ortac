@@ -70,6 +70,9 @@ module Spec =
     type flag =
       | Seq 
       | Dom 
+    type flagged_cmd = {
+      flag: flag ;
+      raw_cmd: raw_cmd }
     type cmd =
       | Make of int 
       | Get 

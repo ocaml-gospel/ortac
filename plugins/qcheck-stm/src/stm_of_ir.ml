@@ -1186,6 +1186,24 @@ let cmd_type ir =
   in
   pstr_type Recursive [ td ]
 
+let flagged_cmd_type =
+  let name = noloc "flagged_cmd"
+  and params = []
+  and cstrs = []
+  and kind =
+    let mutable_ = Immutable in
+    Ptype_record
+      [
+        label_declaration ~name:(noloc "flag") ~mutable_
+          ~type_:(ptyp_constr (lident "flag") []);
+        label_declaration ~name:(noloc "raw_cmd") ~mutable_
+          ~type_:(ptyp_constr (lident "raw_cmd") []);
+      ]
+  and private_ = Public
+  and manifest = None in
+  let td = type_declaration ~name ~params ~cstrs ~kind ~private_ ~manifest in
+  pstr_type Recursive [ td ]
+
 let pp_cmd_case config value =
   let lhs = mk_cmd_pattern value in
   let qualify_pp = qualify [ "Util"; "Pp" ] in
@@ -1847,7 +1865,16 @@ let stm config ir =
       @ tuple_types ir
       @ sut_defs
       @ state_defs
-      @ [ raw_cmd_type; flag_type; cmd; cmd_show; cleanup; gen_cmd; arb_cmd ]
+      @ [
+          raw_cmd_type;
+          flag_type;
+          flagged_cmd_type;
+          cmd;
+          cmd_show;
+          cleanup;
+          gen_cmd;
+          arb_cmd;
+        ]
       @ gen_cmds
       @ arb_cmds
       @ [ next_state; precond; dummy_postcond; run ])
