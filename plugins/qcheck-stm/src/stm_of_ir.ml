@@ -1154,6 +1154,22 @@ let cmd_constructor value =
   in
   constructor_declaration ~name ~args:(Pcstr_tuple args) ~res:None
 
+let flag_type =
+  let constructors =
+    let mk_constructor str =
+      constructor_declaration ~name:(noloc str) ~args:(Pcstr_tuple []) ~res:None
+    in
+    List.map mk_constructor [ "Seq"; "Dom" ]
+  in
+  let name = noloc "flag"
+  and params = []
+  and cstrs = []
+  and kind = Ptype_variant constructors
+  and private_ = Public
+  and manifest = None in
+  let td = type_declaration ~name ~params ~cstrs ~kind ~private_ ~manifest in
+  pstr_type Recursive [ td ]
+
 let cmd_type ir =
   let constructors = List.map cmd_constructor ir.values in
   let td =
@@ -1777,7 +1793,7 @@ let stm config ir =
   let open Reserr in
   let* ghost_types = ghost_types config ir.ghost_types in
   let* config, ghost_functions = ghost_functions config ir.ghost_functions in
-  let warn = [%stri [@@@ocaml.warning "-26-27-69-32-34-38"]] in
+  let warn = [%stri [@@@ocaml.warning "-26-27-69-32-34-37-38"]] in
   let cmd = cmd_type ir in
   let* cmd_show = cmd_show config ir in
   let* idx, next_state = next_state config ir in
@@ -1822,7 +1838,7 @@ let stm config ir =
       @ tuple_types ir
       @ sut_defs
       @ state_defs
-      @ [ cmd; cmd_show; cleanup; gen_cmd; arb_cmd ]
+      @ [ flag_type; cmd; cmd_show; cleanup; gen_cmd; arb_cmd ]
       @ gen_cmds
       @ arb_cmds
       @ [ next_state; precond; dummy_postcond; run ])
