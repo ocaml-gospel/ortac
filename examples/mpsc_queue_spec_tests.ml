@@ -195,8 +195,8 @@ module Spec =
       | Peek_exn 
       | Peek_opt 
       | Push_head of int 
-    let show_cmd cmd__001_ =
-      match cmd__001_ with
+    let show_cmd cmd__005_ =
+      match cmd__005_ with
       | Create () ->
           Format.asprintf "%s %a" "create" (Util.Pp.pp_unit true) ()
       | Of_list xs ->
@@ -235,8 +235,8 @@ module Spec =
             (1, (pure Peek_exn));
             (1, (pure Peek_opt));
             (1, ((pure (fun a_3 -> Push_head a_3)) <*> int))]
-    let arb_cmd state__114_ =
-      let open QCheck in make ~print:show_cmd (gen_cmd state__114_)
+    let arb_cmd state__001_ =
+      let open QCheck in make ~print:show_cmd (gen_cmd state__001_)
     let gen_cmd_seq _ =
       let open QCheck in
         let open Gen in
@@ -285,14 +285,16 @@ module Spec =
             (0, (pure Peek_exn));
             (0, (pure Peek_opt));
             (0, ((pure (fun a_3 -> Push_head a_3)) <*> int))]
-    let arb_cmd_seq = arb_cmd
-    let arb_cmd_dom0 = arb_cmd
-    let arb_cmd_dom1 state__120_ =
-      let open QCheck in make ~print:show_cmd (gen_cmd_dom1 state__120_)
-    let next_state cmd__002_ state__003_ =
-      match cmd__002_ with
+    let arb_cmd_seq state__002_ =
+      let open QCheck in make ~print:show_cmd (gen_cmd_seq state__002_)
+    let arb_cmd_dom0 state__003_ =
+      let open QCheck in make ~print:show_cmd (gen_cmd_dom0 state__003_)
+    let arb_cmd_dom1 state__004_ =
+      let open QCheck in make ~print:show_cmd (gen_cmd_dom1 state__004_)
+    let next_state cmd__006_ state__007_ =
+      match cmd__006_ with
       | Create () ->
-          let q_3__005_ =
+          let q_3__009_ =
             let open ModelElt in
               {
                 contents =
@@ -342,9 +344,9 @@ module Spec =
                                   }
                               })))
               } in
-          Model.drop_n state__003_ 0
+          Model.drop_n state__007_ 0
       | Of_list xs ->
-          let q_4__007_ =
+          let q_4__011_ =
             let open ModelElt in
               {
                 contents =
@@ -394,19 +396,19 @@ module Spec =
                                   }
                               })))
               } in
-          Model.drop_n state__003_ 0
+          Model.drop_n state__007_ 0
       | Push a_2 ->
-          let q_5__008_ = Model.get state__003_ 0 in
-          let q_5__009_ =
+          let q_5__012_ = Model.get state__007_ 0 in
+          let q_5__013_ =
             let open ModelElt in
               {
-                q_5__008_ with
+                q_5__012_ with
                 contents =
                   (try
-                     apply_if_not q_5__008_.closed
+                     apply_if_not q_5__012_.closed
                        (fun seq ->
                           Ortac_runtime.Gospelstdlib.Sequence.snoc seq a_2)
-                       q_5__008_.contents
+                       q_5__012_.contents
                    with
                    | e ->
                        raise
@@ -429,20 +431,20 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 1) q_5__009_
+          Model.push (Model.drop_n state__007_ 1) q_5__013_
       | Push_all xs_1 ->
-          let q_6__010_ = Model.get state__003_ 0 in
-          let q_6__011_ =
+          let q_6__014_ = Model.get state__007_ 0 in
+          let q_6__015_ =
             let open ModelElt in
               {
-                q_6__010_ with
+                q_6__014_ with
                 contents =
                   (try
-                     apply_if_not q_6__010_.closed
+                     apply_if_not q_6__014_.closed
                        (fun seq_1 ->
                           Ortac_runtime.Gospelstdlib.(++) seq_1
                             (Ortac_runtime.Gospelstdlib.List.to_seq xs_1))
-                       q_6__010_.contents
+                       q_6__014_.contents
                    with
                    | e ->
                        raise
@@ -465,17 +467,17 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 1) q_6__011_
+          Model.push (Model.drop_n state__007_ 1) q_6__015_
       | Is_empty ->
-          let q_7__012_ = Model.get state__003_ 0 in
-          let q_7__013_ = q_7__012_ in
-          Model.push (Model.drop_n state__003_ 1) q_7__013_
+          let q_7__016_ = Model.get state__007_ 0 in
+          let q_7__017_ = q_7__016_ in
+          Model.push (Model.drop_n state__007_ 1) q_7__017_
       | Close ->
-          let q_8__014_ = Model.get state__003_ 0 in
-          let q_8__015_ =
+          let q_8__018_ = Model.get state__007_ 0 in
+          let q_8__019_ =
             let open ModelElt in
               {
-                q_8__014_ with
+                q_8__018_ with
                 closed =
                   (try true
                    with
@@ -500,21 +502,21 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 1) q_8__015_
+          Model.push (Model.drop_n state__007_ 1) q_8__019_
       | Pop_exn ->
-          let q_9__016_ = Model.get state__003_ 0 in
-          let q_9__017_ =
+          let q_9__020_ = Model.get state__007_ 0 in
+          let q_9__021_ =
             let open ModelElt in
               {
-                q_9__016_ with
+                q_9__020_ with
                 contents =
                   (try
                      apply_if_not
                        (if
-                          (q_9__016_.closed = true) &&
-                            (is_empty_1 q_9__016_.contents)
+                          (q_9__020_.closed = true) &&
+                            (is_empty_1 q_9__020_.contents)
                         then true
-                        else false) tail_safe q_9__016_.contents
+                        else false) tail_safe q_9__020_.contents
                    with
                    | e ->
                        raise
@@ -537,21 +539,21 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 1) q_9__017_
+          Model.push (Model.drop_n state__007_ 1) q_9__021_
       | Pop_opt ->
-          let q_10__018_ = Model.get state__003_ 0 in
-          let q_10__019_ =
+          let q_10__022_ = Model.get state__007_ 0 in
+          let q_10__023_ =
             let open ModelElt in
               {
-                q_10__018_ with
+                q_10__022_ with
                 contents =
                   (try
                      apply_if_not
                        (if
-                          (q_10__018_.closed = true) &&
-                            (is_empty_1 q_10__018_.contents)
+                          (q_10__022_.closed = true) &&
+                            (is_empty_1 q_10__022_.contents)
                         then true
-                        else false) tail_safe q_10__018_.contents
+                        else false) tail_safe q_10__022_.contents
                    with
                    | e ->
                        raise
@@ -574,21 +576,21 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 1) q_10__019_
+          Model.push (Model.drop_n state__007_ 1) q_10__023_
       | Drop_exn ->
-          let q_11__020_ = Model.get state__003_ 0 in
-          let q_11__021_ =
+          let q_11__024_ = Model.get state__007_ 0 in
+          let q_11__025_ =
             let open ModelElt in
               {
-                q_11__020_ with
+                q_11__024_ with
                 contents =
                   (try
                      apply_if_not
                        (if
-                          (q_11__020_.closed = true) &&
-                            (is_empty_1 q_11__020_.contents)
+                          (q_11__024_.closed = true) &&
+                            (is_empty_1 q_11__024_.contents)
                         then true
-                        else false) tail_safe q_11__020_.contents
+                        else false) tail_safe q_11__024_.contents
                    with
                    | e ->
                        raise
@@ -611,31 +613,31 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 1) q_11__021_
+          Model.push (Model.drop_n state__007_ 1) q_11__025_
       | Peek_exn ->
-          let q_12__022_ = Model.get state__003_ 0 in
-          let q_12__023_ = q_12__022_ in
-          Model.push (Model.drop_n state__003_ 1) q_12__023_
+          let q_12__026_ = Model.get state__007_ 0 in
+          let q_12__027_ = q_12__026_ in
+          Model.push (Model.drop_n state__007_ 1) q_12__027_
       | Peek_opt ->
-          let q_13__024_ = Model.get state__003_ 0 in
-          let q_13__025_ = q_13__024_ in
-          Model.push (Model.drop_n state__003_ 1) q_13__025_
+          let q_13__028_ = Model.get state__007_ 0 in
+          let q_13__029_ = q_13__028_ in
+          Model.push (Model.drop_n state__007_ 1) q_13__029_
       | Push_head a_3 ->
-          let q_14__026_ = Model.get state__003_ 0 in
-          let q_14__027_ =
+          let q_14__030_ = Model.get state__007_ 0 in
+          let q_14__031_ =
             let open ModelElt in
               {
-                q_14__026_ with
+                q_14__030_ with
                 contents =
                   (try
                      apply_if_not
                        (if
-                          (q_14__026_.closed = true) &&
-                            (is_empty_1 q_14__026_.contents)
+                          (q_14__030_.closed = true) &&
+                            (is_empty_1 q_14__030_.contents)
                         then true
                         else false)
                        (Ortac_runtime.Gospelstdlib.Sequence.cons a_3)
-                       q_14__026_.contents
+                       q_14__030_.contents
                    with
                    | e ->
                        raise
@@ -658,9 +660,9 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 1) q_14__027_
-    let precond cmd__088_ state__089_ =
-      match cmd__088_ with
+          Model.push (Model.drop_n state__007_ 1) q_14__031_
+    let precond cmd__092_ state__093_ =
+      match cmd__092_ with
       | Create () -> true
       | Of_list xs -> true
       | Push a_2 -> true
@@ -674,147 +676,147 @@ module Spec =
       | Peek_opt -> true
       | Push_head a_3 -> true
     let postcond _ _ _ = true
-    let run cmd__090_ sut__091_ =
-      match cmd__090_ with
-      | Create () -> Res (sut, (let res__092_ = create () in res__092_))
-      | Of_list xs -> Res (sut, (let res__093_ = of_list xs in res__093_))
+    let run cmd__094_ sut__095_ =
+      match cmd__094_ with
+      | Create () -> Res (sut, (let res__096_ = create () in res__096_))
+      | Of_list xs -> Res (sut, (let res__097_ = of_list xs in res__097_))
       | Push a_2 ->
           Res
             ((result unit exn),
-              (let q_5__094_ = SUT.get sut__091_ 0 in
-               let res__095_ = protect (fun () -> push q_5__094_ a_2) () in
-               res__095_))
+              (let q_5__098_ = SUT.get sut__095_ 0 in
+               let res__099_ = protect (fun () -> push q_5__098_ a_2) () in
+               res__099_))
       | Push_all xs_1 ->
           Res
             ((result unit exn),
-              (let q_6__096_ = SUT.get sut__091_ 0 in
-               let res__097_ = protect (fun () -> push_all q_6__096_ xs_1) () in
-               res__097_))
+              (let q_6__100_ = SUT.get sut__095_ 0 in
+               let res__101_ = protect (fun () -> push_all q_6__100_ xs_1) () in
+               res__101_))
       | Is_empty ->
           Res
             ((result bool exn),
-              (let q_7__098_ = SUT.get sut__091_ 0 in
-               let res__099_ = protect (fun () -> is_empty q_7__098_) () in
-               res__099_))
+              (let q_7__102_ = SUT.get sut__095_ 0 in
+               let res__103_ = protect (fun () -> is_empty q_7__102_) () in
+               res__103_))
       | Close ->
           Res
             ((result unit exn),
-              (let q_8__100_ = SUT.get sut__091_ 0 in
-               let res__101_ = protect (fun () -> close q_8__100_) () in
-               res__101_))
+              (let q_8__104_ = SUT.get sut__095_ 0 in
+               let res__105_ = protect (fun () -> close q_8__104_) () in
+               res__105_))
       | Pop_exn ->
           Res
             ((result int exn),
-              (let q_9__102_ = SUT.get sut__091_ 0 in
-               let res__103_ = protect (fun () -> pop_exn q_9__102_) () in
-               res__103_))
+              (let q_9__106_ = SUT.get sut__095_ 0 in
+               let res__107_ = protect (fun () -> pop_exn q_9__106_) () in
+               res__107_))
       | Pop_opt ->
           Res
             ((result (option int) exn),
-              (let q_10__104_ = SUT.get sut__091_ 0 in
-               let res__105_ = protect (fun () -> pop_opt q_10__104_) () in
-               res__105_))
+              (let q_10__108_ = SUT.get sut__095_ 0 in
+               let res__109_ = protect (fun () -> pop_opt q_10__108_) () in
+               res__109_))
       | Drop_exn ->
           Res
             ((result unit exn),
-              (let q_11__106_ = SUT.get sut__091_ 0 in
-               let res__107_ = protect (fun () -> drop_exn q_11__106_) () in
-               res__107_))
+              (let q_11__110_ = SUT.get sut__095_ 0 in
+               let res__111_ = protect (fun () -> drop_exn q_11__110_) () in
+               res__111_))
       | Peek_exn ->
           Res
             ((result int exn),
-              (let q_12__108_ = SUT.get sut__091_ 0 in
-               let res__109_ = protect (fun () -> peek_exn q_12__108_) () in
-               res__109_))
+              (let q_12__112_ = SUT.get sut__095_ 0 in
+               let res__113_ = protect (fun () -> peek_exn q_12__112_) () in
+               res__113_))
       | Peek_opt ->
           Res
             ((result (option int) exn),
-              (let q_13__110_ = SUT.get sut__091_ 0 in
-               let res__111_ = protect (fun () -> peek_opt q_13__110_) () in
-               res__111_))
+              (let q_13__114_ = SUT.get sut__095_ 0 in
+               let res__115_ = protect (fun () -> peek_opt q_13__114_) () in
+               res__115_))
       | Push_head a_3 ->
           Res
             ((result unit exn),
-              (let q_14__112_ = SUT.get sut__091_ 0 in
-               let res__113_ =
-                 protect (fun () -> push_head q_14__112_ a_3) () in
-               res__113_))
+              (let q_14__116_ = SUT.get sut__095_ 0 in
+               let res__117_ =
+                 protect (fun () -> push_head q_14__116_ a_3) () in
+               res__117_))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__116_ models__117_ last__119_ res__118_ =
+let ortac_show_cmd cmd__119_ models__120_ last__122_ res__121_ =
   let open Spec in
     let open STM in
-      match (cmd__116_, res__118_) with
+      match (cmd__119_, res__121_) with
       | (Create (), Res ((SUT, _), q_3)) ->
-          let lhs = if last__119_ then "r" else "_"
+          let lhs = if last__122_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a" lhs "create"
             (Util.Pp.pp_unit true) ()
       | (Of_list xs, Res ((SUT, _), q_4)) ->
-          let lhs = if last__119_ then "r" else "_"
+          let lhs = if last__122_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a" lhs "of_list"
             (Util.Pp.pp_list Util.Pp.pp_int true) xs
       | (Push a_2, Res ((Result (Unit, Exn), _), _)) ->
-          let lhs = if last__119_ then "r" else "_"
+          let lhs = if last__122_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s %a)" lhs "push"
-            (Model.get_name models__117_ (0 + shift)) (Util.Pp.pp_int true)
+            (Model.get_name models__120_ (0 + shift)) (Util.Pp.pp_int true)
             a_2
       | (Push_all xs_1, Res ((Result (Unit, Exn), _), _)) ->
-          let lhs = if last__119_ then "r" else "_"
+          let lhs = if last__122_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s %a)" lhs
-            "push_all" (Model.get_name models__117_ (0 + shift))
+            "push_all" (Model.get_name models__120_ (0 + shift))
             (Util.Pp.pp_list Util.Pp.pp_int true) xs_1
       | (Is_empty, Res ((Result (Bool, Exn), _), _)) ->
-          let lhs = if last__119_ then "r" else "_"
+          let lhs = if last__122_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "is_empty"
-            (Model.get_name models__117_ (0 + shift))
+            (Model.get_name models__120_ (0 + shift))
       | (Close, Res ((Result (Unit, Exn), _), _)) ->
-          let lhs = if last__119_ then "r" else "_"
+          let lhs = if last__122_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "close"
-            (Model.get_name models__117_ (0 + shift))
+            (Model.get_name models__120_ (0 + shift))
       | (Pop_exn, Res ((Result (Int, Exn), _), _)) ->
-          let lhs = if last__119_ then "r" else "_"
+          let lhs = if last__122_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "pop_exn"
-            (Model.get_name models__117_ (0 + shift))
+            (Model.get_name models__120_ (0 + shift))
       | (Pop_opt, Res ((Result (Option (Int), Exn), _), _)) ->
-          let lhs = if last__119_ then "r" else "_"
+          let lhs = if last__122_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "pop_opt"
-            (Model.get_name models__117_ (0 + shift))
+            (Model.get_name models__120_ (0 + shift))
       | (Drop_exn, Res ((Result (Unit, Exn), _), _)) ->
-          let lhs = if last__119_ then "r" else "_"
+          let lhs = if last__122_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "drop_exn"
-            (Model.get_name models__117_ (0 + shift))
+            (Model.get_name models__120_ (0 + shift))
       | (Peek_exn, Res ((Result (Int, Exn), _), _)) ->
-          let lhs = if last__119_ then "r" else "_"
+          let lhs = if last__122_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "peek_exn"
-            (Model.get_name models__117_ (0 + shift))
+            (Model.get_name models__120_ (0 + shift))
       | (Peek_opt, Res ((Result (Option (Int), Exn), _), _)) ->
-          let lhs = if last__119_ then "r" else "_"
+          let lhs = if last__122_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s)" lhs "peek_opt"
-            (Model.get_name models__117_ (0 + shift))
+            (Model.get_name models__120_ (0 + shift))
       | (Push_head a_3, Res ((Result (Unit, Exn), _), _)) ->
-          let lhs = if last__119_ then "r" else "_"
+          let lhs = if last__122_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s %a)" lhs
-            "push_head" (Model.get_name models__117_ (0 + shift))
+            "push_head" (Model.get_name models__120_ (0 + shift))
             (Util.Pp.pp_int true) a_3
       | _ -> assert false
-let ortac_postcond cmd__028_ state__029_ res__030_ =
+let ortac_postcond cmd__032_ state__033_ res__034_ =
   let open Spec in
     let open STM in
-      let new_state__031_ = lazy (next_state cmd__028_ state__029_) in
-      match (cmd__028_, res__030_) with
+      let new_state__035_ = lazy (next_state cmd__032_ state__033_) in
+      match (cmd__032_, res__034_) with
       | (Create (), Res ((SUT, _), q_3)) -> None
       | (Of_list xs, Res ((SUT, _), q_4)) -> None
       | (Push a_2, Res ((Result (Unit, Exn), _), res)) ->
@@ -822,10 +824,10 @@ let ortac_postcond cmd__028_ state__029_ res__030_ =
            | Ok _ -> None
            | Error (Closed) ->
                if
-                 let q_old__032_ = Model.get state__029_ 0
-                 and q_new__033_ =
-                   lazy (Model.get (Lazy.force new_state__031_) 0) in
-                 (try (Lazy.force q_new__033_).closed = true
+                 let q_old__036_ = Model.get state__033_ 0
+                 and q_new__037_ =
+                   lazy (Model.get (Lazy.force new_state__035_) 0) in
+                 (try (Lazy.force q_new__037_).closed = true
                   with | e -> false)
                then None
                else
@@ -856,10 +858,10 @@ let ortac_postcond cmd__028_ state__029_ res__030_ =
            | Ok _ -> None
            | Error (Closed) ->
                if
-                 let q_old__035_ = Model.get state__029_ 0
-                 and q_new__036_ =
-                   lazy (Model.get (Lazy.force new_state__031_) 0) in
-                 (try (Lazy.force q_new__036_).closed = true
+                 let q_old__039_ = Model.get state__033_ 0
+                 and q_new__040_ =
+                   lazy (Model.get (Lazy.force new_state__035_) 0) in
+                 (try (Lazy.force q_new__040_).closed = true
                   with | e -> false)
                then None
                else
@@ -890,12 +892,12 @@ let ortac_postcond cmd__028_ state__029_ res__030_ =
           (match b with
            | Ok b ->
                if
-                 let q_old__040_ = Model.get state__029_ 0
-                 and q_new__041_ =
-                   lazy (Model.get (Lazy.force new_state__031_) 0) in
+                 let q_old__044_ = Model.get state__033_ 0
+                 and q_new__045_ =
+                   lazy (Model.get (Lazy.force new_state__035_) 0) in
                  (try
                     (b = true) =
-                      (is_empty_1 (Lazy.force q_new__041_).contents)
+                      (is_empty_1 (Lazy.force q_new__045_).contents)
                   with | e -> false)
                then None
                else
@@ -905,12 +907,12 @@ let ortac_postcond cmd__028_ state__029_ res__030_ =
                          Ortac_runtime.Report.Protected_value
                            (Res
                               (bool,
-                                (let q_old__038_ = Model.get state__029_ 0
-                                 and q_new__039_ =
+                                (let q_old__042_ = Model.get state__033_ 0
+                                 and q_new__043_ =
                                    lazy
-                                     (Model.get (Lazy.force new_state__031_)
+                                     (Model.get (Lazy.force new_state__035_)
                                         0) in
-                                 is_empty_1 (Lazy.force q_new__039_).contents)))
+                                 is_empty_1 (Lazy.force q_new__043_).contents)))
                        with | e -> Ortac_runtime.Report.Out_of_domain)
                       "is_empty"
                       [("b = is_empty q.contents",
@@ -932,12 +934,12 @@ let ortac_postcond cmd__028_ state__029_ res__030_ =
                          })])
            | Error (Closed) ->
                if
-                 let q_old__042_ = Model.get state__029_ 0
-                 and q_new__043_ =
-                   lazy (Model.get (Lazy.force new_state__031_) 0) in
+                 let q_old__046_ = Model.get state__033_ 0
+                 and q_new__047_ =
+                   lazy (Model.get (Lazy.force new_state__035_) 0) in
                  (try
-                    ((Lazy.force q_new__043_).closed = true) &&
-                      (is_empty_1 (Lazy.force q_new__043_).contents)
+                    ((Lazy.force q_new__047_).closed = true) &&
+                      (is_empty_1 (Lazy.force q_new__047_).contents)
                   with | e -> false)
                then None
                else
@@ -969,10 +971,10 @@ let ortac_postcond cmd__028_ state__029_ res__030_ =
            | Ok _ -> None
            | Error (Closed) ->
                if
-                 let q_old__045_ = Model.get state__029_ 0
-                 and q_new__046_ =
-                   lazy (Model.get (Lazy.force new_state__031_) 0) in
-                 (try q_old__045_.closed = true with | e -> false)
+                 let q_old__049_ = Model.get state__033_ 0
+                 and q_new__050_ =
+                   lazy (Model.get (Lazy.force new_state__035_) 0) in
+                 (try q_old__049_.closed = true with | e -> false)
                then None
                else
                  Some
@@ -1002,13 +1004,13 @@ let ortac_postcond cmd__028_ state__029_ res__030_ =
           (match a_4 with
            | Ok a_4 ->
                if
-                 let q_old__050_ = Model.get state__029_ 0
-                 and q_new__051_ =
-                   lazy (Model.get (Lazy.force new_state__031_) 0) in
+                 let q_old__054_ = Model.get state__033_ 0
+                 and q_new__055_ =
+                   lazy (Model.get (Lazy.force new_state__035_) 0) in
                  (try
                     a_4 =
                       (Ortac_runtime.Gospelstdlib.Sequence.hd
-                         q_old__050_.contents)
+                         q_old__054_.contents)
                   with | e -> false)
                then None
                else
@@ -1018,13 +1020,13 @@ let ortac_postcond cmd__028_ state__029_ res__030_ =
                          Ortac_runtime.Report.Protected_value
                            (Res
                               (int,
-                                (let q_old__048_ = Model.get state__029_ 0
-                                 and q_new__049_ =
+                                (let q_old__052_ = Model.get state__033_ 0
+                                 and q_new__053_ =
                                    lazy
-                                     (Model.get (Lazy.force new_state__031_)
+                                     (Model.get (Lazy.force new_state__035_)
                                         0) in
                                  Ortac_runtime.Gospelstdlib.Sequence.hd
-                                   q_old__048_.contents)))
+                                   q_old__052_.contents)))
                        with | e -> Ortac_runtime.Report.Out_of_domain)
                       "pop_exn"
                       [("a = hd (old q.contents)",
@@ -1046,10 +1048,10 @@ let ortac_postcond cmd__028_ state__029_ res__030_ =
                          })])
            | Error (Empty) ->
                if
-                 let q_old__052_ = Model.get state__029_ 0
-                 and q_new__053_ =
-                   lazy (Model.get (Lazy.force new_state__031_) 0) in
-                 (try is_empty_1 q_old__052_.contents with | e -> false)
+                 let q_old__056_ = Model.get state__033_ 0
+                 and q_new__057_ =
+                   lazy (Model.get (Lazy.force new_state__035_) 0) in
+                 (try is_empty_1 q_old__056_.contents with | e -> false)
                then None
                else
                  Some
@@ -1076,12 +1078,12 @@ let ortac_postcond cmd__028_ state__029_ res__030_ =
                          })])
            | Error (Closed) ->
                if
-                 let q_old__054_ = Model.get state__029_ 0
-                 and q_new__055_ =
-                   lazy (Model.get (Lazy.force new_state__031_) 0) in
+                 let q_old__058_ = Model.get state__033_ 0
+                 and q_new__059_ =
+                   lazy (Model.get (Lazy.force new_state__035_) 0) in
                  (try
-                    ((Lazy.force q_new__055_).closed = true) &&
-                      (is_empty_1 q_old__054_.contents)
+                    ((Lazy.force q_new__059_).closed = true) &&
+                      (is_empty_1 q_old__058_.contents)
                   with | e -> false)
                then None
                else
@@ -1112,10 +1114,10 @@ let ortac_postcond cmd__028_ state__029_ res__030_ =
           (match o with
            | Ok o ->
                if
-                 let q_old__059_ = Model.get state__029_ 0
-                 and q_new__060_ =
-                   lazy (Model.get (Lazy.force new_state__031_) 0) in
-                 (try o = (head_safe q_old__059_.contents) with | e -> false)
+                 let q_old__063_ = Model.get state__033_ 0
+                 and q_new__064_ =
+                   lazy (Model.get (Lazy.force new_state__035_) 0) in
+                 (try o = (head_safe q_old__063_.contents) with | e -> false)
                then None
                else
                  Some
@@ -1124,12 +1126,12 @@ let ortac_postcond cmd__028_ state__029_ res__030_ =
                          Ortac_runtime.Report.Protected_value
                            (Res
                               ((option int),
-                                (let q_old__057_ = Model.get state__029_ 0
-                                 and q_new__058_ =
+                                (let q_old__061_ = Model.get state__033_ 0
+                                 and q_new__062_ =
                                    lazy
-                                     (Model.get (Lazy.force new_state__031_)
+                                     (Model.get (Lazy.force new_state__035_)
                                         0) in
-                                 head_safe q_old__057_.contents)))
+                                 head_safe q_old__061_.contents)))
                        with | e -> Ortac_runtime.Report.Out_of_domain)
                       "pop_opt"
                       [("o = head_safe (old q.contents)",
@@ -1151,12 +1153,12 @@ let ortac_postcond cmd__028_ state__029_ res__030_ =
                          })])
            | Error (Closed) ->
                if
-                 let q_old__061_ = Model.get state__029_ 0
-                 and q_new__062_ =
-                   lazy (Model.get (Lazy.force new_state__031_) 0) in
+                 let q_old__065_ = Model.get state__033_ 0
+                 and q_new__066_ =
+                   lazy (Model.get (Lazy.force new_state__035_) 0) in
                  (try
-                    ((Lazy.force q_new__062_).closed = true) &&
-                      (is_empty_1 q_old__061_.contents)
+                    ((Lazy.force q_new__066_).closed = true) &&
+                      (is_empty_1 q_old__065_.contents)
                   with | e -> false)
                then None
                else
@@ -1188,10 +1190,10 @@ let ortac_postcond cmd__028_ state__029_ res__030_ =
            | Ok _ -> None
            | Error (Empty) ->
                if
-                 let q_old__064_ = Model.get state__029_ 0
-                 and q_new__065_ =
-                   lazy (Model.get (Lazy.force new_state__031_) 0) in
-                 (try is_empty_1 q_old__064_.contents with | e -> false)
+                 let q_old__068_ = Model.get state__033_ 0
+                 and q_new__069_ =
+                   lazy (Model.get (Lazy.force new_state__035_) 0) in
+                 (try is_empty_1 q_old__068_.contents with | e -> false)
                then None
                else
                  Some
@@ -1218,12 +1220,12 @@ let ortac_postcond cmd__028_ state__029_ res__030_ =
                          })])
            | Error (Closed) ->
                if
-                 let q_old__066_ = Model.get state__029_ 0
-                 and q_new__067_ =
-                   lazy (Model.get (Lazy.force new_state__031_) 0) in
+                 let q_old__070_ = Model.get state__033_ 0
+                 and q_new__071_ =
+                   lazy (Model.get (Lazy.force new_state__035_) 0) in
                  (try
-                    ((Lazy.force q_new__067_).closed = true) &&
-                      (is_empty_1 q_old__066_.contents)
+                    ((Lazy.force q_new__071_).closed = true) &&
+                      (is_empty_1 q_old__070_.contents)
                   with | e -> false)
                then None
                else
@@ -1254,13 +1256,13 @@ let ortac_postcond cmd__028_ state__029_ res__030_ =
           (match a_5 with
            | Ok a_5 ->
                if
-                 let q_old__071_ = Model.get state__029_ 0
-                 and q_new__072_ =
-                   lazy (Model.get (Lazy.force new_state__031_) 0) in
+                 let q_old__075_ = Model.get state__033_ 0
+                 and q_new__076_ =
+                   lazy (Model.get (Lazy.force new_state__035_) 0) in
                  (try
                     a_5 =
                       (Ortac_runtime.Gospelstdlib.Sequence.hd
-                         (Lazy.force q_new__072_).contents)
+                         (Lazy.force q_new__076_).contents)
                   with | e -> false)
                then None
                else
@@ -1270,13 +1272,13 @@ let ortac_postcond cmd__028_ state__029_ res__030_ =
                          Ortac_runtime.Report.Protected_value
                            (Res
                               (int,
-                                (let q_old__069_ = Model.get state__029_ 0
-                                 and q_new__070_ =
+                                (let q_old__073_ = Model.get state__033_ 0
+                                 and q_new__074_ =
                                    lazy
-                                     (Model.get (Lazy.force new_state__031_)
+                                     (Model.get (Lazy.force new_state__035_)
                                         0) in
                                  Ortac_runtime.Gospelstdlib.Sequence.hd
-                                   (Lazy.force q_new__070_).contents)))
+                                   (Lazy.force q_new__074_).contents)))
                        with | e -> Ortac_runtime.Report.Out_of_domain)
                       "peek_exn"
                       [("a = hd q.contents",
@@ -1298,10 +1300,10 @@ let ortac_postcond cmd__028_ state__029_ res__030_ =
                          })])
            | Error (Empty) ->
                if
-                 let q_old__073_ = Model.get state__029_ 0
-                 and q_new__074_ =
-                   lazy (Model.get (Lazy.force new_state__031_) 0) in
-                 (try is_empty_1 (Lazy.force q_new__074_).contents
+                 let q_old__077_ = Model.get state__033_ 0
+                 and q_new__078_ =
+                   lazy (Model.get (Lazy.force new_state__035_) 0) in
+                 (try is_empty_1 (Lazy.force q_new__078_).contents
                   with | e -> false)
                then None
                else
@@ -1329,12 +1331,12 @@ let ortac_postcond cmd__028_ state__029_ res__030_ =
                          })])
            | Error (Closed) ->
                if
-                 let q_old__075_ = Model.get state__029_ 0
-                 and q_new__076_ =
-                   lazy (Model.get (Lazy.force new_state__031_) 0) in
+                 let q_old__079_ = Model.get state__033_ 0
+                 and q_new__080_ =
+                   lazy (Model.get (Lazy.force new_state__035_) 0) in
                  (try
-                    ((Lazy.force q_new__076_).closed = true) &&
-                      (is_empty_1 q_old__075_.contents)
+                    ((Lazy.force q_new__080_).closed = true) &&
+                      (is_empty_1 q_old__079_.contents)
                   with | e -> false)
                then None
                else
@@ -1365,10 +1367,10 @@ let ortac_postcond cmd__028_ state__029_ res__030_ =
           (match o_1 with
            | Ok o_1 ->
                if
-                 let q_old__080_ = Model.get state__029_ 0
-                 and q_new__081_ =
-                   lazy (Model.get (Lazy.force new_state__031_) 0) in
-                 (try o_1 = (head_safe (Lazy.force q_new__081_).contents)
+                 let q_old__084_ = Model.get state__033_ 0
+                 and q_new__085_ =
+                   lazy (Model.get (Lazy.force new_state__035_) 0) in
+                 (try o_1 = (head_safe (Lazy.force q_new__085_).contents)
                   with | e -> false)
                then None
                else
@@ -1378,12 +1380,12 @@ let ortac_postcond cmd__028_ state__029_ res__030_ =
                          Ortac_runtime.Report.Protected_value
                            (Res
                               ((option int),
-                                (let q_old__078_ = Model.get state__029_ 0
-                                 and q_new__079_ =
+                                (let q_old__082_ = Model.get state__033_ 0
+                                 and q_new__083_ =
                                    lazy
-                                     (Model.get (Lazy.force new_state__031_)
+                                     (Model.get (Lazy.force new_state__035_)
                                         0) in
-                                 head_safe (Lazy.force q_new__079_).contents)))
+                                 head_safe (Lazy.force q_new__083_).contents)))
                        with | e -> Ortac_runtime.Report.Out_of_domain)
                       "peek_opt"
                       [("o = head_safe q.contents",
@@ -1405,12 +1407,12 @@ let ortac_postcond cmd__028_ state__029_ res__030_ =
                          })])
            | Error (Closed) ->
                if
-                 let q_old__082_ = Model.get state__029_ 0
-                 and q_new__083_ =
-                   lazy (Model.get (Lazy.force new_state__031_) 0) in
+                 let q_old__086_ = Model.get state__033_ 0
+                 and q_new__087_ =
+                   lazy (Model.get (Lazy.force new_state__035_) 0) in
                  (try
-                    ((Lazy.force q_new__083_).closed = true) &&
-                      (is_empty_1 (Lazy.force q_new__083_).contents)
+                    ((Lazy.force q_new__087_).closed = true) &&
+                      (is_empty_1 (Lazy.force q_new__087_).contents)
                   with | e -> false)
                then None
                else
@@ -1442,12 +1444,12 @@ let ortac_postcond cmd__028_ state__029_ res__030_ =
            | Ok _ -> None
            | Error (Closed) ->
                if
-                 let q_old__085_ = Model.get state__029_ 0
-                 and q_new__086_ =
-                   lazy (Model.get (Lazy.force new_state__031_) 0) in
+                 let q_old__089_ = Model.get state__033_ 0
+                 and q_new__090_ =
+                   lazy (Model.get (Lazy.force new_state__035_) 0) in
                  (try
-                    ((Lazy.force q_new__086_).closed = true) &&
-                      (is_empty_1 q_old__085_.contents)
+                    ((Lazy.force q_new__090_).closed = true) &&
+                      (is_empty_1 q_old__089_.contents)
                   with | e -> false)
                then None
                else

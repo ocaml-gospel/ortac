@@ -89,8 +89,8 @@ module Spec =
     type cmd =
       | Make of int * char 
       | Map of (char -> char) QCheck.fun_ 
-    let show_cmd cmd__001_ =
-      match cmd__001_ with
+    let show_cmd cmd__005_ =
+      match cmd__005_ with
       | Make (len, c) ->
           Format.asprintf "protect (fun () -> %s %a %a)" "make"
             (Util.Pp.pp_int true) len (Util.Pp.pp_char true) c
@@ -105,10 +105,10 @@ module Spec =
             (1,
               ((pure (fun f -> Map f)) <*>
                  (fun1 Observable.char QCheck.char).gen))]
-    let arb_cmd state__022_ =
-      let open QCheck in make ~print:show_cmd (gen_cmd state__022_)
-    let next_state cmd__002_ state__003_ =
-      match cmd__002_ with
+    let arb_cmd state__001_ =
+      let open QCheck in make ~print:show_cmd (gen_cmd state__001_)
+    let next_state cmd__006_ state__007_ =
+      match cmd__006_ with
       | Make (len, c) ->
           if
             (try
@@ -117,7 +117,7 @@ module Spec =
                  (Ortac_runtime.Gospelstdlib.integer_of_int 0)
              with | e -> false)
           then
-            let t_1__005_ =
+            let t_1__009_ =
               let open ModelElt in
                 {
                   size =
@@ -170,15 +170,15 @@ module Spec =
                                     }
                                 })))
                 } in
-            Model.push (Model.drop_n state__003_ 0) t_1__005_
-          else state__003_
+            Model.push (Model.drop_n state__007_ 0) t_1__009_
+          else state__007_
       | Map f ->
-          let input__006_ = Model.get state__003_ 0 in
-          let output__009_ =
+          let input__010_ = Model.get state__007_ 0 in
+          let output__013_ =
             let open ModelElt in
               {
                 size =
-                  (try input__006_.size
+                  (try input__010_.size
                    with
                    | e ->
                        raise
@@ -203,11 +203,11 @@ module Spec =
                 contents =
                   (try
                      Ortac_runtime.Gospelstdlib.Sequence.init
-                       input__006_.size
+                       input__010_.size
                        (fun j_1 ->
                           QCheck.Fn.apply f
                             (Ortac_runtime.Gospelstdlib.__mix_Bub
-                               input__006_.contents j_1))
+                               input__010_.contents j_1))
                    with
                    | e ->
                        raise
@@ -230,58 +230,58 @@ module Spec =
                                   }
                               })))
               }
-          and input__008_ = input__006_ in
-          Model.push (Model.push (Model.drop_n state__003_ 1) input__008_)
-            output__009_
-    let precond cmd__015_ state__016_ =
-      match cmd__015_ with | Make (len, c) -> true | Map f -> true
+          and input__012_ = input__010_ in
+          Model.push (Model.push (Model.drop_n state__007_ 1) input__012_)
+            output__013_
+    let precond cmd__019_ state__020_ =
+      match cmd__019_ with | Make (len, c) -> true | Map f -> true
     let postcond _ _ _ = true
-    let run cmd__017_ sut__018_ =
-      match cmd__017_ with
+    let run cmd__021_ sut__022_ =
+      match cmd__021_ with
       | Make (len, c) ->
           Res
             ((result sut exn),
-              (let res__019_ = protect (fun () -> make len c) () in
-               ((match res__019_ with
-                 | Ok res -> SUT.push sut__018_ res
+              (let res__023_ = protect (fun () -> make len c) () in
+               ((match res__023_ with
+                 | Ok res -> SUT.push sut__022_ res
                  | Error _ -> ());
-                res__019_)))
+                res__023_)))
       | Map f ->
           Res
             (sut,
-              (let input__020_ = SUT.get sut__018_ 0 in
-               let res__021_ = map (QCheck.Fn.apply f) input__020_ in
-               (SUT.push sut__018_ res__021_; res__021_)))
+              (let input__024_ = SUT.get sut__022_ 0 in
+               let res__025_ = map (QCheck.Fn.apply f) input__024_ in
+               (SUT.push sut__022_ res__025_; res__025_)))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__024_ models__025_ last__027_ res__026_ =
+let ortac_show_cmd cmd__027_ models__028_ last__030_ res__029_ =
   let open Spec in
     let open STM in
-      match (cmd__024_, res__026_) with
+      match (cmd__027_, res__029_) with
       | (Make (len, c), Res ((Result (SUT, Exn), _), t_1)) ->
           let lhs =
-            if last__027_
+            if last__030_
             then "r"
             else
               (match t_1 with
-               | Ok _ -> "Ok " ^ (Model.get_name models__025_ 0)
+               | Ok _ -> "Ok " ^ (Model.get_name models__028_ 0)
                | Error _ -> "_")
           and shift = match t_1 with | Ok _ -> 1 | Error _ -> 0 in
           Format.asprintf "let %s = protect (fun () -> %s %a %a)" lhs "make"
             (Util.Pp.pp_int true) len (Util.Pp.pp_char true) c
       | (Map f, Res ((SUT, _), output)) ->
-          let lhs = if last__027_ then "r" else Model.get_name models__025_ 0
+          let lhs = if last__030_ then "r" else Model.get_name models__028_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a %s" lhs "map"
             (Util.Pp.pp_fun_ true) f
-            (Model.get_name models__025_ (0 + shift))
+            (Model.get_name models__028_ (0 + shift))
       | _ -> assert false
-let ortac_postcond cmd__010_ state__011_ res__012_ =
+let ortac_postcond cmd__014_ state__015_ res__016_ =
   let open Spec in
     let open STM in
-      let new_state__013_ = lazy (next_state cmd__010_ state__011_) in
-      match (cmd__010_, res__012_) with
+      let new_state__017_ = lazy (next_state cmd__014_ state__015_) in
+      match (cmd__014_, res__016_) with
       | (Make (len, c), Res ((Result (SUT, Exn), _), t_1)) ->
           (match if
                    try

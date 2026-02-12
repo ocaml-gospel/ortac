@@ -82,8 +82,8 @@ module Spec =
       | Plus1 of int 
       | Plus2 of int 
       | Get 
-    let show_cmd cmd__001_ =
-      match cmd__001_ with
+    let show_cmd cmd__005_ =
+      match cmd__005_ with
       | Make i_1 -> Format.asprintf "%s %a" "make" (Util.Pp.pp_int true) i_1
       | Plus1 i_2 ->
           Format.asprintf "%s %a" "plus1" (Util.Pp.pp_int true) i_2
@@ -99,12 +99,12 @@ module Spec =
             (1, ((pure (fun i_2 -> Plus1 i_2)) <*> int));
             (1, ((pure (fun i_3 -> Plus2 i_3)) <*> int));
             (1, (pure Get))]
-    let arb_cmd state__036_ =
-      let open QCheck in make ~print:show_cmd (gen_cmd state__036_)
-    let next_state cmd__002_ state__003_ =
-      match cmd__002_ with
+    let arb_cmd state__001_ =
+      let open QCheck in make ~print:show_cmd (gen_cmd state__001_)
+    let next_state cmd__006_ state__007_ =
+      match cmd__006_ with
       | Make i_1 ->
-          let r__005_ =
+          let r__009_ =
             let open ModelElt in
               {
                 value =
@@ -131,67 +131,67 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 0) r__005_
-      | Plus1 i_2 -> state__003_
-      | Plus2 i_3 -> state__003_
+          Model.push (Model.drop_n state__007_ 0) r__009_
+      | Plus1 i_2 -> state__007_
+      | Plus2 i_3 -> state__007_
       | Get ->
-          let r_1__006_ = Model.get state__003_ 0 in
-          let r_1__007_ = r_1__006_ in
-          Model.push (Model.drop_n state__003_ 1) r_1__007_
-    let precond cmd__027_ state__028_ =
-      match cmd__027_ with
+          let r_1__010_ = Model.get state__007_ 0 in
+          let r_1__011_ = r_1__010_ in
+          Model.push (Model.drop_n state__007_ 1) r_1__011_
+    let precond cmd__031_ state__032_ =
+      match cmd__031_ with
       | Make i_1 -> true
       | Plus1 i_2 -> true
       | Plus2 i_3 -> true
       | Get -> true
     let postcond _ _ _ = true
-    let run cmd__029_ sut__030_ =
-      match cmd__029_ with
+    let run cmd__033_ sut__034_ =
+      match cmd__033_ with
       | Make i_1 ->
           Res
             (sut,
-              (let res__031_ = make i_1 in
-               (SUT.push sut__030_ res__031_; res__031_)))
-      | Plus1 i_2 -> Res (int, (let res__032_ = plus1 i_2 in res__032_))
-      | Plus2 i_3 -> Res (int, (let res__033_ = plus2 i_3 in res__033_))
+              (let res__035_ = make i_1 in
+               (SUT.push sut__034_ res__035_; res__035_)))
+      | Plus1 i_2 -> Res (int, (let res__036_ = plus1 i_2 in res__036_))
+      | Plus2 i_3 -> Res (int, (let res__037_ = plus2 i_3 in res__037_))
       | Get ->
           Res
             (int,
-              (let r_1__034_ = SUT.get sut__030_ 0 in
-               let res__035_ = get r_1__034_ in res__035_))
+              (let r_1__038_ = SUT.get sut__034_ 0 in
+               let res__039_ = get r_1__038_ in res__039_))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__038_ models__039_ last__041_ res__040_ =
+let ortac_show_cmd cmd__041_ models__042_ last__044_ res__043_ =
   let open Spec in
     let open STM in
-      match (cmd__038_, res__040_) with
+      match (cmd__041_, res__043_) with
       | (Make i_1, Res ((SUT, _), r)) ->
-          let lhs = if last__041_ then "r" else Model.get_name models__039_ 0
+          let lhs = if last__044_ then "r" else Model.get_name models__042_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a" lhs "make" (Util.Pp.pp_int true)
             i_1
       | (Plus1 i_2, Res ((Int, _), _)) ->
-          let lhs = if last__041_ then "r" else "_"
+          let lhs = if last__044_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a" lhs "plus1" (Util.Pp.pp_int true)
             i_2
       | (Plus2 i_3, Res ((Int, _), _)) ->
-          let lhs = if last__041_ then "r" else "_"
+          let lhs = if last__044_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a" lhs "plus2" (Util.Pp.pp_int true)
             i_3
       | (Get, Res ((Int, _), _)) ->
-          let lhs = if last__041_ then "r" else "_"
+          let lhs = if last__044_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "get"
-            (Model.get_name models__039_ (0 + shift))
+            (Model.get_name models__042_ (0 + shift))
       | _ -> assert false
-let ortac_postcond cmd__008_ state__009_ res__010_ =
+let ortac_postcond cmd__012_ state__013_ res__014_ =
   let open Spec in
     let open STM in
-      let new_state__011_ = lazy (next_state cmd__008_ state__009_) in
-      match (cmd__008_, res__010_) with
+      let new_state__015_ = lazy (next_state cmd__012_ state__013_) in
+      match (cmd__012_, res__014_) with
       | (Make i_1, Res ((SUT, _), r)) -> None
       | (Plus1 i_2, Res ((Int, _), i1)) ->
           if
@@ -270,12 +270,12 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
       | (Get, Res ((Int, _), i_4)) ->
           Ortac_runtime.Report.append
             (if
-               let r_old__017_ = Model.get state__009_ 0
-               and r_new__018_ =
-                 lazy (Model.get (Lazy.force new_state__011_) 0) in
+               let r_old__021_ = Model.get state__013_ 0
+               and r_new__022_ =
+                 lazy (Model.get (Lazy.force new_state__015_) 0) in
                try
                  (Ortac_runtime.Gospelstdlib.integer_of_int i_4) =
-                   (Lazy.force r_new__018_).value
+                   (Lazy.force r_new__022_).value
                with | e -> false
              then None
              else
@@ -285,11 +285,11 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                        Ortac_runtime.Report.Value
                          (Res
                             (integer,
-                              (let r_old__013_ = Model.get state__009_ 0
-                               and r_new__014_ =
+                              (let r_old__017_ = Model.get state__013_ 0
+                               and r_new__018_ =
                                  lazy
-                                   (Model.get (Lazy.force new_state__011_) 0) in
-                               (Lazy.force r_new__014_).value)))
+                                   (Model.get (Lazy.force new_state__015_) 0) in
+                               (Lazy.force r_new__018_).value)))
                      with | e -> Ortac_runtime.Report.Out_of_domain) "get"
                     [("i = r.value",
                        {
@@ -310,9 +310,9 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                        })]))
             (Ortac_runtime.Report.append
                (if
-                  let r_old__021_ = Model.get state__009_ 0
-                  and r_new__022_ =
-                    lazy (Model.get (Lazy.force new_state__011_) 0) in
+                  let r_old__025_ = Model.get state__013_ 0
+                  and r_new__026_ =
+                    lazy (Model.get (Lazy.force new_state__015_) 0) in
                   try
                     (plus1_1 (Ortac_runtime.Gospelstdlib.integer_of_int i_4))
                       =
@@ -328,12 +328,12 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                           Ortac_runtime.Report.Value
                             (Res
                                (integer,
-                                 (let r_old__013_ = Model.get state__009_ 0
-                                  and r_new__014_ =
+                                 (let r_old__017_ = Model.get state__013_ 0
+                                  and r_new__018_ =
                                     lazy
-                                      (Model.get (Lazy.force new_state__011_)
+                                      (Model.get (Lazy.force new_state__015_)
                                          0) in
-                                  (Lazy.force r_new__014_).value)))
+                                  (Lazy.force r_new__018_).value)))
                         with | e -> Ortac_runtime.Report.Out_of_domain) "get"
                        [("plus1 i = i + 1",
                           {
@@ -353,9 +353,9 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                               }
                           })]))
                (if
-                  let r_old__023_ = Model.get state__009_ 0
-                  and r_new__024_ =
-                    lazy (Model.get (Lazy.force new_state__011_) 0) in
+                  let r_old__027_ = Model.get state__013_ 0
+                  and r_new__028_ =
+                    lazy (Model.get (Lazy.force new_state__015_) 0) in
                   try
                     (Ortac_runtime.Gospelstdlib.integer_of_int (plus2 i_4)) =
                       (Ortac_runtime.Gospelstdlib.(+)
@@ -370,12 +370,12 @@ let ortac_postcond cmd__008_ state__009_ res__010_ =
                           Ortac_runtime.Report.Value
                             (Res
                                (integer,
-                                 (let r_old__013_ = Model.get state__009_ 0
-                                  and r_new__014_ =
+                                 (let r_old__017_ = Model.get state__013_ 0
+                                  and r_new__018_ =
                                     lazy
-                                      (Model.get (Lazy.force new_state__011_)
+                                      (Model.get (Lazy.force new_state__015_)
                                          0) in
-                                  (Lazy.force r_new__014_).value)))
+                                  (Lazy.force r_new__018_).value)))
                         with | e -> Ortac_runtime.Report.Out_of_domain) "get"
                        [("plus2 i = i + 2",
                           {

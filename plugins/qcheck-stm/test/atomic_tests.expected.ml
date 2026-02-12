@@ -67,8 +67,8 @@ module Spec =
       | Fetch_and_add of int 
       | Incr 
       | Decr 
-    let show_cmd cmd__001_ =
-      match cmd__001_ with
+    let show_cmd cmd__005_ =
+      match cmd__005_ with
       | Make v -> Format.asprintf "%s %a" "make" (Util.Pp.pp_int true) v
       | Get -> Format.asprintf "%s <sut>" "get"
       | Set v_1 ->
@@ -98,8 +98,8 @@ module Spec =
             (1, ((pure (fun n -> Fetch_and_add n)) <*> int));
             (1, (pure Incr));
             (1, (pure Decr))]
-    let arb_cmd state__066_ =
-      let open QCheck in make ~print:show_cmd (gen_cmd state__066_)
+    let arb_cmd state__001_ =
+      let open QCheck in make ~print:show_cmd (gen_cmd state__001_)
     let gen_cmd_seq _ =
       let open QCheck in
         let open Gen in
@@ -115,19 +115,18 @@ module Spec =
             (1, (pure Incr));
             (1, (pure Decr))]
     let gen_cmd_dom0 _ =
-      let open QCheck in
-        let open Gen in
-          oneof_weighted
-            [(1, ((pure (fun v -> Make v)) <*> nat_small));
-            (1, (pure Get));
-            (1, ((pure (fun v_1 -> Set v_1)) <*> int));
-            (1, ((pure (fun v_2 -> Exchange v_2)) <*> int));
-            (1,
-              (((pure (fun seen v_3 -> Compare_and_set (seen, v_3))) <*> int)
-                 <*> int));
-            (1, ((pure (fun n -> Fetch_and_add n)) <*> int));
-            (1, (pure Incr));
-            (1, (pure Decr))]
+      let open QCheck.Gen in
+        oneof_weighted
+          [(1, (pure Get));
+          (1, ((pure (fun v_1 -> Set v_1)) <*> int));
+          (42, ((pure (fun v_2 -> Exchange v_2)) <*> int));
+          (1,
+            (((pure (fun seen -> fun v_3 -> Compare_and_set (seen, v_3))) <*>
+                int)
+               <*> int));
+          (1, ((pure (fun n -> Fetch_and_add n)) <*> int));
+          (1, (pure Incr));
+          (1, (pure Decr))]
     let gen_cmd_dom1 _ =
       let open QCheck in
         let open Gen in
@@ -142,28 +141,16 @@ module Spec =
             (1, ((pure (fun n -> Fetch_and_add n)) <*> int));
             (1, (pure Incr));
             (1, (pure Decr))]
-    let arb_cmd_seq = arb_cmd
-    let arb_cmd_dom0 _ =
-      let open QCheck in
-        make ~print:show_cmd
-          (let open Gen in
-             oneof_weighted
-               [(1, (pure Get));
-               (1, ((pure (fun v_1 -> Set v_1)) <*> int));
-               (1, ((pure (fun v_2 -> Exchange v_2)) <*> int));
-               (1,
-                 (((pure (fun seen -> fun v_3 -> Compare_and_set (seen, v_3)))
-                     <*> int)
-                    <*> int));
-               (1, ((pure (fun n -> Fetch_and_add n)) <*> int));
-               (1, (pure Incr));
-               (1, (pure Decr))])
-    let arb_cmd_dom1 state__072_ =
-      let open QCheck in make ~print:show_cmd (gen_cmd_dom1 state__072_)
-    let next_state cmd__002_ state__003_ =
-      match cmd__002_ with
+    let arb_cmd_seq state__002_ =
+      let open QCheck in make ~print:show_cmd (gen_cmd_seq state__002_)
+    let arb_cmd_dom0 state__003_ =
+      let open QCheck in make ~print:show_cmd (gen_cmd_dom0 state__003_)
+    let arb_cmd_dom1 state__004_ =
+      let open QCheck in make ~print:show_cmd (gen_cmd_dom1 state__004_)
+    let next_state cmd__006_ state__007_ =
+      match cmd__006_ with
       | Make v ->
-          let r__005_ =
+          let r__009_ =
             let open ModelElt in
               {
                 content =
@@ -190,14 +177,14 @@ module Spec =
                                   }
                               })))
               } in
-          Model.drop_n state__003_ 0
+          Model.drop_n state__007_ 0
       | Get ->
-          let r_1__006_ = Model.get state__003_ 0 in
-          let r_1__007_ = r_1__006_ in
-          Model.push (Model.drop_n state__003_ 1) r_1__007_
+          let r_1__010_ = Model.get state__007_ 0 in
+          let r_1__011_ = r_1__010_ in
+          Model.push (Model.drop_n state__007_ 1) r_1__011_
       | Set v_1 ->
-          let r_2__008_ = Model.get state__003_ 0 in
-          let r_2__009_ =
+          let r_2__012_ = Model.get state__007_ 0 in
+          let r_2__013_ =
             let open ModelElt in
               {
                 content =
@@ -224,10 +211,10 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 1) r_2__009_
+          Model.push (Model.drop_n state__007_ 1) r_2__013_
       | Exchange v_2 ->
-          let r_3__010_ = Model.get state__003_ 0 in
-          let r_3__011_ =
+          let r_3__014_ = Model.get state__007_ 0 in
+          let r_3__015_ =
             let open ModelElt in
               {
                 content =
@@ -254,17 +241,17 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 1) r_3__011_
+          Model.push (Model.drop_n state__007_ 1) r_3__015_
       | Compare_and_set (seen, v_3) ->
-          let r_4__012_ = Model.get state__003_ 0 in
-          let r_4__013_ =
+          let r_4__016_ = Model.get state__007_ 0 in
+          let r_4__017_ =
             let open ModelElt in
               {
                 content =
                   (try
-                     if r_4__012_.content = seen
+                     if r_4__016_.content = seen
                      then v_3
-                     else r_4__012_.content
+                     else r_4__016_.content
                    with
                    | e ->
                        raise
@@ -287,10 +274,10 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 1) r_4__013_
+          Model.push (Model.drop_n state__007_ 1) r_4__017_
       | Fetch_and_add n ->
-          let r_5__014_ = Model.get state__003_ 0 in
-          let r_5__015_ =
+          let r_5__018_ = Model.get state__007_ 0 in
+          let r_5__019_ =
             let open ModelElt in
               {
                 content =
@@ -298,7 +285,7 @@ module Spec =
                      Ortac_runtime.Gospelstdlib.int_of_integer
                        (Ortac_runtime.Gospelstdlib.(+)
                           (Ortac_runtime.Gospelstdlib.integer_of_int
-                             r_5__014_.content)
+                             r_5__018_.content)
                           (Ortac_runtime.Gospelstdlib.integer_of_int n))
                    with
                    | e ->
@@ -322,10 +309,10 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 1) r_5__015_
+          Model.push (Model.drop_n state__007_ 1) r_5__019_
       | Incr ->
-          let r_6__016_ = Model.get state__003_ 0 in
-          let r_6__017_ =
+          let r_6__020_ = Model.get state__007_ 0 in
+          let r_6__021_ =
             let open ModelElt in
               {
                 content =
@@ -333,7 +320,7 @@ module Spec =
                      Ortac_runtime.Gospelstdlib.int_of_integer
                        (Ortac_runtime.Gospelstdlib.(+)
                           (Ortac_runtime.Gospelstdlib.integer_of_int
-                             r_6__016_.content)
+                             r_6__020_.content)
                           (Ortac_runtime.Gospelstdlib.integer_of_int 1))
                    with
                    | e ->
@@ -357,10 +344,10 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 1) r_6__017_
+          Model.push (Model.drop_n state__007_ 1) r_6__021_
       | Decr ->
-          let r_7__018_ = Model.get state__003_ 0 in
-          let r_7__019_ =
+          let r_7__022_ = Model.get state__007_ 0 in
+          let r_7__023_ =
             let open ModelElt in
               {
                 content =
@@ -368,7 +355,7 @@ module Spec =
                      Ortac_runtime.Gospelstdlib.int_of_integer
                        (Ortac_runtime.Gospelstdlib.(-)
                           (Ortac_runtime.Gospelstdlib.integer_of_int
-                             r_7__018_.content)
+                             r_7__022_.content)
                           (Ortac_runtime.Gospelstdlib.integer_of_int 1))
                    with
                    | e ->
@@ -392,9 +379,9 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 1) r_7__019_
-    let precond cmd__047_ state__048_ =
-      match cmd__047_ with
+          Model.push (Model.drop_n state__007_ 1) r_7__023_
+    let precond cmd__051_ state__052_ =
+      match cmd__051_ with
       | Make v -> true
       | Get -> true
       | Set v_1 -> true
@@ -404,106 +391,106 @@ module Spec =
       | Incr -> true
       | Decr -> true
     let postcond _ _ _ = true
-    let run cmd__049_ sut__050_ =
-      match cmd__049_ with
-      | Make v -> Res (sut, (let res__051_ = make v in res__051_))
+    let run cmd__053_ sut__054_ =
+      match cmd__053_ with
+      | Make v -> Res (sut, (let res__055_ = make v in res__055_))
       | Get ->
           Res
             (int,
-              (let r_1__052_ = SUT.get sut__050_ 0 in
-               let res__053_ = get r_1__052_ in res__053_))
+              (let r_1__056_ = SUT.get sut__054_ 0 in
+               let res__057_ = get r_1__056_ in res__057_))
       | Set v_1 ->
           Res
             (unit,
-              (let r_2__054_ = SUT.get sut__050_ 0 in
-               let res__055_ = set r_2__054_ v_1 in res__055_))
+              (let r_2__058_ = SUT.get sut__054_ 0 in
+               let res__059_ = set r_2__058_ v_1 in res__059_))
       | Exchange v_2 ->
           Res
             (int,
-              (let r_3__056_ = SUT.get sut__050_ 0 in
-               let res__057_ = exchange r_3__056_ v_2 in res__057_))
+              (let r_3__060_ = SUT.get sut__054_ 0 in
+               let res__061_ = exchange r_3__060_ v_2 in res__061_))
       | Compare_and_set (seen, v_3) ->
           Res
             (bool,
-              (let r_4__058_ = SUT.get sut__050_ 0 in
-               let res__059_ = compare_and_set r_4__058_ seen v_3 in
-               res__059_))
+              (let r_4__062_ = SUT.get sut__054_ 0 in
+               let res__063_ = compare_and_set r_4__062_ seen v_3 in
+               res__063_))
       | Fetch_and_add n ->
           Res
             (int,
-              (let r_5__060_ = SUT.get sut__050_ 0 in
-               let res__061_ = fetch_and_add r_5__060_ n in res__061_))
+              (let r_5__064_ = SUT.get sut__054_ 0 in
+               let res__065_ = fetch_and_add r_5__064_ n in res__065_))
       | Incr ->
           Res
             (unit,
-              (let r_6__062_ = SUT.get sut__050_ 0 in
-               let res__063_ = incr r_6__062_ in res__063_))
+              (let r_6__066_ = SUT.get sut__054_ 0 in
+               let res__067_ = incr r_6__066_ in res__067_))
       | Decr ->
           Res
             (unit,
-              (let r_7__064_ = SUT.get sut__050_ 0 in
-               let res__065_ = decr r_7__064_ in res__065_))
+              (let r_7__068_ = SUT.get sut__054_ 0 in
+               let res__069_ = decr r_7__068_ in res__069_))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__068_ models__069_ last__071_ res__070_ =
+let ortac_show_cmd cmd__071_ models__072_ last__074_ res__073_ =
   let open Spec in
     let open STM in
-      match (cmd__068_, res__070_) with
+      match (cmd__071_, res__073_) with
       | (Make v, Res ((SUT, _), r)) ->
-          let lhs = if last__071_ then "r" else "_"
+          let lhs = if last__074_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %a" lhs "make" (Util.Pp.pp_int true) v
       | (Get, Res ((Int, _), _)) ->
-          let lhs = if last__071_ then "r" else "_"
+          let lhs = if last__074_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "get"
-            (Model.get_name models__069_ (0 + shift))
+            (Model.get_name models__072_ (0 + shift))
       | (Set v_1, Res ((Unit, _), _)) ->
-          let lhs = if last__071_ then "r" else "_"
+          let lhs = if last__074_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "set"
-            (Model.get_name models__069_ (0 + shift)) (Util.Pp.pp_int true)
+            (Model.get_name models__072_ (0 + shift)) (Util.Pp.pp_int true)
             v_1
       | (Exchange v_2, Res ((Int, _), _)) ->
-          let lhs = if last__071_ then "r" else "_"
+          let lhs = if last__074_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "exchange"
-            (Model.get_name models__069_ (0 + shift)) (Util.Pp.pp_int true)
+            (Model.get_name models__072_ (0 + shift)) (Util.Pp.pp_int true)
             v_2
       | (Compare_and_set (seen, v_3), Res ((Bool, _), _)) ->
-          let lhs = if last__071_ then "r" else "_"
+          let lhs = if last__074_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a %a" lhs "compare_and_set"
-            (Model.get_name models__069_ (0 + shift)) (Util.Pp.pp_int true)
+            (Model.get_name models__072_ (0 + shift)) (Util.Pp.pp_int true)
             seen (Util.Pp.pp_int true) v_3
       | (Fetch_and_add n, Res ((Int, _), _)) ->
-          let lhs = if last__071_ then "r" else "_"
+          let lhs = if last__074_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "fetch_and_add"
-            (Model.get_name models__069_ (0 + shift)) (Util.Pp.pp_int true) n
+            (Model.get_name models__072_ (0 + shift)) (Util.Pp.pp_int true) n
       | (Incr, Res ((Unit, _), _)) ->
-          let lhs = if last__071_ then "r" else "_"
+          let lhs = if last__074_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "incr"
-            (Model.get_name models__069_ (0 + shift))
+            (Model.get_name models__072_ (0 + shift))
       | (Decr, Res ((Unit, _), _)) ->
-          let lhs = if last__071_ then "r" else "_"
+          let lhs = if last__074_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "decr"
-            (Model.get_name models__069_ (0 + shift))
+            (Model.get_name models__072_ (0 + shift))
       | _ -> assert false
-let ortac_postcond cmd__020_ state__021_ res__022_ =
+let ortac_postcond cmd__024_ state__025_ res__026_ =
   let open Spec in
     let open STM in
-      let new_state__023_ = lazy (next_state cmd__020_ state__021_) in
-      match (cmd__020_, res__022_) with
+      let new_state__027_ = lazy (next_state cmd__024_ state__025_) in
+      match (cmd__024_, res__026_) with
       | (Make v, Res ((SUT, _), r)) -> None
       | (Get, Res ((Int, _), v_4)) ->
           if
-            let r_old__026_ = Model.get state__021_ 0
-            and r_new__027_ = lazy (Model.get (Lazy.force new_state__023_) 0) in
-            (try v_4 = (Lazy.force r_new__027_).content with | e -> false)
+            let r_old__030_ = Model.get state__025_ 0
+            and r_new__031_ = lazy (Model.get (Lazy.force new_state__027_) 0) in
+            (try v_4 = (Lazy.force r_new__031_).content with | e -> false)
           then None
           else
             Some
@@ -512,10 +499,10 @@ let ortac_postcond cmd__020_ state__021_ res__022_ =
                     Ortac_runtime.Report.Value
                       (Res
                          (int,
-                           (let r_old__024_ = Model.get state__021_ 0
-                            and r_new__025_ =
-                              lazy (Model.get (Lazy.force new_state__023_) 0) in
-                            (Lazy.force r_new__025_).content)))
+                           (let r_old__028_ = Model.get state__025_ 0
+                            and r_new__029_ =
+                              lazy (Model.get (Lazy.force new_state__027_) 0) in
+                            (Lazy.force r_new__029_).content)))
                   with | e -> Ortac_runtime.Report.Out_of_domain) "get"
                  [("v = r.content",
                     {
@@ -537,9 +524,9 @@ let ortac_postcond cmd__020_ state__021_ res__022_ =
       | (Set v_1, Res ((Unit, _), _)) -> None
       | (Exchange v_2, Res ((Int, _), res_1)) ->
           if
-            let r_old__032_ = Model.get state__021_ 0
-            and r_new__033_ = lazy (Model.get (Lazy.force new_state__023_) 0) in
-            (try res_1 = r_old__032_.content with | e -> false)
+            let r_old__036_ = Model.get state__025_ 0
+            and r_new__037_ = lazy (Model.get (Lazy.force new_state__027_) 0) in
+            (try res_1 = r_old__036_.content with | e -> false)
           then None
           else
             Some
@@ -548,10 +535,10 @@ let ortac_postcond cmd__020_ state__021_ res__022_ =
                     Ortac_runtime.Report.Value
                       (Res
                          (int,
-                           (let r_old__030_ = Model.get state__021_ 0
-                            and r_new__031_ =
-                              lazy (Model.get (Lazy.force new_state__023_) 0) in
-                            r_old__030_.content)))
+                           (let r_old__034_ = Model.get state__025_ 0
+                            and r_new__035_ =
+                              lazy (Model.get (Lazy.force new_state__027_) 0) in
+                            r_old__034_.content)))
                   with | e -> Ortac_runtime.Report.Out_of_domain) "exchange"
                  [("res = old r.content",
                     {
@@ -572,9 +559,9 @@ let ortac_postcond cmd__020_ state__021_ res__022_ =
                     })])
       | (Compare_and_set (seen, v_3), Res ((Bool, _), b)) ->
           if
-            let r_old__037_ = Model.get state__021_ 0
-            and r_new__038_ = lazy (Model.get (Lazy.force new_state__023_) 0) in
-            (try (b = true) = (r_old__037_.content = seen) with | e -> false)
+            let r_old__041_ = Model.get state__025_ 0
+            and r_new__042_ = lazy (Model.get (Lazy.force new_state__027_) 0) in
+            (try (b = true) = (r_old__041_.content = seen) with | e -> false)
           then None
           else
             Some
@@ -583,10 +570,10 @@ let ortac_postcond cmd__020_ state__021_ res__022_ =
                     Ortac_runtime.Report.Value
                       (Res
                          (bool,
-                           (let r_old__035_ = Model.get state__021_ 0
-                            and r_new__036_ =
-                              lazy (Model.get (Lazy.force new_state__023_) 0) in
-                            r_old__035_.content = seen)))
+                           (let r_old__039_ = Model.get state__025_ 0
+                            and r_new__040_ =
+                              lazy (Model.get (Lazy.force new_state__027_) 0) in
+                            r_old__039_.content = seen)))
                   with | e -> Ortac_runtime.Report.Out_of_domain)
                  "compare_and_set"
                  [("b <-> old r.content = seen",
@@ -608,9 +595,9 @@ let ortac_postcond cmd__020_ state__021_ res__022_ =
                     })])
       | (Fetch_and_add n, Res ((Int, _), res_2)) ->
           if
-            let r_old__042_ = Model.get state__021_ 0
-            and r_new__043_ = lazy (Model.get (Lazy.force new_state__023_) 0) in
-            (try res_2 = r_old__042_.content with | e -> false)
+            let r_old__046_ = Model.get state__025_ 0
+            and r_new__047_ = lazy (Model.get (Lazy.force new_state__027_) 0) in
+            (try res_2 = r_old__046_.content with | e -> false)
           then None
           else
             Some
@@ -619,10 +606,10 @@ let ortac_postcond cmd__020_ state__021_ res__022_ =
                     Ortac_runtime.Report.Value
                       (Res
                          (int,
-                           (let r_old__040_ = Model.get state__021_ 0
-                            and r_new__041_ =
-                              lazy (Model.get (Lazy.force new_state__023_) 0) in
-                            r_old__040_.content)))
+                           (let r_old__044_ = Model.get state__025_ 0
+                            and r_new__045_ =
+                              lazy (Model.get (Lazy.force new_state__027_) 0) in
+                            r_old__044_.content)))
                   with | e -> Ortac_runtime.Report.Out_of_domain)
                  "fetch_and_add"
                  [("res = old r.content",

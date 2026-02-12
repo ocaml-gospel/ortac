@@ -449,14 +449,29 @@ let gen_cmd_from_which which config ir =
   let expr = efun [ (Nolabel, ppat_any (* for now we don't use it *)) ] body in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
-let gen_cmd = gen_cmd_from_which Gen
-let gen_cmd_seq = gen_cmd_from_which Seq
-let gen_cmd_dom0 = gen_cmd_from_which Dom0
-let gen_cmd_dom1 = gen_cmd_from_which Dom1
+let gen_cmd config ir =
+  match config.Cfg.gen_cmd with
+  | None -> gen_cmd_from_which Gen config ir
+  | Some stri -> Reserr.ok stri
+
+let gen_cmd_seq config ir =
+  match config.Cfg.gen_cmd_seq with
+  | None -> gen_cmd_from_which Seq config ir
+  | Some stri -> Reserr.ok stri
+
+let gen_cmd_dom0 config ir =
+  match config.Cfg.gen_cmd_dom0 with
+  | None -> gen_cmd_from_which Dom0 config ir
+  | Some stri -> Reserr.ok stri
+
+let gen_cmd_dom1 config ir =
+  match config.Cfg.gen_cmd_dom1 with
+  | None -> gen_cmd_from_which Dom1 config ir
+  | Some stri -> Reserr.ok stri
 
 (* Generate the [arb_cmd] definition as a uniform choice between the
    [arb_cmd_case] outputs *)
-let arb_cmd_gen which _config _ir =
+let arb_cmd_gen which =
   let open Reserr in
   let open Ppxlib in
   let pat = pvar @@ arb_from_which which in
@@ -476,34 +491,10 @@ let arb_cmd_gen which _config _ir =
   let expr = efun [ (Nolabel, pvar state_arg) ] body in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
-let arb_cmd config =
-  match config.Cfg.arb_cmd with
-  | None -> arb_cmd_gen Gen config
-  | Some stri -> Fun.const @@ Reserr.ok stri
-
-let arb_cmd_domain_mode which config =
-  let lens = lens_from_which which
-  and pat = pvar @@ arb_from_which which
-  and expr = evar "arb_cmd"
-  and opt_stri =
-    match which with
-    | Gen -> assert false
-    | Seq -> config.Cfg.arb_cmd_seq
-    | Dom0 -> config.Cfg.arb_cmd_dom0
-    | Dom1 -> config.Cfg.arb_cmd_dom1
-  in
-  match opt_stri with
-  | None ->
-      if Weight.(is_empty lens config.Cfg.weights) then
-        Fun.const
-        @@ Reserr.ok
-        @@ pstr_value Nonrecursive [ value_binding ~pat ~expr ]
-      else arb_cmd_gen which config
-  | Some stri -> Fun.const @@ Reserr.ok stri
-
-let arb_cmd_seq = arb_cmd_domain_mode Seq
-let arb_cmd_dom0 = arb_cmd_domain_mode Dom0
-let arb_cmd_dom1 = arb_cmd_domain_mode Dom1
+let arb_cmd = arb_cmd_gen Gen
+let arb_cmd_seq = arb_cmd_gen Seq
+let arb_cmd_dom0 = arb_cmd_gen Dom0
+let arb_cmd_dom1 = arb_cmd_gen Dom1
 
 let run_case config sut_name value =
   let lhs = mk_cmd_pattern value in
@@ -1794,7 +1785,7 @@ let stm config ir =
   let* precond = precond config ir in
   let* run = run config ir in
   let* gen_cmd = gen_cmd config ir in
-  let* arb_cmd = arb_cmd config ir in
+  let* arb_cmd = arb_cmd in
   let* check_init_state = check_init_state config ir in
   let* ortac_show = ortac_cmd_show config ir in
   let cleanup =
@@ -1810,18 +1801,15 @@ let stm config ir =
   in
   let sut_defs = sut_defs ir in
   let state_defs = state_defs ir in
-  let* arb_cmds =
+  let* gen_cmds =
     if config.domain then
       traverse
         (fun f -> f config ir)
-        [
-          gen_cmd_seq;
-          gen_cmd_dom0;
-          gen_cmd_dom1;
-          arb_cmd_seq;
-          arb_cmd_dom0;
-          arb_cmd_dom1;
-        ]
+        [ gen_cmd_seq; gen_cmd_dom0; gen_cmd_dom1 ]
+    else ok []
+  in
+  let* arb_cmds =
+    if config.domain then sequence [ arb_cmd_seq; arb_cmd_dom0; arb_cmd_dom1 ]
     else ok []
   in
   let spec_expr =
@@ -1835,6 +1823,7 @@ let stm config ir =
       @ sut_defs
       @ state_defs
       @ [ cmd; cmd_show; cleanup; gen_cmd; arb_cmd ]
+      @ gen_cmds
       @ arb_cmds
       @ [ next_state; precond; dummy_postcond; run ])
   in

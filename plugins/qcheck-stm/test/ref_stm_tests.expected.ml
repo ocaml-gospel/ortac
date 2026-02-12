@@ -57,8 +57,8 @@ module Spec =
       | Get 
       | Set of int 
       | Incr 
-    let show_cmd cmd__001_ =
-      match cmd__001_ with
+    let show_cmd cmd__005_ =
+      match cmd__005_ with
       | Make v -> Format.asprintf "%s %a" "make" (Util.Pp.pp_int true) v
       | Get -> Format.asprintf "%s <sut>" "get"
       | Set v_1 ->
@@ -73,12 +73,12 @@ module Spec =
             (1, (pure Get));
             (1, ((pure (fun v_1 -> Set v_1)) <*> int));
             (1, (pure Incr))]
-    let arb_cmd state__034_ =
-      let open QCheck in make ~print:show_cmd (gen_cmd state__034_)
-    let next_state cmd__002_ state__003_ =
-      match cmd__002_ with
+    let arb_cmd state__001_ =
+      let open QCheck in make ~print:show_cmd (gen_cmd state__001_)
+    let next_state cmd__006_ state__007_ =
+      match cmd__006_ with
       | Make v ->
-          let r__005_ =
+          let r__009_ =
             let open ModelElt in
               {
                 value =
@@ -105,14 +105,14 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 0) r__005_
+          Model.push (Model.drop_n state__007_ 0) r__009_
       | Get ->
-          let r_1__006_ = Model.get state__003_ 0 in
-          let r_1__007_ = r_1__006_ in
-          Model.push (Model.drop_n state__003_ 1) r_1__007_
+          let r_1__010_ = Model.get state__007_ 0 in
+          let r_1__011_ = r_1__010_ in
+          Model.push (Model.drop_n state__007_ 1) r_1__011_
       | Set v_1 ->
-          let r_2__008_ = Model.get state__003_ 0 in
-          let r_2__009_ =
+          let r_2__012_ = Model.get state__007_ 0 in
+          let r_2__013_ =
             let open ModelElt in
               {
                 value =
@@ -139,10 +139,10 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 1) r_2__009_
+          Model.push (Model.drop_n state__007_ 1) r_2__013_
       | Incr ->
-          let r_3__010_ = Model.get state__003_ 0 in
-          let r_3__011_ =
+          let r_3__014_ = Model.get state__007_ 0 in
+          let r_3__015_ =
             let open ModelElt in
               {
                 value =
@@ -150,7 +150,7 @@ module Spec =
                      Ortac_runtime.Gospelstdlib.int_of_integer
                        (Ortac_runtime.Gospelstdlib.succ
                           (Ortac_runtime.Gospelstdlib.integer_of_int
-                             r_3__010_.value))
+                             r_3__014_.value))
                    with
                    | e ->
                        raise
@@ -173,75 +173,75 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 1) r_3__011_
-    let precond cmd__023_ state__024_ =
-      match cmd__023_ with
+          Model.push (Model.drop_n state__007_ 1) r_3__015_
+    let precond cmd__027_ state__028_ =
+      match cmd__027_ with
       | Make v -> true
       | Get -> true
       | Set v_1 -> true
       | Incr -> true
     let postcond _ _ _ = true
-    let run cmd__025_ sut__026_ =
-      match cmd__025_ with
+    let run cmd__029_ sut__030_ =
+      match cmd__029_ with
       | Make v ->
           Res
             (sut,
-              (let res__027_ = make v in
-               (SUT.push sut__026_ res__027_; res__027_)))
+              (let res__031_ = make v in
+               (SUT.push sut__030_ res__031_; res__031_)))
       | Get ->
           Res
             (int,
-              (let r_1__028_ = SUT.get sut__026_ 0 in
-               let res__029_ = get r_1__028_ in res__029_))
+              (let r_1__032_ = SUT.get sut__030_ 0 in
+               let res__033_ = get r_1__032_ in res__033_))
       | Set v_1 ->
           Res
             (unit,
-              (let r_2__030_ = SUT.get sut__026_ 0 in
-               let res__031_ = set r_2__030_ v_1 in res__031_))
+              (let r_2__034_ = SUT.get sut__030_ 0 in
+               let res__035_ = set r_2__034_ v_1 in res__035_))
       | Incr ->
           Res
             (unit,
-              (let r_3__032_ = SUT.get sut__026_ 0 in
-               let res__033_ = incr r_3__032_ in res__033_))
+              (let r_3__036_ = SUT.get sut__030_ 0 in
+               let res__037_ = incr r_3__036_ in res__037_))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__036_ models__037_ last__039_ res__038_ =
+let ortac_show_cmd cmd__039_ models__040_ last__042_ res__041_ =
   let open Spec in
     let open STM in
-      match (cmd__036_, res__038_) with
+      match (cmd__039_, res__041_) with
       | (Make v, Res ((SUT, _), r)) ->
-          let lhs = if last__039_ then "r" else Model.get_name models__037_ 0
+          let lhs = if last__042_ then "r" else Model.get_name models__040_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a" lhs "make" (Util.Pp.pp_int true) v
       | (Get, Res ((Int, _), _)) ->
-          let lhs = if last__039_ then "r" else "_"
+          let lhs = if last__042_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "get"
-            (Model.get_name models__037_ (0 + shift))
+            (Model.get_name models__040_ (0 + shift))
       | (Set v_1, Res ((Unit, _), _)) ->
-          let lhs = if last__039_ then "r" else "_"
+          let lhs = if last__042_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s %a" lhs "set"
-            (Model.get_name models__037_ (0 + shift)) (Util.Pp.pp_int true)
+            (Model.get_name models__040_ (0 + shift)) (Util.Pp.pp_int true)
             v_1
       | (Incr, Res ((Unit, _), _)) ->
-          let lhs = if last__039_ then "r" else "_"
+          let lhs = if last__042_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = %s %s" lhs "incr"
-            (Model.get_name models__037_ (0 + shift))
+            (Model.get_name models__040_ (0 + shift))
       | _ -> assert false
-let ortac_postcond cmd__012_ state__013_ res__014_ =
+let ortac_postcond cmd__016_ state__017_ res__018_ =
   let open Spec in
     let open STM in
-      let new_state__015_ = lazy (next_state cmd__012_ state__013_) in
-      match (cmd__012_, res__014_) with
+      let new_state__019_ = lazy (next_state cmd__016_ state__017_) in
+      match (cmd__016_, res__018_) with
       | (Make v, Res ((SUT, _), r)) -> None
       | (Get, Res ((Int, _), v_2)) ->
           if
-            let r_old__018_ = Model.get state__013_ 0
-            and r_new__019_ = lazy (Model.get (Lazy.force new_state__015_) 0) in
-            (try v_2 = (Lazy.force r_new__019_).value with | e -> false)
+            let r_old__022_ = Model.get state__017_ 0
+            and r_new__023_ = lazy (Model.get (Lazy.force new_state__019_) 0) in
+            (try v_2 = (Lazy.force r_new__023_).value with | e -> false)
           then None
           else
             Some
@@ -250,10 +250,10 @@ let ortac_postcond cmd__012_ state__013_ res__014_ =
                     Ortac_runtime.Report.Value
                       (Res
                          (int,
-                           (let r_old__016_ = Model.get state__013_ 0
-                            and r_new__017_ =
-                              lazy (Model.get (Lazy.force new_state__015_) 0) in
-                            (Lazy.force r_new__017_).value)))
+                           (let r_old__020_ = Model.get state__017_ 0
+                            and r_new__021_ =
+                              lazy (Model.get (Lazy.force new_state__019_) 0) in
+                            (Lazy.force r_new__021_).value)))
                   with | e -> Ortac_runtime.Report.Out_of_domain) "get"
                  [("v = r.value",
                     {
