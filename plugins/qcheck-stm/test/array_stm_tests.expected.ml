@@ -88,6 +88,19 @@ module Spec =
     let init_sut = SUT.create 2
     type state = Model.t
     let init_state = Model.create 2 ()
+    type raw_cmd =
+      | Length 
+      | Get of int 
+      | Set of int * char 
+      | Make of int * char 
+      | Append 
+      | Sub of int * int 
+      | Copy 
+      | Fill of int * int * char 
+      | To_list 
+      | Of_list of char list 
+      | Mem of char 
+      | For_all of (char -> bool) QCheck.fun_ 
     type flag =
       | Seq 
       | Dom 

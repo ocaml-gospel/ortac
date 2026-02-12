@@ -182,6 +182,19 @@ module Spec =
     let init_sut = SUT.create 1
     type state = Model.t
     let init_state = Model.create 1 ()
+    type raw_cmd =
+      | Create of unit 
+      | Of_list of int list 
+      | Push of int 
+      | Push_all of int list 
+      | Is_empty 
+      | Close 
+      | Pop_exn 
+      | Pop_opt 
+      | Drop_exn 
+      | Peek_exn 
+      | Peek_opt 
+      | Push_head of int 
     type flag =
       | Seq 
       | Dom 

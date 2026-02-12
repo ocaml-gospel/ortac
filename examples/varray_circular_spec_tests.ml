@@ -130,6 +130,25 @@ module Spec =
     let init_sut = SUT.create 2
     type state = Model.t
     let init_state = Model.create 2 ()
+    type raw_cmd =
+      | Push_back of char elt 
+      | Pop_back 
+      | Push_front of char elt 
+      | Pop_front 
+      | Insert_at of int * char elt 
+      | Pop_at of int 
+      | Delete_at of int 
+      | Get of int 
+      | Set of int * char elt 
+      | Length 
+      | Make of int * char elt 
+      | Empty of unit 
+      | Is_empty 
+      | Append 
+      | Sub of int * int 
+      | Copy 
+      | Fill of int * int * char elt 
+      | Blit of int * int * int 
     type flag =
       | Seq 
       | Dom 

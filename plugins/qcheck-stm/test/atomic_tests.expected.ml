@@ -58,6 +58,15 @@ module Spec =
     let init_sut = SUT.create 1
     type state = Model.t
     let init_state = Model.create 1 ()
+    type raw_cmd =
+      | Make of int 
+      | Get 
+      | Set of int 
+      | Exchange of int 
+      | Compare_and_set of int * int 
+      | Fetch_and_add of int 
+      | Incr 
+      | Decr 
     type flag =
       | Seq 
       | Dom 

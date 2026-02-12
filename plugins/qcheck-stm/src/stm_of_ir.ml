@@ -1170,6 +1170,14 @@ let flag_type =
   let td = type_declaration ~name ~params ~cstrs ~kind ~private_ ~manifest in
   pstr_type Recursive [ td ]
 
+let raw_cmd_type ir =
+  let constructors = List.map cmd_constructor ir.values in
+  let td =
+    type_declaration ~name:(noloc "raw_cmd") ~params:[] ~cstrs:[]
+      ~kind:(Ptype_variant constructors) ~private_:Public ~manifest:None
+  in
+  pstr_type Recursive [ td ]
+
 let cmd_type ir =
   let constructors = List.map cmd_constructor ir.values in
   let td =
@@ -1794,6 +1802,7 @@ let stm config ir =
   let* ghost_types = ghost_types config ir.ghost_types in
   let* config, ghost_functions = ghost_functions config ir.ghost_functions in
   let warn = [%stri [@@@ocaml.warning "-26-27-69-32-34-37-38"]] in
+  let raw_cmd_type = raw_cmd_type ir in
   let cmd = cmd_type ir in
   let* cmd_show = cmd_show config ir in
   let* idx, next_state = next_state config ir in
@@ -1838,7 +1847,7 @@ let stm config ir =
       @ tuple_types ir
       @ sut_defs
       @ state_defs
-      @ [ flag_type; cmd; cmd_show; cleanup; gen_cmd; arb_cmd ]
+      @ [ raw_cmd_type; flag_type; cmd; cmd_show; cleanup; gen_cmd; arb_cmd ]
       @ gen_cmds
       @ arb_cmds
       @ [ next_state; precond; dummy_postcond; run ])

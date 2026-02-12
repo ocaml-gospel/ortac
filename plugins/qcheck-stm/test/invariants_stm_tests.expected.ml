@@ -52,6 +52,12 @@ module Spec =
     let init_sut = SUT.create 2
     type state = Model.t
     let init_state = Model.create 2 ()
+    type raw_cmd =
+      | Create of int 
+      | Push of int 
+      | Transfer 
+      | Copy 
+      | Sub of int * int 
     type flag =
       | Seq 
       | Dom 

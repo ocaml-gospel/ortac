@@ -91,6 +91,20 @@ module Spec =
     let init_sut = SUT.create 1
     type state = Model.t
     let init_state = Model.create 1 ()
+    type raw_cmd =
+      | Create of bool * int 
+      | Clear 
+      | Reset 
+      | Copy 
+      | Add of char * int 
+      | Find of char 
+      | Find_opt of char 
+      | Find_all of char 
+      | Mem of char 
+      | Remove of char 
+      | Replace of char * int 
+      | Filter_map_inplace of (char -> int -> int option) QCheck.fun_ 
+      | Length 
     type flag =
       | Seq 
       | Dom 
