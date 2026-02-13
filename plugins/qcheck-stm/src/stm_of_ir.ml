@@ -6,7 +6,6 @@ module Ident = Gospel.Identifier.Ident
 module Weight = Cfg.Weights
 
 let is_a_function ty =
-  let open Ppxlib in
   match ty.ptyp_desc with Ptyp_arrow (_, _, _) -> true | _ -> false
 
 let ty_default_name = "char"
@@ -30,6 +29,7 @@ let eexpected_value case e =
   in
   [%expr try [%e x] with e -> Ortac_runtime.Report.Out_of_domain]
 
+let let_open str e = pexp_open Ast_helper.(Opn.mk (Mod.ident (lident str))) e
 let evalue = eexpected_value "Value"
 let eprotected = eexpected_value "Protected_value"
 let eexception = eexpected_value "Exception"
@@ -37,6 +37,9 @@ let eexception = eexpected_value "Exception"
 let eprotect call =
   let lazy_call = efun [ (Nolabel, punit) ] call in
   pexp_apply (evar "protect") [ (Nolabel, lazy_call); (Nolabel, eunit) ]
+
+let eaccess_raw_cmd raw_cmd_var = pexp_field raw_cmd_var (lident "raw_cmd")
+let eaccess_flag flag_var = pexp_field flag_var (lident "flag")
 
 let may_raise_exception v =
   match (v.postcond.exceptional, v.postcond.checks) with
@@ -424,7 +427,6 @@ let arb_from_which = label_from_which "arb_cmd"
 
 let gen_cmd_from_which which config ir =
   let open Reserr in
-  let open Ppxlib in
   let lens = lens_from_which which and pat = pvar @@ gen_from_which which in
   let aux value (freq_map, acc) =
     let* gen = gen_cmd_case config value in
@@ -439,9 +441,6 @@ let gen_cmd_from_which which config ir =
     @@ Weight.unused lens unused_freq
   in
   let cmds = elist generators in
-  let let_open str e =
-    pexp_open Ast_helper.(Opn.mk (Mod.ident (lident str |> noloc))) e
-  in
   let body =
     let_open "QCheck"
     @@ let_open "Gen" (pexp_apply (evar "oneof_weighted") [ (Nolabel, cmds) ])
@@ -473,11 +472,7 @@ let gen_cmd_dom1 config ir =
    [arb_cmd_case] outputs *)
 let arb_cmd_gen which =
   let open Reserr in
-  let open Ppxlib in
   let pat = pvar @@ arb_from_which which in
-  let let_open str e =
-    pexp_open Ast_helper.(Opn.mk (Mod.ident (lident str |> noloc))) e
-  in
   let gen_fun = evar @@ gen_from_which which
   and state_arg = gen_symbol ~prefix:"state" () in
   let body =
@@ -928,7 +923,6 @@ let postcond_case config state invariants idx state_ident new_state_ident value
   let* lhs1 =
     let ret_ty = Ir.get_return_type value in
     let* ret_ty =
-      let open Ppxlib in
       match ret_ty.ptyp_desc with
       | Ptyp_var _ | Ptyp_constr _ | Ptyp_tuple _ -> ok ret_ty
       | _ ->
@@ -1359,7 +1353,7 @@ let init_state config ir =
                  ~default:
                    ( Impossible_init_state_generation
                        (No_translatable_specification id.Ident.id_str),
-                     Ppxlib.Location.none )))
+                     Location.none )))
       ir.state
   in
   let expr = pexp_record fields None |> bindings in
@@ -1640,7 +1634,6 @@ let pp_ortac_cmd_case config models last value =
   let* lhs1 =
     let ret_ty = Ir.get_return_type value in
     let* ret_ty =
-      let open Ppxlib in
       match ret_ty.ptyp_desc with
       | Ptyp_var _ | Ptyp_constr _ | Ptyp_tuple _ -> ok ret_ty
       (* Unsupported return types are already filtered out *)
