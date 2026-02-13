@@ -89,8 +89,7 @@ module Spec =
                   nat_small));
             (1, (((pure (fun a_2 b -> Add (a_2, b))) <*> int) <*> int))]
     let gen_cmd state__025_ =
-      let open QCheck in
-        let open Gen in (with_flag Seq) <$> (gen_cmd state__025_)
+      let open QCheck.Gen in (with_flag Seq) <$> (gen_cmd state__025_)
     let arb_cmd state__001_ =
       let open QCheck in make ~print:show_cmd (gen_cmd state__001_)
     let next_state cmd__006_ state__007_ =

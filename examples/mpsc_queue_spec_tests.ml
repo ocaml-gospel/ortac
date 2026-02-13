@@ -243,8 +243,7 @@ module Spec =
             (1, (pure Peek_opt));
             (1, ((pure (fun a_3 -> Push_head a_3)) <*> int))]
     let gen_cmd state__126_ =
-      let open QCheck in
-        let open Gen in (with_flag Seq) <$> (gen_cmd state__126_)
+      let open QCheck.Gen in (with_flag Seq) <$> (gen_cmd state__126_)
     let arb_cmd state__001_ =
       let open QCheck in make ~print:show_cmd (gen_cmd state__001_)
     let gen_cmd_seq _ =
@@ -296,14 +295,11 @@ module Spec =
             (0, (pure Peek_opt));
             (0, ((pure (fun a_3 -> Push_head a_3)) <*> int))]
     let gen_cmd_seq state__125_ =
-      let open QCheck in
-        let open Gen in (with_flag Seq) <$> (gen_cmd_seq state__125_)
+      let open QCheck.Gen in (with_flag Seq) <$> (gen_cmd_seq state__125_)
     let gen_cmd_dom0 state__124_ =
-      let open QCheck in
-        let open Gen in (with_flag Dom) <$> (gen_cmd_dom0 state__124_)
+      let open QCheck.Gen in (with_flag Dom) <$> (gen_cmd_dom0 state__124_)
     let gen_cmd_dom1 state__123_ =
-      let open QCheck in
-        let open Gen in (with_flag Dom) <$> (gen_cmd_dom1 state__123_)
+      let open QCheck.Gen in (with_flag Dom) <$> (gen_cmd_dom1 state__123_)
     let arb_cmd_seq state__002_ =
       let open QCheck in make ~print:show_cmd (gen_cmd_seq state__002_)
     let arb_cmd_dom0 state__003_ =

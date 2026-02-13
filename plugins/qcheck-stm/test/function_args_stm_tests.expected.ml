@@ -113,8 +113,7 @@ module Spec =
               ((pure (fun f -> Map f)) <*>
                  (fun1 Observable.char QCheck.char).gen))]
     let gen_cmd state__031_ =
-      let open QCheck in
-        let open Gen in (with_flag Seq) <$> (gen_cmd state__031_)
+      let open QCheck.Gen in (with_flag Seq) <$> (gen_cmd state__031_)
     let arb_cmd state__001_ =
       let open QCheck in make ~print:show_cmd (gen_cmd state__001_)
     let next_state cmd__006_ state__007_ =

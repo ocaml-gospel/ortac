@@ -84,8 +84,7 @@ module Spec =
                (((pure (fun i a_1 -> Make (i, a_1))) <*> nat_small) <*> char));
             (1, (((pure (fun i_1 a_2 -> Set (i_1, a_2))) <*> int) <*> char))]
     let gen_cmd state__033_ =
-      let open QCheck in
-        let open Gen in (with_flag Seq) <$> (gen_cmd state__033_)
+      let open QCheck.Gen in (with_flag Seq) <$> (gen_cmd state__033_)
     let arb_cmd state__001_ =
       let open QCheck in make ~print:show_cmd (gen_cmd state__001_)
     let next_state cmd__006_ state__007_ =

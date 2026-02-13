@@ -240,8 +240,7 @@ module Spec =
                   <*> int)
                  <*> int))]
     let gen_cmd state__189_ =
-      let open QCheck in
-        let open Gen in (with_flag Seq) <$> (gen_cmd state__189_)
+      let open QCheck.Gen in (with_flag Seq) <$> (gen_cmd state__189_)
     let arb_cmd state__001_ =
       let open QCheck in make ~print:show_cmd (gen_cmd state__001_)
     let next_state cmd__008_ state__009_ =

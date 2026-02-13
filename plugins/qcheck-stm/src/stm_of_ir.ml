@@ -29,7 +29,13 @@ let eexpected_value case e =
   in
   [%expr try [%e x] with e -> Ortac_runtime.Report.Out_of_domain]
 
-let let_open str e = pexp_open Ast_helper.(Opn.mk (Mod.ident (lident str))) e
+let let_open xs e =
+  match xs with
+  | [] -> assert false
+  | m :: ms ->
+      let ms' = List.fold_left (fun acc x -> Ldot (acc, x)) (Lident m) ms in
+      pexp_open Ast_helper.(Opn.mk (Mod.ident @@ noloc ms')) e
+
 let evalue = eexpected_value "Value"
 let eprotected = eexpected_value "Protected_value"
 let eexception = eexpected_value "Exception"
@@ -443,8 +449,10 @@ let gen_raw_cmd_from_which which config ir =
   in
   let cmds = elist generators in
   let body =
-    let_open "QCheck"
-    @@ let_open "Gen" (pexp_apply (evar "oneof_weighted") [ (Nolabel, cmds) ])
+    (* we need [QCheck] to be open to access function generators *)
+    let_open [ "QCheck" ]
+    @@ let_open [ "Gen" ]
+         (pexp_apply (evar "oneof_weighted") [ (Nolabel, cmds) ])
   in
   let expr = efun [ (Nolabel, ppat_any (* for now we don't use it *)) ] body in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
@@ -486,7 +494,7 @@ let flagged_cmd_gen_from_which which =
     pexp_apply (evar "( <$> )")
       [ (Nolabel, partial_with_flag); (Nolabel, call_gen) ]
   in
-  let body = let_open "QCheck" @@ let_open "Gen" map_with_flag in
+  let body = let_open [ "QCheck"; "Gen" ] map_with_flag in
   let expr = efun [ (Nolabel, pvar state_var) ] body in
   let value_bindings = [ value_binding ~pat ~expr ] in
   pstr_value Nonrecursive value_bindings
@@ -499,7 +507,7 @@ let arb_cmd_gen which =
   let gen_fun = evar @@ gen_from_which which
   and state_arg = gen_symbol ~prefix:"state" () in
   let body =
-    let_open "QCheck"
+    let_open [ "QCheck" ]
       (pexp_apply (evar "make")
          [
            (Labelled "print", evar "show_cmd");
@@ -644,7 +652,7 @@ let next_state_case state config cmd_name state_ident nb_models value =
       let sut_map =
         (* Don't create a name for a new sut when testing in concurrent
            context *)
-        if Cfg.((*not config.domain &&*) does_return_sut config value.ty) then
+        if Cfg.does_return_sut config value.ty then
           let ret_id = List.hd value.ret in
           let ret_var = gen_symbol ~prefix:(str_of_ident ret_id) () in
           (ret_id, Ident.create ~loc:Location.none ret_var) :: sut_map
@@ -1396,8 +1404,8 @@ let init_state config ir =
                      Location.none )))
       ir.state
   in
-  let expr = pexp_record fields None |> bindings in
-  [%stri let init = [%e expr]] |> ok
+  let pat = pvar "init" and expr = pexp_record fields None |> bindings in
+  ok @@ pstr_value Nonrecursive [ value_binding ~pat ~expr ]
 
 let model_module config ir =
   let lds =
@@ -1928,11 +1936,9 @@ let stm config ir =
           flag_type;
           flagged_cmd_type;
           with_flag;
-          (* cmd; *)
           cmd_show;
           cleanup;
           gen_cmd;
-          (* gen_raw_cmd; *)
           flagged_cmd_gen_from_which Gen;
           arb_cmd;
         ]
