@@ -422,10 +422,11 @@ let label_from_which prefix = function
   | Dom0 -> prefix ^ "_dom0"
   | Dom1 -> prefix ^ "_dom1"
 
+let flag_from_which = function Gen | Seq -> "Seq" | Dom0 | Dom1 -> "Dom"
 let gen_from_which = label_from_which "gen_cmd"
 let arb_from_which = label_from_which "arb_cmd"
 
-let gen_cmd_from_which which config ir =
+let gen_raw_cmd_from_which which config ir =
   let open Reserr in
   let lens = lens_from_which which and pat = pvar @@ gen_from_which which in
   let aux value (freq_map, acc) =
@@ -450,23 +451,45 @@ let gen_cmd_from_which which config ir =
 
 let gen_cmd config ir =
   match config.Cfg.gen_cmd with
-  | None -> gen_cmd_from_which Gen config ir
+  | None -> gen_raw_cmd_from_which Gen config ir
   | Some stri -> Reserr.ok stri
 
 let gen_cmd_seq config ir =
   match config.Cfg.gen_cmd_seq with
-  | None -> gen_cmd_from_which Seq config ir
+  | None -> gen_raw_cmd_from_which Seq config ir
   | Some stri -> Reserr.ok stri
 
 let gen_cmd_dom0 config ir =
   match config.Cfg.gen_cmd_dom0 with
-  | None -> gen_cmd_from_which Dom0 config ir
+  | None -> gen_raw_cmd_from_which Dom0 config ir
   | Some stri -> Reserr.ok stri
 
 let gen_cmd_dom1 config ir =
   match config.Cfg.gen_cmd_dom1 with
-  | None -> gen_cmd_from_which Dom1 config ir
+  | None -> gen_raw_cmd_from_which Dom1 config ir
   | Some stri -> Reserr.ok stri
+
+(** [flagged_cmd_gen_from_which which] generates a QCheck flagged command
+    generator, with the flag chosen accordingly to [which].
+
+    The generator simply map [with_flag flag] over the raw command generator. *)
+let flagged_cmd_gen_from_which which =
+  let gen_var = gen_from_which which
+  and state_var = gen_symbol ~prefix:"state" ()
+  and pat = pvar @@ gen_from_which which
+  and flag_var = evar @@ flag_from_which which in
+  let call_gen = pexp_apply (evar gen_var) [ (Nolabel, evar state_var) ] in
+  let partial_with_flag =
+    pexp_apply (evar "with_flag") [ (Nolabel, flag_var) ]
+  in
+  let map_with_flag =
+    pexp_apply (evar "( <$> )")
+      [ (Nolabel, partial_with_flag); (Nolabel, call_gen) ]
+  in
+  let body = let_open "QCheck" @@ let_open "Gen" map_with_flag in
+  let expr = efun [ (Nolabel, pvar state_var) ] body in
+  let value_bindings = [ value_binding ~pat ~expr ] in
+  pstr_value Nonrecursive value_bindings
 
 (* Generate the [arb_cmd] definition as a uniform choice between the
    [arb_cmd_case] outputs *)
@@ -580,7 +603,7 @@ let run config ir =
   let sut_name = gen_symbol ~prefix:"sut" () in
   let open Reserr in
   let* cases = promote_map (run_case config sut_name) ir.values in
-  let body = pexp_match (evar cmd_name) cases in
+  let body = pexp_match (eaccess_raw_cmd @@ evar cmd_name) cases in
   let pat = pvar "run" in
   let expr = efun [ (Nolabel, pvar cmd_name); (Nolabel, pvar sut_name) ] body in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
@@ -738,7 +761,7 @@ let next_state config ir =
       ir.values
   in
   let idx, cases = List.split idx_cases in
-  let body = pexp_match (evar cmd_name) cases in
+  let body = pexp_match (eaccess_raw_cmd @@ evar cmd_name) cases in
   let pat = pvar "next_state" in
   let expr =
     efun [ (Nolabel, pvar cmd_name); (Nolabel, pvar state_name) ] body
@@ -774,7 +797,7 @@ let precond config ir =
   let* cases =
     promote_map (precond_case config ir.state state_ident) ir.values
   in
-  let body = pexp_match (evar cmd_name) cases in
+  let body = pexp_match (eaccess_raw_cmd @@ evar cmd_name) cases in
   let pat = pvar "precond" in
   let expr =
     efun [ (Nolabel, pvar cmd_name); (Nolabel, pvar state_name) ] body
@@ -1118,7 +1141,9 @@ let postcond config idx ir =
       Ast_helper.(Opn.mk (Mod.ident (lident "Spec")))
       (pexp_open
          Ast_helper.(Opn.mk (Mod.ident (lident "STM")))
-         (pexp_match (pexp_tuple [ evar cmd_name; evar res_name ]) cases
+         (pexp_match
+            (pexp_tuple [ eaccess_raw_cmd @@ evar cmd_name; evar res_name ])
+            cases
          |> new_state_let))
   in
   let pat = pvar "ortac_postcond" in
@@ -1181,7 +1206,7 @@ let cmd_type ir =
   pstr_type Recursive [ td ]
 
 let flagged_cmd_type =
-  let name = noloc "flagged_cmd"
+  let name = noloc "cmd"
   and params = []
   and cstrs = []
   and kind =
@@ -1275,7 +1300,7 @@ let cmd_show config ir =
   let cmd_name = gen_symbol ~prefix:"cmd" () in
   let open Reserr in
   let* cases = promote_map (pp_cmd_case config) ir.values in
-  let body = pexp_match (evar cmd_name) cases in
+  let body = pexp_match (eaccess_raw_cmd @@ evar cmd_name) cases in
   let pat = pvar "show_cmd" in
   let expr = efun [ (Nolabel, pvar cmd_name) ] body in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
@@ -1793,7 +1818,9 @@ let ortac_cmd_show config ir =
   in
   let cases = cases @ [ default_case ] in
   let match_expr =
-    pexp_match (pexp_tuple [ evar cmd_name; evar res_name ]) cases
+    pexp_match
+      (pexp_tuple [ eaccess_raw_cmd @@ evar cmd_name; evar res_name ])
+      cases
   in
   let body =
     pexp_open
@@ -1829,13 +1856,14 @@ let stm config ir =
   let* config, ghost_functions = ghost_functions config ir.ghost_functions in
   let warn = [%stri [@@@ocaml.warning "-26-27-69-32-34-37-38"]] in
   let raw_cmd_type = raw_cmd_type ir in
-  let cmd = cmd_type ir in
+  (* let cmd = cmd_type ir in *)
   let* cmd_show = cmd_show config ir in
   let* idx, next_state = next_state config ir in
   let* postcond = postcond config idx ir in
   let* precond = precond config ir in
   let* run = run config ir in
   let* gen_cmd = gen_cmd config ir in
+  (* let* gen_raw_cmd = gen_raw_cmd_from_which Gen config ir in *)
   let* arb_cmd = arb_cmd in
   let* check_init_state = check_init_state config ir in
   let* ortac_show = ortac_cmd_show config ir in
@@ -1854,9 +1882,18 @@ let stm config ir =
   let state_defs = state_defs ir in
   let* gen_cmds =
     if config.domain then
-      traverse
-        (fun f -> f config ir)
-        [ gen_cmd_seq; gen_cmd_dom0; gen_cmd_dom1 ]
+      let* xs =
+        traverse
+          (fun f -> f config ir)
+          [ gen_cmd_seq; gen_cmd_dom0; gen_cmd_dom1 ]
+      in
+      ok
+      @@ xs
+      @ [
+          flagged_cmd_gen_from_which Seq;
+          flagged_cmd_gen_from_which Dom0;
+          flagged_cmd_gen_from_which Dom1;
+        ]
     else ok []
   in
   let* arb_cmds =
@@ -1878,10 +1915,12 @@ let stm config ir =
           flag_type;
           flagged_cmd_type;
           with_flag;
-          cmd;
+          (* cmd; *)
           cmd_show;
           cleanup;
           gen_cmd;
+          (* gen_raw_cmd; *)
+          flagged_cmd_gen_from_which Gen;
           arb_cmd;
         ]
       @ gen_cmds

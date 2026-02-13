@@ -82,17 +82,12 @@ module Spec =
     type flag =
       | Seq 
       | Dom 
-    type flagged_cmd = {
+    type cmd = {
       flag: flag ;
       raw_cmd: raw_cmd }
     let with_flag flag raw_cmd = { flag; raw_cmd }
-    type cmd =
-      | Proj of char elt 
-      | Empty of unit 
-      | Push of int elt 
-      | Top 
     let show_cmd cmd__005_ =
-      match cmd__005_ with
+      match cmd__005_.raw_cmd with
       | Proj __arg0 ->
           Format.asprintf "%s %a" "proj"
             (Util.Pp.pp_elt Util.Pp.pp_char true) __arg0
@@ -110,10 +105,13 @@ module Spec =
             (1, ((pure (fun () -> Empty ())) <*> unit));
             (1, ((pure (fun e -> Push e)) <*> (elt int)));
             (1, (pure Top))]
+    let gen_cmd state__037_ =
+      let open QCheck in
+        let open Gen in (with_flag Seq) <$> (gen_cmd state__037_)
     let arb_cmd state__001_ =
       let open QCheck in make ~print:show_cmd (gen_cmd state__001_)
     let next_state cmd__006_ state__007_ =
-      match cmd__006_ with
+      match cmd__006_.raw_cmd with
       | Proj __arg0 -> state__007_
       | Empty () ->
           let t_1__009_ =
@@ -189,14 +187,14 @@ module Spec =
             Model.push (Model.drop_n state__007_ 1) t_3__013_
           else state__007_
     let precond cmd__022_ state__023_ =
-      match cmd__022_ with
+      match cmd__022_.raw_cmd with
       | Proj __arg0 -> true
       | Empty () -> true
       | Push e -> true
       | Top -> true
     let postcond _ _ _ = true
     let run cmd__024_ sut__025_ =
-      match cmd__024_ with
+      match cmd__024_.raw_cmd with
       | Proj __arg0 -> Res (char, (let res__026_ = proj __arg0 in res__026_))
       | Empty () ->
           Res
@@ -220,7 +218,7 @@ let check_init_state () = ()
 let ortac_show_cmd cmd__033_ models__034_ last__036_ res__035_ =
   let open Spec in
     let open STM in
-      match (cmd__033_, res__035_) with
+      match ((cmd__033_.raw_cmd), res__035_) with
       | (Proj __arg0, Res ((Char, _), _)) ->
           let lhs = if last__036_ then "r" else "_"
           and shift = 0 in
@@ -247,7 +245,7 @@ let ortac_postcond cmd__014_ state__015_ res__016_ =
   let open Spec in
     let open STM in
       let new_state__017_ = lazy (next_state cmd__014_ state__015_) in
-      match (cmd__014_, res__016_) with
+      match ((cmd__014_.raw_cmd), res__016_) with
       | (Proj __arg0, Res ((Char, _), result)) -> None
       | (Empty (), Res ((SUT, _), t_1)) -> None
       | (Push e, Res ((Unit, _), _)) -> None

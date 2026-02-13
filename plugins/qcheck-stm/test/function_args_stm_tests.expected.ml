@@ -92,15 +92,12 @@ module Spec =
     type flag =
       | Seq 
       | Dom 
-    type flagged_cmd = {
+    type cmd = {
       flag: flag ;
       raw_cmd: raw_cmd }
     let with_flag flag raw_cmd = { flag; raw_cmd }
-    type cmd =
-      | Make of int * char 
-      | Map of (char -> char) QCheck.fun_ 
     let show_cmd cmd__005_ =
-      match cmd__005_ with
+      match cmd__005_.raw_cmd with
       | Make (len, c) ->
           Format.asprintf "protect (fun () -> %s %a %a)" "make"
             (Util.Pp.pp_int true) len (Util.Pp.pp_char true) c
@@ -115,10 +112,13 @@ module Spec =
             (1,
               ((pure (fun f -> Map f)) <*>
                  (fun1 Observable.char QCheck.char).gen))]
+    let gen_cmd state__031_ =
+      let open QCheck in
+        let open Gen in (with_flag Seq) <$> (gen_cmd state__031_)
     let arb_cmd state__001_ =
       let open QCheck in make ~print:show_cmd (gen_cmd state__001_)
     let next_state cmd__006_ state__007_ =
-      match cmd__006_ with
+      match cmd__006_.raw_cmd with
       | Make (len, c) ->
           if
             (try
@@ -244,10 +244,10 @@ module Spec =
           Model.push (Model.push (Model.drop_n state__007_ 1) input__012_)
             output__013_
     let precond cmd__019_ state__020_ =
-      match cmd__019_ with | Make (len, c) -> true | Map f -> true
+      match cmd__019_.raw_cmd with | Make (len, c) -> true | Map f -> true
     let postcond _ _ _ = true
     let run cmd__021_ sut__022_ =
-      match cmd__021_ with
+      match cmd__021_.raw_cmd with
       | Make (len, c) ->
           Res
             ((result sut exn),
@@ -268,7 +268,7 @@ let check_init_state () = ()
 let ortac_show_cmd cmd__027_ models__028_ last__030_ res__029_ =
   let open Spec in
     let open STM in
-      match (cmd__027_, res__029_) with
+      match ((cmd__027_.raw_cmd), res__029_) with
       | (Make (len, c), Res ((Result (SUT, Exn), _), t_1)) ->
           let lhs =
             if last__030_
@@ -291,7 +291,7 @@ let ortac_postcond cmd__014_ state__015_ res__016_ =
   let open Spec in
     let open STM in
       let new_state__017_ = lazy (next_state cmd__014_ state__015_) in
-      match (cmd__014_, res__016_) with
+      match ((cmd__014_.raw_cmd), res__016_) with
       | (Make (len, c), Res ((Result (SUT, Exn), _), t_1)) ->
           (match if
                    try

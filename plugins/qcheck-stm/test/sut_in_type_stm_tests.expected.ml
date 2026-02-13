@@ -66,14 +66,12 @@ module Spec =
     type flag =
       | Seq 
       | Dom 
-    type flagged_cmd = {
+    type cmd = {
       flag: flag ;
       raw_cmd: raw_cmd }
     let with_flag flag raw_cmd = { flag; raw_cmd }
-    type cmd =
-      | Make of int * int 
     let show_cmd cmd__005_ =
-      match cmd__005_ with
+      match cmd__005_.raw_cmd with
       | Make (i, a_1) ->
           Format.asprintf "protect (fun () -> %s %a %a)" "make"
             (Util.Pp.pp_int true) i (Util.Pp.pp_int true) a_1
@@ -85,10 +83,13 @@ module Spec =
             [(1,
                (((pure (fun i a_1 -> Make (i, a_1))) <*> nat_small) <*>
                   nat_small))]
+    let gen_cmd state__024_ =
+      let open QCheck in
+        let open Gen in (with_flag Seq) <$> (gen_cmd state__024_)
     let arb_cmd state__001_ =
       let open QCheck in make ~print:show_cmd (gen_cmd state__001_)
     let next_state cmd__006_ state__007_ =
-      match cmd__006_ with
+      match cmd__006_.raw_cmd with
       | Make (i, a_1) ->
           if
             (try
@@ -130,10 +131,10 @@ module Spec =
             Model.push (Model.drop_n state__007_ 0) t_1__009_
           else state__007_
     let precond cmd__014_ state__015_ =
-      match cmd__014_ with | Make (i, a_1) -> true
+      match cmd__014_.raw_cmd with | Make (i, a_1) -> true
     let postcond _ _ _ = true
     let run cmd__016_ sut__017_ =
-      match cmd__016_ with
+      match cmd__016_.raw_cmd with
       | Make (i, a_1) ->
           Res
             ((result sut exn),
@@ -148,7 +149,7 @@ let check_init_state () = ()
 let ortac_show_cmd cmd__020_ models__021_ last__023_ res__022_ =
   let open Spec in
     let open STM in
-      match (cmd__020_, res__022_) with
+      match ((cmd__020_.raw_cmd), res__022_) with
       | (Make (i, a_1), Res ((Result (SUT, Exn), _), t_1)) ->
           let lhs =
             if last__023_
@@ -165,7 +166,7 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
   let open Spec in
     let open STM in
       let new_state__013_ = lazy (next_state cmd__010_ state__011_) in
-      match (cmd__010_, res__012_) with
+      match ((cmd__010_.raw_cmd), res__012_) with
       | (Make (i, a_1), Res ((Result (SUT, Exn), _), t_1)) ->
           (match if
                    try

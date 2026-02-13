@@ -94,21 +94,12 @@ module Spec =
     type flag =
       | Seq 
       | Dom 
-    type flagged_cmd = {
+    type cmd = {
       flag: flag ;
       raw_cmd: raw_cmd }
     let with_flag flag raw_cmd = { flag; raw_cmd }
-    type cmd =
-      | Create of unit 
-      | Of_list of int list 
-      | Is_empty 
-      | Peek_opt 
-      | Pop_opt 
-      | Pop_all 
-      | Push of int 
-      | Push_all of int list 
     let show_cmd cmd__005_ =
-      match cmd__005_ with
+      match cmd__005_.raw_cmd with
       | Create () ->
           Format.asprintf "%s %a" "create" (Util.Pp.pp_unit true) ()
       | Of_list xs ->
@@ -136,6 +127,9 @@ module Spec =
             (1, (pure Pop_all));
             (1, ((pure (fun x -> Push x)) <*> int));
             (1, ((pure (fun xs_1 -> Push_all xs_1)) <*> (list int)))]
+    let gen_cmd state__076_ =
+      let open QCheck in
+        let open Gen in (with_flag Seq) <$> (gen_cmd state__076_)
     let arb_cmd state__001_ =
       let open QCheck in make ~print:show_cmd (gen_cmd state__001_)
     let gen_cmd_seq _ =
@@ -174,6 +168,15 @@ module Spec =
             (1, (pure Pop_all));
             (1, ((pure (fun x -> Push x)) <*> int));
             (1, ((pure (fun xs_1 -> Push_all xs_1)) <*> (list int)))]
+    let gen_cmd_seq state__075_ =
+      let open QCheck in
+        let open Gen in (with_flag Seq) <$> (gen_cmd_seq state__075_)
+    let gen_cmd_dom0 state__074_ =
+      let open QCheck in
+        let open Gen in (with_flag Dom) <$> (gen_cmd_dom0 state__074_)
+    let gen_cmd_dom1 state__073_ =
+      let open QCheck in
+        let open Gen in (with_flag Dom) <$> (gen_cmd_dom1 state__073_)
     let arb_cmd_seq state__002_ =
       let open QCheck in make ~print:show_cmd (gen_cmd_seq state__002_)
     let arb_cmd_dom0 state__003_ =
@@ -181,7 +184,7 @@ module Spec =
     let arb_cmd_dom1 state__004_ =
       let open QCheck in make ~print:show_cmd (gen_cmd_dom1 state__004_)
     let next_state cmd__006_ state__007_ =
-      match cmd__006_ with
+      match cmd__006_.raw_cmd with
       | Create () ->
           let a_1__009_ =
             let open ModelElt in
@@ -380,7 +383,7 @@ module Spec =
               } in
           Model.push (Model.drop_n state__007_ 1) a_8__023_
     let precond cmd__050_ state__051_ =
-      match cmd__050_ with
+      match cmd__050_.raw_cmd with
       | Create () -> true
       | Of_list xs -> true
       | Is_empty -> true
@@ -391,7 +394,7 @@ module Spec =
       | Push_all xs_1 -> true
     let postcond _ _ _ = true
     let run cmd__052_ sut__053_ =
-      match cmd__052_ with
+      match cmd__052_.raw_cmd with
       | Create () -> Res (sut, (let res__054_ = create () in res__054_))
       | Of_list xs -> Res (sut, (let res__055_ = of_list xs in res__055_))
       | Is_empty ->
@@ -430,7 +433,7 @@ let check_init_state () = ()
 let ortac_show_cmd cmd__069_ models__070_ last__072_ res__071_ =
   let open Spec in
     let open STM in
-      match (cmd__069_, res__071_) with
+      match ((cmd__069_.raw_cmd), res__071_) with
       | (Create (), Res ((SUT, _), a_1)) ->
           let lhs = if last__072_ then "r" else "_"
           and shift = 0 in
@@ -477,7 +480,7 @@ let ortac_postcond cmd__024_ state__025_ res__026_ =
   let open Spec in
     let open STM in
       let new_state__027_ = lazy (next_state cmd__024_ state__025_) in
-      match (cmd__024_, res__026_) with
+      match ((cmd__024_.raw_cmd), res__026_) with
       | (Create (), Res ((SUT, _), a_1)) -> None
       | (Of_list xs, Res ((SUT, _), a_2)) -> None
       | (Is_empty, Res ((Bool, _), b)) ->

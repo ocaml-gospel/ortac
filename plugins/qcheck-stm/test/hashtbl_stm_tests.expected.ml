@@ -108,26 +108,12 @@ module Spec =
     type flag =
       | Seq 
       | Dom 
-    type flagged_cmd = {
+    type cmd = {
       flag: flag ;
       raw_cmd: raw_cmd }
     let with_flag flag raw_cmd = { flag; raw_cmd }
-    type cmd =
-      | Create of bool * int 
-      | Clear 
-      | Reset 
-      | Copy 
-      | Add of char * int 
-      | Find of char 
-      | Find_opt of char 
-      | Find_all of char 
-      | Mem of char 
-      | Remove of char 
-      | Replace of char * int 
-      | Filter_map_inplace of (char -> int -> int option) QCheck.fun_ 
-      | Length 
     let show_cmd cmd__005_ =
-      match cmd__005_ with
+      match cmd__005_.raw_cmd with
       | Create (random, size) ->
           Format.asprintf "%s %a %a" "create" (Util.Pp.pp_bool true) random
             (Util.Pp.pp_int true) size
@@ -181,10 +167,13 @@ module Spec =
             (fun f -> Filter_map_inplace f) <$>
               (fun2 Observable.char Observable.int (QCheck.option QCheck.int)).gen;
             pure Length]
+    let gen_cmd state__104_ =
+      let open QCheck in
+        let open Gen in (with_flag Seq) <$> (gen_cmd state__104_)
     let arb_cmd state__001_ =
       let open QCheck in make ~print:show_cmd (gen_cmd state__001_)
     let next_state cmd__006_ state__007_ =
-      match cmd__006_ with
+      match cmd__006_.raw_cmd with
       | Create (random, size) ->
           let h__009_ =
             let open ModelElt in
@@ -456,7 +445,7 @@ module Spec =
           let h_11__035_ = h_11__034_ in
           Model.push (Model.drop_n state__007_ 1) h_11__035_
     let precond cmd__070_ state__071_ =
-      match cmd__070_ with
+      match cmd__070_.raw_cmd with
       | Create (random, size) -> true
       | Clear -> true
       | Reset -> true
@@ -472,7 +461,7 @@ module Spec =
       | Length -> true
     let postcond _ _ _ = true
     let run cmd__072_ sut__073_ =
-      match cmd__072_ with
+      match cmd__072_.raw_cmd with
       | Create (random, size) ->
           Res
             (sut,
@@ -548,7 +537,7 @@ let check_init_state () = ()
 let ortac_show_cmd cmd__100_ models__101_ last__103_ res__102_ =
   let open Spec in
     let open STM in
-      match (cmd__100_, res__102_) with
+      match ((cmd__100_.raw_cmd), res__102_) with
       | (Create (random, size), Res ((SUT, _), h)) ->
           let lhs = if last__103_ then "r" else Model.get_name models__101_ 0
           and shift = 1 in
@@ -627,7 +616,7 @@ let ortac_postcond cmd__036_ state__037_ res__038_ =
   let open Spec in
     let open STM in
       let new_state__039_ = lazy (next_state cmd__036_ state__037_) in
-      match (cmd__036_, res__038_) with
+      match ((cmd__036_.raw_cmd), res__038_) with
       | (Create (random, size), Res ((SUT, _), h)) -> None
       | (Clear, Res ((Unit, _), _)) -> None
       | (Reset, Res ((Unit, _), _)) -> None

@@ -76,27 +76,12 @@ module Spec =
     type flag =
       | Seq 
       | Dom 
-    type flagged_cmd = {
+    type cmd = {
       flag: flag ;
       raw_cmd: raw_cmd }
     let with_flag flag raw_cmd = { flag; raw_cmd }
-    type cmd =
-      | Create of unit 
-      | Add of int 
-      | Push of int 
-      | Take 
-      | Take_opt 
-      | Pop 
-      | Peek 
-      | Top 
-      | Peek_opt 
-      | Clear 
-      | Copy 
-      | Is_empty 
-      | Length 
-      | Transfer 
     let show_cmd cmd__005_ =
-      match cmd__005_ with
+      match cmd__005_.raw_cmd with
       | Create () ->
           Format.asprintf "%s %a" "create" (Util.Pp.pp_unit true) ()
       | Add v -> Format.asprintf "%s %a <sut>" "add" (Util.Pp.pp_int true) v
@@ -132,10 +117,13 @@ module Spec =
             (1, (pure Is_empty));
             (1, (pure Length));
             (1, (pure Transfer))]
+    let gen_cmd state__149_ =
+      let open QCheck in
+        let open Gen in (with_flag Seq) <$> (gen_cmd state__149_)
     let arb_cmd state__001_ =
       let open QCheck in make ~print:show_cmd (gen_cmd state__001_)
     let next_state cmd__006_ state__007_ =
-      match cmd__006_ with
+      match cmd__006_.raw_cmd with
       | Create () ->
           let t_1__009_ =
             let open ModelElt in
@@ -491,7 +479,7 @@ module Spec =
           Model.push (Model.push (Model.drop_n state__007_ 2) t2__040_)
             t1__041_
     let precond cmd__112_ state__113_ =
-      match cmd__112_ with
+      match cmd__112_.raw_cmd with
       | Create () -> true
       | Add v -> true
       | Push v_1 -> true
@@ -508,7 +496,7 @@ module Spec =
       | Transfer -> true
     let postcond _ _ _ = true
     let run cmd__114_ sut__115_ =
-      match cmd__114_ with
+      match cmd__114_.raw_cmd with
       | Create () ->
           Res
             (sut,
@@ -591,7 +579,7 @@ let check_init_state () = ()
 let ortac_show_cmd cmd__145_ models__146_ last__148_ res__147_ =
   let open Spec in
     let open STM in
-      match (cmd__145_, res__147_) with
+      match ((cmd__145_.raw_cmd), res__147_) with
       | (Create (), Res ((SUT, _), t_1)) ->
           let lhs = if last__148_ then "r" else Model.get_name models__146_ 0
           and shift = 1 in
@@ -669,7 +657,7 @@ let ortac_postcond cmd__042_ state__043_ res__044_ =
   let open Spec in
     let open STM in
       let new_state__045_ = lazy (next_state cmd__042_ state__043_) in
-      match (cmd__042_, res__044_) with
+      match ((cmd__042_.raw_cmd), res__044_) with
       | (Create (), Res ((SUT, _), t_1)) -> None
       | (Add v, Res ((Unit, _), _)) -> None
       | (Push v_1, Res ((Unit, _), _)) -> None
