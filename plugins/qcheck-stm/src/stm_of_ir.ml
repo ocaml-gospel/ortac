@@ -1204,6 +1204,21 @@ let flagged_cmd_type =
   let td = type_declaration ~name ~params ~cstrs ~kind ~private_ ~manifest in
   pstr_type Recursive [ td ]
 
+let with_flag =
+  let pat = ppat_var @@ noloc "with_flag"
+  and expr =
+    efun
+      [
+        (Nolabel, ppat_var @@ noloc "flag");
+        (Nolabel, ppat_var @@ noloc "raw_cmd");
+      ]
+      (pexp_record
+         [ (lident "flag", evar "flag"); (lident "raw_cmd", evar "raw_cmd") ]
+         None)
+  in
+  let value_bindings = [ value_binding ~pat ~expr ] in
+  pstr_value Nonrecursive value_bindings
+
 let pp_cmd_case config value =
   let lhs = mk_cmd_pattern value in
   let qualify_pp = qualify [ "Util"; "Pp" ] in
@@ -1869,6 +1884,7 @@ let stm config ir =
           raw_cmd_type;
           flag_type;
           flagged_cmd_type;
+          with_flag;
           cmd;
           cmd_show;
           cleanup;

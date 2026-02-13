@@ -95,6 +95,7 @@ module Spec =
     type flagged_cmd = {
       flag: flag ;
       raw_cmd: raw_cmd }
+    let with_flag flag raw_cmd = { flag; raw_cmd }
     type cmd =
       | Make of int * char 
       | Map of (char -> char) QCheck.fun_ 

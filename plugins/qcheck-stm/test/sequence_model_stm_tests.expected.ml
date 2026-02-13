@@ -88,6 +88,7 @@ module Spec =
     type flagged_cmd = {
       flag: flag ;
       raw_cmd: raw_cmd }
+    let with_flag flag raw_cmd = { flag; raw_cmd }
     type cmd =
       | Create of unit 
       | Add of char 
