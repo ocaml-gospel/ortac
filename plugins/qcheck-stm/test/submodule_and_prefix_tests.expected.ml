@@ -54,20 +54,20 @@ module Spec =
     let init_state = Model.create 0 ()
     type cmd =
       | Make of int 
-    let show_cmd cmd__001_ =
-      match cmd__001_ with
+    let show_cmd cmd__005_ =
+      match cmd__005_ with
       | Make a_1 -> Format.asprintf "%s %a" "make" (Util.Pp.pp_int true) a_1
     let cleanup _ = ()
-    let arb_cmd _ =
+    let gen_cmd _ =
       let open QCheck in
-        make ~print:show_cmd
-          (let open Gen in
-             oneof_weighted
-               [(1, ((pure (fun a_1 -> Make a_1)) <*> nat_small))])
-    let next_state cmd__002_ state__003_ =
-      match cmd__002_ with
+        let open Gen in
+          oneof_weighted [(1, ((pure (fun a_1 -> Make a_1)) <*> nat_small))]
+    let arb_cmd state__001_ =
+      let open QCheck in make ~print:show_cmd (gen_cmd state__001_)
+    let next_state cmd__006_ state__007_ =
+      match cmd__006_ with
       | Make a_1 ->
-          let t_1__005_ =
+          let t_1__009_ =
             let open ModelElt in
               {
                 value =
@@ -94,35 +94,35 @@ module Spec =
                                   }
                               })))
               } in
-          Model.push (Model.drop_n state__003_ 0) t_1__005_
-    let precond cmd__010_ state__011_ =
-      match cmd__010_ with | Make a_1 -> true
+          Model.push (Model.drop_n state__007_ 0) t_1__009_
+    let precond cmd__014_ state__015_ =
+      match cmd__014_ with | Make a_1 -> true
     let postcond _ _ _ = true
-    let run cmd__012_ sut__013_ =
-      match cmd__012_ with
+    let run cmd__016_ sut__017_ =
+      match cmd__016_ with
       | Make a_1 ->
           Res
             (sut,
-              (let res__014_ = make a_1 in
-               (SUT.push sut__013_ res__014_; res__014_)))
+              (let res__018_ = make a_1 in
+               (SUT.push sut__017_ res__018_; res__018_)))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__016_ models__017_ last__019_ res__018_ =
+let ortac_show_cmd cmd__020_ models__021_ last__023_ res__022_ =
   let open Spec in
     let open STM in
-      match (cmd__016_, res__018_) with
+      match (cmd__020_, res__022_) with
       | (Make a_1, Res ((SUT, _), t_1)) ->
-          let lhs = if last__019_ then "r" else Model.get_name models__017_ 0
+          let lhs = if last__023_ then "r" else Model.get_name models__021_ 0
           and shift = 1 in
           Format.asprintf "let %s = %s %a" lhs "make" (Util.Pp.pp_int true)
             a_1
       | _ -> assert false
-let ortac_postcond cmd__006_ state__007_ res__008_ =
+let ortac_postcond cmd__010_ state__011_ res__012_ =
   let open Spec in
     let open STM in
-      let new_state__009_ = lazy (next_state cmd__006_ state__007_) in
-      match (cmd__006_, res__008_) with
+      let new_state__013_ = lazy (next_state cmd__010_ state__011_) in
+      match (cmd__010_, res__012_) with
       | (Make a_1, Res ((SUT, _), t_1)) -> None
       | _ -> None
 let _ =

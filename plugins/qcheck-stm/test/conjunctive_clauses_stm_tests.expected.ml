@@ -60,8 +60,8 @@ module Spec =
     type cmd =
       | Make of int * char 
       | Set of int * char 
-    let show_cmd cmd__001_ =
-      match cmd__001_ with
+    let show_cmd cmd__005_ =
+      match cmd__005_ with
       | Make (i, a_1) ->
           Format.asprintf "protect (fun () -> %s %a %a)" "make"
             (Util.Pp.pp_int true) i (Util.Pp.pp_char true) a_1
@@ -69,18 +69,17 @@ module Spec =
           Format.asprintf "protect (fun () -> %s <sut> %a %a)" "set"
             (Util.Pp.pp_int true) i_1 (Util.Pp.pp_char true) a_2
     let cleanup _ = ()
-    let arb_cmd _ =
+    let gen_cmd _ =
       let open QCheck in
-        make ~print:show_cmd
-          (let open Gen in
-             oneof_weighted
-               [(1,
-                  (((pure (fun i a_1 -> Make (i, a_1))) <*> nat_small) <*>
-                     char));
-               (1,
-                 (((pure (fun i_1 a_2 -> Set (i_1, a_2))) <*> int) <*> char))])
-    let next_state cmd__002_ state__003_ =
-      match cmd__002_ with
+        let open Gen in
+          oneof_weighted
+            [(1,
+               (((pure (fun i a_1 -> Make (i, a_1))) <*> nat_small) <*> char));
+            (1, (((pure (fun i_1 a_2 -> Set (i_1, a_2))) <*> int) <*> char))]
+    let arb_cmd state__001_ =
+      let open QCheck in make ~print:show_cmd (gen_cmd state__001_)
+    let next_state cmd__006_ state__007_ =
+      match cmd__006_ with
       | Make (i, a_1) ->
           if
             (try
@@ -89,7 +88,7 @@ module Spec =
                  (Ortac_runtime.Gospelstdlib.integer_of_int 0)
              with | e -> false)
           then
-            let t_1__005_ =
+            let t_1__009_ =
               let open ModelElt in
                 {
                   contents =
@@ -119,31 +118,31 @@ module Spec =
                                     }
                                 })))
                 } in
-            Model.push (Model.drop_n state__003_ 0) t_1__005_
-          else state__003_
+            Model.push (Model.drop_n state__007_ 0) t_1__009_
+          else state__007_
       | Set (i_1, a_2) ->
-          let t_2__006_ = Model.get state__003_ 0 in
+          let t_2__010_ = Model.get state__007_ 0 in
           if
             (try
-               let __t1__008_ =
+               let __t1__012_ =
                  Ortac_runtime.Gospelstdlib.(<=)
                    (Ortac_runtime.Gospelstdlib.integer_of_int 0)
                    (Ortac_runtime.Gospelstdlib.integer_of_int i_1) in
-               let __t2__009_ =
+               let __t2__013_ =
                  Ortac_runtime.Gospelstdlib.(<)
                    (Ortac_runtime.Gospelstdlib.integer_of_int i_1)
                    (Ortac_runtime.Gospelstdlib.Sequence.length
-                      t_2__006_.contents) in
-               __t1__008_ && __t2__009_
+                      t_2__010_.contents) in
+               __t1__012_ && __t2__013_
              with | e -> false)
           then
-            let t_2__007_ =
+            let t_2__011_ =
               let open ModelElt in
                 {
                   contents =
                     (try
                        Ortac_runtime.Gospelstdlib.Sequence.set
-                         t_2__006_.contents
+                         t_2__010_.contents
                          (Ortac_runtime.Gospelstdlib.integer_of_int i_1) a_2
                      with
                      | e ->
@@ -167,57 +166,57 @@ module Spec =
                                     }
                                 })))
                 } in
-            Model.push (Model.drop_n state__003_ 1) t_2__007_
-          else state__003_
-    let precond cmd__017_ state__018_ =
-      match cmd__017_ with | Make (i, a_1) -> true | Set (i_1, a_2) -> true
+            Model.push (Model.drop_n state__007_ 1) t_2__011_
+          else state__007_
+    let precond cmd__021_ state__022_ =
+      match cmd__021_ with | Make (i, a_1) -> true | Set (i_1, a_2) -> true
     let postcond _ _ _ = true
-    let run cmd__019_ sut__020_ =
-      match cmd__019_ with
+    let run cmd__023_ sut__024_ =
+      match cmd__023_ with
       | Make (i, a_1) ->
           Res
             ((result sut exn),
-              (let res__021_ = protect (fun () -> make i a_1) () in
-               ((match res__021_ with
-                 | Ok res -> SUT.push sut__020_ res
+              (let res__025_ = protect (fun () -> make i a_1) () in
+               ((match res__025_ with
+                 | Ok res -> SUT.push sut__024_ res
                  | Error _ -> ());
-                res__021_)))
+                res__025_)))
       | Set (i_1, a_2) ->
           Res
             ((result unit exn),
-              (let t_2__022_ = SUT.get sut__020_ 0 in
-               let res__023_ = protect (fun () -> set t_2__022_ i_1 a_2) () in
-               res__023_))
+              (let t_2__026_ = SUT.get sut__024_ 0 in
+               let res__027_ = protect (fun () -> set t_2__026_ i_1 a_2) () in
+               res__027_))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__025_ models__026_ last__028_ res__027_ =
+let ortac_show_cmd cmd__029_ models__030_ last__032_ res__031_ =
   let open Spec in
     let open STM in
-      match (cmd__025_, res__027_) with
+      match (cmd__029_, res__031_) with
       | (Make (i, a_1), Res ((Result (SUT, Exn), _), t_1)) ->
           let lhs =
-            if last__028_
+            if last__032_
             then "r"
             else
               (match t_1 with
-               | Ok _ -> "Ok " ^ (Model.get_name models__026_ 0)
+               | Ok _ -> "Ok " ^ (Model.get_name models__030_ 0)
                | Error _ -> "_")
           and shift = match t_1 with | Ok _ -> 1 | Error _ -> 0 in
           Format.asprintf "let %s = protect (fun () -> %s %a %a)" lhs "make"
             (Util.Pp.pp_int true) i (Util.Pp.pp_char true) a_1
       | (Set (i_1, a_2), Res ((Result (Unit, Exn), _), _)) ->
-          let lhs = if last__028_ then "r" else "_"
+          let lhs = if last__032_ then "r" else "_"
           and shift = 0 in
           Format.asprintf "let %s = protect (fun () -> %s %s %a %a)" lhs
-            "set" (Model.get_name models__026_ (0 + shift))
+            "set" (Model.get_name models__030_ (0 + shift))
             (Util.Pp.pp_int true) i_1 (Util.Pp.pp_char true) a_2
       | _ -> assert false
-let ortac_postcond cmd__010_ state__011_ res__012_ =
+let ortac_postcond cmd__014_ state__015_ res__016_ =
   let open Spec in
     let open STM in
-      let new_state__013_ = lazy (next_state cmd__010_ state__011_) in
-      match (cmd__010_, res__012_) with
+      let new_state__017_ = lazy (next_state cmd__014_ state__015_) in
+      match (cmd__014_, res__016_) with
       | (Make (i, a_1), Res ((Result (SUT, Exn), _), t_1)) ->
           (match if
                    try
@@ -292,18 +291,18 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                               })])))
       | (Set (i_1, a_2), Res ((Result (Unit, Exn), _), res)) ->
           (match if
-                   let tmp__014_ = Model.get state__011_ 0 in
+                   let tmp__018_ = Model.get state__015_ 0 in
                    try
-                     let __t1__015_ =
+                     let __t1__019_ =
                        Ortac_runtime.Gospelstdlib.(<=)
                          (Ortac_runtime.Gospelstdlib.integer_of_int 0)
                          (Ortac_runtime.Gospelstdlib.integer_of_int i_1) in
-                     let __t2__016_ =
+                     let __t2__020_ =
                        Ortac_runtime.Gospelstdlib.(<)
                          (Ortac_runtime.Gospelstdlib.integer_of_int i_1)
                          (Ortac_runtime.Gospelstdlib.Sequence.length
-                            tmp__014_.contents) in
-                     __t1__015_ && __t2__016_
+                            tmp__018_.contents) in
+                     __t1__019_ && __t2__020_
                    with | e -> false
                  then None
                  else
@@ -338,18 +337,18 @@ let ortac_postcond cmd__010_ state__011_ res__012_ =
                 | Error (Invalid_argument _) -> None
                 | _ ->
                     if
-                      let tmp__014_ = Model.get state__011_ 0 in
+                      let tmp__018_ = Model.get state__015_ 0 in
                       (try
-                         let __t1__015_ =
+                         let __t1__019_ =
                            Ortac_runtime.Gospelstdlib.(<=)
                              (Ortac_runtime.Gospelstdlib.integer_of_int 0)
                              (Ortac_runtime.Gospelstdlib.integer_of_int i_1) in
-                         let __t2__016_ =
+                         let __t2__020_ =
                            Ortac_runtime.Gospelstdlib.(<)
                              (Ortac_runtime.Gospelstdlib.integer_of_int i_1)
                              (Ortac_runtime.Gospelstdlib.Sequence.length
-                                tmp__014_.contents) in
-                         __t1__015_ && __t2__016_
+                                tmp__018_.contents) in
+                         __t1__019_ && __t2__020_
                        with | e -> false)
                     then None
                     else

@@ -146,6 +146,8 @@ uses the [checks] clauses and the [raises] ones.
 Configuration of the Ortac/QCheck-STM tool is done via both a configuration file
 and the command-line arguments.
 
+{3 Configuration file}
+
 Configuration files for Ortac/QCheck-STM are OCaml modules containing {e at
 least} a type declaration for `sut` (usually the type `t` of the module under
 test with all the type parameters instantiated) and a value declaration for
@@ -178,7 +180,7 @@ The other information we can put in the configuration file are:
     {li {b or}, if we use the Domain mode, custom weights to be used by
     [QCheck] in a [Weights_seq], a [Weights_dom0] and a
     [Weights_dom1] modules}
-    {li custom [arb_cmd], [arb_cmd_seq], [arb_cmd_dom0] and [arb_cmd_dom1]
+    {li custom [gen_cmd], [gen_cmd_seq], [gen_cmd_dom0] and [gen_cmd_dom1]
     definition }}
 
 These additional information are mostly necessary when the tested library
@@ -207,23 +209,35 @@ The [Weights*] modules should contain value declarations of the form [let
 <value_name> = <int literal>] where [<value_name>] is the name of a function
 from the interface file we want to test.
 
+{3 Custom command generators}
+
 Custom command generators are a bit trickier to write. A good starting point is
 to copy-paste the generated one into the configuration file and modify it.
 
 Firstly, when some command generators are provided in the configuration file,
-two rules of overwritting the generated generic ones are applied in the
-following order:
+they overwrite the generated ones with the following naming convention:
 
-{ol
- {li a provided [arb_cmd] will overwrite all the generated ones}
- {li when in domain mode, the provided [arb_cmd_seq], [arb_cmd_dom0] and
- [arb_cmd_dom1] will respectively overwrite the generated generic ones}}
+{ul
+ {li [gen_cmd] will be used for generating commands in the sequential mode}
+ {li [gen_cmd_seq] will be used for generating commands in the sequential
+ prefix of the domain mode}
+ {li [gen_cmd_dom0] and [gen_cmd_dom1] will respectively be used to generated
+ commands in the two spawned domain in the domain mode}}
 
-The main reason to want to write a custom command generator is to take
+Any other name will be ignored.
+
+Beware that any weights that could be declared in the configuration file will
+be ignored if a custom generator is provided for the intended case. A weights
+declared in a module [Weights_dom0] will be ignored when a [gen_cmd_dom0] is
+provided.
+
+The main reason one would want to write a custom command generator is to take
 advantage of the fact that the command generator in QCheck-STM is parameterized
-by the model of the SUT, {e aka} the state. Now, in order to manipulate the
-state we need to know a bit of the internals of how it is represented by
-Ortac/QCheck-STM.
+by the model of the SUT, {e aka} the state. Ortac is not smart enough to take
+opportunity of this possibility in the generated command generators.
+
+Now, in order to manipulate the state we need to know a bit of the internals of
+how it is represented by Ortac/QCheck-STM.
 
 In the generated code, a [state] is of type [Model.t]. A value of type
 [Model.t] is a container of [ModelElt.elt]. This last one represents the model
@@ -236,14 +250,23 @@ argument is [0], the index of the second SUT argument is [1] and so on.
 Once we have the [ModelElt.elt], we will want to inspect it.
 
 The type [ModelElt.elt] is defined in the generated code as a record which
-fields are the name of the Gospel models provided in the module's interface.
+fields are the name of the Gospel models provided in the module's interface. It
+is a good idea to take a look at some examples that can be found in the test
+folder of the Ortac/QCheck-STM plugin or the examples folder.
 
-For example, provided a type ['a t] with a Gospel model [contents: 'a
-sequence] and a type [sut] defined in the configuration file as [int t],
-Ortac/QCheck-STM will generate:
+For example, provided the following type declaration annotated with a Gospel
+model:
+
+{@ocaml file=example_hashtbl.mli[
+type ('a, 'b) t
+(*@ mutable model contents : ('a * 'b) sequence *)
+]}
+
+The following [ModelElt.elt] type declaration will be generated (assuming the
+type [sut] is defined in the configuration file as [(char, int) t]):
 
 {@ocaml skip[
-type elt = { contents : int Ortac_runtime.Gospelstdlib.sequence }
+type nonrec elt = { contents : (char * int) Ortac_runtime.Gospelstdlib.sequence }
 ]}
 
 Knowing that, we just have to open [ModelElt] to have access to the element's
@@ -256,9 +279,57 @@ have to write:
 let contents = (Model.get state 0).ModelElt.contents
 ]}
 
-We'll get an OCaml value worresponding to the Gospel logical model. To inspect
+We'll get an OCaml value corresponding to the Gospel logical model. To inspect
 it further, we need to use the functions provided in
 [Ortac_runtime.Gospelstdlib].
+
+A good example is the command generator used for the [Hashtbl] module in the
+plugin test directory, where we use the [state] to make sure we have a chance
+to generate keys that are present in the hashtable. Let's reproduce it here
+with some comments:
+
+{@ocaml file=example_config_custom_gen.ml[
+let gen_cmd state =
+  (* We will use [fun2] which is in [QCheck] module *)
+  let open QCheck in
+  let open Gen in
+  (* We inspect the [state] to compute the list of keys. This will be used by
+     functions that take only one SUT, so we look at the first model in the
+     model container. *)
+  let keys =
+    (* We use the [Ortac_runtime.Gospelstdlib.Sequence] module to manipulate
+       the [contents] field of the model of one hash table. *)
+    let open Ortac_runtime.Gospelstdlib in
+    (* The [Model] and [ModelElt] are declared in the generated code, hence are
+       directly available where this code will be injected. *)
+    List.of_seq @@ Sequence.map fst @@ (Model.get state 0).ModelElt.contents
+  in
+  (* We use the keys to implement a new [key] generator and make sure we have a
+     chance to generate a key that is actualy mapped to a value. *)
+  let key =
+    match keys with [] -> char | xs -> oneof [ char; oneof_list xs ]
+  in
+  (* The following is classic QCheck generator. *)
+  oneof
+    [
+      (fun random size -> Create (random, size)) <$> bool <*> nat_small;
+      pure Clear;
+      pure Reset;
+      pure Copy;
+      (fun k v -> Add (k, v)) <$> char <*> int;
+      (fun k -> Find k) <$> char;
+      (fun k -> Find_opt k) <$> char;
+      (fun k -> Find_all k) <$> char;
+      (fun k -> Mem k) <$> char;
+      (fun k -> Remove k) <$> char;
+      (fun k v -> Replace (k, v)) <$> char <*> int;
+      (fun f -> Filter_map_inplace f)
+      <$> (fun2 Observable.char Observable.int (QCheck.option QCheck.int)).gen;
+      pure Length;
+    ]
+]}
+
+{3 Other command line arguments}
 
 Apart from the OCaml file, the configuration file and the output file, the other
 cli arguments available are:
@@ -531,7 +602,7 @@ and peculiarities:
         initial size of the datastructure as an argument. In order to keep the
         size of the created data structure manageable, a heuristic is used.
         Whenever a functions returns a SUT, but does not take a SUT as an input
-        argument, any [Gen.int] generators in [Spec.arb_cmd] are automatically
+        argument, any [Gen.int] generators in [Spec.gen_cmd] are automatically
         exchanged with [Gen.small_signed_int]}}
 
 {1 Segmentation faults and non-termination}

@@ -1,5 +1,7 @@
 # Unreleased
 
+- [QCheck-STM] User can now provides `gen_cmd*`s rather than `arb_cmd*`s
+  [\#372](https://github.com/ocaml-gospel/ortac/pull/372)
 - [QCheck-STM] Fix last error name wich mentioned frequency
   [\#371](https://github.com/ocaml-gospel/ortac/pull/371)
 - [QCheck-STM] Update to QCheck 0.90 great renaming

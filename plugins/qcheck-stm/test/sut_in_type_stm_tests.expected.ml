@@ -63,22 +63,23 @@ module Spec =
     let init_state = Model.create 0 ()
     type cmd =
       | Make of int * int 
-    let show_cmd cmd__001_ =
-      match cmd__001_ with
+    let show_cmd cmd__005_ =
+      match cmd__005_ with
       | Make (i, a_1) ->
           Format.asprintf "protect (fun () -> %s %a %a)" "make"
             (Util.Pp.pp_int true) i (Util.Pp.pp_int true) a_1
     let cleanup _ = ()
-    let arb_cmd _ =
+    let gen_cmd _ =
       let open QCheck in
-        make ~print:show_cmd
-          (let open Gen in
-             oneof_weighted
-               [(1,
-                  (((pure (fun i a_1 -> Make (i, a_1))) <*> nat_small) <*>
-                     nat_small))])
-    let next_state cmd__002_ state__003_ =
-      match cmd__002_ with
+        let open Gen in
+          oneof_weighted
+            [(1,
+               (((pure (fun i a_1 -> Make (i, a_1))) <*> nat_small) <*>
+                  nat_small))]
+    let arb_cmd state__001_ =
+      let open QCheck in make ~print:show_cmd (gen_cmd state__001_)
+    let next_state cmd__006_ state__007_ =
+      match cmd__006_ with
       | Make (i, a_1) ->
           if
             (try
@@ -87,7 +88,7 @@ module Spec =
                  (Ortac_runtime.Gospelstdlib.integer_of_int 0)
              with | e -> false)
           then
-            let t_1__005_ =
+            let t_1__009_ =
               let open ModelElt in
                 {
                   contents =
@@ -117,45 +118,45 @@ module Spec =
                                     }
                                 })))
                 } in
-            Model.push (Model.drop_n state__003_ 0) t_1__005_
-          else state__003_
-    let precond cmd__010_ state__011_ =
-      match cmd__010_ with | Make (i, a_1) -> true
+            Model.push (Model.drop_n state__007_ 0) t_1__009_
+          else state__007_
+    let precond cmd__014_ state__015_ =
+      match cmd__014_ with | Make (i, a_1) -> true
     let postcond _ _ _ = true
-    let run cmd__012_ sut__013_ =
-      match cmd__012_ with
+    let run cmd__016_ sut__017_ =
+      match cmd__016_ with
       | Make (i, a_1) ->
           Res
             ((result sut exn),
-              (let res__014_ = protect (fun () -> make i a_1) () in
-               ((match res__014_ with
-                 | Ok res -> SUT.push sut__013_ res
+              (let res__018_ = protect (fun () -> make i a_1) () in
+               ((match res__018_ with
+                 | Ok res -> SUT.push sut__017_ res
                  | Error _ -> ());
-                res__014_)))
+                res__018_)))
   end
 module STMTests = (Ortac_runtime.Make)(Spec)
 let check_init_state () = ()
-let ortac_show_cmd cmd__016_ models__017_ last__019_ res__018_ =
+let ortac_show_cmd cmd__020_ models__021_ last__023_ res__022_ =
   let open Spec in
     let open STM in
-      match (cmd__016_, res__018_) with
+      match (cmd__020_, res__022_) with
       | (Make (i, a_1), Res ((Result (SUT, Exn), _), t_1)) ->
           let lhs =
-            if last__019_
+            if last__023_
             then "r"
             else
               (match t_1 with
-               | Ok _ -> "Ok " ^ (Model.get_name models__017_ 0)
+               | Ok _ -> "Ok " ^ (Model.get_name models__021_ 0)
                | Error _ -> "_")
           and shift = match t_1 with | Ok _ -> 1 | Error _ -> 0 in
           Format.asprintf "let %s = protect (fun () -> %s %a %a)" lhs "make"
             (Util.Pp.pp_int true) i (Util.Pp.pp_int true) a_1
       | _ -> assert false
-let ortac_postcond cmd__006_ state__007_ res__008_ =
+let ortac_postcond cmd__010_ state__011_ res__012_ =
   let open Spec in
     let open STM in
-      let new_state__009_ = lazy (next_state cmd__006_ state__007_) in
-      match (cmd__006_, res__008_) with
+      let new_state__013_ = lazy (next_state cmd__010_ state__011_) in
+      match (cmd__010_, res__012_) with
       | (Make (i, a_1), Res ((Result (SUT, Exn), _), t_1)) ->
           (match if
                    try

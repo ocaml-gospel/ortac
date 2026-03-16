@@ -372,7 +372,7 @@ let exp_of_ident id = pexp_ident (lident (str_of_ident id))
 (* Output a generator for one particular cmd by
    - a capitalized function constructor, e.g., [show] to [fun x y z -> Show (x,y,z)]
    - a list of generated arguments, strung together with [<*>], aka Gen.combine *)
-let arb_cmd_case config value =
+let gen_cmd_case config value =
   let open Reserr in
   let is_create = value.sut_vars = [] && Cfg.does_return_sut config value.ty in
   let epure = pexp_ident (lident "pure") in
@@ -413,20 +413,21 @@ let lens_from_which = function
   | Dom0 -> Weight.dom0
   | Dom1 -> Weight.dom1
 
-let pat_from_which = function
-  | Gen -> pvar "arb_cmd"
-  | Seq -> pvar "arb_cmd_seq"
-  | Dom0 -> pvar "arb_cmd_dom0"
-  | Dom1 -> pvar "arb_cmd_dom1"
+let label_from_which prefix = function
+  | Gen -> prefix
+  | Seq -> prefix ^ "_seq"
+  | Dom0 -> prefix ^ "_dom0"
+  | Dom1 -> prefix ^ "_dom1"
 
-(* Generate the [arb_cmd] definition as a uniform choice between the
-   [arb_cmd_case] outputs *)
-let arb_cmd_gen which config ir =
+let gen_from_which = label_from_which "gen_cmd"
+let arb_from_which = label_from_which "arb_cmd"
+
+let gen_cmd_from_which which config ir =
   let open Reserr in
   let open Ppxlib in
-  let lens = lens_from_which which and pat = pat_from_which which in
+  let lens = lens_from_which which and pat = pvar @@ gen_from_which which in
   let aux value (freq_map, acc) =
-    let* gen = arb_cmd_case config value in
+    let* gen = gen_cmd_case config value in
     let freq, freq_map = Weight.pop lens (str_of_ident value.id) freq_map in
     ok @@ (freq_map, pexp_tuple [ eint freq; gen ] :: acc)
   in
@@ -441,45 +442,59 @@ let arb_cmd_gen which config ir =
   let let_open str e =
     pexp_open Ast_helper.(Opn.mk (Mod.ident (lident str |> noloc))) e
   in
-  let oneof_weighted =
-    let_open "Gen" (pexp_apply (evar "oneof_weighted") [ (Nolabel, cmds) ])
-  in
   let body =
     let_open "QCheck"
-      (pexp_apply (evar "make")
-         [ (Labelled "print", evar "show_cmd"); (Nolabel, oneof_weighted) ])
+    @@ let_open "Gen" (pexp_apply (evar "oneof_weighted") [ (Nolabel, cmds) ])
   in
   let expr = efun [ (Nolabel, ppat_any (* for now we don't use it *)) ] body in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
-let arb_cmd config =
-  match config.Cfg.arb_cmd with
-  | None -> arb_cmd_gen Gen config
-  | Some stri -> Fun.const @@ Reserr.ok stri
+let gen_cmd config ir =
+  match config.Cfg.gen_cmd with
+  | None -> gen_cmd_from_which Gen config ir
+  | Some stri -> Reserr.ok stri
 
-let arb_cmd_domain_mode which config =
-  let lens = lens_from_which which
-  and pat = pat_from_which which
-  and expr = evar "arb_cmd"
-  and opt_stri =
-    match which with
-    | Gen -> assert false
-    | Seq -> config.Cfg.arb_cmd_seq
-    | Dom0 -> config.Cfg.arb_cmd_dom0
-    | Dom1 -> config.Cfg.arb_cmd_dom1
+let gen_cmd_seq config ir =
+  match config.Cfg.gen_cmd_seq with
+  | None -> gen_cmd_from_which Seq config ir
+  | Some stri -> Reserr.ok stri
+
+let gen_cmd_dom0 config ir =
+  match config.Cfg.gen_cmd_dom0 with
+  | None -> gen_cmd_from_which Dom0 config ir
+  | Some stri -> Reserr.ok stri
+
+let gen_cmd_dom1 config ir =
+  match config.Cfg.gen_cmd_dom1 with
+  | None -> gen_cmd_from_which Dom1 config ir
+  | Some stri -> Reserr.ok stri
+
+(* Generate the [arb_cmd] definition as a uniform choice between the
+   [arb_cmd_case] outputs *)
+let arb_cmd_gen which =
+  let open Reserr in
+  let open Ppxlib in
+  let pat = pvar @@ arb_from_which which in
+  let let_open str e =
+    pexp_open Ast_helper.(Opn.mk (Mod.ident (lident str |> noloc))) e
   in
-  match opt_stri with
-  | None ->
-      if Weight.(is_empty lens config.Cfg.weights) then
-        Fun.const
-        @@ Reserr.ok
-        @@ pstr_value Nonrecursive [ value_binding ~pat ~expr ]
-      else arb_cmd_gen which config
-  | Some stri -> Fun.const @@ Reserr.ok stri
+  let gen_fun = evar @@ gen_from_which which
+  and state_arg = gen_symbol ~prefix:"state" () in
+  let body =
+    let_open "QCheck"
+      (pexp_apply (evar "make")
+         [
+           (Labelled "print", evar "show_cmd");
+           (Nolabel, pexp_apply gen_fun [ (Nolabel, evar state_arg) ]);
+         ])
+  in
+  let expr = efun [ (Nolabel, pvar state_arg) ] body in
+  pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
-let arb_cmd_seq = arb_cmd_domain_mode Seq
-let arb_cmd_dom0 = arb_cmd_domain_mode Dom0
-let arb_cmd_dom1 = arb_cmd_domain_mode Dom1
+let arb_cmd = arb_cmd_gen Gen
+let arb_cmd_seq = arb_cmd_gen Seq
+let arb_cmd_dom0 = arb_cmd_gen Dom0
+let arb_cmd_dom1 = arb_cmd_gen Dom1
 
 let run_case config sut_name value =
   let lhs = mk_cmd_pattern value in
@@ -1769,7 +1784,8 @@ let stm config ir =
   let* postcond = postcond config idx ir in
   let* precond = precond config ir in
   let* run = run config ir in
-  let* arb_cmd = arb_cmd config ir in
+  let* gen_cmd = gen_cmd config ir in
+  let* arb_cmd = arb_cmd in
   let* check_init_state = check_init_state config ir in
   let* ortac_show = ortac_cmd_show config ir in
   let cleanup =
@@ -1785,11 +1801,15 @@ let stm config ir =
   in
   let sut_defs = sut_defs ir in
   let state_defs = state_defs ir in
-  let* arb_cmds =
+  let* gen_cmds =
     if config.domain then
       traverse
         (fun f -> f config ir)
-        [ arb_cmd_seq; arb_cmd_dom0; arb_cmd_dom1 ]
+        [ gen_cmd_seq; gen_cmd_dom0; gen_cmd_dom1 ]
+    else ok []
+  in
+  let* arb_cmds =
+    if config.domain then sequence [ arb_cmd_seq; arb_cmd_dom0; arb_cmd_dom1 ]
     else ok []
   in
   let spec_expr =
@@ -1802,7 +1822,8 @@ let stm config ir =
       @ tuple_types ir
       @ sut_defs
       @ state_defs
-      @ [ cmd; cmd_show; cleanup; arb_cmd ]
+      @ [ cmd; cmd_show; cleanup; gen_cmd; arb_cmd ]
+      @ gen_cmds
       @ arb_cmds
       @ [ next_state; precond; dummy_postcond; run ])
   in
