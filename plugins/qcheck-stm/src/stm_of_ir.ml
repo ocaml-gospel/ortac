@@ -6,7 +6,6 @@ module Ident = Gospel.Identifier.Ident
 module Weight = Cfg.Weights
 
 let is_a_function ty =
-  let open Ppxlib in
   match ty.ptyp_desc with Ptyp_arrow (_, _, _) -> true | _ -> false
 
 let ty_default_name = "char"
@@ -30,6 +29,13 @@ let eexpected_value case e =
   in
   [%expr try [%e x] with e -> Ortac_runtime.Report.Out_of_domain]
 
+let let_open xs e =
+  match xs with
+  | [] -> assert false
+  | m :: ms ->
+      let ms' = List.fold_left (fun acc x -> Ldot (acc, x)) (Lident m) ms in
+      pexp_open Ast_helper.(Opn.mk (Mod.ident @@ noloc ms')) e
+
 let evalue = eexpected_value "Value"
 let eprotected = eexpected_value "Protected_value"
 let eexception = eexpected_value "Exception"
@@ -37,6 +43,9 @@ let eexception = eexpected_value "Exception"
 let eprotect call =
   let lazy_call = efun [ (Nolabel, punit) ] call in
   pexp_apply (evar "protect") [ (Nolabel, lazy_call); (Nolabel, eunit) ]
+
+let eaccess_raw_cmd raw_cmd_var = pexp_field raw_cmd_var (lident "raw_cmd")
+let eaccess_flag flag_var = pexp_field flag_var (lident "flag")
 
 let may_raise_exception v =
   match (v.postcond.exceptional, v.postcond.checks) with
@@ -419,12 +428,12 @@ let label_from_which prefix = function
   | Dom0 -> prefix ^ "_dom0"
   | Dom1 -> prefix ^ "_dom1"
 
+let flag_from_which = function Gen | Seq -> "Seq" | Dom0 | Dom1 -> "Dom"
 let gen_from_which = label_from_which "gen_cmd"
 let arb_from_which = label_from_which "arb_cmd"
 
-let gen_cmd_from_which which config ir =
+let gen_raw_cmd_from_which which config ir =
   let open Reserr in
-  let open Ppxlib in
   let lens = lens_from_which which and pat = pvar @@ gen_from_which which in
   let aux value (freq_map, acc) =
     let* gen = gen_cmd_case config value in
@@ -439,49 +448,66 @@ let gen_cmd_from_which which config ir =
     @@ Weight.unused lens unused_freq
   in
   let cmds = elist generators in
-  let let_open str e =
-    pexp_open Ast_helper.(Opn.mk (Mod.ident (lident str |> noloc))) e
-  in
   let body =
-    let_open "QCheck"
-    @@ let_open "Gen" (pexp_apply (evar "oneof_weighted") [ (Nolabel, cmds) ])
+    (* we need [QCheck] to be open to access function generators *)
+    let_open [ "QCheck" ]
+    @@ let_open [ "Gen" ]
+         (pexp_apply (evar "oneof_weighted") [ (Nolabel, cmds) ])
   in
   let expr = efun [ (Nolabel, ppat_any (* for now we don't use it *)) ] body in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
 
 let gen_cmd config ir =
   match config.Cfg.gen_cmd with
-  | None -> gen_cmd_from_which Gen config ir
+  | None -> gen_raw_cmd_from_which Gen config ir
   | Some stri -> Reserr.ok stri
 
 let gen_cmd_seq config ir =
   match config.Cfg.gen_cmd_seq with
-  | None -> gen_cmd_from_which Seq config ir
+  | None -> gen_raw_cmd_from_which Seq config ir
   | Some stri -> Reserr.ok stri
 
 let gen_cmd_dom0 config ir =
   match config.Cfg.gen_cmd_dom0 with
-  | None -> gen_cmd_from_which Dom0 config ir
+  | None -> gen_raw_cmd_from_which Dom0 config ir
   | Some stri -> Reserr.ok stri
 
 let gen_cmd_dom1 config ir =
   match config.Cfg.gen_cmd_dom1 with
-  | None -> gen_cmd_from_which Dom1 config ir
+  | None -> gen_raw_cmd_from_which Dom1 config ir
   | Some stri -> Reserr.ok stri
+
+(** [flagged_cmd_gen_from_which which] generates a QCheck flagged command
+    generator, with the flag chosen accordingly to [which].
+
+    The generator simply map [with_flag flag] over the raw command generator. *)
+let flagged_cmd_gen_from_which which =
+  let gen_var = gen_from_which which
+  and state_var = gen_symbol ~prefix:"state" ()
+  and pat = pvar @@ gen_from_which which
+  and flag_var = evar @@ flag_from_which which in
+  let call_gen = pexp_apply (evar gen_var) [ (Nolabel, evar state_var) ] in
+  let partial_with_flag =
+    pexp_apply (evar "with_flag") [ (Nolabel, flag_var) ]
+  in
+  let map_with_flag =
+    pexp_apply (evar "( <$> )")
+      [ (Nolabel, partial_with_flag); (Nolabel, call_gen) ]
+  in
+  let body = let_open [ "QCheck"; "Gen" ] map_with_flag in
+  let expr = efun [ (Nolabel, pvar state_var) ] body in
+  let value_bindings = [ value_binding ~pat ~expr ] in
+  pstr_value Nonrecursive value_bindings
 
 (* Generate the [arb_cmd] definition as a uniform choice between the
    [arb_cmd_case] outputs *)
 let arb_cmd_gen which =
   let open Reserr in
-  let open Ppxlib in
   let pat = pvar @@ arb_from_which which in
-  let let_open str e =
-    pexp_open Ast_helper.(Opn.mk (Mod.ident (lident str |> noloc))) e
-  in
   let gen_fun = evar @@ gen_from_which which
   and state_arg = gen_symbol ~prefix:"state" () in
   let body =
-    let_open "QCheck"
+    let_open [ "QCheck" ]
       (pexp_apply (evar "make")
          [
            (Labelled "print", evar "show_cmd");
@@ -496,7 +522,7 @@ let arb_cmd_seq = arb_cmd_gen Seq
 let arb_cmd_dom0 = arb_cmd_gen Dom0
 let arb_cmd_dom1 = arb_cmd_gen Dom1
 
-let run_case config sut_name value =
+let run_case config cmd_name sut_name value =
   let lhs = mk_cmd_pattern value in
   let open Reserr in
   let* rhs =
@@ -555,17 +581,26 @@ let run_case config sut_name value =
       List.fold_right aux suts body
     in
     let pushes =
-      (* If concurrent, don't push *)
-      if Cfg.((not config.domain) && does_return_sut config value.ty) then
-        (* We can only push a sut if there was no exception *)
+      if Cfg.(does_return_sut config value.ty) then
+        (* We can only push a sut if in sequential prefix and there was no
+           exception *)
         if may_raise_exception value then
           [
             [%expr
               match [%e evar call_res] with
-              | Ok res -> SUT.push [%e evar sut_name] res
+              | Ok res ->
+                  if [%e pexp_field (evar cmd_name) (lident "flag")] = Seq then
+                    SUT.push [%e evar sut_name] res
+                  else ()
               | Error _ -> ()];
           ]
-        else [ [%expr SUT.push [%e evar sut_name] [%e evar call_res]] ]
+        else
+          [
+            [%expr
+              if [%e pexp_field (evar cmd_name) (lident "flag")] = Seq then
+                SUT.push [%e evar sut_name] [%e evar call_res]
+              else ()];
+          ]
       else []
     in
     let tail = List.fold_right pexp_sequence pushes (evar call_res) in
@@ -584,8 +619,8 @@ let run config ir =
   let cmd_name = gen_symbol ~prefix:"cmd" () in
   let sut_name = gen_symbol ~prefix:"sut" () in
   let open Reserr in
-  let* cases = promote_map (run_case config sut_name) ir.values in
-  let body = pexp_match (evar cmd_name) cases in
+  let* cases = promote_map (run_case config cmd_name sut_name) ir.values in
+  let body = pexp_match (eaccess_raw_cmd @@ evar cmd_name) cases in
   let pat = pvar "run" in
   let expr = efun [ (Nolabel, pvar cmd_name); (Nolabel, pvar sut_name) ] body in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
@@ -605,7 +640,7 @@ let pop_states state_ident value =
     value.sut_vars
   |> List.split
 
-let next_state_case state config state_ident nb_models value =
+let next_state_case state config cmd_name state_ident nb_models value =
   let state_var = str_of_ident state_ident |> evar in
   let lhs = mk_cmd_pattern value in
   let open Reserr in
@@ -617,7 +652,7 @@ let next_state_case state config state_ident nb_models value =
       let sut_map =
         (* Don't create a name for a new sut when testing in concurrent
            context *)
-        if Cfg.((*not config.domain &&*) does_return_sut config value.ty) then
+        if Cfg.does_return_sut config value.ty then
           let ret_id = List.hd value.ret in
           let ret_var = gen_symbol ~prefix:(str_of_ident ret_id) () in
           (ret_id, Ident.create ~loc:Location.none ret_var) :: sut_map
@@ -707,11 +742,15 @@ let next_state_case state config state_ident nb_models value =
           next_state_vars
       in
       let push_expr =
-        (* If concurrent, don't push *)
-        if Cfg.((not config.domain) && does_return_sut config value.ty) then
+        (* If concurrent, don't push the new SUT*)
+        if Cfg.(does_return_sut config value.ty) then
           let ret_id = List.hd value.ret in
           let ret_var = List.assoc ret_id next_vars_assoc in
-          eapply (qualify [ "Model" ] "push") [ push_expr; evar ret_var ]
+          pexp_ifthenelse
+            (eapply (evar "=")
+               [ pexp_field (evar cmd_name) (lident "flag"); evar "Seq" ])
+            (eapply (qualify [ "Model" ] "push") [ push_expr; evar ret_var ])
+            (Some push_expr)
         else push_expr
       in
       let new_state = pexp_let Nonrecursive vbs_next_states push_expr in
@@ -738,12 +777,14 @@ let next_state config ir =
   let* idx_cases =
     promote_map
       (fun v ->
-        let* i, c = next_state_case ir.state config state_ident nb_models v in
+        let* i, c =
+          next_state_case ir.state config cmd_name state_ident nb_models v
+        in
         ok ((v.id, i), c))
       ir.values
   in
   let idx, cases = List.split idx_cases in
-  let body = pexp_match (evar cmd_name) cases in
+  let body = pexp_match (eaccess_raw_cmd @@ evar cmd_name) cases in
   let pat = pvar "next_state" in
   let expr =
     efun [ (Nolabel, pvar cmd_name); (Nolabel, pvar state_name) ] body
@@ -779,7 +820,7 @@ let precond config ir =
   let* cases =
     promote_map (precond_case config ir.state state_ident) ir.values
   in
-  let body = pexp_match (evar cmd_name) cases in
+  let body = pexp_match (eaccess_raw_cmd @@ evar cmd_name) cases in
   let pat = pvar "precond" in
   let expr =
     efun [ (Nolabel, pvar cmd_name); (Nolabel, pvar state_name) ] body
@@ -928,7 +969,6 @@ let postcond_case config state invariants idx state_ident new_state_ident value
   let* lhs1 =
     let ret_ty = Ir.get_return_type value in
     let* ret_ty =
-      let open Ppxlib in
       match ret_ty.ptyp_desc with
       | Ptyp_var _ | Ptyp_constr _ | Ptyp_tuple _ -> ok ret_ty
       | _ ->
@@ -1124,7 +1164,9 @@ let postcond config idx ir =
       Ast_helper.(Opn.mk (Mod.ident (lident "Spec")))
       (pexp_open
          Ast_helper.(Opn.mk (Mod.ident (lident "STM")))
-         (pexp_match (pexp_tuple [ evar cmd_name; evar res_name ]) cases
+         (pexp_match
+            (pexp_tuple [ eaccess_raw_cmd @@ evar cmd_name; evar res_name ])
+            cases
          |> new_state_let))
   in
   let pat = pvar "ortac_postcond" in
@@ -1154,6 +1196,30 @@ let cmd_constructor value =
   in
   constructor_declaration ~name ~args:(Pcstr_tuple args) ~res:None
 
+let flag_type =
+  let constructors =
+    let mk_constructor str =
+      constructor_declaration ~name:(noloc str) ~args:(Pcstr_tuple []) ~res:None
+    in
+    List.map mk_constructor [ "Seq"; "Dom" ]
+  in
+  let name = noloc "flag"
+  and params = []
+  and cstrs = []
+  and kind = Ptype_variant constructors
+  and private_ = Public
+  and manifest = None in
+  let td = type_declaration ~name ~params ~cstrs ~kind ~private_ ~manifest in
+  pstr_type Recursive [ td ]
+
+let raw_cmd_type ir =
+  let constructors = List.map cmd_constructor ir.values in
+  let td =
+    type_declaration ~name:(noloc "raw_cmd") ~params:[] ~cstrs:[]
+      ~kind:(Ptype_variant constructors) ~private_:Public ~manifest:None
+  in
+  pstr_type Recursive [ td ]
+
 let cmd_type ir =
   let constructors = List.map cmd_constructor ir.values in
   let td =
@@ -1161,6 +1227,39 @@ let cmd_type ir =
       ~kind:(Ptype_variant constructors) ~private_:Public ~manifest:None
   in
   pstr_type Recursive [ td ]
+
+let flagged_cmd_type =
+  let name = noloc "cmd"
+  and params = []
+  and cstrs = []
+  and kind =
+    let mutable_ = Immutable in
+    Ptype_record
+      [
+        label_declaration ~name:(noloc "flag") ~mutable_
+          ~type_:(ptyp_constr (lident "flag") []);
+        label_declaration ~name:(noloc "raw_cmd") ~mutable_
+          ~type_:(ptyp_constr (lident "raw_cmd") []);
+      ]
+  and private_ = Public
+  and manifest = None in
+  let td = type_declaration ~name ~params ~cstrs ~kind ~private_ ~manifest in
+  pstr_type Recursive [ td ]
+
+let with_flag =
+  let pat = ppat_var @@ noloc "with_flag"
+  and expr =
+    efun
+      [
+        (Nolabel, ppat_var @@ noloc "flag");
+        (Nolabel, ppat_var @@ noloc "raw_cmd");
+      ]
+      (pexp_record
+         [ (lident "flag", evar "flag"); (lident "raw_cmd", evar "raw_cmd") ]
+         None)
+  in
+  let value_bindings = [ value_binding ~pat ~expr ] in
+  pstr_value Nonrecursive value_bindings
 
 let pp_cmd_case config value =
   let lhs = mk_cmd_pattern value in
@@ -1224,7 +1323,7 @@ let cmd_show config ir =
   let cmd_name = gen_symbol ~prefix:"cmd" () in
   let open Reserr in
   let* cases = promote_map (pp_cmd_case config) ir.values in
-  let body = pexp_match (evar cmd_name) cases in
+  let body = pexp_match (eaccess_raw_cmd @@ evar cmd_name) cases in
   let pat = pvar "show_cmd" in
   let expr = efun [ (Nolabel, pvar cmd_name) ] body in
   pstr_value Nonrecursive [ value_binding ~pat ~expr ] |> ok
@@ -1302,11 +1401,11 @@ let init_state config ir =
                  ~default:
                    ( Impossible_init_state_generation
                        (No_translatable_specification id.Ident.id_str),
-                     Ppxlib.Location.none )))
+                     Location.none )))
       ir.state
   in
-  let expr = pexp_record fields None |> bindings in
-  [%stri let init = [%e expr]] |> ok
+  let pat = pvar "init" and expr = pexp_record fields None |> bindings in
+  ok @@ pstr_value Nonrecursive [ value_binding ~pat ~expr ]
 
 let model_module config ir =
   let lds =
@@ -1583,7 +1682,6 @@ let pp_ortac_cmd_case config models last value =
   let* lhs1 =
     let ret_ty = Ir.get_return_type value in
     let* ret_ty =
-      let open Ppxlib in
       match ret_ty.ptyp_desc with
       | Ptyp_var _ | Ptyp_constr _ | Ptyp_tuple _ -> ok ret_ty
       (* Unsupported return types are already filtered out *)
@@ -1743,7 +1841,9 @@ let ortac_cmd_show config ir =
   in
   let cases = cases @ [ default_case ] in
   let match_expr =
-    pexp_match (pexp_tuple [ evar cmd_name; evar res_name ]) cases
+    pexp_match
+      (pexp_tuple [ eaccess_raw_cmd @@ evar cmd_name; evar res_name ])
+      cases
   in
   let body =
     pexp_open
@@ -1777,8 +1877,8 @@ let stm config ir =
   let open Reserr in
   let* ghost_types = ghost_types config ir.ghost_types in
   let* config, ghost_functions = ghost_functions config ir.ghost_functions in
-  let warn = [%stri [@@@ocaml.warning "-26-27-69-32-34-38"]] in
-  let cmd = cmd_type ir in
+  let warn = [%stri [@@@ocaml.warning "-26-27-69-32-34-37-38"]] in
+  let raw_cmd_type = raw_cmd_type ir in
   let* cmd_show = cmd_show config ir in
   let* idx, next_state = next_state config ir in
   let* postcond = postcond config idx ir in
@@ -1803,9 +1903,18 @@ let stm config ir =
   let state_defs = state_defs ir in
   let* gen_cmds =
     if config.domain then
-      traverse
-        (fun f -> f config ir)
-        [ gen_cmd_seq; gen_cmd_dom0; gen_cmd_dom1 ]
+      let* xs =
+        traverse
+          (fun f -> f config ir)
+          [ gen_cmd_seq; gen_cmd_dom0; gen_cmd_dom1 ]
+      in
+      ok
+      @@ xs
+      @ [
+          flagged_cmd_gen_from_which Seq;
+          flagged_cmd_gen_from_which Dom0;
+          flagged_cmd_gen_from_which Dom1;
+        ]
     else ok []
   in
   let* arb_cmds =
@@ -1822,7 +1931,17 @@ let stm config ir =
       @ tuple_types ir
       @ sut_defs
       @ state_defs
-      @ [ cmd; cmd_show; cleanup; gen_cmd; arb_cmd ]
+      @ [
+          raw_cmd_type;
+          flag_type;
+          flagged_cmd_type;
+          with_flag;
+          cmd_show;
+          cleanup;
+          gen_cmd;
+          flagged_cmd_gen_from_which Gen;
+          arb_cmd;
+        ]
       @ gen_cmds
       @ arb_cmds
       @ [ next_state; precond; dummy_postcond; run ])
