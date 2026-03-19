@@ -1,4 +1,4 @@
-# Unreleased
+# 0.8.0
 
 - Remove pin and update constraints on gospel package
   [\#375](https://github.com/ocaml-gospel/ortac/pull/375)
@@ -6,7 +6,7 @@
   [\#373](https://github.com/ocaml-gospel/ortac/pull/373)
 - [QCheck-STM] User can now provides `gen_cmd*`s rather than `arb_cmd*`s
   [\#372](https://github.com/ocaml-gospel/ortac/pull/372)
-- [QCheck-STM] Fix last error name wich mentioned frequency
+- [QCheck-STM] Fix last error name which mentioned frequency
   [\#371](https://github.com/ocaml-gospel/ortac/pull/371)
 - [QCheck-STM] Update to QCheck 0.90 great renaming
   [\#370](https://github.com/ocaml-gospel/ortac/pull/370)
