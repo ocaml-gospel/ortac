@@ -1,5 +1,7 @@
 # Unreleased
 
+- Remove pin and update constraints on gospel package
+  [\#375](https://github.com/ocaml-gospel/ortac/pull/375)
 - [QCheck-STM] Reintegrate full testing of sut-returning function in domain mode
   [\#373](https://github.com/ocaml-gospel/ortac/pull/373)
 - [QCheck-STM] User can now provides `gen_cmd*`s rather than `arb_cmd*`s
