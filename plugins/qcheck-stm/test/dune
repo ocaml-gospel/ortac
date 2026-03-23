@@ -182,6 +182,8 @@
 
 (library
  (name atomic)
+ (enabled_if
+  (>= %{ocaml_version} 5))
  (modules atomic))
 
 (rule
