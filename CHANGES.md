@@ -1,5 +1,7 @@
 # 0.8.0
 
+- [QCheck-STM] Fix lower bound for testing atomic library
+  [\#376](https://github.com/ocaml-gospel/ortac/pull/376)
 - Remove pin and update constraints on gospel package
   [\#375](https://github.com/ocaml-gospel/ortac/pull/375)
 - [QCheck-STM] Reintegrate full testing of sut-returning function in domain mode
