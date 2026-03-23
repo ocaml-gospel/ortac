@@ -187,6 +187,7 @@
  (modules atomic))
 
 (rule
+ (alias runtest)
  (target atomic_tests.ml)
  (package ortac-qcheck-stm)
  (enabled_if
@@ -208,6 +209,17 @@
      --domain
      -o
      %{target})))))
+
+(rule
+ (alias runtest)
+ (target atomic_tests.ml)
+ (package ortac-qcheck-stm)
+ (enabled_if
+  (< %{ocaml_version} 5))
+  (action
+   (with-stdout-to
+    %{target}
+    (echo ""))))
 
 (rule
  (alias runtest)
