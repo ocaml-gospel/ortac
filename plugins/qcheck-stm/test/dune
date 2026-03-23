@@ -222,7 +222,7 @@
 (test
  (name atomic_tests)
  (package ortac-qcheck-stm)
- (build_if
+ (enabled_if
   (>= %{ocaml_version} 5))
  (modules atomic_tests)
  (libraries ortac-runtime-qcheck-stm.domain atomic)
