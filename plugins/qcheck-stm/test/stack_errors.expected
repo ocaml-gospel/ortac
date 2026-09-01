@@ -1,4 +1,4 @@
-File "stack.mli", line 37, characters 0-170:
+File "./stack.mli", line 37, characters 0-170:
 37 | val top_opt : 'a t -> 'a option
 38 | (*@ v = top_opt t
 39 |     ensures match v with

@@ -25,17 +25,17 @@ module ModelElt =
                       {
                         Ortac_runtime.start =
                           {
-                            pos_fname = "ghost_as_model.mli";
+                            pos_fname = "./ghost_as_model.mli";
                             pos_lnum = 8;
-                            pos_bol = 343;
-                            pos_cnum = 361
+                            pos_bol = 355;
+                            pos_cnum = 373
                           };
                         Ortac_runtime.stop =
                           {
-                            pos_fname = "ghost_as_model.mli";
+                            pos_fname = "./ghost_as_model.mli";
                             pos_lnum = 8;
-                            pos_bol = 343;
-                            pos_cnum = 362
+                            pos_bol = 355;
+                            pos_cnum = 374
                           }
                       })))
       }
@@ -95,17 +95,17 @@ module Spec =
                               {
                                 Ortac_runtime.start =
                                   {
-                                    pos_fname = "ghost_as_model.mli";
+                                    pos_fname = "./ghost_as_model.mli";
                                     pos_lnum = 8;
-                                    pos_bol = 343;
-                                    pos_cnum = 361
+                                    pos_bol = 355;
+                                    pos_cnum = 373
                                   };
                                 Ortac_runtime.stop =
                                   {
-                                    pos_fname = "ghost_as_model.mli";
+                                    pos_fname = "./ghost_as_model.mli";
                                     pos_lnum = 8;
-                                    pos_bol = 343;
-                                    pos_cnum = 362
+                                    pos_bol = 355;
+                                    pos_cnum = 374
                                   }
                               })))
               } in
@@ -129,17 +129,17 @@ module Spec =
                               {
                                 Ortac_runtime.start =
                                   {
-                                    pos_fname = "ghost_as_model.mli";
+                                    pos_fname = "./ghost_as_model.mli";
                                     pos_lnum = 13;
-                                    pos_bol = 502;
-                                    pos_cnum = 520
+                                    pos_bol = 518;
+                                    pos_cnum = 536
                                   };
                                 Ortac_runtime.stop =
                                   {
-                                    pos_fname = "ghost_as_model.mli";
+                                    pos_fname = "./ghost_as_model.mli";
                                     pos_lnum = 13;
-                                    pos_bol = 502;
-                                    pos_cnum = 556
+                                    pos_bol = 518;
+                                    pos_cnum = 572
                                   }
                               })))
               } in

@@ -23,17 +23,17 @@ module ModelElt =
                       {
                         Ortac_runtime.start =
                           {
-                            pos_fname = "submodule.mli";
+                            pos_fname = "./submodule.mli";
                             pos_lnum = 7;
-                            pos_bol = 241;
-                            pos_cnum = 265
+                            pos_bol = 249;
+                            pos_cnum = 273
                           };
                         Ortac_runtime.stop =
                           {
-                            pos_fname = "submodule.mli";
+                            pos_fname = "./submodule.mli";
                             pos_lnum = 7;
-                            pos_bol = 241;
-                            pos_cnum = 266
+                            pos_bol = 249;
+                            pos_cnum = 274
                           }
                       })))
       }
@@ -89,17 +89,17 @@ module Spec =
                               {
                                 Ortac_runtime.start =
                                   {
-                                    pos_fname = "submodule.mli";
+                                    pos_fname = "./submodule.mli";
                                     pos_lnum = 7;
-                                    pos_bol = 241;
-                                    pos_cnum = 265
+                                    pos_bol = 249;
+                                    pos_cnum = 273
                                   };
                                 Ortac_runtime.stop =
                                   {
-                                    pos_fname = "submodule.mli";
+                                    pos_fname = "./submodule.mli";
                                     pos_lnum = 7;
-                                    pos_bol = 241;
-                                    pos_cnum = 266
+                                    pos_bol = 249;
+                                    pos_cnum = 274
                                   }
                               })))
               } in

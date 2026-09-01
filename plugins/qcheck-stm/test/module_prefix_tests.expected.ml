@@ -23,17 +23,17 @@ module ModelElt =
                       {
                         Ortac_runtime.start =
                           {
-                            pos_fname = "module_prefix.mli";
+                            pos_fname = "./module_prefix.mli";
                             pos_lnum = 6;
-                            pos_bol = 228;
-                            pos_cnum = 250
+                            pos_bol = 236;
+                            pos_cnum = 258
                           };
                         Ortac_runtime.stop =
                           {
-                            pos_fname = "module_prefix.mli";
+                            pos_fname = "./module_prefix.mli";
                             pos_lnum = 6;
-                            pos_bol = 228;
-                            pos_cnum = 251
+                            pos_bol = 236;
+                            pos_cnum = 259
                           }
                       })))
       }
@@ -89,17 +89,17 @@ module Spec =
                               {
                                 Ortac_runtime.start =
                                   {
-                                    pos_fname = "module_prefix.mli";
+                                    pos_fname = "./module_prefix.mli";
                                     pos_lnum = 6;
-                                    pos_bol = 228;
-                                    pos_cnum = 250
+                                    pos_bol = 236;
+                                    pos_cnum = 258
                                   };
                                 Ortac_runtime.stop =
                                   {
-                                    pos_fname = "module_prefix.mli";
+                                    pos_fname = "./module_prefix.mli";
                                     pos_lnum = 6;
-                                    pos_bol = 228;
-                                    pos_cnum = 251
+                                    pos_bol = 236;
+                                    pos_cnum = 259
                                   }
                               })))
               } in

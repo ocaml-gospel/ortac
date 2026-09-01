@@ -23,17 +23,17 @@ module ModelElt =
                       {
                         Ortac_runtime.start =
                           {
-                            pos_fname = "integer_in_model.mli";
+                            pos_fname = "./integer_in_model.mli";
                             pos_lnum = 6;
-                            pos_bol = 243;
-                            pos_cnum = 261
+                            pos_bol = 251;
+                            pos_cnum = 269
                           };
                         Ortac_runtime.stop =
                           {
-                            pos_fname = "integer_in_model.mli";
+                            pos_fname = "./integer_in_model.mli";
                             pos_lnum = 6;
-                            pos_bol = 243;
-                            pos_cnum = 262
+                            pos_bol = 251;
+                            pos_cnum = 270
                           }
                       })))
       }
@@ -93,17 +93,17 @@ module Spec =
                               {
                                 Ortac_runtime.start =
                                   {
-                                    pos_fname = "integer_in_model.mli";
+                                    pos_fname = "./integer_in_model.mli";
                                     pos_lnum = 6;
-                                    pos_bol = 243;
-                                    pos_cnum = 261
+                                    pos_bol = 251;
+                                    pos_cnum = 269
                                   };
                                 Ortac_runtime.stop =
                                   {
-                                    pos_fname = "integer_in_model.mli";
+                                    pos_fname = "./integer_in_model.mli";
                                     pos_lnum = 6;
-                                    pos_bol = 243;
-                                    pos_cnum = 262
+                                    pos_bol = 251;
+                                    pos_cnum = 270
                                   }
                               })))
               } in
@@ -125,17 +125,17 @@ module Spec =
                               {
                                 Ortac_runtime.start =
                                   {
-                                    pos_fname = "integer_in_model.mli";
+                                    pos_fname = "./integer_in_model.mli";
                                     pos_lnum = 11;
-                                    pos_bol = 401;
-                                    pos_cnum = 419
+                                    pos_bol = 413;
+                                    pos_cnum = 431
                                   };
                                 Ortac_runtime.stop =
                                   {
-                                    pos_fname = "integer_in_model.mli";
+                                    pos_fname = "./integer_in_model.mli";
                                     pos_lnum = 11;
-                                    pos_bol = 401;
-                                    pos_cnum = 423
+                                    pos_bol = 413;
+                                    pos_cnum = 435
                                   }
                               })))
               } in

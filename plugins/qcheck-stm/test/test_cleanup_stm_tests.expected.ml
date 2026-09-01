@@ -23,17 +23,17 @@ module ModelElt =
                       {
                         Ortac_runtime.start =
                           {
-                            pos_fname = "test_cleanup.mli";
+                            pos_fname = "./test_cleanup.mli";
                             pos_lnum = 6;
-                            pos_bol = 227;
-                            pos_cnum = 245
+                            pos_bol = 235;
+                            pos_cnum = 253
                           };
                         Ortac_runtime.stop =
                           {
-                            pos_fname = "test_cleanup.mli";
+                            pos_fname = "./test_cleanup.mli";
                             pos_lnum = 6;
-                            pos_bol = 227;
-                            pos_cnum = 246
+                            pos_bol = 235;
+                            pos_cnum = 254
                           }
                       })))
       }
@@ -93,17 +93,17 @@ module Spec =
                               {
                                 Ortac_runtime.start =
                                   {
-                                    pos_fname = "test_cleanup.mli";
+                                    pos_fname = "./test_cleanup.mli";
                                     pos_lnum = 6;
-                                    pos_bol = 227;
-                                    pos_cnum = 245
+                                    pos_bol = 235;
+                                    pos_cnum = 253
                                   };
                                 Ortac_runtime.stop =
                                   {
-                                    pos_fname = "test_cleanup.mli";
+                                    pos_fname = "./test_cleanup.mli";
                                     pos_lnum = 6;
-                                    pos_bol = 227;
-                                    pos_cnum = 246
+                                    pos_bol = 235;
+                                    pos_cnum = 254
                                   }
                               })))
               } in
@@ -128,17 +128,17 @@ module Spec =
                               {
                                 Ortac_runtime.start =
                                   {
-                                    pos_fname = "test_cleanup.mli";
+                                    pos_fname = "./test_cleanup.mli";
                                     pos_lnum = 11;
-                                    pos_bol = 377;
-                                    pos_cnum = 397
+                                    pos_bol = 389;
+                                    pos_cnum = 409
                                   };
                                 Ortac_runtime.stop =
                                   {
-                                    pos_fname = "test_cleanup.mli";
+                                    pos_fname = "./test_cleanup.mli";
                                     pos_lnum = 11;
-                                    pos_bol = 377;
-                                    pos_cnum = 398
+                                    pos_bol = 389;
+                                    pos_cnum = 410
                                   }
                               })))
               } in

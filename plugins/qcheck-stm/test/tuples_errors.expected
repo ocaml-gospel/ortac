@@ -1,10 +1,10 @@
-File "tuples.mli", line 32, characters 0-149:
+File "./tuples.mli", line 32, characters 0-149:
 32 | val size_tup : ('a, 'b) t -> int * int
 33 | (*@ x, y = size_tup t
 34 |     ensures x = Sequence.length t.contents
 35 |     ensures y = Sequence.length t.contents *)
 Warning: Incomplete computation of the returned value in the specification of size_tup. Failure message won't be able to display the expected returned value.
-File "tuples.mli", line 37, characters 0-203:
+File "./tuples.mli", line 37, characters 0-203:
 37 | val size_tup' : ('a, 'b) t -> int * int * int
 38 | (*@ x, y, z = size_tup' t
 39 |     ensures x = Sequence.length t.contents

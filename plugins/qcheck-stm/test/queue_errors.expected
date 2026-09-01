@@ -1,4 +1,4 @@
-File "queue.mli", line 58, characters 0-172:
+File "./queue.mli", line 58, characters 0-172:
 58 | val peek_opt : 'a t -> 'a option
 59 | (*@ v = peek_opt t
 60 |     ensures match v with
