@@ -392,7 +392,7 @@ let init gospel config_module module_prefix submodule domain count =
           let ls = Context.get_ls ctx [ vd_name.id_str ] in
           Context.add_function ls vd_name.id_str ctx
       | Sig_function { fun_ls; fun_def = Some _; _ } ->
-          Context.add_function fun_ls fun_ls.ls_name.id_str ctx
+          Context.add_function fun_ls (Symbols.get_name fun_ls).id_str ctx
       | _ -> ctx
     in
     let context = List.fold_left add context sigs in

@@ -36,7 +36,7 @@ let with_models ~context:_ fields (type_ : type_) =
   let models =
     List.map
       (fun ((ls : Symbols.lsymbol), b) ->
-        let name = ls.ls_name.id_str in
+        let name = (Symbols.get_name ls).id_str in
         let prefix = "__projection_" ^ name in
         let proj_name = gen_symbol ~prefix () in
         let ident = Ident.create ~loc:Location.none proj_name in
@@ -66,12 +66,12 @@ let collect_model ir =
         { term with t_node }
     | Tfield (t, ls) ->
         let t = collect t in
-        let field = ls.ls_name.id_str in
+        let field = (Symbols.get_name ls).id_str in
         let t_node =
           match find_ident ir field with
           | Some proj_ident ->
               let vs =
-                let vs_ty = Option.value ls.ls_value ~default:Ttypes.ty_bool in
+                let vs_ty = Symbols.get_value ls in
                 Symbols.{ vs_name = proj_ident; vs_ty }
               in
               let projection_term = Tterm_helper.t_var vs Location.none in
@@ -121,7 +121,7 @@ let collect_model ir =
 let subst_invariant_fields var (t : Tterm.term) =
   let rec aux t =
     match t.Tterm.t_node with
-    | Tapp (ls, []) when ls.ls_field -> { t with t_node = Tfield (var, ls) }
+    | Tapp ((Field_symbol _ as ls), []) -> { t with t_node = Tfield (var, ls) }
     | Tvar _ | Tconst _ | Ttrue | Tfalse -> t
     | Tapp (ls, tl) ->
         let tl = List.map aux tl in
@@ -487,7 +487,7 @@ let collect_old t =
         let t_node = Tterm.Tnot t in
         (acc, { term with t_node })
     | Told t ->
-        let vs = fresh_var t.t_ty in
+        let vs = fresh_var (Some t.t_ty) in
         let t_node = Tterm.Tvar vs in
         ((vs, t) :: acc, { term with t_node })
   in
@@ -755,7 +755,9 @@ let constant ~pack ~ghost (vd : Tast.val_description) =
 
 let function_of (kind : [ `Function | `Predicate ]) ~pack (f : Tast.function_) =
   let ir, context = P.unpack pack in
-  let name = gen_symbol ~prefix:("__logical_" ^ f.fun_ls.ls_name.id_str) () in
+  let name =
+    gen_symbol ~prefix:("__logical_" ^ (Symbols.get_name f.fun_ls).id_str) ()
+  in
   let loc = f.fun_loc in
   let rec_ = f.fun_rec in
   let arguments = List.map (var_of_vs ~ir) f.fun_params in
@@ -793,7 +795,8 @@ let signature ~context s =
       | Sig_val (vd, ghost) when vd.vd_args <> [] -> value ~pack ~ghost vd
       | Sig_val (vd, ghost) -> constant ~pack ~ghost vd
       | Sig_type (_rec, td, ghost) -> types ~pack ~ghost td
-      | Sig_function func when Option.is_none func.fun_ls.ls_value ->
+      | Sig_function func
+        when Ttypes.(ty_equal ty_bool @@ Symbols.get_value func.fun_ls) ->
           predicate ~pack func
       | Sig_function func -> function_ ~pack func
       | Sig_axiom ax -> axiom ~pack ax

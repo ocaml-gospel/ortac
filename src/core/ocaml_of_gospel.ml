@@ -50,8 +50,9 @@ let rec pattern_ p =
             ppat_tuple pattern_s |> some
       in
       let name =
-        if Identifier.(Ident.equal cons l.ls_name) then "::"
-        else str_of_ident l.ls_name
+        let open Symbols in
+        if Identifier.(Ident.equal cons (get_name l)) then "::"
+        else str_of_ident (get_name l)
       in
       ppat_construct (lident name) args |> return
   | Por (p1, p2) ->
@@ -85,7 +86,7 @@ let rec bounds ~context ~loc (var : Symbols.vsymbol) (t1 : Tterm.term)
   (* [comb] extracts a bound from an the operator [f] and expression [e].
      [right] indicates if [e] is on the right side of the operator. *)
   let comb ~right (f : Symbols.lsymbol) e =
-    match f.ls_name.id_str with
+    match (Symbols.get_name f).id_str with
     | "infix >=" -> if right then Inf e else Sup e
     | "infix <=" -> if right then Sup e else Inf e
     | "infix <" -> if right then Sup (epred e) else Inf (esucc e)
@@ -116,21 +117,21 @@ and case ~context (p, g, t) =
   Builder.case ~lhs ~guard ~rhs:(term ~context t)
 
 and term ~context (t : Tterm.term) : expression =
+  let open Symbols in
   let term = term ~context in
   let loc = t.t_loc in
   let unsupported m = raise (W.Error (W.Unsupported m, loc)) in
   match t.t_node with
   | Tvar { vs_name; _ } -> evar (str_of_ident vs_name)
   | Tconst c -> econst c
-  | Tfield (t, f) -> pexp_field (term t) (lident (str_of_ident f.ls_name))
-  | Tapp (fs, []) when Symbols.(ls_equal fs fs_bool_true) -> [%expr true]
-  | Tapp (fs, []) when Symbols.(ls_equal fs fs_bool_false) -> [%expr false]
-  | Tapp (fs, tlist) when Symbols.is_fs_tuple fs ->
-      List.map term tlist |> pexp_tuple
+  | Tfield (t, f) -> pexp_field (term t) (lident (str_of_ident @@ get_name f))
+  | Tapp (fs, []) when ls_equal fs fs_bool_true -> [%expr true]
+  | Tapp (fs, []) when ls_equal fs fs_bool_false -> [%expr false]
+  | Tapp (fs, tlist) when is_fs_tuple fs -> List.map term tlist |> pexp_tuple
   | Tapp (ls, tlist) when Context.is_function ls context ->
       let f = Context.find_function ls context in
       eapply (evar f) (List.map term tlist)
-  | Tapp (ls, tlist) when Symbols.(ls_equal ls fs_apply) ->
+  | Tapp (ls, tlist) when ls_equal ls fs_apply ->
       let f, args =
         match tlist with
         | [] -> assert false
@@ -140,13 +141,15 @@ and term ~context (t : Tterm.term) : expression =
   | Tapp (ls, tlist) -> (
       Context.translate_stdlib ls context |> function
       | Some f -> eapply (evar f) (List.map term tlist)
-      | None ->
-          let func = ls.ls_name.id_str in
-          if ls.ls_constr then
-            (if tlist = [] then None
-             else Some (List.map term tlist |> pexp_tuple))
-            |> pexp_construct (lident func)
-          else Fmt.kstr unsupported "function application `%s`" func)
+      | None -> (
+          let open Symbols in
+          let func = (get_name ls).id_str in
+          match ls with
+          | Constructor_symbol _ ->
+              (if tlist = [] then None
+               else Some (List.map term tlist |> pexp_tuple))
+              |> pexp_construct (lident func)
+          | _ -> Fmt.kstr unsupported "function application `%s`" func))
   | Tif (i, t, e) -> [%expr if [%e term i] then [%e term t] else [%e term e]]
   | Tlet (x, t1, t2) ->
       let x = str_of_ident x.vs_name in
@@ -217,11 +220,10 @@ let term_with_catch ~context t =
 let term_with_catch_bool ~context t =
   let open Tterm in
   let open Ttypes in
-  match t.t_ty with
-  | Some ty when not (ty_equal ty ty_bool) -> term_with_catch ~context t
-  | _ ->
-      let exp = term ~context t in
-      [%expr try [%e exp] with e -> false]
+  if ty_equal t.t_ty ty_bool then term_with_catch ~context t
+  else
+    let exp = term ~context t in
+    [%expr try [%e exp] with e -> false]
 
 let core_type_of_ty_aux ~context f =
   let open Ttypes in
@@ -283,9 +285,10 @@ let ocaml_type_decl_of_gospel_type_decl ~context td =
                      Error
                        ( Unsupported "constructor with a record as argument",
                          cd.cd_loc ));
-               let name = noloc (str_of_ident cd.cd_cs.ls_name)
+               let open Symbols in
+               let name = noloc (str_of_ident (get_name cd.cd_cs))
                and args =
-                 Pcstr_tuple (List.map core_type_of_ty cd.cd_cs.ls_args)
+                 Pcstr_tuple (List.map core_type_of_ty (get_args cd.cd_cs))
                and res = None in
                constructor_declaration ~name ~args ~res)
              constr_decls)
@@ -293,12 +296,9 @@ let ocaml_type_decl_of_gospel_type_decl ~context td =
         Ptype_record
           (List.map
              (fun (ld : Symbols.lsymbol label_declaration) ->
-               let name = noloc (str_of_ident ld.ld_field.ls_name)
+               let name = noloc (str_of_ident (Symbols.get_name ld.ld_field))
                and mutable_ = Ppxlib.Immutable
-               and type_ =
-                 core_type_of_ty
-                   (Option.value ~default:Ttypes.ty_bool ld.ld_field.ls_value)
-               in
+               and type_ = core_type_of_ty (Symbols.get_value ld.ld_field) in
                label_declaration ~name ~mutable_ ~type_)
              rec_decl.rd_ldl)
   in

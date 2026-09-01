@@ -189,11 +189,13 @@ let int_of_integer =
   and vs_ty = Ttypes.fresh_ty_var "a" in
   fun integer_term ->
     let term =
-      Tterm_helper.mk_term (Tvar { vs_name; vs_ty }) None Location.none
+      Tterm_helper.mk_term
+        (Tvar { vs_name; vs_ty })
+        Ttypes.ty_unit Location.none
     in
     Tterm_helper.mk_term
       (Tapp (Symbols.fs_apply, [ term; integer_term ]))
-      None Location.none
+      Ttypes.ty_unit Location.none
 
 let get_state_description_with_index is_t state spec =
   let open Tterm in
@@ -201,8 +203,9 @@ let get_state_description_with_index is_t state spec =
     match t.t_node with
     | Tapp (ls, [ { t_node = Tfield ({ t_node = Tvar vs; _ }, m); _ }; right ])
       when Symbols.(ls_equal ps_equ ls) && is_t vs ->
-        if List.exists (fun (id, _) -> Ident.equal id m.ls_name) state then
-          Some (i, Ir.{ model = m.ls_name; description = right })
+        if
+          List.exists (fun (id, _) -> Ident.equal id Symbols.(get_name m)) state
+        then Some (i, Ir.{ model = Symbols.get_name m; description = right })
         else None
     | Tapp
         ( ls_eq,
@@ -216,10 +219,18 @@ let get_state_description_with_index is_t state spec =
             right;
           ] )
       when Symbols.(ls_equal ps_equ ls_eq)
-           && ls.ls_name.id_str = "integer_of_int"
+           && (Symbols.get_name ls).id_str = "integer_of_int"
            && is_t vs ->
-        if List.exists (fun (id, _) -> Ident.equal id m.ls_name) state then
-          Some (i, Ir.{ model = m.ls_name; description = int_of_integer right })
+        if
+          List.exists (fun (id, _) -> Ident.equal id (Symbols.get_name m)) state
+        then
+          Some
+            ( i,
+              Ir.
+                {
+                  model = Symbols.get_name m;
+                  description = int_of_integer right;
+                } )
         else None
     | Tbinop ((Tand | Tand_asym), l, r) -> (
         match pred i l with None -> pred i r | o -> o)
@@ -236,7 +247,7 @@ let next_states suts state spec =
       | { t_node = Tvar vs; _ } as t when is_t vs ->
           List.map (fun (m, _) -> (m, t.t_loc)) state
       | { t_node = Tfield ({ t_node = Tvar vs; _ }, m); _ } as t when is_t vs ->
-          [ (m.ls_name, t.t_loc) ]
+          [ (Symbols.get_name m, t.t_loc) ]
       | _ -> []
     in
     let modifies = List.concat_map check_modify spec.sp_wr in
@@ -305,13 +316,13 @@ let returned_value_description spec ret =
     (* Gospel automatically inserts a cast from int to integer when needed *)
     | Tapp
         (ls, [ { t_node = Tapp (func, [ { t_node = Tvar vs; _ } ]); _ }; right ])
-      when String.equal func.ls_name.id_str "integer_of_int"
+      when String.equal (Symbols.get_name func).id_str "integer_of_int"
            && Symbols.(ls_equal ps_equ ls)
            && is_ret vs ->
         [ Ir.term_val spec right ]
     | Tapp
         (ls, [ left; { t_node = Tapp (func, [ { t_node = Tvar vs; _ } ]); _ } ])
-      when String.equal func.ls_name.id_str "integer_of_int"
+      when String.equal (Symbols.get_name func).id_str "integer_of_int"
            && Symbols.(ls_equal ps_equ ls)
            && is_ret vs ->
         [ Ir.term_val spec left ]
@@ -442,8 +453,8 @@ let state_and_invariants config sigs =
   in
   let process_model (ls, _) =
     let open Symbols in
-    ( ls.ls_name,
-      Option.get ls.ls_value
+    ( get_name ls,
+      get_value ls
       |> Ocaml_of_gospel.core_type_of_ty_with_subst ~context:config.context
            subst )
   in
