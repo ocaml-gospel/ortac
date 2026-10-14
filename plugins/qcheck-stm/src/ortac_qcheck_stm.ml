@@ -8,12 +8,15 @@ let main path config output module_prefix submodule domain quiet count () =
   let open Reserr in
   let fmt = Registration.get_out_formatter output in
   let pp = pp quiet Ppxlib_ast.Pprintast.structure fmt in
-  pp
+  let res =
     (let* sigs, config =
        Config.init path config module_prefix submodule domain count
      in
      let* ir = Ir_of_gospel.run sigs config in
      Stm_of_ir.stm config ir)
+  in
+  pp res;
+  if res |> to_option |> Option.is_none then exit Cmdliner.Cmd.Exit.some_error
 
 open Cmdliner
 

@@ -11,6 +11,7 @@ We can forget to write the configuration file:
   > EOF
   $ ortac qcheck-stm foo.mli foo_config.ml
   Error: Missing configuration file foo_config.ml.
+  [123]
 
 We can give a pair as SUT type:
 
@@ -22,6 +23,7 @@ We can give a pair as SUT type:
   $ ortac qcheck-stm foo.mli foo_config.ml
   Error: Unsupported SUT type (int * bool): SUT type must be a type
          constructor, possibly applied to type arguments.
+  [123]
 
 We can give a functional argument to the SUT type:
 
@@ -33,6 +35,7 @@ We can give a functional argument to the SUT type:
   $ ortac qcheck-stm foo.mli foo_config.ml
   Error: Unsupported type parameter int -> bool: only constructors and tuples
          are supported in arguments for the SUT type.
+  [123]
 
 We can give a type that does not exist in the module as the system under test:
 
@@ -43,6 +46,7 @@ We can give a type that does not exist in the module as the system under test:
   > EOF
   $ ortac qcheck-stm foo.mli foo_config.ml
   Error: Type ty not declared in the module.
+  [123]
 
 Or forget its argument:
 
@@ -61,6 +65,7 @@ Or forget its argument:
   1 | type 'a t
       ^^^^^^^^^
   Error: Missing specification for the SUT type t.
+  [123]
 
 We can forget to instantiate the type parameter of the system under test:
 
@@ -71,6 +76,7 @@ We can forget to instantiate the type parameter of the system under test:
   > EOF
   $ ortac qcheck-stm foo.mli foo_config.ml
   Error: Unsupported type parameter 'a: SUT type should be fully instantiated.
+  [123]
 
 We can forget to specify the type of the system under test (which is already
 the case in `foo.mli`):
@@ -85,6 +91,7 @@ the case in `foo.mli`):
   1 | type 'a t
       ^^^^^^^^^
   Error: Missing specification for the SUT type t.
+  [123]
 
 Or specify it without any model:
 
@@ -97,6 +104,7 @@ Or specify it without any model:
   2 | (*@ ephemeral *)
          ^^^^^^^^^^^
   Error: Missing model(s) for the SUT type t.
+  [123]
 
 We can give a non-existing function for `init_state`:
 
@@ -106,6 +114,7 @@ We can give a non-existing function for `init_state`:
   > EOF
   $ ortac qcheck-stm foo.mli foo_config.ml
   Error: Function make not declared in the module.
+  [123]
 
 We can forget to specify the function used for the `init_state` function:
 
@@ -120,6 +129,7 @@ We can forget to specify the function used for the `init_state` function:
       ^^^^^^^^^^^^^^^^^^^^^
   Error: Unsupported INIT function make: the function called in the INIT
          expression must be specified to initialize the model state.
+  [123]
 
 Or specify it in a manner that does not allow to deduce the complete `state`:
 
@@ -141,6 +151,7 @@ Or specify it in a manner that does not allow to deduce the complete `state`:
   Error: Unsupported INIT function make: the specification of the function
          called in the INIT expression does not specify the following fields of
          the model: value, size.
+  [123]
 
 Or specify it using clauses that cannot be executed:
 
@@ -172,6 +183,7 @@ Or specify it using clauses that cannot be executed:
   6 |     ensures t.value = if forall i. i = i then a :: [] else [] *)
                                ^^^^^^^^^^^^^^^
   Warning: Skipping clause: unsupported quantification.
+  [123]
 
 Or we can give a function that does not return the type of the system under test:
 
@@ -189,6 +201,7 @@ Or we can give a function that does not return the type of the system under test
   5 |     modifies () *)
   Error: Unsupported INIT expression make: the function called in the INIT
          expression must return a value of SUT type.
+  [123]
 
 We are expected to give a function call as expression for the `init_state` function:
 
@@ -208,6 +221,7 @@ We are expected to give a function call as expression for the `init_state` funct
   Error: Unsupported INIT expression 42: the INIT expression is expected to be
          a function call (the specification of that function is required to
          initialize the model state).
+  [123]
 
 It also does not support qualified names:
 
@@ -222,6 +236,7 @@ It also does not support qualified names:
   $ ortac qcheck-stm foo.mli foo_config.ml
   Error: Unsupported INIT function Foo.make: qualified names are not yet
          supported.
+  [123]
 
 It checks the number of arguments in the function call:
 
@@ -243,6 +258,7 @@ It checks the number of arguments in the function call:
                      ^^^^^^^^^^
   Error: Error in INIT expression make 42 73: mismatch in the number of
          arguments between the INIT expression and the function specification.
+  [123]
 
 We shouldn't be able to define a model by itsef in the `make` function:
   $ cat > foo.mli << EOF
@@ -275,6 +291,7 @@ We shouldn't be able to define a model by itsef in the `make` function:
                             ^
   Warning: Skipping clause: impossible to define the initial value of the model
            with a recursive expression.
+  [123]
 
 If we add some custom generators, we should do so in a `Gen` module that is implemented (functor application or reference to another module are not supported):
   $ cat > foo.mli << EOF
@@ -293,3 +310,4 @@ If we add some custom generators, we should do so in a `Gen` module that is impl
   $ ortac qcheck-stm foo.mli foo_config.ml
   Error: Unsupported Gen module definition: only structures are allowed as
          module definition here.
+  [123]
