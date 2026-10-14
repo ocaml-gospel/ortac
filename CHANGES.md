@@ -1,3 +1,8 @@
+# Unreleased
+
+- ortac qcheck-stm: exit non-zero on error
+  [\#383](https://github.com/ocaml-gospel/ortac/pull/383)
+
 # 0.8.0
 
 - [QCheck-STM] Fix lower bound for testing atomic library
