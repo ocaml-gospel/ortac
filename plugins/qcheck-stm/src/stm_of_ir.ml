@@ -129,7 +129,7 @@ let subst_term state ?(out_of_scope = []) ~gos_t ?(old_lz = false) ~fun_vars
   let exception
     ImpossibleSubst of
       (Gospel.Tterm.term * [ `Never | `New | `Old | `NotModel | `OutOfScope ])
-  in
+    in
   let rec aux cur_lz cur_t term =
     let open Gospel.Tterm in
     let next = aux cur_lz cur_t in
