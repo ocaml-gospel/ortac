@@ -1,9 +1,11 @@
 module W = Warnings
 open Ppxlib
-open Gospel
+open Gospel_typecheckerlibs
 open Builder
 
-let str_of_ident = Fmt.str "%a" Identifier.Ident.pp
+let str_of_ident = Fmt.str "%a" Ident.pp
+let str_of_qualid = Fmt.str "%a" Tast_printer.qualid
+let id_of_qualid = function Id_uast.Qid id | Id_uast.Qdot (_, id) -> id
 
 module M = struct
   let return a = (a, [])
@@ -29,76 +31,80 @@ module M = struct
   let some a = Some a |> return
 end
 
+type binop = Implies | Iff | And | And_asym | Or | Or_asym
+
+let binop_of_str = function
+  | "->" -> Implies
+  | "<->" -> Iff
+  | "/\\" -> And
+  | "&&" -> And_asym
+  | "\\/" -> Or
+  | "||" -> Or_asym
+  | _ -> raise Exit
+
 let rec pattern_ p =
-  let open Tterm in
+  let open Tast in
   let open M in
-  match p.p_node with
+  match p.pat_desc with
   | Pwild -> return ppat_any
-  | Pvar v -> pvar (str_of_ident v.vs_name) |> return
-  | Papp (l, pl) when Symbols.is_fs_tuple l ->
+  | Pid v -> pvar (str_of_ident v.ts_id) |> return
+  | Ptuple pl ->
       let* pattern_s = map pattern_ pl in
       ppat_tuple pattern_s |> return
-  | Papp (l, pl) ->
-      let* args =
-        match pl with
-        | [] -> return None
-        | [ x ] ->
-            let* p = pattern_ x in
-            some p
-        | _ ->
-            let* pattern_s = map pattern_ pl in
-            ppat_tuple pattern_s |> some
-      in
-      let name =
-        let open Symbols in
-        if Identifier.(Ident.equal cons (get_name l)) then "::"
-        else str_of_ident (get_name l)
-      in
-      ppat_construct (lident name) args |> return
-  | Por (p1, p2) ->
-      let* p1 = pattern_ p1 and* p2 = pattern_ p2 in
-      ppat_or p1 p2 |> return
-  | Pas (p, v) ->
-      let* p = pattern_ p in
-      ppat_alias p (noloc (str_of_ident v.vs_name)) |> return
-  | Pinterval (c1, c2) ->
-      ppat_interval (Pconst_char c1) (Pconst_char c2) |> return
-  | Pconst (Pconst_integer (_, _) as c) ->
-      let i = econst c and var = gen_symbol ~prefix:"__x" () in
-      let extra =
-        pexp_apply
-          (pexp_ident (lident "(=)"))
-          [ (Nolabel, evar var); (Nolabel, i) ]
-      in
-      let* () = put extra in
-      ppat_var (noloc var) |> return
-  | Pconst c -> ppat_constant c |> return
+  | Pcast (p, _) -> pattern_ p
 
 let pattern p = pattern_ p |> M.value
 
 type bound = Inf of expression | Sup of expression
 
-let rec bounds ~context ~loc (var : Symbols.vsymbol) (t1 : Tterm.term)
-    (t2 : Tterm.term) =
+let is_stdlib context q =
+  Option.is_none @@ Context.translate_stdlib (id_of_qualid q) context
+
+let is_conjunction context =
+  let open Tast in
+  function
+  | { t_node = Tvar q; _ } when is_stdlib context q ->
+      let str = str_of_ident @@ id_of_qualid q in
+      String.equal "/\\" str || String.equal "&&" str
+  | _ -> false
+
+let is_implication context =
+  let open Tast in
+  function
+  | { t_node = Tvar q; _ } when is_stdlib context q ->
+      let str = str_of_ident @@ id_of_qualid q in
+      String.equal "\\/" str || String.equal "||" str
+  | _ -> false
+
+let rec bounds ~context ~loc var (t1 : Tast.term) (t2 : Tast.term) =
   let unsupported () =
     raise W.(Error (Unsupported "ill formed quantification", loc))
   in
+  let open Tast in
   (* [comb] extracts a bound from an the operator [f] and expression [e].
-     [right] indicates if [e] is on the right side of the operator. *)
-  let comb ~right (f : Symbols.lsymbol) e =
-    match (Symbols.get_name f).id_str with
-    | "infix >=" -> if right then Inf e else Sup e
-    | "infix <=" -> if right then Sup e else Inf e
-    | "infix <" -> if right then Sup (epred e) else Inf (esucc e)
-    | "infix >" -> if right then Inf (esucc e) else Sup (epred e)
+   [right] indicates if [e] is on the right side of the operator. *)
+  let comb ~right f e =
+    if Option.is_none @@ Context.translate_stdlib (id_of_qualid f) context then
+      unsupported ();
+    match str_of_ident @@ id_of_qualid f with
+    | ">=" -> if right then Inf e else Sup e
+    | "<=" -> if right then Sup e else Inf e
+    | "<" -> if right then Sup (epred e) else Inf (esucc e)
+    | ">" -> if right then Inf (esucc e) else Sup (epred e)
     | _ -> unsupported ()
   in
   let bound = function
-    | Tterm.Tapp (f, [ { t_node = Tvar vs; _ }; t ])
-      when vs.vs_name = var.vs_name ->
+    | Tast.Tapply
+        ( {
+            t_node = Tast.Tapply ({ t_node = Tvar f; _ }, { t_node = Tvar q; _ });
+          },
+          t )
+      when Ident.equal (id_of_qualid q) var.ts_id ->
         comb ~right:true f (term ~context t)
-    | Tterm.Tapp (f, [ t; { t_node = Tvar vs; _ } ])
-      when vs.vs_name = var.vs_name ->
+    | Tast.Tapply
+        ( { t_node = Tast.Tapply ({ t_node = Tvar f; _ }, t) },
+          { t_node = Tvar q; _ } )
+      when Ident.equal (id_of_qualid q) var.ts_id ->
         comb ~right:false f (term ~context t)
     | _ -> unsupported ()
   in
@@ -116,99 +122,120 @@ and case ~context (p, g, t) =
   in
   Builder.case ~lhs ~guard ~rhs:(term ~context t)
 
-and term ~context (t : Tterm.term) : expression =
-  let open Symbols in
+and constant =
+  let open Parse_uast in
+  function
+  | Pconst_integer (str, char_opt) -> Ppxlib.Pconst_integer (str, char_opt)
+  | Pconst_char char -> Ppxlib.Pconst_char char
+  | Pconst_string (str, loc) -> Ppxlib.Pconst_string (str, loc, None)
+  | Pconst_float str -> Ppxlib.Pconst_float (str, None)
+
+and binop ~loc ~context op t1 t2 =
   let term = term ~context in
-  let loc = t.t_loc in
+  match op with
+  | And ->
+      let vt1 = gen_symbol ~prefix:"__t1" () in
+      let vt2 = gen_symbol ~prefix:"__t2" () in
+      [%expr
+        let [%p pvar vt1] = [%e term t1] in
+        let [%p pvar vt2] = [%e term t2] in
+        [%e evar vt1] && [%e evar vt2]]
+  | And_asym -> [%expr [%e term t1] && [%e term t2]]
+  | Or ->
+      let vt1 = gen_symbol ~prefix:"__t1" () in
+      let vt2 = gen_symbol ~prefix:"__t2" () in
+      [%expr
+        let [%p pvar vt1] = [%e term t1] in
+        let [%p pvar vt2] = [%e term t2] in
+        [%e evar vt1] || [%e evar vt2]]
+  | Or_asym -> [%expr [%e term t1] || [%e term t2]]
+  | Implies -> [%expr (not [%e term t1]) || [%e term t2]]
+  | Iff -> [%expr [%e term t1] = [%e term t2]]
+
+and term ~context (t : Tast.term) : expression =
+  let term = term ~context
+  and loc = t.t_loc
+  and is_implication = is_implication context
+  and is_conjunction = is_conjunction context in
   let unsupported m = raise (W.Error (W.Unsupported m, loc)) in
   match t.t_node with
-  | Tvar { vs_name; _ } -> evar (str_of_ident vs_name)
-  | Tconst c -> econst c
-  | Tfield (t, f) -> pexp_field (term t) (lident (str_of_ident @@ get_name f))
-  | Tapp (fs, []) when ls_equal fs fs_bool_true -> [%expr true]
-  | Tapp (fs, []) when ls_equal fs fs_bool_false -> [%expr false]
-  | Tapp (fs, tlist) when is_fs_tuple fs -> List.map term tlist |> pexp_tuple
-  | Tapp (ls, tlist) when Context.is_function ls context ->
-      let f = Context.find_function ls context in
-      eapply (evar f) (List.map term tlist)
-  | Tapp (ls, tlist) when ls_equal ls fs_apply ->
-      let f, args =
-        match tlist with
-        | [] -> assert false
-        | x :: xs -> (term x, List.map term xs)
+  (* ortac doesn't discriminate between bool and prop *)
+  | Ttrue | TTrue -> [%expr true]
+  | Tfalse | TFalse -> [%expr false]
+  (* `Tyapply` constructor is for type-annotated variables *)
+  | Tvar q | Ttyapply (q, _) ->
+      let id = id_of_qualid q in
+      let v =
+        match Context.translate_stdlib id context with
+        | None ->
+            if Context.is_function id context then
+              let f = Context.find_function id context in
+              f
+            else str_of_qualid q
+        | Some f -> f
       in
-      eapply f args
-  | Tapp (ls, tlist) -> (
-      Context.translate_stdlib ls context |> function
-      | Some f -> eapply (evar f) (List.map term tlist)
-      | None -> (
-          let open Symbols in
-          let func = (get_name ls).id_str in
-          match ls with
-          | Constructor_symbol _ ->
-              (if tlist = [] then None
-               else Some (List.map term tlist |> pexp_tuple))
-              |> pexp_construct (lident func)
-          | _ -> Fmt.kstr unsupported "function application `%s`" func))
-  | Tif (i, t, e) -> [%expr if [%e term i] then [%e term t] else [%e term e]]
+      evar v
   | Tlet (x, t1, t2) ->
-      let x = str_of_ident x.vs_name in
       [%expr
-        let [%p pvar x] = [%e term t1] in
+        let [%p pattern x] = [%e term t1] in
         [%e term t2]]
-  | Tcase (t, ptl) -> List.map (case ~context) ptl |> pexp_match (term t)
-  | Tlambda (ps, t) ->
-      efun (List.map (fun p -> (Nolabel, pattern p)) ps) (term t)
+  | Tconst c -> econst @@ constant c
+  | Tapply (f, a) ->
+      let f = term f and a = term a in
+      pexp_apply f [ (Nolabel, a) ]
   | Tquant
-      ( (Tterm.(Tforall | Texists) as quant),
+      ( quant,
         [ var ],
-        Tterm.
+        (* Filtering the shape of supported quantification.
+           Examples:
+             `forall x. t0 /\ t1 -> pred`
+             `exists x. t0 /\ t1 /\ pred` *)
+        Tast.
           {
             t_node =
-              Tbinop
-                ( ((Timplies | Tand | Tand_asym) as op),
-                  { t_node = Tbinop ((Tand | Tand_asym), t1, t2); _ },
-                  p );
+              Tapply
+                ( {
+                    t_node =
+                      Tapply
+                        ( op0 (* implication or conjunction *),
+                          {
+                            t_node =
+                              Tapply ({ t_node = Tapply (op1, t0); _ }, t1);
+                            _;
+                          } );
+                    _;
+                  },
+                  pred );
             _;
-          } ) ->
-      (match (quant, op) with
-      | Tforall, Timplies | Texists, (Tand | Tand_asym) -> ()
-      | _, _ -> unsupported "ill formed quantification");
-      let start, stop = bounds ~context ~loc var t1 t2 in
-      let p = term p in
+          } )
+    when is_conjunction op1 && (is_conjunction op0 || is_implication op0) ->
+      (match quant with
+      | Tforall when is_implication op0 -> ()
+      | Texists when is_conjunction op0 -> ()
+      | _ -> unsupported "ill formed quantification");
+      let start, stop = bounds ~context ~loc var t0 t1 in
+      let pred = term pred in
       let quant =
         evar
           (if quant = Tforall then "Ortac_runtime.Z.forall"
            else "Ortac_runtime.Z.exists")
       in
-      let x = str_of_ident var.vs_name in
-      let func = pexp_fun Nolabel None (pvar x) p in
+      let x = str_of_ident var.ts_id in
+      let func = pexp_fun Nolabel None (pvar x) pred in
       eapply quant [ start; stop; func ]
-  | Tquant (_, _, _) -> unsupported "quantification"
-  | Tbinop (op, t1, t2) -> (
-      match op with
-      | Tterm.Tand ->
-          let vt1 = gen_symbol ~prefix:"__t1" () in
-          let vt2 = gen_symbol ~prefix:"__t2" () in
-          [%expr
-            let [%p pvar vt1] = [%e term t1] in
-            let [%p pvar vt2] = [%e term t2] in
-            [%e evar vt1] && [%e evar vt2]]
-      | Tterm.Tand_asym -> [%expr [%e term t1] && [%e term t2]]
-      | Tterm.Tor ->
-          let vt1 = gen_symbol ~prefix:"__t1" () in
-          let vt2 = gen_symbol ~prefix:"__t2" () in
-          [%expr
-            let [%p pvar vt1] = [%e term t1] in
-            let [%p pvar vt2] = [%e term t2] in
-            [%e evar vt1] || [%e evar vt2]]
-      | Tterm.Tor_asym -> [%expr [%e term t1] || [%e term t2]]
-      | Tterm.Timplies -> [%expr (not [%e term t1]) || [%e term t2]]
-      | Tterm.Tiff -> [%expr [%e term t1] = [%e term t2]])
-  | Tnot t -> [%expr not [%e term t]]
+  | Tquant _ -> unsupported "quantification"
+  | Tif (i, t, e) -> [%expr if [%e term i] then [%e term t] else [%e term e]]
+  | Tset (ts, t) -> unsupported "set"
+  | Ttuple terms -> pexp_tuple @@ List.map term terms
+  | Tlambda (ps, t, _) ->
+      efun (List.map (fun p -> (Nolabel, pattern p)) ps) (term t)
+  | Trecord fields -> failwith "todo"
+  | Tfield (t, q) ->
+      pexp_field (term t) (lident (str_of_ident @@ id_of_qualid q))
+  | Tattr (_attr, t) -> term t
+  | Tcast (t, _) -> term t
+  | Tscope (_q, t) -> term t
   | Told _ -> unsupported "old operator"
-  | Ttrue -> [%expr true]
-  | Tfalse -> [%expr false]
 
 let term_with_catch ~context t =
   let exp = term ~context t in
@@ -218,15 +245,15 @@ let term_with_catch ~context t =
       raise (Ortac_runtime.Partial_function (e, [%e elocation t.t_loc]))]
 
 let term_with_catch_bool ~context t =
-  let open Tterm in
-  let open Ttypes in
+  let open Tast in
+  let open Types in
   if ty_equal t.t_ty ty_bool then term_with_catch ~context t
   else
     let exp = term ~context t in
     [%expr try [%e exp] with e -> false]
 
 let core_type_of_ty_aux ~context f =
-  let open Ttypes in
+  let open Types in
   let lident_of_tysymbol ts =
     (match Context.translate_tystdlib ts context with
       | Some ty -> ty
@@ -259,12 +286,12 @@ let core_type_of_tysymbol ~context ts =
   let lid =
     (match Context.translate_tystdlib ts context with
       | Some ty -> ty
-      | None -> str_of_ident ts.Ttypes.ts_ident)
+      | None -> str_of_ident ts.Types.ts_ident)
     |> Builder.lident
   in
   let args =
     List.map
-      (fun tv -> Builder.ptyp_var (str_of_ident tv.Ttypes.tv_name))
+      (fun tv -> Builder.ptyp_var (str_of_ident tv.Types.tv_name))
       ts.ts_args
   in
   Builder.ptyp_constr lid args
@@ -307,7 +334,7 @@ let ocaml_type_decl_of_gospel_type_decl ~context td =
     List.map
       (function
         | tvsymbol, (var, inj) ->
-            (ptyp_var (str_of_ident tvsymbol.Ttypes.tv_name), (var, inj)))
+            (ptyp_var (str_of_ident tvsymbol.Types.tv_name), (var, inj)))
       td.td_params
   and cstrs =
     List.map
