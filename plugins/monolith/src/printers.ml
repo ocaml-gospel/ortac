@@ -41,12 +41,10 @@ and tuple drv tyl =
       M.print_tuple [%e tuple]]
 
 let lsymbol2printer drv (ls : Symbols.lsymbol) =
-  match ls.ls_value with
-  | Some ty -> ty2printer drv ty
-  | None -> failwith "can't find type to build printer"
+  ty2printer drv @@ Symbols.get_value ls
 
 let mk_field drv (ld : Symbols.lsymbol Tast.label_declaration) =
-  let field = ld.ld_field.ls_name.id_str in
+  let field = (Symbols.get_name ld.ld_field).id_str in
   let printer = lsymbol2printer drv ld.ld_field in
   [%expr [%e B.estring field], [%e printer] [%e B.evar field]]
 
@@ -54,7 +52,7 @@ let record_printer drv (rec_decl : Tast.rec_declaration) =
   let fields =
     List.map
       (fun (ld : Symbols.lsymbol Tast.label_declaration) ->
-        String.concat "." [ "R"; ld.ld_field.ls_name.id_str ])
+        String.concat "." [ "R"; (Symbols.get_name ld.ld_field).id_str ])
       rec_decl.rd_ldl
   in
   let prec =
@@ -72,8 +70,8 @@ let ty2repr drv x (ty : Ttypes.ty) =
 let variant_printer drv (constructors : Tast.constructor_decl list) =
   let variant (cd : Tast.constructor_decl) =
     let ty2repr = ty2repr drv in
-    let cname = cd.cd_cs.ls_name.id_str in
-    let cargs = cd.cd_cs.ls_args in
+    let cname = (Symbols.get_name cd.cd_cs).id_str in
+    let cargs = Symbols.get_args cd.cd_cs in
     let xs =
       List.init (List.length cargs) (fun _ -> gen_symbol ~prefix:"__x" ())
     in

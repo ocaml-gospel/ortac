@@ -38,16 +38,13 @@ and tuple drv tyl =
   in
   [%expr fun () -> [%e tuple]]
 
-let lsymbol2gen drv (ls : Symbols.lsymbol) =
-  match ls.ls_value with
-  | Some ty -> ty2gen drv ty
-  | None -> failwith "can't find type to build generator"
+let lsymbol2gen drv (ls : Symbols.lsymbol) = ty2gen drv @@ Symbols.get_value ls
 
 let variant_generator drv (constructors : Tast.constructor_decl list) =
   let name (c : Tast.constructor_decl) =
-    Printf.sprintf "R.%s" c.cd_cs.ls_name.id_str |> B.evar
+    Printf.sprintf "R.%s" (Symbols.get_name c.cd_cs).id_str |> B.evar
   in
-  let arg (c : Tast.constructor_decl) = c.cd_cs.ls_args in
+  let arg (c : Tast.constructor_decl) = Symbols.get_args c.cd_cs in
   let gen (c : Tast.constructor_decl) =
     let ty2gen = ty2gen drv in
     let gen = arg c |> List.map ty2gen in
@@ -68,7 +65,7 @@ let variant_generator drv (constructors : Tast.constructor_decl list) =
 
 let record_generator drv (rec_decl : Tast.rec_declaration) =
   let field (ld : Symbols.lsymbol Tast.label_declaration) =
-    Printf.sprintf "R.%s" ld.ld_field.ls_name.id_str
+    Printf.sprintf "R.%s" (Symbols.get_name ld.ld_field).id_str
   in
   let gen (ld : Symbols.lsymbol Tast.label_declaration) =
     let gen = lsymbol2gen drv ld.ld_field in
