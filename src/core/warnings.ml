@@ -1,9 +1,9 @@
 open Ppxlib
-module GW = Gospel.Warnings
+module GW = Gospel_typecheckerlibs.Warnings
 
 type level = Warning | Error
 type kind = ..
-type kind += GospelError of Gospel.Warnings.kind | Unsupported of string
+type kind += GospelError of GW.kind | Unsupported of string
 
 exception Unknown_kind
 
@@ -23,7 +23,7 @@ let pp_level ppf = function
   | Error -> GW.styled_list [ `Red; `Bold ] string ppf "Error"
 
 let pp_kind ppf = function
-  | GospelError k -> pf ppf "Gospel error: %a" Gospel.Warnings.pp_kind k
+  | GospelError k -> pf ppf "Gospel error: %a" GW.pp_kind k
   | Unsupported msg -> pf ppf "Skipping clause:@ unsupported %s" msg
   | _ -> raise Unknown_kind
 

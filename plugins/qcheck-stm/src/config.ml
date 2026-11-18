@@ -1,6 +1,6 @@
-open Gospel
-open Ortac_core
 open Ppxlib
+open Gospel_typecheckerlibs
+open Ortac_core
 
 module WeightsMap = struct
   module M = Map.Make (String)
@@ -379,20 +379,18 @@ let init gospel config_module module_prefix submodule domain count =
   let open Reserr in
   try
     let module_name = Utils.module_name_of_path gospel in
-    Parser_frontend.parse_ocaml_gospel gospel |> Utils.type_check [] gospel
-    |> fun (env, sigs) ->
-    assert (List.length env = 1);
-    let namespace = List.hd env in
+    let env, sigs = Utils.type_check [] gospel in
+    let namespace = Namespace.defs env in
     let context = Context.init module_name namespace in
     let add ctx s =
       (* we add to the context the pure OCaml values and the functions and
          predicates with a body *)
-      match s.Tast.sig_desc with
-      | Sig_val ({ vd_name; vd_spec = Some { sp_pure = true; _ }; _ }, _) ->
-          let ls = Context.get_ls ctx [ vd_name.id_str ] in
-          Context.add_function ls vd_name.id_str ctx
-      | Sig_function { fun_ls; fun_def = Some _; _ } ->
-          Context.add_function fun_ls fun_ls.ls_name.id_str ctx
+      match s.Tast.sdesc with
+      | Sig_value { vname; vspec = Some { sp_pure = true; _ }; _ } ->
+          let ls = Context.get_ls ctx [ vname.id_str ] in
+          Context.add_function ls vname.id_str ctx
+      | Sig_function { fun_name; fun_def = Some _; _ } ->
+          Context.add_function fun_name (Fmt.str "%a" Ident.pp fun_name) ctx
       | _ -> ctx
     in
     let context = List.fold_left add context sigs in
@@ -401,5 +399,5 @@ let init gospel config_module module_prefix submodule domain count =
       >>= mk_config context module_prefix submodule domain count
     in
     ok (sigs, config)
-  with Gospel.Warnings.Error (l, k) ->
+  with Gospel_typecheckerlibs.Warnings.Error (l, k) ->
     error (Ortac_core.Warnings.GospelError k, l)

@@ -1,12 +1,47 @@
-open Gospel.Tmodule
-module L = Map.Make (Gospel.Symbols.LS)
-module T = Map.Make (Gospel.Ttypes.Ts)
+open Gospel_typecheckerlibs
+open Namespace
+
+open struct
+  let mk_qualid xs =
+    let open Parse_uast in
+    let pid x = Preid.create ~loc:Location.none x in
+    let qid x = Qid (pid x) and qdot q x = Qdot (q, pid x) in
+    let rec aux = function
+      | [] -> invalid_arg "mk_qualid"
+      | [ x ] -> qid x
+      | x :: xs -> qdot (aux xs) x
+    in
+    aux @@ List.rev xs
+
+  let find_module str namespace =
+    let _, m = access_mod namespace @@ mk_qualid str in
+    m
+
+  let get_fun_ident namespace str = get_fun_ident namespace @@ mk_qualid str
+
+  let get_gospel_type_ident namespace str =
+    get_gospel_type_ident namespace @@ mk_qualid str
+end
+
+module L = Map.Make (struct
+  type t = Ident.t
+
+  let equal = Ident.equal
+  let compare x y = compare x.Ident.id_tag y.Ident.id_tag
+end)
+
+module T = Map.Make (struct
+  type t = Ident.t
+
+  let equal = Ident.equal
+  let compare x y = compare x.Ident.id_tag y.Ident.id_tag
+end)
 
 type t = {
   module_name : string;
   stdlib : string L.t;
   tystdlib : string T.t;
-  env : namespace;
+  env : mod_defs;
   functions : string L.t;
 }
 
@@ -18,14 +53,14 @@ let get_env get ns path =
         (list ~sep:(any ".") string)
         path)
 
-let get_ls_env = get_env ns_find_ls
 let translate_stdlib ls t = L.find_opt ls t.stdlib
 let translate_tystdlib ts t = T.find_opt ts t.tystdlib
 let add_function ls i t = { t with functions = L.add ls i t.functions }
 let find_function ls t = L.find ls t.functions
 let is_function ls t = L.mem ls t.functions
-let get_ls t = get_ls_env t.env
-let get_ts t = get_env ns_find_ts t.env
+let get_ls_env = get_fun_ident
+let get_ls t = get_fun_ident t.env
+let get_ts t = get_gospel_type_ident t.env
 
 let builtins =
   [
@@ -104,13 +139,15 @@ let process_name name =
 
 let fold_namespace proj f path ns v =
   let rec aux path ns v =
-    let v = Gospel.Tmodule.Mstr.fold (f path) (proj ns) v in
-    Gospel.Tmodule.Mstr.fold (fun s -> aux (path @ [ s ])) ns.ns_ns v
+    let v = Env.fold (f path) (proj ns) v in
+    Env.fold
+      (fun s mod_info -> aux (path @ [ s ]) mod_info.mdefs)
+      (get_mod_env ns) v
   in
   aux path ns v
 
 let init module_name env =
-  let gostd = Gospel.Tmodule.Mstr.find "Gospelstdlib" env.ns_ns in
+  let gostd = find_module [ "Gospelstdlib" ] env in
   let process_gostd_entry add path name sym lib =
     match process_name name with
     | None -> lib
@@ -129,22 +166,20 @@ let init module_name env =
       L.empty builtins
   in
   let stdlib =
-    fold_namespace
-      (fun ns -> ns.ns_ls)
-      (process_gostd_entry L.add)
+    fold_namespace get_fun_env
+      (process_gostd_entry @@ fun info -> L.add info.fid)
       [ "Gospelstdlib" ] gostd stdlib
   in
   let tystdlib =
     List.fold_left
       (fun acc (path, ocaml) ->
-        let ts = get_env ns_find_ts env path in
+        let ts = get_gospel_type_ident env path in
         T.add ts ocaml acc)
       T.empty tybuiltins
   in
   let tystdlib =
-    fold_namespace
-      (fun ns -> ns.ns_ts)
-      (process_gostd_entry T.add)
+    fold_namespace get_type_env
+      (process_gostd_entry @@ fun info -> T.add info.tid)
       [ "Gospelstdlib" ] gostd tystdlib
   in
   { module_name; stdlib; tystdlib; env; functions = L.empty }

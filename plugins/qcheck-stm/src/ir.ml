@@ -1,7 +1,6 @@
-open Gospel
-module Ident = Identifier.Ident
+open Gospel_typecheckerlibs
 
-type term = { term : Tterm.term; text : string }
+type term = { term : Tast.term; text : string }
 
 let term ~prj_txt ~prj_loc spec term =
   let text = Ortac_core.Utils.term_printer (prj_txt spec) (prj_loc spec) term in
@@ -13,11 +12,11 @@ let term_val =
 let term_type =
   term ~prj_txt:(fun s -> s.Tast.ty_text) ~prj_loc:(fun s -> s.Tast.ty_loc)
 
-type xpost = Ttypes.xsymbol * Tterm.pattern option * term
+type xpost = Ttypes.xsymbol * Tast.pattern option * term
 
 type new_state_formulae = {
   model : Ident.t; (* the name of the model's field *)
-  description : Tterm.term; (* the new value for the model's field *)
+  description : Tast.term; (* the new value for the model's field *)
 }
 
 type indexed_term = int * term
@@ -51,7 +50,7 @@ type value = {
   ret_values : term list list;
   next_states : (Ident.t * next_state) list;
       (* each used sut can have a different next state *)
-  precond : Tterm.term list;
+  precond : Tast.term list;
   postcond : postcond;
 }
 
