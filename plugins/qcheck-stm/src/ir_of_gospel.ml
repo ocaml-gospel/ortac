@@ -438,7 +438,7 @@ let state_and_invariants config sigs =
     | _ -> None
   in
   let open Reserr in
-  let* ty =
+  let* ty : Gospel.Tast.s_type_declaration =
     List.filter_map is_sut_decl sigs
     |> Fun.flip List.nth_opt 0
     |> of_option ~default:(No_sut_type sut_name, Ppxlib.Location.none)
